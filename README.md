@@ -117,7 +117,7 @@ tai.convert.manyToMany.atomicToUnix(915148832000);
 
 #### tai.convert.manyToOne
 
-These methods treat the relationship between Unix time and TAI as many-to-one in each direction. The result of a conversion is always a single possiblity. For a leap second, when the input is ambiguous, we return the "canonical" (later) of the two possibilities. However, distinct inputs may still result in the same output, and reversing a conversion does not always result in the same input.
+These methods treat the relationship between Unix time and TAI as many-to-one in each direction. The result of a conversion is always a single possiblity. For a leap second, when the input is ambiguous, we return the "canonical" (later) of the two possibilities. However, distinct inputs may still result in the same output, and reversing a conversion does not always result in the original input.
 
 ##### tai.convert.manyToOne.unixToAtomic(unix)
 Convert a number of Unix milliseconds to a number of TAI milliseconds. Note that over the course of a leap second, a single Unix instant can correspond to *two* TAI instants, so we return the later of the two.
