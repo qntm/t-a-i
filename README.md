@@ -80,7 +80,7 @@ Returns `63072010000`, TAI milliseconds when TAI began (1972-01-01 00:00:10 TAI)
 Returns `10000`, the offset in milliseconds between TAI and Unix time when TAI began.
 
 ### tai.leapSeconds
-Returns an array of leap second objects. Each leap second has a property `unix` which indicates the Unix time when the offset between TAI and Unix time changed, e.g. `78796801000` indicating 1972-07-01 00:00:01 Unix time, and a property `offset` indicating the number of milliseconds by which the offset changed, always `1000` for a single inserted leap second at the time of writing.
+Returns an array of leap second objects. Each leap second has a property `unix` which indicates the Unix time when the offset between TAI and Unix time changed, and the number of milliseconds by which the offset changed. E.g. `{unix: 78796801000, offset: 1000}` for the inserted leap second of 1 July 1972.
 
 ### tai.unixToAtomic(unix)
 Shorthand for `tai.convert.manyToOne.unixToAtomic(unix)`.
@@ -90,7 +90,7 @@ Shorthand for `tai.convert.manyToOne.atomicToUnix(atomic)`.
 
 ### tai.convert
 
-Object containing conversion methods sorted by relationship model.
+Object containing conversion methods, sorted by relationship model.
 
 #### tai.convert.manyToMany
 
