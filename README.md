@@ -101,17 +101,17 @@ Convert a number of Unix milliseconds to an array of possible TAI milliseconds c
 
 ```javascript
 tai.convert.manyToMany.unixToAtomic(915148800000);
-// [915148832000, 915148833000]
+// [915148831000, 915148832000]
 ```
 
 ##### tai.convert.manyToMany.atomicToUnix(atomic)
 Convert a number of TAI milliseconds to an array of possible Unix milliseconds counts.
 
 ```javascript
-tai.convert.manyToMany.atomicToUnix(915148832000);
+tai.convert.manyToMany.atomicToUnix(915148831000);
 // [915148800000]
 
-tai.convert.manyToMany.atomicToUnix(915148833000);
+tai.convert.manyToMany.atomicToUnix(915148832000);
 // [915148800000], same result
 ```
 
@@ -124,17 +124,17 @@ Convert a number of Unix milliseconds to a number of TAI milliseconds. Note that
 
 ```javascript
 tai.unixToAtomic(915148800000);
-// 915148833000
+// 915148832000
 ```
 
 ##### tai.convert.manyToOne.atomicToUnix(atomic)
 Convert a number of TAI milliseconds to Unix milliseconds. Note that over the course of a leap second, two instants in TAI may convert back to the same instant in Unix time.
 
 ```javascript
-tai.convert.manyToOne.atomicToUnix(915148832000);
+tai.convert.manyToOne.atomicToUnix(915148831000);
 // 915148800000
 
-tai.convert.manyToOne.atomicToUnix(915148833000);
+tai.convert.manyToOne.atomicToUnix(915148832000);
 // 915148800000
 ```
 
@@ -145,15 +145,15 @@ These methods treat the relationship between Unix time and TAI as one-to-one. Am
 ##### tai.convert.oneToOne.unixToAtomic(unix)
 ```javascript
 tai.convert.oneToOne.unixToAtomic(915148800000);
-// 915148833000
+// 915148832000
 ```
 
 ##### tai.convert.oneToOne.atomicToUnix(atomic)
 ```javascript
-tai.convert.oneToOne.atomicToUnix(915148832000);
+tai.convert.oneToOne.atomicToUnix(915148831000);
 // throws exception
 
-tai.convert.oneToOne.atomicToUnix(915148833000);
+tai.convert.oneToOne.atomicToUnix(915148832000);
 // 915148800000
 ```
 
