@@ -51,3 +51,5 @@ module.exports = build(
 		{unix: Date.UTC(2017, JANUARY, 1, 0, 0, 1), offset: +1000}  // 37
 	]
 );
+
+module.exports.build = build;

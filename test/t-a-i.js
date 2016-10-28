@@ -112,3 +112,26 @@ var DECEMBER = 11;
 	// Now-ish
 	console.log(tai.convert.manyToOne.unixToAtomic(Date.UTC(2016, OCTOBER, 27, 20, 5, 14, 678)) === Date.UTC(2016, OCTOBER, 27, 20, 5, 50, 678));
 }
+
+{
+	// Demo
+	console.log(tai.unixToAtomic(915148799000) === 915148830000);
+	console.log(tai.unixToAtomic(Date.UTC(1998, DECEMBER, 31, 23, 59, 59)) === Date.UTC(1999, JANUARY, 1, 0, 0, 30));
+	console.log(tai.atomicToUnix(915148830000) === 915148799000);
+	console.log(tai.atomicToUnix(Date.UTC(1999, JANUARY, 1, 0, 0, 30)) === Date.UTC(1998, DECEMBER, 31, 23, 59, 59));
+	console.log(tai.convert.manyToMany.unixToAtomic(915148800000).length === 2);
+	console.log(tai.convert.manyToMany.unixToAtomic(915148800000)[0] === 915148831000);
+	console.log(tai.convert.manyToMany.unixToAtomic(915148800000)[1] === 915148832000);
+	console.log(tai.convert.manyToMany.atomicToUnix(915148831000).length === 1);
+	console.log(tai.convert.manyToMany.atomicToUnix(915148831000)[0] === 915148800000);
+	console.log(tai.convert.manyToMany.atomicToUnix(915148832000).length === 1);
+	console.log(tai.convert.manyToMany.atomicToUnix(915148832000)[0] === 915148800000);
+	try {
+		tai.convert.oneToOne.atomicToUnix(915148831000);
+		console.log(false);
+	} catch(e) {
+		console.log(true);
+	}
+}
+
+// TODO: what if the first thing that happens is that we insert 5 leap seconds?
