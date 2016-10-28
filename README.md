@@ -168,7 +168,7 @@ var odd = tai.build(
 	1,  // instant in Unix time when TAI started
 	12, // initial offset of TAI from Unix time
 	[
-		{unix: 3, offset:  1}, // inserted leap millisecond
+		{unix: 4, offset:  1}, // inserted leap millisecond
 		{unix: 6, offset: -1}  // removed leap millisecond
 	]
 );
