@@ -11,8 +11,8 @@ Well... actually, TAI is not well-defined prior to 1972-01-01 00:00:00 Unix time
 ```javascript
 var tai = require("t-a-i");
 
-tai.unixToAtomic(915148799000); // 915148831000
-tai.atomicToUnix(915148831000); // 915148799000
+tai.unixToAtomic(915148799000); // 915148830000
+tai.atomicToUnix(915148830000); // 915148799000
 ```
 
 More powerful conversion methods are also provided.
