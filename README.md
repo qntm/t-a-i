@@ -1,12 +1,20 @@
 # t-a-i
 
-Introduces International Atomic Time (TAI) milliseconds, and methods for converting these to and from conventional Unix milliseconds.
+Introduces [International Atomic Time (TAI)](https://en.wikipedia.org/wiki/International_Atomic_Time) milliseconds, and methods for converting these to and from conventional [Unix milliseconds](https://en.wikipedia.org/wiki/Unix_time).
 
-**Unix time** tracks the number of elapsed milliseconds since 1970-01-01 00:00:00 UTC, excluding leap seconds. (Unix time can equally well be measured in seconds, but here we use milliseconds because this is how a JavaScript `Date` object works.)
+**Unix time** tracks the number of elapsed milliseconds since 1970-01-01 00:00:00 UTC, excluding [leap seconds](https://en.wikipedia.org/wiki/Leap_second). (Unix time can equally well be measured in seconds, but here we use milliseconds because this is how a JavaScript `Date` object works.)
 
 **TAI milliseconds** tracks the number of elapsed milliseconds since 1970-01-01 00:00:00 TAI. TAI does not have leap seconds.
 
 Well... actually, TAI is not well-defined prior to 1972-01-01 00:00:00 Unix time = 1972-01-01 00:00:10 TAI, when TAI started. However, if we call this instant 63072010000 TAI milliseconds, the effective result is the same. But we have to be careful not to extend TAI backwards to before this instant.
+
+# Installation
+
+```
+npm install t-a-i
+```
+
+# Usage
 
 ```javascript
 var tai = require("t-a-i");
@@ -19,7 +27,7 @@ var offset = tai.unixToAtomic(now) - now;
 // 36000 at the time of writing; TAI is 36 seconds ahead of Unix
 ```
 
-More powerful conversion methods are also provided.
+More powerful conversion methods are also provided, see below.
 
 ## Background: UTC vs Unix time vs TAI
 
@@ -96,11 +104,11 @@ Shorthand for `tai.convert.manyToOne.atomicToUnix(atomic)`.
 
 Object containing conversion methods, sorted by relationship model. All conversion methods throw an exception if the input or output is prior to the beginning of TAI.
 
-#### tai.convert.manyToMany
+### tai.convert.manyToMany
 
 These methods treat the relationship between Unix time and TAI as many-to-many. Ambiguity is handled by always returning an array of possibilities. This array usually contains a single element, but for a leap second, it may contain two elements. Also, several different inputs may result in the same output.
 
-##### tai.convert.manyToMany.unixToAtomic(unix)
+### tai.convert.manyToMany.unixToAtomic(unix)
 Convert a number of Unix milliseconds to an array of possible TAI milliseconds counts.
 
 ```javascript
@@ -108,7 +116,7 @@ tai.convert.manyToMany.unixToAtomic(915148800000);
 // [915148831000, 915148832000]
 ```
 
-##### tai.convert.manyToMany.atomicToUnix(atomic)
+### tai.convert.manyToMany.atomicToUnix(atomic)
 Convert a number of TAI milliseconds to an array of possible Unix milliseconds counts.
 
 ```javascript
@@ -119,11 +127,11 @@ tai.convert.manyToMany.atomicToUnix(915148832000);
 // [915148800000], same result
 ```
 
-#### tai.convert.manyToOne
+### tai.convert.manyToOne
 
 These methods treat the relationship between Unix time and TAI as many-to-one in each direction. The result of a conversion is always a single possiblity. For a leap second, when the input is ambiguous, we return the "canonical" (later) of the two possibilities. However, distinct inputs may still result in the same output, and reversing a conversion does not always result in the original input.
 
-##### tai.convert.manyToOne.unixToAtomic(unix)
+### tai.convert.manyToOne.unixToAtomic(unix)
 Convert a number of Unix milliseconds to a number of TAI milliseconds. Note that over the course of a leap second, a single Unix instant can correspond to *two* TAI instants, so we return the later of the two.
 
 ```javascript
@@ -131,7 +139,7 @@ tai.unixToAtomic(915148800000);
 // 915148832000
 ```
 
-##### tai.convert.manyToOne.atomicToUnix(atomic)
+### tai.convert.manyToOne.atomicToUnix(atomic)
 Convert a number of TAI milliseconds to Unix milliseconds. Note that over the course of a leap second, two instants in TAI may convert back to the same instant in Unix time.
 
 ```javascript
@@ -142,17 +150,17 @@ tai.convert.manyToOne.atomicToUnix(915148832000);
 // 915148800000
 ```
 
-#### tai.convert.oneToOne
+### tai.convert.oneToOne
 
 These methods treat the relationship between Unix time and TAI as one-to-one. Ambiguity is not tolerated, round trips always work, any value which is not canonical causes an exception to be thrown.
 
-##### tai.convert.oneToOne.unixToAtomic(unix)
+### tai.convert.oneToOne.unixToAtomic(unix)
 ```javascript
 tai.convert.oneToOne.unixToAtomic(915148800000);
 // 915148832000
 ```
 
-##### tai.convert.oneToOne.atomicToUnix(atomic)
+### tai.convert.oneToOne.atomicToUnix(atomic)
 ```javascript
 tai.convert.oneToOne.atomicToUnix(915148831000);
 // throws exception
