@@ -6,7 +6,7 @@ Introduces [International Atomic Time (TAI)](https://en.wikipedia.org/wiki/Inter
 
 **TAI milliseconds** tracks the number of elapsed milliseconds since 1970-01-01 00:00:00 TAI. TAI does not have leap seconds.
 
-Well... actually, prior to 1972-01-01 00:00:00 Unix time = 1972-01-01 00:00:10 TAI, the relationship between Unix time and TAI was quite complicated, and we do not attempt to model it properly here. However, if we call this instant 63072010000 TAI milliseconds,and promise not to use TAI instants before this time, the effective result is the same.
+Well... actually, prior to 1972-01-01 00:00:00 Unix time = 1972-01-01 00:00:10 TAI, the relationship between Unix time and TAI was quite complicated, and we do not attempt to model it properly here. However, if we call this instant 63072010000 TAI milliseconds, and promise not to use TAI instants before this time, the effective result is the same.
 
 # Installation
 
