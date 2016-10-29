@@ -13,6 +13,10 @@ var tai = require("t-a-i");
 
 tai.unixToAtomic(915148799000); // 915148830000
 tai.atomicToUnix(915148830000); // 915148799000
+
+var now = Date.now();
+var offset = tai.unixToAtomic(now) - now;
+// 36000 at the time of writing; TAI is 36 seconds ahead of Unix
 ```
 
 More powerful conversion methods are also provided.
@@ -53,7 +57,7 @@ If that had been a removed leap second, this is what would have happened instead
 | 1999‑01‑01&nbsp;00:00:01.000 | 1999‑01‑01&nbsp;00:00:01.000 |      915148801000 | 1999‑01‑01&nbsp;00:00:31.000 |     915148831000 |    30000ms |
 | 1999‑01‑01&nbsp;00:00:01.250 | 1999‑01‑01&nbsp;00:00:01.250 |      915148801250 | 1999‑01‑01&nbsp;00:00:31.250 |     915148831250 |    30000ms |
 
-See how UTC skips a second. 23:59:59 *never happened* - it is considered an invalid time of day on 1998-12-31, just as 25:98:66 would be. Meanwhile, Unix time has a one-second **discontinuity** - there is a full second of Unix times which strictly speaking do not exist, or, to look at it another way, overlap with the next second. And again, TAI just keeps counting.
+See how UTC skips a second. 23:59:59 *never happened* - it is considered an invalid time of day on 1998-12-31, just as 25:98:66 would be. Meanwhile, Unix time has a one-second *discontinuity* - there is a full second of Unix times which strictly speaking do not exist, or, to look at it another way, overlap with the next second. And again, TAI just keeps counting.
 
 Additionally, when TAI began at the beginning of 1972, it was already 10 seconds ahead of UTC:
 
@@ -90,7 +94,7 @@ Shorthand for `tai.convert.manyToOne.atomicToUnix(atomic)`.
 
 ### tai.convert
 
-Object containing conversion methods, sorted by relationship model.
+Object containing conversion methods, sorted by relationship model. All conversion methods throw an exception if the input or output is prior to the beginning of TAI.
 
 #### tai.convert.manyToMany
 
