@@ -28,13 +28,21 @@ var _generateBlocks = function(earliestAtomic, initialOffset, leapSeconds) {
 		if(!("atomic" in leapSecond)) {
 			throw new Error("Missing property `atomic` in leap second");
 		}
-		var atomicStart = Math.min(leapSecond.atomic, leapSecond.atomic + leapSecond.offset);
+		var atomic = leapSecond.atomic;
+		var offset = leapSecond.offset;
+		var atomicStart = Math.min(
+			atomic,
+
+			// Extend the block backwards a little way so that all possible
+			// Unix times are still represented
+			atomic + offset - blocks[blocks.length - 1].offset
+		);
 		if(atomicStart <= blocks[blocks.length - 1].atomicStart) {
 			throw new Error("Disordered leap seconds");
 		}
-		blocks[blocks.length - 1].atomicEnd = leapSecond.atomic;
+		blocks[blocks.length - 1].atomicEnd = atomic;
 		blocks.push({
-			offset      : blocks[blocks.length - 1].offset + leapSecond.offset,
+			offset      : offset, // absolute
 			atomicStart : atomicStart,
 			atomicEnd   : Infinity
 		});
@@ -60,7 +68,7 @@ module.exports = function(
 
 	// An array of pairs {atomic, offset}.
 	// `atomic` is the atomic time when the offset changed; the offset in milliseconds
-	// indicates by how much.
+	// indicates the new offset (TAI minus Unix) as of this atomic time.
 	leapSeconds
 ) {
 	var blocks = _generateBlocks(earliestAtomic, initialOffset, leapSeconds);

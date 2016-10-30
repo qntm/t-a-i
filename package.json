@@ -1,6 +1,6 @@
 {
   "name": "t-a-i",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Converts Unix milliseconds to and from International Atomic Time (TAI) milliseconds",
   "main": "./src/t-a-i.js",
   "scripts": {

@@ -18,7 +18,7 @@ var build = require("./../src/build.js");
 	try {
 		build._generateBlocks(0, 0, [
 			{atomic: 3, offset: -1},
-			{atomic: 3, offset: -1}
+			{atomic: 3, offset: -2}
 		]);
 		console.log(false);
 	} catch(e) {
@@ -72,8 +72,8 @@ var build = require("./../src/build.js");
 		// Unix: [...][6][7][8][9][9][10][11]
 		//                               [12][13][...]
 		var blocks5 = build._generateBlocks(3, -4, [
-			{atomic: 6, offset:  1}, // inserted leap millisecond
-			{atomic: 9, offset: -1}  // removed leap millisecond
+			{atomic: 6, offset: -3}, // inserted leap millisecond
+			{atomic: 9, offset: -4}  // removed leap millisecond
 		]);
 		console.log(blocks5.length === 3);
 		console.log(blocks5[0].offset === -4);
@@ -103,8 +103,8 @@ var build = require("./../src/build.js");
 	// Unix: [...][6][7][8][9][9][10][11]
 	//                               [12][13][...]
 	var a = build(3, -4, [
-		{atomic: 6, offset:  1}, // inserted leap millisecond
-		{atomic: 9, offset: -1}  // removed leap millisecond
+		{atomic: 6, offset: -3}, // inserted leap millisecond
+		{atomic: 9, offset: -4}  // removed leap millisecond
 	]);
 
 	{

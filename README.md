@@ -92,7 +92,7 @@ Returns `63072000000`, Unix time when TAI began (1972-01-01 00:00:00 Unix time).
 Returns `10000`, the offset in milliseconds between TAI and Unix time when TAI began.
 
 ### tai.leapSeconds
-Returns an array of leap second objects. Each leap second has a property `atomic` which indicates the TAI time when the offset between TAI and Unix time changed, and the number of milliseconds by which the offset changed. E.g. `{atomic: 78796811000, offset: 1000}` for the inserted leap second of 30 June 1972.
+Returns an array of leap second objects. Each leap second has a property `atomic` which indicates the TAI time when the offset between TAI and Unix time changed, and the new offset. E.g. `{atomic: 78796811000, offset: 11000}` for the inserted leap second of 30 June 1972.
 
 ### tai.unixToAtomic(unix)
 Shorthand for `tai.convert.manyToOne.unixToAtomic(unix)`.
@@ -180,8 +180,8 @@ var odd = tai.build(
 	13, // first instant in TAI
 	12, // initial offset of TAI from Unix time
 	[
-		{atomic: 16, offset:  1}, // inserted leap millisecond
-		{atomic: 19, offset: -1}  // removed leap millisecond
+		{atomic: 16, offset: 13}, // inserted leap millisecond
+		{atomic: 19, offset: 12}  // removed leap millisecond
 	]
 );
 ```
