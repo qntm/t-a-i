@@ -7,8 +7,8 @@ var build = require("./../src/build.js");
 	// Got to put those leap seconds in the right order
 	try {
 		build._generateBlocks(0, 0, [
-			{unix: 3, offset: -1},
-			{unix: 2, offset:  1}
+			{atomic: 3, offset: -1},
+			{atomic: 2, offset:  1}
 		]);
 		console.log(false);
 	} catch(e) {
@@ -17,8 +17,8 @@ var build = require("./../src/build.js");
 
 	try {
 		build._generateBlocks(0, 0, [
-			{unix: 3, offset: -1},
-			{unix: 3, offset: -1}
+			{atomic: 3, offset: -1},
+			{atomic: 3, offset: -1}
 		]);
 		console.log(false);
 	} catch(e) {
@@ -49,19 +49,19 @@ var build = require("./../src/build.js");
 		var blocks3 = build._generateBlocks(0, -4, []);
 		console.log(blocks3.length === 1);
 		console.log(blocks3[0].offset === -4);
-		console.log(blocks3[0].unixStart === 0);
-		console.log(blocks3[0].unixEnd === Infinity);
-		console.log(blocks3[0].atomicStart === -4);
+		console.log(blocks3[0].atomicStart === 0);
 		console.log(blocks3[0].atomicEnd === Infinity);
+		console.log(blocks3[0].unixStart === 4);
+		console.log(blocks3[0].unixEnd === Infinity);
 	}
 
 	{
 		var blocks4 = build._generateBlocks(7, -4, []);
 		console.log(blocks4.length === 1);
 		console.log(blocks4[0].offset === -4);
-		console.log(blocks4[0].unixStart === 7);
+		console.log(blocks4[0].unixStart === 11);
 		console.log(blocks4[0].unixEnd === Infinity);
-		console.log(blocks4[0].atomicStart === 3);
+		console.log(blocks4[0].atomicStart === 7);
 		console.log(blocks4[0].atomicEnd === Infinity);
 	}
 
@@ -71,26 +71,26 @@ var build = require("./../src/build.js");
 		// TAI:          [3][4][5][6][ 7][ 8][ 9][...]
 		// Unix: [...][6][7][8][9][9][10][11]
 		//                               [12][13][...]
-		var blocks5 = build._generateBlocks(7, -4, [
-			{unix: 10, offset:  1}, // inserted leap millisecond
-			{unix: 12, offset: -1}  // removed leap millisecond
+		var blocks5 = build._generateBlocks(3, -4, [
+			{atomic: 6, offset:  1}, // inserted leap millisecond
+			{atomic: 9, offset: -1}  // removed leap millisecond
 		]);
 		console.log(blocks5.length === 3);
 		console.log(blocks5[0].offset === -4);
-		console.log(blocks5[0].unixStart === 7);
-		console.log(blocks5[0].unixEnd === 10);
 		console.log(blocks5[0].atomicStart === 3);
 		console.log(blocks5[0].atomicEnd === 6);
+		console.log(blocks5[0].unixStart === 7);
+		console.log(blocks5[0].unixEnd === 10);
 		console.log(blocks5[1].offset === -3);
-		console.log(blocks5[1].unixStart === 9);
-		console.log(blocks5[1].unixEnd === 12);
 		console.log(blocks5[1].atomicStart === 6);
 		console.log(blocks5[1].atomicEnd === 9);
+		console.log(blocks5[1].unixStart === 9);
+		console.log(blocks5[1].unixEnd === 12);
 		console.log(blocks5[2].offset === -4);
-		console.log(blocks5[2].unixStart === 12);
-		console.log(blocks5[2].unixEnd === Infinity);
 		console.log(blocks5[2].atomicStart === 8);
 		console.log(blocks5[2].atomicEnd === Infinity);
+		console.log(blocks5[2].unixStart === 12);
+		console.log(blocks5[2].unixEnd === Infinity);
 	}
 }
 
@@ -102,13 +102,13 @@ var build = require("./../src/build.js");
 	// TAI:          [3][4][5][6][ 7][ 8][ 9][...]
 	// Unix: [...][6][7][8][9][9][10][11]
 	//                               [12][13][...]
-	var a = build(7, -4, [
-		{unix: 10, offset:  1}, // inserted leap millisecond
-		{unix: 12, offset: -1}  // removed leap millisecond
+	var a = build(3, -4, [
+		{atomic: 6, offset:  1}, // inserted leap millisecond
+		{atomic: 9, offset: -1}  // removed leap millisecond
 	]);
 
 	{
-		//.convert.manyToMany.atomicToUnix
+		// convert.manyToMany.atomicToUnix
 		try {
 			a.convert.manyToMany.atomicToUnix(2);
 			console.log(false);
@@ -133,7 +133,7 @@ var build = require("./../src/build.js");
 	}
 
 	{
-		//.convert.manyToOne.atomicToUnix
+		// convert.manyToOne.atomicToUnix
 		try {
 			a.convert.manyToOne.atomicToUnix(2);
 			console.log(false);
@@ -151,7 +151,7 @@ var build = require("./../src/build.js");
 	}
 
 	{
-		//.convert.oneToOne.atomicToUnix
+		// convert.oneToOne.atomicToUnix
 		try {
 			a.convert.oneToOne.atomicToUnix(2);
 			console.log(false);
@@ -173,7 +173,7 @@ var build = require("./../src/build.js");
 	}
 
 	{
-		//.convert.manyToMany.unixToAtomic
+		// convert.manyToMany.unixToAtomic
 		try {
 			a.convert.manyToMany.unixToAtomic(6);
 			console.log(false);
@@ -198,7 +198,7 @@ var build = require("./../src/build.js");
 	}
 
 	{
-		//.convert.manyToOne.unixToAtomic
+		// convert.manyToOne.unixToAtomic
 		try {
 			a.convert.manyToOne.unixToAtomic(6);
 			console.log(false);
@@ -216,7 +216,7 @@ var build = require("./../src/build.js");
 	}
 
 	{
-		//.convert.oneToOne.unixToAtomic
+		// convert.oneToOne.unixToAtomic
 		try {
 			a.convert.oneToOne.unixToAtomic(6);
 			console.log(false);
@@ -240,99 +240,23 @@ var build = require("./../src/build.js");
 
 {
 	// Weird example with two removed leap seconds in succession
-	// TAI  [0][1][2][3][4]
-	// Unix [0][1][2]
-	//            [3]
-	//            [4][5][6]
-	var w = build(0, 0, [
-		{unix: 3, offset: -1},
-		{unix: 4, offset: -1}
-	]);
-
 	try {
-		w.convert.manyToOne.atomicToUnix(-1);
-		console.log(false);
+		build(0, 0, [
+			{atomic: 3, offset: -1},
+			{atomic: 3, offset: -1}
+		]);
 	} catch(e) {
 		console.log(true);
 	}
-	console.log(w.convert.manyToOne.atomicToUnix(0) === 0);
-	console.log(w.convert.manyToOne.atomicToUnix(1) === 1);
-	console.log(w.convert.manyToMany.atomicToUnix(2).length === 3);
-	console.log(w.convert.manyToMany.atomicToUnix(2)[0] === 2);
-	console.log(w.convert.manyToMany.atomicToUnix(2)[1] === 3);
-	console.log(w.convert.manyToMany.atomicToUnix(2)[2] === 4);
-	console.log(w.convert.manyToOne.atomicToUnix(2) === 4);
-	console.log(w.convert.oneToOne.atomicToUnix(2) === 4);
-	console.log(w.convert.manyToOne.atomicToUnix(3) === 5);
-	console.log(w.convert.manyToOne.atomicToUnix(4) === 6);
 
-	try {
-		w.convert.manyToOne.unixToAtomic(-1);
-		console.log(false);
-	} catch(e) {
-		console.log(true);
-	}
-	console.log(w.convert.manyToOne.unixToAtomic(0) === 0);
-	console.log(w.convert.manyToOne.unixToAtomic(1) === 1);
-	console.log(w.convert.manyToOne.unixToAtomic(2) === 2);
-	console.log(w.convert.manyToOne.unixToAtomic(3) === 2);
-	console.log(w.convert.oneToOne.unixToAtomic(4) === 2);
-	console.log(w.convert.manyToOne.unixToAtomic(5) === 3);
-	console.log(w.convert.manyToOne.unixToAtomic(6) === 4);
-}
-
-{
 	// Bizarre example where the first offset sets Unix back before the beginning of TAI
-	// TAI  [-3][-2][-1][0][1][2][3][4]
-	// Unix             [0][1][2]
-	//          [ 3][ 4][5][6][7][8][9]
-	var b = build(0, 0, [
-		{unix: 3, offset: -5}
-	]);
-
 	try {
-		b.convert.manyToOne.atomicToUnix(-3);
-		console.log(false);
+		build(0, 0, [
+			{atomic: 3, offset: -5}
+		]);
 	} catch(e) {
 		console.log(true);
 	}
-	console.log(b.convert.manyToOne.atomicToUnix(-2) === 3);
-	console.log(b.convert.manyToOne.atomicToUnix(-1) === 4);
-	console.log(b.convert.manyToMany.atomicToUnix(0).length === 2);
-	console.log(b.convert.manyToMany.atomicToUnix(0)[0] === 0);
-	console.log(b.convert.manyToMany.atomicToUnix(0)[1] === 5);
-	console.log(b.convert.manyToOne.atomicToUnix(0) === 5);
-	console.log(b.convert.oneToOne.atomicToUnix(0) === 5);
-	console.log(b.convert.manyToMany.atomicToUnix(1).length === 2);
-	console.log(b.convert.manyToMany.atomicToUnix(1)[0] === 1);
-	console.log(b.convert.manyToMany.atomicToUnix(1)[1] === 6);
-	console.log(b.convert.manyToOne.atomicToUnix(1) === 6);
-	console.log(b.convert.oneToOne.atomicToUnix(1) === 6);
-	console.log(b.convert.manyToMany.atomicToUnix(2).length === 2);
-	console.log(b.convert.manyToMany.atomicToUnix(2)[0] === 2);
-	console.log(b.convert.manyToMany.atomicToUnix(2)[1] === 7);
-	console.log(b.convert.manyToOne.atomicToUnix(2) === 7);
-	console.log(b.convert.manyToOne.atomicToUnix(3) === 8);
-	console.log(b.convert.manyToOne.atomicToUnix(4) === 9);
-	console.log(b.atomicToUnix(4) === 9);
-
-	try {
-		b.convert.manyToOne.unixToAtomic(-1);
-		console.log(false);
-	} catch(e) {
-		console.log(true);
-	}
-	console.log(b.convert.manyToOne.unixToAtomic(0) === 0);
-	console.log(b.convert.manyToOne.unixToAtomic(1) === 1);
-	console.log(b.convert.manyToOne.unixToAtomic(2) === 2);
-	console.log(b.convert.oneToOne.unixToAtomic(3) === -2);
-	console.log(b.convert.oneToOne.unixToAtomic(4) === -1);
-	console.log(b.convert.oneToOne.unixToAtomic(5) === 0);
-	console.log(b.convert.oneToOne.unixToAtomic(6) === 1);
-	console.log(b.convert.oneToOne.unixToAtomic(7) === 2);
-	console.log(b.convert.oneToOne.unixToAtomic(8) === 3);
-	console.log(b.convert.oneToOne.unixToAtomic(9) === 4);
-	console.log(b.unixToAtomic(9) === 4);
 }
 
 // TODO: what if the first thing that happens is that we insert 5 leap seconds?

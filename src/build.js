@@ -15,30 +15,34 @@
 	Convert the initial parameters and the leap seconds list into a list of
 	blocks of Unix time which track exactly with atomic time.
 */
-var _generateBlocks = function(earliestUnix, initialOffset, leapSeconds) {
+var _generateBlocks = function(earliestAtomic, initialOffset, leapSeconds) {
 	var blocks = [];
 
 	blocks.push({
-		offset    : initialOffset,
-		unixStart : earliestUnix,
-		unixEnd   : Infinity
+		offset      : initialOffset,
+		atomicStart : earliestAtomic,
+		atomicEnd   : Infinity
 	});
 
 	leapSeconds.forEach(function(leapSecond) {
-		if(leapSecond.unix <= blocks[blocks.length - 1].unixStart) {
-			throw Error("Disordered leap seconds");
+		if(!("atomic" in leapSecond)) {
+			throw new Error("Missing property `atomic` in leap second");
 		}
-		blocks[blocks.length - 1].unixEnd = leapSecond.unix;
+		var atomicStart = Math.min(leapSecond.atomic, leapSecond.atomic + leapSecond.offset);
+		if(atomicStart <= blocks[blocks.length - 1].atomicStart) {
+			throw new Error("Disordered leap seconds");
+		}
+		blocks[blocks.length - 1].atomicEnd = leapSecond.atomic;
 		blocks.push({
-			offset    : blocks[blocks.length - 1].offset + leapSecond.offset,
-			unixStart : Math.min(leapSecond.unix, leapSecond.unix - leapSecond.offset),
-			unixEnd   : Infinity
+			offset      : blocks[blocks.length - 1].offset + leapSecond.offset,
+			atomicStart : atomicStart,
+			atomicEnd   : Infinity
 		});
 	});
 
 	blocks.forEach(function(block) {
-		block.atomicStart = block.unixStart + block.offset;
-		block.atomicEnd   = block.unixEnd   + block.offset;
+		block.unixStart = block.atomicStart - block.offset;
+		block.unixEnd   = block.atomicEnd   - block.offset;
 	});
 
 	return blocks;
@@ -49,22 +53,22 @@ var _generateBlocks = function(earliestUnix, initialOffset, leapSeconds) {
 */
 module.exports = function(
 	// Unix time when atomic time began, for the purposes of our system
-	earliestUnix,
+	earliestAtomic,
 
-	// Atomic time minus Unix time as of `earliestUnix`, in milliseconds
+	// Atomic time minus Unix time as of `earliestAtomic`, in milliseconds
 	initialOffset,
 
-	// An array of pairs {unix, offset}.
-	// `unix` is the Unix time when the offset changed; the offset in milliseconds
+	// An array of pairs {atomic, offset}.
+	// `atomic` is the atomic time when the offset changed; the offset in milliseconds
 	// indicates by how much.
 	leapSeconds
 ) {
-	var blocks = _generateBlocks(earliestUnix, initialOffset, leapSeconds);
+	var blocks = _generateBlocks(earliestAtomic, initialOffset, leapSeconds);
 
 	// Compute the "beginning" of atomic time. We need this so we can
 	// check it during the AtomicDate constructor
-	var earliestAtomic = Math.min.apply(Math, blocks.map(function(block) {
-		return block.atomicStart;
+	var earliestUnix = Math.min.apply(Math, blocks.map(function(block) {
+		return block.unixStart;
 	}));
 
 	// Many-to-many APIs

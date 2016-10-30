@@ -82,17 +82,17 @@ As a result of these shenanigans, instants in Unix time and instants in TAI are 
 
 ## APIs
 
-### tai.earliestUnix
-Returns `63072000000`, Unix time when TAI began (1972-01-01 00:00:00 Unix time).
-
 ### tai.earliestAtomic
 Returns `63072010000`, TAI milliseconds when TAI began (1972-01-01 00:00:10 TAI).
+
+### tai.earliestUnix
+Returns `63072000000`, Unix time when TAI began (1972-01-01 00:00:00 Unix time).
 
 ### tai.initialOffset
 Returns `10000`, the offset in milliseconds between TAI and Unix time when TAI began.
 
 ### tai.leapSeconds
-Returns an array of leap second objects. Each leap second has a property `unix` which indicates the Unix time when the offset between TAI and Unix time changed, and the number of milliseconds by which the offset changed. E.g. `{unix: 78796801000, offset: 1000}` for the inserted leap second of 30 June 1972.
+Returns an array of leap second objects. Each leap second has a property `atomic` which indicates the TAI time when the offset between TAI and Unix time changed, and the number of milliseconds by which the offset changed. E.g. `{atomic: 78796811000, offset: 1000}` for the inserted leap second of 30 June 1972.
 
 ### tai.unixToAtomic(unix)
 Shorthand for `tai.convert.manyToOne.unixToAtomic(unix)`.
@@ -129,7 +129,7 @@ tai.convert.manyToMany.atomicToUnix(915148832000);
 
 ### tai.convert.manyToOne
 
-These methods treat the relationship between Unix time and TAI as many-to-one in each direction. The result of a conversion is always a single possiblity. For a leap second, when the input is ambiguous, we return the "canonical" (later) of the two possibilities. However, distinct inputs may still result in the same output, and reversing a conversion does not always result in the original input.
+These methods treat the relationship between Unix time and TAI as many-to-one in each direction. The result of a conversion is always a single possibility. For a leap second, when the input is ambiguous, we return the "canonical" (later) of the two possibilities. However, distinct inputs may still result in the same output, and reversing a conversion does not always result in the original input.
 
 ### tai.convert.manyToOne.unixToAtomic(unix)
 Convert a number of Unix milliseconds to a number of TAI milliseconds. Note that over the course of a leap second, a single Unix instant can correspond to *two* TAI instants, so we return the later of the two.
@@ -169,7 +169,7 @@ tai.convert.oneToOne.atomicToUnix(915148832000);
 // 915148800000
 ```
 
-### tai.build(earliestUnix, initialOffset, leapSeconds)
+### tai.build(earliestAtomic, initialOffset, leapSeconds)
 
 `t-a-i` uses real-world data, but it also exposes a `build` method which can be used to construct atomic time standards with arbitrary combinations of leap seconds. This is useful because it means we can try out removed leap seconds too, which have never happened to date.
 
@@ -177,11 +177,11 @@ It also means we can build a more demonstrative example. Let's consider this odd
 
 ```javascript
 var odd = tai.build(
-	1,  // instant in Unix time when TAI started
+	13, // first instant in TAI
 	12, // initial offset of TAI from Unix time
 	[
-		{unix: 4, offset:  1}, // inserted leap millisecond
-		{unix: 6, offset: -1}  // removed leap millisecond
+		{atomic: 16, offset:  1}, // inserted leap millisecond
+		{atomic: 19, offset: -1}  // removed leap millisecond
 	]
 );
 ```
