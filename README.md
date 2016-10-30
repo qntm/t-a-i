@@ -259,3 +259,5 @@ odd.convert.oneToOne.unixToAtomic(6); // 18
 ## Note
 
 Use caution when constructing a `Date` object from a TAI millisecond count. A `Date` represents an instant in Unix time, not an instant in TAI, and the object's method names and method behaviours reflect this.
+
+Instead, use a [`TaiDate`](https://github.com/ferno/tai-date)!
