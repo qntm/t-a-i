@@ -82,17 +82,10 @@ As a result of these shenanigans, instants in Unix time and instants in TAI are 
 
 ## APIs
 
-### tai.earliestAtomic
-Returns `63072010000`, TAI milliseconds when TAI began (1972-01-01 00:00:10 TAI).
-
-### tai.earliestUnix
-Returns `63072000000`, Unix time when TAI began (1972-01-01 00:00:00 Unix time).
-
-### tai.initialOffset
-Returns `10000`, the offset in milliseconds between TAI and Unix time when TAI began.
-
 ### tai.leapSeconds
 Returns an array of leap second objects. Each leap second has a property `atomic` which indicates the TAI time when the offset between TAI and Unix time changed, and the new offset. E.g. `{atomic: 78796811000, offset: 11000}` for the inserted leap second of 30 June 1972.
+
+The first entry is `{atomic: 63072010000, offset: 10000}`, marking the beginning of TAI for our purposes.
 
 ### tai.unixToAtomic(unix)
 Shorthand for `tai.convert.manyToOne.unixToAtomic(unix)`.

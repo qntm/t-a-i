@@ -132,6 +132,8 @@ var DECEMBER = 11;
 	} catch(e) {
 		console.log(true);
 	}
+
+	console.log(tai.leapSeconds.length === 28);
 }
 
 // TODO: what if the first thing that happens is that we insert 5 leap seconds?

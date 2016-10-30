@@ -15,18 +15,23 @@
 	Convert the initial parameters and the leap seconds list into a list of
 	blocks of Unix time which track exactly with atomic time.
 */
-var _generateBlocks = function(earliestAtomic, initialOffset, leapSeconds) {
+var _generateBlocks = function(leapSeconds) {
 	var blocks = [];
 
+	if(leapSeconds.length < 1) {
+		throw new Error("Need to provide at least one reference point");
+	}
+
+	var initial = leapSeconds[0];
 	blocks.push({
-		offset      : initialOffset,
-		atomicStart : earliestAtomic,
+		offset      : initial.offset,
+		atomicStart : initial.atomic,
 		atomicEnd   : Infinity
 	});
 
-	leapSeconds.forEach(function(leapSecond) {
+	leapSeconds.slice(1).forEach(function(leapSecond) {
 		if(!("atomic" in leapSecond)) {
-			throw new Error("Missing property `atomic` in leap second");
+			throw new Error("Missing property `atomic` in leapSecond");
 		}
 		var atomic = leapSecond.atomic;
 		var offset = leapSecond.offset;
@@ -60,21 +65,17 @@ var _generateBlocks = function(earliestAtomic, initialOffset, leapSeconds) {
 	Build and return an atomic time converter.
 */
 module.exports = function(
-	// Unix time when atomic time began, for the purposes of our system
-	earliestAtomic,
-
-	// Atomic time minus Unix time as of `earliestAtomic`, in milliseconds
-	initialOffset,
-
 	// An array of pairs {atomic, offset}.
 	// `atomic` is the atomic time when the offset changed; the offset in milliseconds
 	// indicates the new offset (TAI minus Unix) as of this atomic time.
 	leapSeconds
 ) {
-	var blocks = _generateBlocks(earliestAtomic, initialOffset, leapSeconds);
+	var blocks = _generateBlocks(leapSeconds);
 
-	// Compute the "beginning" of atomic time. We need this so we can
-	// check it during the AtomicDate constructor
+	// Compute the "beginning" of atomic time. We need this so we can check it
+	var earliestAtomic = Math.min.apply(Math, blocks.map(function(block) {
+		return block.atomicStart;
+	}));
 	var earliestUnix = Math.min.apply(Math, blocks.map(function(block) {
 		return block.unixStart;
 	}));
@@ -169,9 +170,6 @@ module.exports = function(
 	};
 
 	return {
-		earliestUnix   : earliestUnix,
-		earliestAtomic : earliestAtomic,
-		initialOffset  : initialOffset,
 		leapSeconds    : leapSeconds,
 		unixToAtomic   : manyToOne_unixToAtomic,
 		atomicToUnix   : manyToOne_atomicToUnix,

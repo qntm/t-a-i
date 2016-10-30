@@ -10,16 +10,12 @@ var JULY = 6;
 	International Atomic Time incoming!
 */
 module.exports = build(
-	// Earliest meaningful moment TAI, expressed in TAI milliseconds.
-	Date.UTC(1972, JANUARY, 1, 0, 0, 10, 0),
-
-	// Initial offset of TAI from Unix time, in milliseconds
-	// TAI - Unix
-	10 * 1000,
-
 	// List of leap seconds, expressed as instants in TAI when
 	// the offset between TAI and Unix time changed, and the new offset
+	// (TAI - Unix). The first of these is the beginning of TAI for our
+	// purposes.
 	[
+		{atomic: Date.UTC(1972, JANUARY, 1, 0, 0, 10), offset: 10000},
 		{atomic: Date.UTC(1972, JULY   , 1, 0, 0, 11), offset: 11000},
 		{atomic: Date.UTC(1973, JANUARY, 1, 0, 0, 12), offset: 12000},
 		{atomic: Date.UTC(1974, JANUARY, 1, 0, 0, 13), offset: 13000},

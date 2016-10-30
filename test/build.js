@@ -4,9 +4,19 @@ var build = require("./../src/build.js");
 
 {
 	// _generateBlocks
+
+	// Must have at least one block
+	try {
+		build._generateBlocks([]);
+		console.log(false);
+	} catch(e) {
+		console.log(true);
+	}
+
 	// Got to put those leap seconds in the right order
 	try {
-		build._generateBlocks(0, 0, [
+		build._generateBlocks([
+			{atomic: 0, offset:  0},
 			{atomic: 3, offset: -1},
 			{atomic: 2, offset:  1}
 		]);
@@ -16,7 +26,8 @@ var build = require("./../src/build.js");
 	}
 
 	try {
-		build._generateBlocks(0, 0, [
+		build._generateBlocks([
+			{atomic: 0, offset:  0},
 			{atomic: 3, offset: -1},
 			{atomic: 3, offset: -2}
 		]);
@@ -26,7 +37,9 @@ var build = require("./../src/build.js");
 	}
 
 	{
-		var blocks = build._generateBlocks(0, 0, []);
+		var blocks = build._generateBlocks([
+			{atomic: 0, offset: 0}
+		]);
 		console.log(blocks.length === 1);
 		console.log(blocks[0].offset === 0);
 		console.log(blocks[0].unixStart === 0);
@@ -36,7 +49,9 @@ var build = require("./../src/build.js");
 	}
 
 	{
-		var blocks2 = build._generateBlocks(7, 0, []);
+		var blocks2 = build._generateBlocks([
+			{atomic: 7, offset: 0}
+		]);
 		console.log(blocks2.length === 1);
 		console.log(blocks2[0].offset === 0);
 		console.log(blocks2[0].unixStart === 7);
@@ -46,7 +61,9 @@ var build = require("./../src/build.js");
 	}
 
 	{
-		var blocks3 = build._generateBlocks(0, -4, []);
+		var blocks3 = build._generateBlocks([
+			{atomic: 0, offset: -4}
+		]);
 		console.log(blocks3.length === 1);
 		console.log(blocks3[0].offset === -4);
 		console.log(blocks3[0].atomicStart === 0);
@@ -56,7 +73,9 @@ var build = require("./../src/build.js");
 	}
 
 	{
-		var blocks4 = build._generateBlocks(7, -4, []);
+		var blocks4 = build._generateBlocks([
+			{atomic: 7, offset: -4}
+		]);
 		console.log(blocks4.length === 1);
 		console.log(blocks4[0].offset === -4);
 		console.log(blocks4[0].unixStart === 11);
@@ -71,7 +90,8 @@ var build = require("./../src/build.js");
 		// TAI:          [3][4][5][6][ 7][ 8][ 9][...]
 		// Unix: [...][6][7][8][9][9][10][11]
 		//                               [12][13][...]
-		var blocks5 = build._generateBlocks(3, -4, [
+		var blocks5 = build._generateBlocks([
+			{atomic: 3, offset: -4},
 			{atomic: 6, offset: -3}, // inserted leap millisecond
 			{atomic: 9, offset: -4}  // removed leap millisecond
 		]);
@@ -102,10 +122,13 @@ var build = require("./../src/build.js");
 	// TAI:          [3][4][5][6][ 7][ 8][ 9][...]
 	// Unix: [...][6][7][8][9][9][10][11]
 	//                               [12][13][...]
-	var a = build(3, -4, [
+	var a = build([
+		{atomic: 3, offset: -4},
 		{atomic: 6, offset: -3}, // inserted leap millisecond
 		{atomic: 9, offset: -4}  // removed leap millisecond
 	]);
+
+	console.log(a.leapSeconds.length === 3);
 
 	{
 		// convert.manyToMany.atomicToUnix
@@ -241,7 +264,8 @@ var build = require("./../src/build.js");
 {
 	// Weird example with two removed leap seconds in succession
 	try {
-		build(0, 0, [
+		build([
+			{atomic: 0, offset:  0},
 			{atomic: 3, offset: -1},
 			{atomic: 3, offset: -1}
 		]);
@@ -251,7 +275,8 @@ var build = require("./../src/build.js");
 
 	// Bizarre example where the first offset sets Unix back before the beginning of TAI
 	try {
-		build(0, 0, [
+		build([
+			{atomic: 0, offset:  0},
 			{atomic: 3, offset: -5}
 		]);
 	} catch(e) {
