@@ -2,20 +2,31 @@
 
 var tai = require("./../src/t-a-i.js");
 
-var JANUARY = 0;
-var OCTOBER = 9;
-var DECEMBER = 11;
+var JANUARY   =  0;
+var FEBRUARY  =  1;
+var JULY      =  6;
+var AUGUST    =  7;
+var SEPTEMBER =  8;
+var OCTOBER   =  9;
+var DECEMBER  = 11;
 
 {
 	// TAI->Unix conversions
 
-	// The earliest instant in TAI
+	// The NEW earliest instant in TAI
 	try {
-		tai.atomicToUnix(Date.UTC(1972, JANUARY, 1, 0, 0, 9, 999));
+		tai.atomicToUnix(Date.UTC(1961, JANUARY, 1, 0, 0, 1, 422));
 		console.log(false);
 	} catch(e) {
 		console.log(true);
 	}
+
+	// Oog, floating point
+	console.log(Math.round(tai.convert.oneToMany.atomicToUnix(Date.UTC(1961, JANUARY, 1, 0, 0, 1, 423))) === Date.UTC(1961, JANUARY, 1, 0, 0, 0, 0));
+	console.log(tai.convert.oneToMany.atomicToUnix(Date.UTC(1972, JANUARY, 1, 0, 0, 9, 999)) === 63072000106.757996);
+	console.log(tai.convert.oneToMany.atomicToUnix(Date.UTC(1972, JANUARY, 1, 0, 0, 9, 999)) === Date.UTC(1972, JANUARY, 1, 0, 0, 0, 106) + 0.757996);
+
+	// After this point in time, conversions become far simpler and always integer numbers of milliseconds
 	console.log(tai.convert.oneToMany.atomicToUnix(Date.UTC(1972, JANUARY, 1, 0, 0, 10, 0)) === Date.UTC(1972, JANUARY, 1, 0, 0, 0, 0));
 	console.log(tai.convert.oneToMany.atomicToUnix(Date.UTC(1972, JANUARY, 1, 0, 0, 10, 1)) === Date.UTC(1972, JANUARY, 1, 0, 0, 0, 1));
 	console.log(tai.convert.oneToMany.atomicToUnix(Date.UTC(1972, JANUARY, 1, 0, 0, 10, 2)) === Date.UTC(1972, JANUARY, 1, 0, 0, 0, 2));
@@ -24,9 +35,9 @@ var DECEMBER = 11;
 	console.log(tai.convert.oneToOne .atomicToUnix(Date.UTC(1972, JANUARY, 1, 0, 0, 10, 1)) === Date.UTC(1972, JANUARY, 1, 0, 0, 0, 1));
 	console.log(tai.convert.oneToOne .atomicToUnix(Date.UTC(1972, JANUARY, 1, 0, 0, 10, 2)) === Date.UTC(1972, JANUARY, 1, 0, 0, 0, 2));
 
-	console.log(tai                  .atomicToUnix(Date.UTC(1972, JANUARY, 1, 0, 0, 10, 0)) === Date.UTC(1972, JANUARY, 1, 0, 0, 0, 0));
-	console.log(tai                  .atomicToUnix(Date.UTC(1972, JANUARY, 1, 0, 0, 10, 1)) === Date.UTC(1972, JANUARY, 1, 0, 0, 0, 1));
-	console.log(tai                  .atomicToUnix(Date.UTC(1972, JANUARY, 1, 0, 0, 10, 2)) === Date.UTC(1972, JANUARY, 1, 0, 0, 0, 2));
+	console.log(tai.atomicToUnix(Date.UTC(1972, JANUARY, 1, 0, 0, 10, 0)) === Date.UTC(1972, JANUARY, 1, 0, 0, 0, 0));
+	console.log(tai.atomicToUnix(Date.UTC(1972, JANUARY, 1, 0, 0, 10, 1)) === Date.UTC(1972, JANUARY, 1, 0, 0, 0, 1));
+	console.log(tai.atomicToUnix(Date.UTC(1972, JANUARY, 1, 0, 0, 10, 2)) === Date.UTC(1972, JANUARY, 1, 0, 0, 0, 2));
 	// etc.
 
 	// A typical leap second from the past, note repetition
@@ -52,17 +63,20 @@ var DECEMBER = 11;
 
 {
 	// Unix->TAI conversions
-	// The earliest instant in TAI
+	// The NEW earliest instant in TAI
 	try {
-		tai.convert.oneToMany.unixToAtomic(Date.UTC(1971, DECEMBER, 31, 23, 59, 59, 999));
+		console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1960, DECEMBER, 31, 23, 59, 59, 999)));
 		console.log(false);
 	} catch(e) {
 		console.log(true);
 	}
-	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1972, JANUARY, 1, 0, 0, 0, 0)).length === 1);
-	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1972, JANUARY, 1, 0, 0, 0, 0))[0] === Date.UTC(1972, JANUARY, 1, 0, 0, 10, 0));
-	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1972, JANUARY, 1, 0, 0, 0, 1)).length === 1);
-	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1972, JANUARY, 1, 0, 0, 0, 1))[0] === Date.UTC(1972, JANUARY, 1, 0, 0, 10, 1));
+
+	// Again with the icky floating point comparisons. Fun fact! There is about 105 leap milliseconds here!
+	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1972, JANUARY, 1, 0, 0, 0, 0)).length === 2);
+	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1972, JANUARY, 1, 0, 0, 0, 0))[0] === Date.UTC(1972, JANUARY, 1, 0, 0,  9, 892) + 0.242004);
+	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1972, JANUARY, 1, 0, 0, 0, 0))[1] === Date.UTC(1972, JANUARY, 1, 0, 0, 10, 0));
+	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1972, JANUARY, 1, 0, 0, 0, 1)).length === 2);
+	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1972, JANUARY, 1, 0, 0, 0, 1))[1] === Date.UTC(1972, JANUARY, 1, 0, 0, 10, 1));
 	console.log(tai.convert.oneToOne .unixToAtomic(Date.UTC(1972, JANUARY, 1, 0, 0, 0, 2))    === Date.UTC(1972, JANUARY, 1, 0, 0, 10, 2));
 	console.log(tai                  .unixToAtomic(Date.UTC(1972, JANUARY, 1, 0, 0, 0, 2))    === Date.UTC(1972, JANUARY, 1, 0, 0, 10, 2));
 	// etc.
@@ -124,7 +138,27 @@ var DECEMBER = 11;
 		console.log(true);
 	}
 
-	console.log(tai.leapSeconds.length === 28);
+	console.log(tai.leapSeconds.length === 41);
 }
 
 // TODO: what if the first thing that happens is that we insert 5 leap seconds?
+
+{
+	// Crazy pre-1972 nonsense
+	console.log(tai.unixToAtomic(Date.UTC(1968, FEBRUARY, 1, 0, 0, 0)) === Date.UTC(1968, FEBRUARY, 1, 0, 0, 6, 185) + 0.682);
+	console.log(Math.abs(tai.unixToAtomic(Date.UTC(1962, JANUARY, 1, 0, 0, 0)) - (Date.UTC(1962, JANUARY, 1, 0, 0, 1, 845) + 0.858)) < 0.0001);
+
+	// Oh look, an inserted leap tenth of a second!
+	// The period between 1965-09-01 00:00:00 and 00:00:00.100 UTC happened twice!
+	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1965, SEPTEMBER, 1, 0, 0, 0, 50)).length === 2);
+	console.log(Math.abs(tai.convert.oneToMany.unixToAtomic(Date.UTC(1965, SEPTEMBER, 1, 0, 0, 0, 50))[0] - (Date.UTC(1965, SEPTEMBER, 1, 0, 0, 4, 105) + 0.058)) < 0.0001);
+	console.log(Math.abs(tai.convert.oneToMany.unixToAtomic(Date.UTC(1965, SEPTEMBER, 1, 0, 0, 0, 50))[1] - (Date.UTC(1965, SEPTEMBER, 1, 0, 0, 4, 205) + 0.058)) < 0.0001);
+
+	// Hey, what! A removed leap twentieth of a second???
+	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1961, JULY  , 31, 23, 59, 59, 949)).length === 1);
+	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1961, JULY  , 31, 23, 59, 59, 950)).length === 0);
+	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1961, JULY  , 31, 23, 59, 59, 999)).length === 0);
+	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1961, AUGUST,  1,  0,  0,  0,   0)).length === 0); // Hmm, should be 1. FLOATING POINT!
+	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1961, AUGUST,  1,  0,  0,  0,   1)).length === 1);
+	console.log(Math.abs(tai.convert.oneToMany.atomicToUnix(Date.UTC(1961, AUGUST,  1,  0,  0,  1, 647) + 0.570) - Date.UTC(1961, AUGUST, 1, 0, 0, 0, 0)) < 0.0001);
+}

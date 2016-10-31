@@ -6,8 +6,6 @@ Introduces [International Atomic Time (TAI)](https://en.wikipedia.org/wiki/Inter
 
 **TAI milliseconds** tracks the number of elapsed milliseconds since 1970-01-01 00:00:00 TAI. TAI does not have leap seconds.
 
-Well... actually, prior to 1972-01-01 00:00:00 Unix time = 1972-01-01 00:00:10 TAI, the relationship between Unix time and TAI was quite complicated, and we do not attempt to model it properly here. However, if we call this instant 63072010000 TAI milliseconds, and promise not to use TAI instants before this time, the effective result is the same.
-
 # Installation
 
 ```
@@ -29,7 +27,7 @@ var offset = tai.unixToAtomic(now) - now;
 
 More powerful conversion methods are also provided, see below.
 
-## Background: UTC vs Unix time vs TAI
+## Background: UTC vs Unix time vs TAI (1972 to present)
 
 Here's what happened over the course of the inserted leap second of 31 December 1998 (h/t Wikipedia):
 
@@ -209,3 +207,11 @@ odd.convert.oneToOne.atomicToUnix(15); // throws exception
 Use caution when constructing a `Date` object from a TAI millisecond count. A `Date` represents an instant in Unix time, not an instant in TAI, and the object's method names and method behaviours reflect this.
 
 Instead, use a [`TaiDate`](https://github.com/ferno/tai-date)!
+
+## UTC vs Unix time vs TAI (1961 to 1971 inclusive)
+
+The relationship between TAI and UTC (and hence Unix time) is well-defined as far back as 1961-01-01 00:00:00 UTC = 1961-01-01 00:00:01.422818 TAI, which for the purposes of this module is the beginning of TAI; conversions involving earlier times will fail.
+
+Prior to 1972-01-01 00:00:00 UTC = 1972-01-01 00:00:10 TAI, the relationship between TAI and UTC was quite complex; TAI seconds were not the same length as UTC seconds, and the ratio of their lengths was modified periodically by small amounts, as was the absolute offset between the two. This can be seen in [this IERS listing of historic offsets between TAI and UTC](http://hpiers.obspm.fr/eop-pc/earthor/utc/TAI-UTC_tab.html) and this table provided by the US Naval Observatory (ftp://maia.usno.navy.mil/ser7/tai-utc.dat).
+
+This module correctly handles conversions during this period, give or take some potential loss of precision due to floating point stuff - I think there's some room for improvement here. However, I believe conversions are accurate to the millisecond, which is close enough for jazz as far as JavaScript is concerned.

@@ -170,6 +170,12 @@ var build = require("./../src/build.js");
 		} catch(e) {
 			console.log(true);
 		}
+
+		// bug
+		console.log(a.convert.oneToMany.unixToAtomic(7).length === 1);
+		console.log(a.convert.oneToMany.unixToAtomic(7)[0] === 3);
+		console.log(!isNaN(a.convert.oneToOne.unixToAtomic(7)));
+
 		console.log(a.convert.oneToOne.atomicToUnix(3) === 7);
 		console.log(a.convert.oneToOne.atomicToUnix(4) === 8);
 		try {

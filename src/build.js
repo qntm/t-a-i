@@ -2,11 +2,6 @@
 	Set the parameters of your very own spinning Earth and compare it with
 	reality! (This provides DI for testing against simpler structures of leap
 	seconds.)
-
-	Ironically it is TAI which is the fixed constant in reality, and Unix time
-	which takes on different shapes depending when leap seconds are added, but in
-	JavaScript the reverse is true: Unix time is fixed, and our atomic "backing"
-	time standard is what we must build by applying changes to it.
 */
 
 "use strict";
@@ -16,42 +11,69 @@
 	blocks of Unix time which track exactly with atomic time.
 */
 var _generateBlocks = function(leapSeconds) {
-	var blocks = [];
 
 	if(leapSeconds.length < 1) {
 		throw new Error("Need to provide at least one reference point");
 	}
 
-	var initial = leapSeconds[0];
-	blocks.push({
-		offset      : initial.offset,
-		atomicStart : initial.atomic,
-		atomicEnd   : Infinity
-	});
-
-	leapSeconds.slice(1).forEach(function(leapSecond) {
-		if(!("atomic" in leapSecond)) {
-			throw new Error("Missing property `atomic` in leapSecond");
-		}
-		var atomic = leapSecond.atomic;
-		var offset = leapSecond.offset;
-		if(atomic <= blocks[blocks.length - 1].atomicStart) {
+	leapSeconds.forEach(function(leapSecond, i) {
+		if(i > 0 && leapSecond.atomic <= leapSeconds[i - 1].atomic) {
 			throw new Error("Disordered leap seconds");
 		}
-		blocks[blocks.length - 1].atomicEnd = atomic;
-		blocks.push({
-			offset      : offset, // absolute
-			atomicStart : atomic,
-			atomicEnd   : Infinity
-		});
 	});
 
-	blocks.forEach(function(block) {
-		block.unixStart = block.atomicStart - block.offset;
-		block.unixEnd   = block.atomicEnd   - block.offset;
-	});
+	var millisecondsInOneDay = 1000 * 60 * 60 * 24; // 86400000
 
-	return blocks;
+	return leapSeconds.map(function(leapSecond, i) {
+		var offset        = leapSecond.offset;
+		var driftRate     = leapSecond.driftRate || 0.000000;
+
+		var atomicStart   = leapSecond.atomic;
+		var atomicEnd     = i === leapSeconds.length - 1 ? Infinity : leapSeconds[i + 1].atomic;
+		var atomicInBlock = function(atomic) {
+			return atomicStart <= atomic && atomic < atomicEnd;
+		};
+		var atomicToUnix  = function(atomic) {
+			atomic -= offset;
+			// Ewww, direct float equality comparison
+			if(driftRate !== 0) {
+				// Ordinarily we would now divide `atomic` by `1 + driftRate / millisecondsInOneDay`
+				// but this number is very close to 1 so we would possibly lose precision...
+				atomic = (atomic * millisecondsInOneDay) / (millisecondsInOneDay + driftRate);
+			}
+			return atomic;
+		};
+
+		var unixStart     = atomicToUnix(atomicStart);
+		var unixEnd       = atomicToUnix(atomicEnd);
+		var unixInBlock   = function(unix) {
+			return unixStart <= unix && unix < unixEnd;
+		};
+		var unixToAtomic  = function(unix) {
+			// Ewww, direct float equality comparison
+			if(driftRate !== 0) {
+				// Ordinarily we would multiply `unix` by `1 + driftRate / millisecondsInOneDay`
+				// but this number is very close to 1 so we could lose even more precision
+				// than I am clearly already losing
+				unix = unix + (unix * driftRate) / millisecondsInOneDay;
+			}
+			unix += offset;
+			return unix;
+		};
+
+		return {
+			offset        : offset,
+			driftRate     : driftRate,
+			atomicStart   : atomicStart,
+			atomicEnd     : atomicEnd,
+			atomicInBlock : atomicInBlock,
+			atomicToUnix  : atomicToUnix,
+			unixStart     : unixStart,
+			unixEnd       : unixEnd,
+			unixInBlock   : unixInBlock,
+			unixToAtomic  : unixToAtomic
+		};
+	});
 };
 
 /**
@@ -86,9 +108,9 @@ module.exports = function(
 			throw new Error("This Unix time falls before atomic time was defined.");
 		}
 		return blocks.filter(function(block) {
-			return block.unixStart <= unix && unix < block.unixEnd;
+			return block.unixInBlock(unix);
 		}).map(function(block) {
-			return unix + block.offset;
+			return block.unixToAtomic(unix);
 		});
 	};
 
@@ -104,9 +126,9 @@ module.exports = function(
 			throw new Error("This atomic time is not defined.");
 		}
 		var results = blocks.filter(function(block) {
-			return block.atomicStart <= atomic && atomic < block.atomicEnd;
+			return block.atomicInBlock(atomic);
 		}).map(function(block) {
-			return atomic - block.offset;
+			return block.atomicToUnix(atomic);
 		});
 		if(results.length === 0) {
 			throw new Error("This atomic time was not found. This should be impossible.");
