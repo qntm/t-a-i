@@ -88,8 +88,7 @@ var build = require("./../src/build.js");
 		//                  inserted       removed
 		//                       \/         \/
 		// TAI:          [3][4][5][6][ 7][ 8][ 9][...]
-		// Unix: [...][6][7][8][9][9][10][11]
-		//                               [12][13][...]
+		// Unix: [...][6][7][8][9][9][10][11][13][...]
 		var blocks5 = build._generateBlocks([
 			{atomic: 3, offset: -4},
 			{atomic: 6, offset: -3}, // inserted leap millisecond
@@ -107,9 +106,9 @@ var build = require("./../src/build.js");
 		console.log(blocks5[1].unixStart === 9);
 		console.log(blocks5[1].unixEnd === 12);
 		console.log(blocks5[2].offset === -4);
-		console.log(blocks5[2].atomicStart === 8);
+		console.log(blocks5[2].atomicStart === 9);
 		console.log(blocks5[2].atomicEnd === Infinity);
-		console.log(blocks5[2].unixStart === 12);
+		console.log(blocks5[2].unixStart === 13);
 		console.log(blocks5[2].unixEnd === Infinity);
 	}
 }
@@ -120,8 +119,7 @@ var build = require("./../src/build.js");
 	//                  inserted       removed
 	//                       \/         \/
 	// TAI:          [3][4][5][6][ 7][ 8][ 9][...]
-	// Unix: [...][6][7][8][9][9][10][11]
-	//                               [12][13][...]
+	// Unix: [...][6][7][8][9][9][10][11][13][...]
 	var a = build([
 		{atomic: 3, offset: -4},
 		{atomic: 6, offset: -3}, // inserted leap millisecond
@@ -131,46 +129,37 @@ var build = require("./../src/build.js");
 	console.log(a.leapSeconds.length === 3);
 
 	{
-		// convert.manyToMany.atomicToUnix
+		// convert.oneToMany.atomicToUnix
 		try {
-			a.convert.manyToMany.atomicToUnix(2);
+			a.convert.oneToMany.atomicToUnix(2);
 			console.log(false);
 		} catch(e) {
 			console.log(true);
 		}
-		console.log(a.convert.manyToMany.atomicToUnix(3).length === 1);
-		console.log(a.convert.manyToMany.atomicToUnix(3)[0] === 7);
-		console.log(a.convert.manyToMany.atomicToUnix(4).length === 1);
-		console.log(a.convert.manyToMany.atomicToUnix(4)[0] === 8);
-		console.log(a.convert.manyToMany.atomicToUnix(5).length === 1);
-		console.log(a.convert.manyToMany.atomicToUnix(5)[0] === 9);
-		console.log(a.convert.manyToMany.atomicToUnix(6).length === 1);
-		console.log(a.convert.manyToMany.atomicToUnix(6)[0] === 9);
-		console.log(a.convert.manyToMany.atomicToUnix(7).length === 1);
-		console.log(a.convert.manyToMany.atomicToUnix(7)[0] === 10);
-		console.log(a.convert.manyToMany.atomicToUnix(8).length === 2);
-		console.log(a.convert.manyToMany.atomicToUnix(8)[0] === 11);
-		console.log(a.convert.manyToMany.atomicToUnix(8)[1] === 12);
-		console.log(a.convert.manyToMany.atomicToUnix(9).length === 1);
-		console.log(a.convert.manyToMany.atomicToUnix(9)[0] === 13);
-	}
+		console.log(a.convert.oneToMany.atomicToUnix(3) === 7);
+		console.log(a.convert.oneToMany.atomicToUnix(4) === 8);
+		console.log(a.convert.oneToMany.atomicToUnix(5) === 9);
+		console.log(a.convert.oneToMany.atomicToUnix(6) === 9);
+		console.log(a.convert.oneToMany.atomicToUnix(7) === 10);
+		console.log(a.convert.oneToMany.atomicToUnix(8) === 11);
+		// no way to get 12
+		console.log(a.convert.oneToMany.atomicToUnix(9) === 13);
 
-	{
-		// convert.manyToOne.atomicToUnix
+		// = atomicToUnix
 		try {
-			a.convert.manyToOne.atomicToUnix(2);
+			a.atomicToUnix(2);
 			console.log(false);
 		} catch(e) {
 			console.log(true);
 		}
-		console.log(a.convert.manyToOne.atomicToUnix(3) === 7);
-		console.log(a.convert.manyToOne.atomicToUnix(4) === 8);
-		console.log(a.convert.manyToOne.atomicToUnix(5) === 9);
-		console.log(a.convert.manyToOne.atomicToUnix(6) === 9);
-		console.log(a.convert.manyToOne.atomicToUnix(7) === 10);
-		// no way to get 11
-		console.log(a.convert.manyToOne.atomicToUnix(8) === 12);
-		console.log(a.convert.manyToOne.atomicToUnix(9) === 13);
+		console.log(a.atomicToUnix(3) === 7);
+		console.log(a.atomicToUnix(4) === 8);
+		console.log(a.atomicToUnix(5) === 9);
+		console.log(a.atomicToUnix(6) === 9);
+		console.log(a.atomicToUnix(7) === 10);
+		console.log(a.atomicToUnix(8) === 11);
+		// no way to get 12
+		console.log(a.atomicToUnix(9) === 13);
 	}
 
 	{
@@ -191,52 +180,40 @@ var build = require("./../src/build.js");
 		}
 		console.log(a.convert.oneToOne.atomicToUnix(6) === 9);
 		console.log(a.convert.oneToOne.atomicToUnix(7) === 10);
-		// no way to get 11
+		console.log(a.convert.oneToOne.atomicToUnix(8) === 11);
+		// no way to get 12
 		console.log(a.convert.oneToOne.atomicToUnix(9) === 13);
 	}
 
 	{
-		// convert.manyToMany.unixToAtomic
+		// convert.oneToMany.unixToAtomic
 		try {
-			a.convert.manyToMany.unixToAtomic(6);
+			a.convert.oneToMany.unixToAtomic(6);
 			console.log(false);
 		} catch(e) {
 			console.log(true);
 		}
-		console.log(a.convert.manyToMany.unixToAtomic(7).length === 1);
-		console.log(a.convert.manyToMany.unixToAtomic(7)[0] === 3);
-		console.log(a.convert.manyToMany.unixToAtomic(8).length === 1);
-		console.log(a.convert.manyToMany.unixToAtomic(8)[0] === 4);
-		console.log(a.convert.manyToMany.unixToAtomic(9).length === 2);
-		console.log(a.convert.manyToMany.unixToAtomic(9)[0] === 5);
-		console.log(a.convert.manyToMany.unixToAtomic(9)[1] === 6);
-		console.log(a.convert.manyToMany.unixToAtomic(10).length === 1);
-		console.log(a.convert.manyToMany.unixToAtomic(10)[0] === 7);
-		console.log(a.convert.manyToMany.unixToAtomic(11).length === 1);
-		console.log(a.convert.manyToMany.unixToAtomic(11)[0] === 8);
-		console.log(a.convert.manyToMany.unixToAtomic(12).length === 1);
-		console.log(a.convert.manyToMany.unixToAtomic(12)[0] === 8);
-		console.log(a.convert.manyToMany.unixToAtomic(13).length === 1);
-		console.log(a.convert.manyToMany.unixToAtomic(13)[0] === 9);
+		console.log(a.convert.oneToMany.unixToAtomic(7).length === 1);
+		console.log(a.convert.oneToMany.unixToAtomic(7)[0] === 3);
+		console.log(a.convert.oneToMany.unixToAtomic(8).length === 1);
+		console.log(a.convert.oneToMany.unixToAtomic(8)[0] === 4);
+		// No way to get 5
+		console.log(a.convert.oneToMany.unixToAtomic(9).length === 2);
+		console.log(a.convert.oneToMany.unixToAtomic(9)[0] === 5);
+		console.log(a.convert.oneToMany.unixToAtomic(9)[1] === 6);
+		console.log(a.convert.oneToMany.unixToAtomic(10).length === 1);
+		console.log(a.convert.oneToMany.unixToAtomic(10)[0] === 7);
+		console.log(a.convert.oneToMany.unixToAtomic(11).length === 1);
+		console.log(a.convert.oneToMany.unixToAtomic(11)[0] === 8);
+		console.log(a.convert.oneToMany.unixToAtomic(12).length === 0);
+		console.log(a.convert.oneToMany.unixToAtomic(13).length === 1);
+		console.log(a.convert.oneToMany.unixToAtomic(13)[0] === 9);
 	}
 
-	{
-		// convert.manyToOne.unixToAtomic
-		try {
-			a.convert.manyToOne.unixToAtomic(6);
-			console.log(false);
-		} catch(e) {
-			console.log(true);
-		}
-		console.log(a.convert.manyToOne.unixToAtomic(7) === 3);
-		console.log(a.convert.manyToOne.unixToAtomic(8) === 4);
-		// No way to get 5
-		console.log(a.convert.manyToOne.unixToAtomic(9) === 6);
-		console.log(a.convert.manyToOne.unixToAtomic(10) === 7);
-		console.log(a.convert.manyToOne.unixToAtomic(11) === 8);
-		console.log(a.convert.manyToOne.unixToAtomic(12) === 8);
-		console.log(a.convert.manyToOne.unixToAtomic(13) === 9);
-	}
+	//                  inserted       removed
+	//                       \/         \/
+	// TAI:          [3][4][5][6][ 7][ 8][ 9][...]
+	// Unix: [...][6][7][8][9][9][10][11][13][...]
 
 	{
 		// convert.oneToOne.unixToAtomic
@@ -251,13 +228,33 @@ var build = require("./../src/build.js");
 		// No way to get 5
 		console.log(a.convert.oneToOne.unixToAtomic(9) === 6);
 		console.log(a.convert.oneToOne.unixToAtomic(10) === 7);
+		console.log(a.convert.oneToOne.unixToAtomic(11) === 8);
 		try {
-			a.convert.oneToOne.unixToAtomic(11) === 8;
+			a.convert.oneToOne.unixToAtomic(12);
 		} catch(e) {
 			console.log(true);
 		}
-		console.log(a.convert.oneToOne.unixToAtomic(12) === 8);
 		console.log(a.convert.oneToOne.unixToAtomic(13) === 9);
+
+		// = unixToAtomic
+		try {
+			a.unixToAtomic(6);
+			console.log(false);
+		} catch(e) {
+			console.log(true);
+		}
+		console.log(a.unixToAtomic(7) === 3);
+		console.log(a.unixToAtomic(8) === 4);
+		// No way to get 5
+		console.log(a.unixToAtomic(9) === 6);
+		console.log(a.unixToAtomic(10) === 7);
+		console.log(a.unixToAtomic(11) === 8);
+		try {
+			a.unixToAtomic(12);
+		} catch(e) {
+			console.log(true);
+		}
+		console.log(a.unixToAtomic(13) === 9);
 	}
 }
 

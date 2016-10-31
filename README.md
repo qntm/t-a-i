@@ -73,12 +73,7 @@ Additionally, when TAI began at the beginning of 1972, it was already 10 seconds
 | ---------------------------- | ---------------------------- | ----------------- | ---------------------------- | ---------------- | ---------- |
 | 1972‑01‑01&nbsp;00:00:00.000 | 1972‑01‑01&nbsp;00:00:00.000 |       63072000000 | 1972‑01‑01&nbsp;00:00:10.000 |      63072010000 |    10000ms |
 
-As a result of these shenanigans, instants in Unix time and instants in TAI are in a *many-to-many relationship*.
-
-* During an inserted leap second, a single instant Unix time (e.g. 1999-01-01 00:00:00.500) can be interpreted to mean either of two instants (1999-01-01 00:00:31.500 or 1999-01-01 00:00:32.500) in TAI. So, we should return an array of possibilities: usually one, but sometimes two.
-* However, this relationship can be made many-to-one by considering one of the two results (the later one) to be *canonical*.
-* Furthermore, this relationship can be made one-to-one by throwing an exception when we attempt to convert a non-canonical instant back.
-* During a removed leap second, the same applies in reverse: a single instant in TAI (e.g. 1999-01-01 00:00:30.500 TAI) can be interpreted to mean either of two instants (1998-12-31 23:59:59.500 or 1999-01-01 00:00:00.500) in Unix time.
+As a result of these shenanigans, instants in TAI and instants in Unix time and are in a *one-to-many relationship*, and the offered APIs reflect this. This relationship can alternatively be viewed as *one-to-one* by eliminating some duplicate instants.
 
 ## APIs
 
@@ -88,7 +83,7 @@ Returns an array of leap second objects. Each leap second has a property `atomic
 The first entry is `{atomic: 63072010000, offset: 10000}`, marking the beginning of TAI for our purposes.
 
 ### tai.unixToAtomic(unix)
-Shorthand for `tai.convert.manyToOne.unixToAtomic(unix)`.
+Shorthand for `tai.convert.oneToOne.unixToAtomic(unix)`.
 
 ### tai.atomicToUnix(atomic)
 Shorthand for `tai.convert.manyToOne.atomicToUnix(atomic)`.
@@ -97,63 +92,44 @@ Shorthand for `tai.convert.manyToOne.atomicToUnix(atomic)`.
 
 Object containing conversion methods, sorted by relationship model. All conversion methods throw an exception if the input or output is prior to the beginning of TAI.
 
-### tai.convert.manyToMany
+### tai.convert.oneToMany
 
-These methods treat the relationship between Unix time and TAI as many-to-many. Ambiguity is handled by always returning an array of possibilities. This array usually contains a single element, but for a leap second, it may contain two elements. Also, several different inputs may result in the same output.
+These methods treat the relationship between TAI and Unix time as one-to-many.
 
-### tai.convert.manyToMany.unixToAtomic(unix)
-Convert a number of Unix milliseconds to an array of possible TAI milliseconds counts.
+### tai.convert.oneToMany.unixToAtomic(unix)
+Convert a number of Unix milliseconds to an array of possible TAI milliseconds counts. Ordinarily, this array will have a single entry. If the Unix time falls during an inserted leap second, the array will have two entries. If the Unix time falls during a removed leap second, the array will be empty.
 
 ```javascript
-tai.convert.manyToMany.unixToAtomic(915148800000);
+tai.convert.oneToMany.unixToAtomic(915148800000);
 // [915148831000, 915148832000]
 ```
 
-### tai.convert.manyToMany.atomicToUnix(atomic)
-Convert a number of TAI milliseconds to an array of possible Unix milliseconds counts.
+### tai.convert.oneToMany.atomicToUnix(atomic)
+Convert a number of TAI milliseconds to Unix milliseconds. Note that over the course of a leap second, two instants in TAI may convert back to the same instant in Unix time.
 
 ```javascript
-tai.convert.manyToMany.atomicToUnix(915148831000);
-// [915148800000]
+tai.convert.oneToMany.atomicToUnix(915148831000);
+// 915148800000
 
-tai.convert.manyToMany.atomicToUnix(915148832000);
-// [915148800000], same result
+tai.convert.oneToMany.atomicToUnix(915148832000);
+// 915148800000
 ```
 
-### tai.convert.manyToOne
+### tai.convert.oneToOne
 
-These methods treat the relationship between Unix time and TAI as many-to-one in each direction. The result of a conversion is always a single possibility. For a leap second, when the input is ambiguous, we return the "canonical" (later) of the two possibilities. However, distinct inputs may still result in the same output, and reversing a conversion does not always result in the original input.
+These methods treat the relationship between Unix time and TAI as one-to-one. Ambiguity is not tolerated, round trips always work.
 
-### tai.convert.manyToOne.unixToAtomic(unix)
-Convert a number of Unix milliseconds to a number of TAI milliseconds. Note that over the course of a leap second, a single Unix instant can correspond to *two* TAI instants, so we return the later of the two.
+### tai.convert.oneToOne.unixToAtomic(unix)
+Convert a number of Unix milliseconds to a number of TAI milliseconds. If the Unix time falls on an inserted leap second, it corresponds to *two* TAI instants, so we return the later ("canonical") of the two. If the Unix time falls on a removed leap second, we throw an exception.
 
 ```javascript
 tai.unixToAtomic(915148800000);
 // 915148832000
 ```
 
-### tai.convert.manyToOne.atomicToUnix(atomic)
-Convert a number of TAI milliseconds to Unix milliseconds. Note that over the course of a leap second, two instants in TAI may convert back to the same instant in Unix time.
-
-```javascript
-tai.convert.manyToOne.atomicToUnix(915148831000);
-// 915148800000
-
-tai.convert.manyToOne.atomicToUnix(915148832000);
-// 915148800000
-```
-
-### tai.convert.oneToOne
-
-These methods treat the relationship between Unix time and TAI as one-to-one. Ambiguity is not tolerated, round trips always work, any value which is not canonical causes an exception to be thrown.
-
-### tai.convert.oneToOne.unixToAtomic(unix)
-```javascript
-tai.convert.oneToOne.unixToAtomic(915148800000);
-// 915148832000
-```
-
 ### tai.convert.oneToOne.atomicToUnix(atomic)
+Convert a number of TAI milliseconds back to Unix milliseconds. If the TAI time falls during the first part of an inserted leap second, throw an exception.
+
 ```javascript
 tai.convert.oneToOne.atomicToUnix(915148831000);
 // throws exception
@@ -162,21 +138,21 @@ tai.convert.oneToOne.atomicToUnix(915148832000);
 // 915148800000
 ```
 
-### tai.build(earliestAtomic, initialOffset, leapSeconds)
+### tai.build(leapSeconds)
 
 `t-a-i` uses real-world data, but it also exposes a `build` method which can be used to construct atomic time standards with arbitrary combinations of leap seconds. This is useful because it means we can try out removed leap seconds too, which have never happened to date.
 
 It also means we can build a more demonstrative example. Let's consider this odd hypothetical timeline of TAI and Unix milliseconds:
 
 ```javascript
-var odd = tai.build(
-	13, // first instant in TAI
-	12, // initial offset of TAI from Unix time
-	[
-		{atomic: 16, offset: 13}, // inserted leap millisecond
-		{atomic: 19, offset: 12}  // removed leap millisecond
-	]
-);
+var odd = tai.build([
+	{
+		atomic: 13, // first instant in TAI
+		offset: 12  // initial offset of TAI from Unix time
+	},
+	{atomic: 16, offset: 13}, // inserted leap millisecond
+	{atomic: 19, offset: 12}  // removed leap millisecond
+]);
 ```
 
 (Note that we can insert and remove arbitrary numbers of milliseconds, not just 1000 at a time.)
@@ -187,8 +163,7 @@ Timeline diagram:
                      start     insertion    removal
                       \/          \/          \/
 TAI:                   [13][14][15][16][17][18][19][20][21][...]
-Unix time: [...][-1][0][ 1][ 2][ 3][ 3][ 4][ 5]
-                                           [ 6][ 7][ 8][ 9][...]
+Unix time: [...][-1][0][ 1][ 2][ 3][ 3][ 4][ 5][ 7][ 8][ 9][...]
 ```
 
 * Unix time extends backwards basically forever.
@@ -196,35 +171,19 @@ Unix time: [...][-1][0][ 1][ 2][ 3][ 3][ 4][ 5]
 * TAI is offset from Unix time at the instant when it begins.
 * TAI is a fixture, it does not jump forwards or backwards, but increases smoothly and continuously.
 * There is one inserted leap millisecond, which causes Unix time to jump backwards with respect to TAI, and repeat itself.
-* There is also one removed leap millisecond, which causes Unix time to jump forwards with respect to TAI, and overlap itself.
+* There is also one removed leap millisecond, which causes Unix time to jump forwards with respect to TAI.
 * Both Unix and TAI extend forwards basically forever.
 
-Many-to-many APIs:
+One-to-many APIs:
 
 ```javascript
-odd.convert.manyToMany.atomicToUnix(13); // [1]
-odd.convert.manyToMany.atomicToUnix(15); // [3]
-odd.convert.manyToMany.atomicToUnix(16); // [3]
-odd.convert.manyToMany.atomicToUnix(18); // [5, 6]
+odd.convert.oneToMany.unixToAtomic(1); // [13]
+odd.convert.oneToMany.unixToAtomic(3); // [15, 16]
+odd.convert.oneToMany.unixToAtomic(6); // []
 
-odd.convert.manyToMany.unixToAtomic(1); // [13]
-odd.convert.manyToMany.unixToAtomic(3); // [15, 16]
-odd.convert.manyToMany.unixToAtomic(5); // [18]
-odd.convert.manyToMany.unixToAtomic(6); // [18]
-```
-
-Many-to-one APIs:
-
-```javascript
-odd.convert.manyToOne.atomicToUnix(13); // 1
-odd.convert.manyToOne.atomicToUnix(15); // 3
-odd.convert.manyToOne.atomicToUnix(16); // 3
-odd.convert.manyToOne.atomicToUnix(18); // 6 (there is no way to return 5)
-
-odd.convert.manyToOne.unixToAtomic(1); // 13
-odd.convert.manyToOne.unixToAtomic(3); // 16 (there is no way to return 15)
-odd.convert.manyToOne.unixToAtomic(5); // 18
-odd.convert.manyToOne.unixToAtomic(6); // 18
+odd.convert.oneToMany.atomicToUnix(13); // 1
+odd.convert.oneToMany.atomicToUnix(15); // 3
+odd.convert.oneToMany.atomicToUnix(16); // 3
 ```
 
 One-to-one APIs see the timeline more simply, like this:
@@ -233,20 +192,16 @@ One-to-one APIs see the timeline more simply, like this:
                 start     insertion    removal
                  \/          \/          \/
 TAI:              [13][14][15][16][17][18][19][20][21][...]
-Unix: [...][-1][0][ 1][ 2]    [ 3][ 4]
-                                      [ 6][ 7][ 8][ 9][...]
+Unix: [...][-1][0][ 1][ 2]    [ 3][ 4][ 5][ 7][ 8][ 9][...]
 ```
 
 ```javascript
+odd.convert.oneToOne.unixToAtomic(1); // 13
+odd.convert.oneToOne.unixToAtomic(3); // 16
+odd.convert.oneToOne.unixToAtomic(6); // throws exception
+o
 odd.convert.oneToOne.atomicToUnix(13); // 1
 odd.convert.oneToOne.atomicToUnix(15); // throws exception
-odd.convert.oneToOne.atomicToUnix(16); // 3
-odd.convert.oneToOne.atomicToUnix(18); // 6 (there is no way to return 5)
-
-odd.convert.oneToOne.unixToAtomic(1); // 13
-odd.convert.oneToOne.unixToAtomic(3); // 16 (there is no way to return 15)
-odd.convert.oneToOne.unixToAtomic(5); // throws exception
-odd.convert.oneToOne.unixToAtomic(6); // 18
 ```
 
 ## Note
