@@ -20,6 +20,23 @@ var DECEMBER  = 11;
 	} catch(e) {
 		console.log(true);
 	}
+	try {
+		tai.atomicToUnix(Date.UTC(1961, JANUARY, 1, 0, 0, 1, 422) + 0.818);
+		console.log(false);
+	} catch(e) {
+		console.log(true);
+	}
+	try {
+		tai.atomicToUnix(-283996798577.182); // same
+		console.log(false);
+	} catch(e) {
+		console.log(true);
+	}
+
+	// This is the earliest 64-bit float number of TAI milliseconds which represents a legal
+	// TAI time, coming just slightly after the beginning of TAI.
+	console.log(tai.atomicToUnix(-283996798577.18195) > -283996800000);
+	console.log(tai.atomicToUnix(-283996798577.18195) === -283996799999.99994);
 
 	// Oog, floating point
 	console.log(Math.round(tai.convert.oneToMany.atomicToUnix(Date.UTC(1961, JANUARY, 1, 0, 0, 1, 423))) === Date.UTC(1961, JANUARY, 1, 0, 0, 0, 0));
@@ -145,7 +162,6 @@ var DECEMBER  = 11;
 
 {
 	// Crazy pre-1972 nonsense
-	console.log(tai.unixToAtomic(Date.UTC(1968, FEBRUARY, 1, 0, 0, 0)) === Date.UTC(1968, FEBRUARY, 1, 0, 0, 6, 185) + 0.682);
 	console.log(Math.abs(tai.unixToAtomic(Date.UTC(1962, JANUARY, 1, 0, 0, 0)) - (Date.UTC(1962, JANUARY, 1, 0, 0, 1, 845) + 0.858)) < 0.0001);
 
 	// Oh look, an inserted leap tenth of a second!
