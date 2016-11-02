@@ -29,10 +29,7 @@ var _generateBlocks = function(leapSeconds) {
 		var driftRate     = leapSecond.driftRate || 0.000000;
 
 		var atomicStart   = leapSecond.atomic;
-		var atomicEnd     = i === leapSeconds.length - 1 ? Infinity : leapSeconds[i + 1].atomic;
-		var atomicInBlock = function(atomic) {
-			return atomicStart <= atomic && atomic < atomicEnd;
-		};
+		var atomicEnd     = i + 1 === leapSeconds.length ? Infinity : leapSeconds[i + 1].atomic;
 		var atomicToUnix  = function(atomic) {
 			atomic -= offset;
 			// Ewww, direct float equality comparison
@@ -44,11 +41,8 @@ var _generateBlocks = function(leapSeconds) {
 			return atomic;
 		};
 
-		var unixStart     = atomicToUnix(atomicStart);
+		var unixStart     = leapSecond.unixStart || atomicToUnix(atomicStart);
 		var unixEnd       = atomicToUnix(atomicEnd);
-		var unixInBlock   = function(unix) {
-			return unixStart <= unix && unix < unixEnd;
-		};
 		var unixToAtomic  = function(unix) {
 			// Ewww, direct float equality comparison
 			if(driftRate !== 0) {
@@ -66,11 +60,9 @@ var _generateBlocks = function(leapSeconds) {
 			driftRate     : driftRate,
 			atomicStart   : atomicStart,
 			atomicEnd     : atomicEnd,
-			atomicInBlock : atomicInBlock,
 			atomicToUnix  : atomicToUnix,
 			unixStart     : unixStart,
 			unixEnd       : unixEnd,
-			unixInBlock   : unixInBlock,
 			unixToAtomic  : unixToAtomic
 		};
 	});
@@ -108,7 +100,7 @@ module.exports = function(
 			throw new Error("This Unix time falls before atomic time was defined.");
 		}
 		return blocks.filter(function(block) {
-			return block.unixInBlock(unix);
+			return block.unixStart <= unix && unix < block.unixEnd;
 		}).map(function(block) {
 			return block.unixToAtomic(unix);
 		});
@@ -126,7 +118,7 @@ module.exports = function(
 			throw new Error("This atomic time is not defined.");
 		}
 		var results = blocks.filter(function(block) {
-			return block.atomicInBlock(atomic);
+			return block.atomicStart <= atomic && atomic < block.atomicEnd;
 		}).map(function(block) {
 			return block.atomicToUnix(atomic);
 		});

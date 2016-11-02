@@ -174,7 +174,7 @@ var DECEMBER  = 11;
 	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1961, JULY  , 31, 23, 59, 59, 949)).length === 1);
 	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1961, JULY  , 31, 23, 59, 59, 950)).length === 0);
 	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1961, JULY  , 31, 23, 59, 59, 999)).length === 0);
-	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1961, AUGUST,  1,  0,  0,  0,   0)).length === 0); // Hmm, should be 1. FLOATING POINT!
+	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1961, AUGUST,  1,  0,  0,  0,   0)).length === 1);
 	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1961, AUGUST,  1,  0,  0,  0,   1)).length === 1);
 	console.log(Math.abs(tai.convert.oneToMany.atomicToUnix(Date.UTC(1961, AUGUST,  1,  0,  0,  1, 647) + 0.570) - Date.UTC(1961, AUGUST, 1, 0, 0, 0, 0)) < 0.0001);
 }
