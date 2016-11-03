@@ -4,10 +4,13 @@ var tai = require("./../src/t-a-i.js");
 
 var JANUARY   =  0;
 var FEBRUARY  =  1;
+var MARCH     =  2;
+var APRIL     =  3;
 var JULY      =  6;
 var AUGUST    =  7;
 var SEPTEMBER =  8;
 var OCTOBER   =  9;
+var NOVEMBER  = 10;
 var DECEMBER  = 11;
 
 {
@@ -158,8 +161,6 @@ var DECEMBER  = 11;
 	console.log(tai.leapSeconds.length === 41);
 }
 
-// TODO: what if the first thing that happens is that we insert 5 leap seconds?
-
 {
 	// Crazy pre-1972 nonsense
 	console.log(Math.abs(tai.unixToAtomic(Date.UTC(1962, JANUARY, 1, 0, 0, 0)) - (Date.UTC(1962, JANUARY, 1, 0, 0, 1, 845) + 0.858)) < 0.0001);
@@ -180,4 +181,58 @@ var DECEMBER  = 11;
 	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1961, AUGUST,  1,  0,  0,  0,   0)).length === 1);
 	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1961, AUGUST,  1,  0,  0,  0,   1)).length === 1);
 	console.log(Math.abs(tai.convert.oneToMany.atomicToUnix(Date.UTC(1961, AUGUST,  1,  0,  0,  1, 647) + 0.570) - Date.UTC(1961, AUGUST, 1, 0, 0, 0, 0)) < 0.0001);
+
+	// Let's check out some boundaries where the relationship between TAI and UTC changed
+	// 1 August 1961: 0.05 TAI seconds removed
+	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1961, JULY     , 31, 23, 59, 59, 950)).length === 1);
+	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1961, JULY     , 31, 23, 59, 59, 951)).length === 0);
+	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1961, JULY     , 31, 23, 59, 59, 999)).length === 0);
+	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1961, AUGUST   ,  1,  0,  0,  0,   0)).length === 1);
+
+	// 1 January 1962: Perfect continuity (although the drift rate changed)
+	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1961, DECEMBER , 31, 23, 59, 59, 999)).length === 1);
+	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1962, JANUARY  ,  1,  0,  0,  0,   0)).length === 1);
+	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1962, JANUARY  ,  1,  0,  0,  0,   1)).length === 1);
+
+	// 1 November 1963: 0.1 TAI seconds inserted
+	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1963, OCTOBER  , 30, 23, 59, 59, 999)).length === 1);
+	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1963, NOVEMBER ,  1,  0,  0,  0,   0)).length === 2);
+	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1963, NOVEMBER ,  1,  0,  0,  0,  99)).length === 2);
+	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1963, NOVEMBER ,  1,  0,  0,  0, 100)).length === 1);
+
+	// 1 January 1964: Perfect continuity (drift rate changes)
+	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1963, DECEMBER , 31, 23, 59, 59, 999)).length === 1);
+	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1964, JANUARY  ,  1,  0,  0,  0,   0)).length === 1);
+	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1964, JANUARY  ,  1,  0,  0,  0,   1)).length === 1);
+
+	// 1 April 1964: 0.1 TAI seconds inserted
+	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1964, MARCH    , 31, 23, 59, 59, 999)).length === 1);
+	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1964, APRIL    ,  1,  0,  0,  0,   0)).length === 2);
+	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1964, APRIL    ,  1,  0,  0,  0,  99)).length === 2);
+	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1964, APRIL    ,  1,  0,  0,  0, 100)).length === 1);
+
+	// etc. (various occasions when 0.1 TAI seconds were inserted)
+	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1964, SEPTEMBER,  1,  0,  0,  0,  99)).length === 2);
+	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1965, JANUARY  ,  1,  0,  0,  0,  99)).length === 2);
+	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1965, MARCH    ,  1,  0,  0,  0,  99)).length === 2);
+	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1965, JULY     ,  1,  0,  0,  0,  99)).length === 2);
+	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1965, SEPTEMBER,  1,  0,  0,  0,  99)).length === 2);
+
+	// 1 January 1966: Perfect continuity (drift rate changes)
+	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1965, DECEMBER , 31, 23, 59, 59, 999)).length === 1);
+	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1966, JANUARY  ,  1,  0,  0,  0,   0)).length === 1);
+	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1966, JANUARY  ,  1,  0,  0,  0,   1)).length === 1);
+
+	// 1 February 1968: 0.1 TAI seconds removed
+	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1968, JANUARY  , 31, 23, 59, 59, 899)).length === 1);
+	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1968, JANUARY  , 31, 23, 59, 59, 900)).length === 1);
+	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1968, JANUARY  , 31, 23, 59, 59, 901)).length === 0);
+	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1968, JANUARY  , 31, 23, 59, 59, 999)).length === 0);
+	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1968, FEBRUARY ,  1,  0,  0,  0,   0)).length === 1);
+
+	// 1 January 1972: 0.107758 TAI seconds inserted
+	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1971, DECEMBER , 31, 23, 59, 59, 999)).length === 1);
+	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1972, JANUARY  ,  1,  0,  0,  0,   0)).length === 2);
+	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1972, JANUARY  ,  1,  0,  0,  0, 107)).length === 2);
+	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1972, JANUARY  ,  1,  0,  0,  0, 108)).length === 1);
 }

@@ -22,13 +22,12 @@ var _generateBlocks = function(leapSeconds) {
 		}
 	});
 
-	var millisecondsInOneDay = 1000 * 60 * 60 * 24; // 86400000
-
 	return leapSeconds.map(function(leapSecond, i) {
 		var offset = leapSecond.offset;
 
 		// Convert UTC to TAI by multiplying by (1 + driftRate)
-		var driftRate = leapSecond.driftRate || 0.000000;
+		// Defaults to 0
+		var driftRate = leapSecond.driftRate === undefined ? 0.000000 : leapSecond.driftRate;
 
 		// Convert TAI to UTC by multiplying by (1 - undriftRate), where
 		// UDR = DR - DR^2 + DR^3 - ...
@@ -45,6 +44,9 @@ var _generateBlocks = function(leapSeconds) {
 		var atomicStart  = leapSecond.atomic;
 		var atomicEnd    = i + 1 === leapSeconds.length ? Infinity : leapSeconds[i + 1].atomic;
 		var atomicToUnix = function(atomic) {
+			if(atomic === Infinity) {
+				return Infinity;
+			}
 			atomic -= offset;
 			// Ordinarily we would now divide `atomic` by `1 + driftRate`
 			// but this number is very close to 1 so we seem to lose a little precision.
@@ -52,8 +54,9 @@ var _generateBlocks = function(leapSeconds) {
 			return atomic;
 		};
 
-		var unixStart    = leapSecond.unixStart || atomicToUnix(atomicStart);
-		var unixEnd      = atomicEnd === Infinity ? Infinity : atomicToUnix(atomicEnd);
+		// `unixStart` and `unixEnd` may optionally be pre-specified
+		var unixStart    = leapSecond.unixStart === undefined ? atomicToUnix(atomicStart) : leapSecond.unixStart;
+		var unixEnd      = leapSecond.unixEnd === undefined ? atomicToUnix(atomicEnd) : leapSecond.unixEnd;
 		var unixToAtomic = function(unix) {
 			// Ordinarily we would multiply `unix` by `1 + driftRate`
 			// but this number is very close to 1 so we could lose precision (maybe??)
