@@ -25,7 +25,7 @@ module.exports = build([
 
 		TAI - UTC = AX + B, where:
 			A is the `driftRate` in TAI milliseconds per UTC millisecond (or days per day),
-			X is the number of number of UTC days since the Unix epoch, 1970-01-01 00:00:00 UTC
+			X is the number of number of UTC milliseconds since the Unix epoch, 1970-01-01 00:00:00 UTC
 			B was the `offset` in milliseconds between TAI and UTC at that time.
 
 		Note that just because the X starts at the Unix epoch does NOT indicate that the 
