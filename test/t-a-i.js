@@ -171,8 +171,11 @@ var DECEMBER  = 11;
 	console.log(Math.abs(tai.convert.oneToMany.unixToAtomic(Date.UTC(1965, SEPTEMBER, 1, 0, 0, 0, 50))[1] - (Date.UTC(1965, SEPTEMBER, 1, 0, 0, 4, 205) + 0.058)) < 0.0001);
 
 	// Hey, what! A removed leap twentieth of a second???
+	// Well, technically, that's 1/20th of a TAI second, which is SLIGHTLY LESS than 1/20th of a UTC second
+	// Which means that 23:59:59.950 UTC *does* actually exist...
 	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1961, JULY  , 31, 23, 59, 59, 949)).length === 1);
-	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1961, JULY  , 31, 23, 59, 59, 950)).length === 0);
+	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1961, JULY  , 31, 23, 59, 59, 950)).length === 1);
+	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1961, JULY  , 31, 23, 59, 59, 951)).length === 0);
 	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1961, JULY  , 31, 23, 59, 59, 999)).length === 0);
 	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1961, AUGUST,  1,  0,  0,  0,   0)).length === 1);
 	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1961, AUGUST,  1,  0,  0,  0,   1)).length === 1);

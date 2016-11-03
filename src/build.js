@@ -25,32 +25,39 @@ var _generateBlocks = function(leapSeconds) {
 	var millisecondsInOneDay = 1000 * 60 * 60 * 24; // 86400000
 
 	return leapSeconds.map(function(leapSecond, i) {
-		var offset        = leapSecond.offset;
-		var driftRate     = leapSecond.driftRate || 0.000000;
+		var offset = leapSecond.offset;
 
-		var atomicStart   = leapSecond.atomic;
-		var atomicEnd     = i + 1 === leapSeconds.length ? Infinity : leapSeconds[i + 1].atomic;
-		var atomicToUnix  = function(atomic) {
-			atomic -= offset;
-			// Ewww, direct float equality comparison
-			if(driftRate !== 0) {
-				// Ordinarily we would now divide `atomic` by `1 + driftRate / millisecondsInOneDay`
-				// but this number is very close to 1 so we would possibly lose precision...
-				atomic = (atomic * millisecondsInOneDay) / (millisecondsInOneDay + driftRate);
+		// Convert UTC to TAI by multiplying by (1 + driftRate)
+		var driftRate = leapSecond.driftRate || 0.000000;
+
+		// Convert TAI to UTC by multiplying by (1 - undriftRate), where
+		// UDR = DR - DR^2 + DR^3 - ...
+		var undriftRate = 0, power = 1;
+		while(true) {
+			var newUndriftRate = undriftRate - Math.pow(-driftRate, power);
+			if(newUndriftRate === undriftRate) {
+				break;
 			}
+			undriftRate = newUndriftRate;
+			power++;
+		}
+
+		var atomicStart  = leapSecond.atomic;
+		var atomicEnd    = i + 1 === leapSeconds.length ? Infinity : leapSeconds[i + 1].atomic;
+		var atomicToUnix = function(atomic) {
+			atomic -= offset;
+			// Ordinarily we would now divide `atomic` by `1 + driftRate`
+			// but this number is very close to 1 so we seem to lose a little precision.
+			atomic = atomic - (atomic * undriftRate);
 			return atomic;
 		};
 
-		var unixStart     = leapSecond.unixStart || atomicToUnix(atomicStart);
-		var unixEnd       = atomicToUnix(atomicEnd);
-		var unixToAtomic  = function(unix) {
-			// Ewww, direct float equality comparison
-			if(driftRate !== 0) {
-				// Ordinarily we would multiply `unix` by `1 + driftRate / millisecondsInOneDay`
-				// but this number is very close to 1 so we could lose even more precision
-				// than I am clearly already losing
-				unix = unix + (unix * driftRate) / millisecondsInOneDay;
-			}
+		var unixStart    = leapSecond.unixStart || atomicToUnix(atomicStart);
+		var unixEnd      = atomicEnd === Infinity ? Infinity : atomicToUnix(atomicEnd);
+		var unixToAtomic = function(unix) {
+			// Ordinarily we would multiply `unix` by `1 + driftRate`
+			// but this number is very close to 1 so we could lose precision (maybe??)
+			unix = unix + (unix * driftRate);
 			unix += offset;
 			return unix;
 		};
@@ -58,6 +65,7 @@ var _generateBlocks = function(leapSeconds) {
 		return {
 			offset        : offset,
 			driftRate     : driftRate,
+			undriftRate   : undriftRate,
 			atomicStart   : atomicStart,
 			atomicEnd     : atomicEnd,
 			atomicToUnix  : atomicToUnix,
