@@ -30,7 +30,7 @@ var DECEMBER  = 11;
 		console.log(true);
 	}
 	try {
-		tai.atomicToUnix(-283996798577.182); // same
+		console.log(tai.atomicToUnix(-283996798577.182)); // same
 		console.log(false);
 	} catch(e) {
 		console.log(true);
@@ -235,4 +235,18 @@ var DECEMBER  = 11;
 	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1972, JANUARY  ,  1,  0,  0,  0,   0)).length === 2);
 	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1972, JANUARY  ,  1,  0,  0,  0, 107)).length === 2);
 	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1972, JANUARY  ,  1,  0,  0,  0, 108)).length === 1);
+
+	console.log(tai.convert.oneToMany.unixToAtomic(-265680000049.99997).length === 0); // Removed time
+	console.log(tai.convert.oneToMany.unixToAtomic(-252460800000      ).length === 1);
+	console.log(tai.convert.oneToMany.unixToAtomic(-194659199900      ).length === 1);
+	console.log(tai.convert.oneToMany.unixToAtomic(-189388800000      ).length === 1);
+	console.log(tai.convert.oneToMany.unixToAtomic(-181526399900      ).length === 1);
+	console.log(tai.convert.oneToMany.unixToAtomic(-168307199900      ).length === 1);
+	console.log(tai.convert.oneToMany.unixToAtomic(-157766399900      ).length === 1);
+	console.log(tai.convert.oneToMany.unixToAtomic(-152668799900      ).length === 1);
+	console.log(tai.convert.oneToMany.unixToAtomic(-142127999900      ).length === 1);
+	console.log(tai.convert.oneToMany.unixToAtomic(-136771199900      ).length === 1);
+	console.log(tai.convert.oneToMany.unixToAtomic(-126230400000      ).length === 1);
+	console.log(tai.convert.oneToMany.unixToAtomic(- 60480000099.99999).length === 0); // Removed time
+	console.log(tai.convert.oneToMany.unixToAtomic(  63072000107.758  ).length === 1);
 }

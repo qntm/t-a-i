@@ -6,6 +6,8 @@
 
 "use strict";
 
+var Approx = require("./approx.js");
+
 /**
 	Convert the initial parameters and the leap seconds list into a list of
 	blocks of Unix time which track exactly with atomic time.
@@ -17,8 +19,8 @@ var _generateBlocks = function(leapSeconds) {
 	}
 
 	leapSeconds.forEach(function(leapSecond, i) {
-		if(i > 0 && leapSecond.atomic <= leapSeconds[i - 1].atomic) {
-			throw new Error("Disordered leap seconds");
+		if(i + 1 < leapSeconds.length && Approx.le(leapSeconds[i + 1].atomic, leapSecond.atomic)) {
+			throw new Error("Disordered leap seconds: " + leapSecond.atomic + ", " + leapSeconds[i + 1].atomic);
 		}
 	});
 
@@ -91,12 +93,16 @@ module.exports = function(
 	var blocks = _generateBlocks(leapSeconds);
 
 	// Compute the "beginning" of atomic time. We need this so we can check it
-	var earliestAtomic = Math.min.apply(Math, blocks.map(function(block) {
+	var earliestAtomic = blocks.map(function(block) {
 		return block.atomicStart;
-	}));
-	var earliestUnix = Math.min.apply(Math, blocks.map(function(block) {
+	}).reduce(function(a, b) {
+		return Approx.lt(a, b) ? a : b;
+	});
+	var earliestUnix = blocks.map(function(block) {
 		return block.unixStart;
-	}));
+	}).reduce(function(a, b) {
+		return Approx.lt(a, b) ? a : b;
+	});
 
 	// One-to-many APIs
 
@@ -107,11 +113,11 @@ module.exports = function(
 		elements in the array. A removed leap second? No elements.
 	*/
 	var oneToMany_unixToAtomic = function(unix) {
-		if(unix < earliestUnix) {
+		if(Approx.lt(unix, earliestUnix)) {
 			throw new Error("This Unix time falls before atomic time was defined.");
 		}
 		return blocks.filter(function(block) {
-			return block.unixStart <= unix && unix < block.unixEnd;
+			return Approx.le(block.unixStart, unix) && Approx.lt(unix, block.unixEnd);
 		}).map(function(block) {
 			return block.unixToAtomic(unix);
 		});
@@ -125,11 +131,11 @@ module.exports = function(
 		If the "atomic time" falls too early, throw an exception.
 	*/
 	var oneToMany_atomicToUnix = function(atomic) {
-		if(atomic < earliestAtomic) {
+		if(Approx.lt(atomic, earliestAtomic)) {
 			throw new Error("This atomic time is not defined.");
 		}
 		var results = blocks.filter(function(block) {
-			return block.atomicStart <= atomic && atomic < block.atomicEnd;
+			return Approx.le(block.atomicStart, atomic) && Approx.lt(atomic, block.atomicEnd);
 		}).map(function(block) {
 			return block.atomicToUnix(atomic);
 		});
@@ -171,15 +177,15 @@ module.exports = function(
 	};
 
 	return {
-		leapSeconds    : leapSeconds,
-		unixToAtomic   : oneToOne_unixToAtomic,
-		atomicToUnix   : oneToMany_atomicToUnix,
-		convert        : {
-			oneToMany  : {
+		leapSeconds  : leapSeconds,
+		unixToAtomic : oneToOne_unixToAtomic,
+		atomicToUnix : oneToMany_atomicToUnix,
+		convert      : {
+			oneToMany : {
 				unixToAtomic : oneToMany_unixToAtomic,
 				atomicToUnix : oneToMany_atomicToUnix
 			},
-			oneToOne   : {
+			oneToOne  : {
 				unixToAtomic : oneToOne_unixToAtomic,
 				atomicToUnix : oneToOne_atomicToUnix
 			}
