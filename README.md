@@ -117,9 +117,11 @@ tai.convert.oneToOne.atomicToUnix(915148832000);
 
 The relationship between UTC and TAI starts at 00:00:00 UTC on 1 January 1961. The relationship has always been **[linear](https://en.wikipedia.org/wiki/Linear_function_(calculus))**, but the nature of the linear relationship has changed on various discrete occasions.
 
+Raw data is provided by USNO (ftp://maia.usno.navy.mil/ser7/tai-utc.dat) or <a href="http://hpiers.obspm.fr/eop-pc/earthor/utc/TAI-UTC_tab.html">IERS</a>.
+
 ### 1961 to 1971 inclusive
 
-When TAI was first defined ([source](ftp://maia.usno.navy.mil/ser7/tai-utc.dat)):
+When TAI was first defined:
 
 ```
 1961 JAN  1 =JD 2437300.5  TAI-UTC=   1.4228180 S + (MJD - 37300.) X 0.001296 S
@@ -217,8 +219,8 @@ A one-time calculation using the Unix epoch as our new root yields this raw data
 |                 -60480000000 | 0.000000030&nbsp;*&nbsp;Unix&nbsp;+&nbsp;8000.0820 | 0.1 TAI seconds removed from UTC                     | 
 |                  63072010000 |                                         10000.0000 | 0.107758 TAI seconds added to UTC, drift rate zeroed |
 |                  78796810000 |                                         11000.0000 | 1.0 seconds added to UTC                             |
-|                  94694410000 |                                         12000.0000 | etc.                                                 |
-|                 126230410000 |                                         13000.0000 |                                                      |
+|                  94694410000 |                                         12000.0000 | 1.0 seconds added to UTC                             |
+|                 126230410000 |                                         13000.0000 | etc.                                                 |
 |                 157766410000 |                                         14000.0000 |                                                      |
 |                 189302410000 |                                         15000.0000 |                                                      |
 |                 220924810000 |                                         16000.0000 |                                                      |
