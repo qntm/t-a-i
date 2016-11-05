@@ -249,4 +249,7 @@ var DECEMBER  = 11;
 	console.log(tai.convert.oneToMany.unixToAtomic(-126230400000      ).length === 1);
 	console.log(tai.convert.oneToMany.unixToAtomic(- 60480000099.99999).length === 0); // Removed time
 	console.log(tai.convert.oneToMany.unixToAtomic(  63072000107.758  ).length === 1);
+
+	console.log(tai.convert.oneToMany.unixToAtomic(-60480000100).length === 1);
+	console.log(tai.convert.oneToMany.unixToAtomic(Date.UTC(1968, 0, 31, 23, 59, 59, 900)).length === 1);
 }
