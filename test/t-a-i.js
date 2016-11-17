@@ -157,8 +157,6 @@ var DECEMBER  = 11;
 	} catch(e) {
 		console.log(true);
 	}
-
-	console.log(tai.leapSeconds.length === 41);
 }
 
 {

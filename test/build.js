@@ -126,8 +126,6 @@ var build = require("./../src/build.js");
 		{atomic: 9, offset: -4}  // removed leap millisecond
 	]);
 
-	console.log(a.leapSeconds.length === 3);
-
 	{
 		// convert.oneToMany.atomicToUnix
 		try {

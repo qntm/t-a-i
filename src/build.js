@@ -104,6 +104,13 @@ module.exports = function(
 		return Approx.lt(a, b) ? a : b;
 	});
 
+	var atomicTooEarly = function(atomic) {
+		return Approx.lt(atomic, earliestAtomic);
+	};
+	var unixTooEarly = function(unix) {
+		return Approx.lt(unix, earliestUnix);
+	};
+
 	// One-to-many APIs
 
 	/**
@@ -113,7 +120,7 @@ module.exports = function(
 		elements in the array. A removed leap second? No elements.
 	*/
 	var oneToMany_unixToAtomic = function(unix) {
-		if(Approx.lt(unix, earliestUnix)) {
+		if(unixTooEarly(unix)) {
 			throw new Error("This Unix time falls before atomic time was defined.");
 		}
 		return blocks.filter(function(block) {
@@ -131,7 +138,7 @@ module.exports = function(
 		If the "atomic time" falls too early, throw an exception.
 	*/
 	var oneToMany_atomicToUnix = function(atomic) {
-		if(Approx.lt(atomic, earliestAtomic)) {
+		if(atomicTooEarly(atomic)) {
 			throw new Error("This atomic time is not defined.");
 		}
 		var results = blocks.filter(function(block) {
@@ -177,10 +184,11 @@ module.exports = function(
 	};
 
 	return {
-		leapSeconds  : leapSeconds,
-		unixToAtomic : oneToOne_unixToAtomic,
-		atomicToUnix : oneToMany_atomicToUnix,
-		convert      : {
+		atomicTooEarly : atomicTooEarly,
+		unixTooEarly   : unixTooEarly,
+		unixToAtomic   : oneToOne_unixToAtomic,
+		atomicToUnix   : oneToMany_atomicToUnix,
+		convert        : {
 			oneToMany : {
 				unixToAtomic : oneToMany_unixToAtomic,
 				atomicToUnix : oneToMany_atomicToUnix
