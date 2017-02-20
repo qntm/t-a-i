@@ -4,9 +4,13 @@ Introduces [International Atomic Time (TAI)](https://en.wikipedia.org/wiki/Inter
 
 **Unix time** tracks the number of elapsed UTC milliseconds since 1970-01-01 00:00:00 UTC, excluding [leap seconds](https://en.wikipedia.org/wiki/Leap_second). (Unix time can equally well be measured in seconds, but here we use milliseconds because this is how a JavaScript `Date` object works.)
 
-**TAI milliseconds** tracks the number of elapsed TAI milliseconds since 1970-01-01 00:00:00 TAI. TAI does not have leap seconds.
+Because Unix time ignores leap seconds, it is not generally possible to determine the *true* amount of elapsed time between any two Unix timestamps by simply subtracting one from the other. Equally, it is not safe to add or subtract time intervals to Unix timestamps and expect to receive a new Unix timestamp which is separated from the first Unix timestamp by that interval. Results will be wrong by the number of leap seconds in the interval, which depends on when the interval started and ended.
 
-Instants in Unix time and instants in TAI are in a *one-to-many relationship*. During an inserted leap second, one Unix time corresponds to multiple instants in TAI. During a removed leap second, a Unix time may have no TAI equivalent. Using `t-a-i`, you can get an array of all of the possibilities, or you can get a single "canonical" result.
+**TAI milliseconds** tracks the number of elapsed TAI milliseconds since 1970-01-01 00:00:00 TAI. TAI does not have leap seconds. All of the above problems are easily solved as follows:
+
+1. Convert your Unix milliseconds to TAI milliseconds.
+2. Perform your arithmetic.
+3. Convert the TAI results back to Unix time.
 
 The relationship between TAI and UTC is well-defined as far back as 1 January 1961. Prior to 1 January 1972, the relationship was quite complex: TAI seconds were not the same length as UTC seconds; time was inserted in fractions of TAI seconds; time was sometimes removed; time was modified at the beginning of any month, not just January or July. `t-a-i` handles all of these conversions correctly and returns results accurate to at least the millisecond.
 
@@ -16,20 +20,32 @@ The relationship between TAI and UTC is well-defined as far back as 1 January 19
 npm install t-a-i
 ```
 
-## Usage
+## Examples
+
+Exactly how long was 1972?
 
 ```javascript
 var tai = require("t-a-i");
 
-var unix   = 915148799000; // 1998-12-31 23:59:59 UTC
-var atomic = 915148830000; // 1999-01-01 00:00:30 TAI
+var unixStart = Date.UTC(1972, 0, 1); // 63072000000
+var unixEnd   = Date.UTC(1973, 0, 1); // 94694400000
 
-tai.unixToAtomic(unix);   // 915148830000
-tai.atomicToUnix(atomic); // 915148799000
+console.log(end - start);
+// 31622400000 milliseconds - wrong answer!
 
+var taiStart = tai.unixToAtomic(unixStart); // 63072010000
+var taiEnd   = tai.unixToAtomic(unixEnd);   // 94694412000
+
+console.log(taiEnd - taiStart);
+// 31622402000 milliseconds - right, including two leap seconds!
+```
+
+What is the current offset between TAI and Unix time?
+
+```
 var now = Date.now();
 var offset = tai.unixToAtomic(now) - now;
-// 36000 at the time of writing; TAI is 36 seconds ahead of Unix
+// 37000 at the time of writing; TAI is 37 seconds ahead of Unix time
 ```
 
 Note! Use caution when constructing a `Date` object directly from a TAI millisecond count. A `Date` represents an instant in Unix time, not an instant in TAI, and the object's method names and method behaviours reflect this. Instead, consider using a [`TaiDate`](https://github.com/ferno/tai-date)!
@@ -84,7 +100,7 @@ tai.convert.oneToMany.atomicToUnix(atomic2);
 
 ### tai.convert.oneToOne
 
-These methods treat the relationship between Unix time and TAI as one-to-one. Ambiguity is not tolerated.
+These methods treat the relationship between Unix time and TAI as one-to-one. Ambiguity is not tolerated. Round trips always work.
 
 ### tai.convert.oneToOne.unixToAtomic(unix)
 Convert a number of Unix milliseconds to a number of TAI milliseconds. If the Unix time falls on an inserted leap second, it corresponds to *two* TAI instants, so we return the later ("canonical") of the two. If the Unix time falls on a removed leap second, we throw an exception.
