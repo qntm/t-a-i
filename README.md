@@ -42,7 +42,7 @@ console.log(taiEnd - taiStart);
 
 What is the current offset between TAI and Unix time?
 
-```
+```javascript
 var now = Date.now();
 var offset = tai.unixToAtomic(now) - now;
 // 37000 at the time of writing; TAI is 37 seconds ahead of Unix time
