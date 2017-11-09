@@ -178,7 +178,7 @@ module.exports = function(
 	var oneToOne_atomicToUnix = function(atomic) {
 		var unix = oneToMany_atomicToUnix(atomic);
 		if(oneToOne_unixToAtomic(unix) !== atomic) {
-			throw new Error("This atomic time cannot be represeted in Unix time; it falls during an inserted leap second.");
+			throw new Error("This atomic time cannot be represented in Unix time; it falls during an inserted leap second.");
 		}
 		return unix;
 	};
