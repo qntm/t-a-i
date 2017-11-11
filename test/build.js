@@ -1,288 +1,241 @@
-"use strict";
+'use strict'
 
-var build = require("./../src/build.js");
+/* eslint-env jasmine */
 
-{
-	// _generateBlocks
+const build = require('./../src/build.js')
 
-	// Must have at least one block
-	try {
-		build._generateBlocks([]);
-		console.log(false);
-	} catch(e) {
-		console.log(true);
-	}
+describe('build', () => {
+  describe('_generateBlocks', () => {
+    const generateBlocks = arg => {
+      const results = build._generateBlocks(arg)
+      results.forEach(result => {
+        delete result.unixToAtomic
+        delete result.atomicToUnix
+      })
+      return results
+    }
 
-	// Got to put those leap seconds in the right order
-	try {
-		build._generateBlocks([
-			{atomic: 0, offset:  0},
-			{atomic: 3, offset: -1},
-			{atomic: 2, offset:  1}
-		]);
-		console.log(false);
-	} catch(e) {
-		console.log(true);
-	}
+    it('must have at least one block', () => {
+      expect(() => generateBlocks([])).toThrow()
+    })
 
-	try {
-		build._generateBlocks([
-			{atomic: 0, offset:  0},
-			{atomic: 3, offset: -1},
-			{atomic: 3, offset: -2}
-		]);
-		console.log(false);
-	} catch(e) {
-		console.log(true);
-	}
+    it('must have the leap seconds in the right order', () => {
+      expect(() => generateBlocks([
+        {atomic: 0, offset: 0},
+        {atomic: 3, offset: -1},
+        {atomic: 2, offset: 1}
+      ])).toThrow()
 
-	{
-		var blocks = build._generateBlocks([
-			{atomic: 0, offset: 0}
-		]);
-		console.log(blocks.length === 1);
-		console.log(blocks[0].offset === 0);
-		console.log(blocks[0].unixStart === 0);
-		console.log(blocks[0].unixEnd === Infinity);
-		console.log(blocks[0].atomicStart === 0);
-		console.log(blocks[0].atomicEnd === Infinity);
-	}
+      expect(() => generateBlocks([
+        {atomic: 0, offset: 0},
+        {atomic: 3, offset: -1},
+        {atomic: 3, offset: -2}
+      ])).toThrow()
+    })
 
-	{
-		var blocks2 = build._generateBlocks([
-			{atomic: 7, offset: 0}
-		]);
-		console.log(blocks2.length === 1);
-		console.log(blocks2[0].offset === 0);
-		console.log(blocks2[0].unixStart === 7);
-		console.log(blocks2[0].unixEnd === Infinity);
-		console.log(blocks2[0].atomicStart === 7);
-		console.log(blocks2[0].atomicEnd === Infinity);
-	}
+    it('works', () => {
+      expect(generateBlocks([
+        {atomic: 0, offset: 0}
+      ])).toEqual([{
+        offset: 0,
+        unixStart: 0,
+        unixEnd: Infinity,
+        atomicStart: 0,
+        atomicEnd: Infinity,
+        driftRate: 0,
+        undriftRate: 0
+      }])
 
-	{
-		var blocks3 = build._generateBlocks([
-			{atomic: 0, offset: -4}
-		]);
-		console.log(blocks3.length === 1);
-		console.log(blocks3[0].offset === -4);
-		console.log(blocks3[0].atomicStart === 0);
-		console.log(blocks3[0].atomicEnd === Infinity);
-		console.log(blocks3[0].unixStart === 4);
-		console.log(blocks3[0].unixEnd === Infinity);
-	}
+      expect(generateBlocks([
+        {atomic: 7, offset: 0}
+      ])).toEqual([{
+        offset: 0,
+        unixStart: 7,
+        unixEnd: Infinity,
+        atomicStart: 7,
+        atomicEnd: Infinity,
+        driftRate: 0,
+        undriftRate: 0
+      }])
 
-	{
-		var blocks4 = build._generateBlocks([
-			{atomic: 7, offset: -4}
-		]);
-		console.log(blocks4.length === 1);
-		console.log(blocks4[0].offset === -4);
-		console.log(blocks4[0].unixStart === 11);
-		console.log(blocks4[0].unixEnd === Infinity);
-		console.log(blocks4[0].atomicStart === 7);
-		console.log(blocks4[0].atomicEnd === Infinity);
-	}
+      expect(generateBlocks([
+        {atomic: 0, offset: -4}
+      ])).toEqual([{
+        offset: -4,
+        atomicStart: 0,
+        atomicEnd: Infinity,
+        unixStart: 4,
+        unixEnd: Infinity,
+        driftRate: 0,
+        undriftRate: 0
+      }])
 
-	{
-		//                  inserted       removed
-		//                       \/         \/
-		// TAI:          [3][4][5][6][ 7][ 8][ 9][...]
-		// Unix: [...][6][7][8][9][9][10][11][13][...]
-		var blocks5 = build._generateBlocks([
-			{atomic: 3, offset: -4},
-			{atomic: 6, offset: -3}, // inserted leap millisecond
-			{atomic: 9, offset: -4}  // removed leap millisecond
-		]);
-		console.log(blocks5.length === 3);
-		console.log(blocks5[0].offset === -4);
-		console.log(blocks5[0].atomicStart === 3);
-		console.log(blocks5[0].atomicEnd === 6);
-		console.log(blocks5[0].unixStart === 7);
-		console.log(blocks5[0].unixEnd === 10);
-		console.log(blocks5[1].offset === -3);
-		console.log(blocks5[1].atomicStart === 6);
-		console.log(blocks5[1].atomicEnd === 9);
-		console.log(blocks5[1].unixStart === 9);
-		console.log(blocks5[1].unixEnd === 12);
-		console.log(blocks5[2].offset === -4);
-		console.log(blocks5[2].atomicStart === 9);
-		console.log(blocks5[2].atomicEnd === Infinity);
-		console.log(blocks5[2].unixStart === 13);
-		console.log(blocks5[2].unixEnd === Infinity);
-	}
-}
+      expect(generateBlocks([
+        {atomic: 7, offset: -4}
+      ])).toEqual([{
+        offset: -4,
+        unixStart: 11,
+        unixEnd: Infinity,
+        atomicStart: 7,
+        atomicEnd: Infinity,
+        driftRate: 0,
+        undriftRate: 0
+      }])
 
-{
-	// build
+      //                  inserted       removed
+      //                       \/         \/
+      // TAI:          [3][4][5][6][ 7][ 8][ 9][...]
+      // Unix: [...][6][7][8][9][9][10][11][13][...]
+      expect(generateBlocks([
+        {atomic: 3, offset: -4},
+        {atomic: 6, offset: -3}, // inserted leap millisecond
+        {atomic: 9, offset: -4}  // removed leap millisecond
+      ])).toEqual([{
+        offset: -4,
+        atomicStart: 3,
+        atomicEnd: 6,
+        unixStart: 7,
+        unixEnd: 10,
+        driftRate: 0,
+        undriftRate: 0
+      }, {
+        offset: -3,
+        atomicStart: 6,
+        atomicEnd: 9,
+        unixStart: 9,
+        unixEnd: 12,
+        driftRate: 0,
+        undriftRate: 0
+      }, {
+        offset: -4,
+        atomicStart: 9,
+        atomicEnd: Infinity,
+        unixStart: 13,
+        unixEnd: Infinity,
+        driftRate: 0,
+        undriftRate: 0
+      }])
+    })
+  })
 
-	//                  inserted       removed
-	//                       \/         \/
-	// TAI:          [3][4][5][6][ 7][ 8][ 9][...]
-	// Unix: [...][6][7][8][9][9][10][11][13][...]
-	var a = build([
-		{atomic: 3, offset: -4},
-		{atomic: 6, offset: -3}, // inserted leap millisecond
-		{atomic: 9, offset: -4}  // removed leap millisecond
-	]);
+  describe('a', () => {
+    //                  inserted       removed
+    //                       \/         \/
+    // TAI:          [3][4][5][6][ 7][ 8][ 9][...]
+    // Unix: [...][6][7][8][9][9][10][11][13][...]
+    const a = build([
+      {atomic: 3, offset: -4},
+      {atomic: 6, offset: -3}, // inserted leap millisecond
+      {atomic: 9, offset: -4}  // removed leap millisecond
+    ])
 
-	{
-		// convert.oneToMany.atomicToUnix
-		try {
-			a.convert.oneToMany.atomicToUnix(2);
-			console.log(false);
-		} catch(e) {
-			console.log(true);
-		}
-		console.log(a.convert.oneToMany.atomicToUnix(3) === 7);
-		console.log(a.convert.oneToMany.atomicToUnix(4) === 8);
-		console.log(a.convert.oneToMany.atomicToUnix(5) === 9);
-		console.log(a.convert.oneToMany.atomicToUnix(6) === 9);
-		console.log(a.convert.oneToMany.atomicToUnix(7) === 10);
-		console.log(a.convert.oneToMany.atomicToUnix(8) === 11);
-		// no way to get 12
-		console.log(a.convert.oneToMany.atomicToUnix(9) === 13);
+    describe('convert.oneToMany.atomicToUnix', () => {
+      it('works', () => {
+        expect(() => a.convert.oneToMany.atomicToUnix(2)).toThrow()
+        expect(a.convert.oneToMany.atomicToUnix(3)).toBe(7)
+        expect(a.convert.oneToMany.atomicToUnix(4)).toBe(8)
+        expect(a.convert.oneToMany.atomicToUnix(5)).toBe(9)
+        expect(a.convert.oneToMany.atomicToUnix(6)).toBe(9)
+        expect(a.convert.oneToMany.atomicToUnix(7)).toBe(10)
+        expect(a.convert.oneToMany.atomicToUnix(8)).toBe(11)
+        // no way to get 12
+        expect(a.convert.oneToMany.atomicToUnix(9)).toBe(13)
+      })
+    })
 
-		// = atomicToUnix
-		try {
-			a.atomicToUnix(2);
-			console.log(false);
-		} catch(e) {
-			console.log(true);
-		}
-		console.log(a.atomicToUnix(3) === 7);
-		console.log(a.atomicToUnix(4) === 8);
-		console.log(a.atomicToUnix(5) === 9);
-		console.log(a.atomicToUnix(6) === 9);
-		console.log(a.atomicToUnix(7) === 10);
-		console.log(a.atomicToUnix(8) === 11);
-		// no way to get 12
-		console.log(a.atomicToUnix(9) === 13);
-	}
+    describe('atomicToUnix', () => {
+      it('works', () => {
+        expect(() => a.atomicToUnix(2)).toThrow()
+        expect(a.atomicToUnix(3)).toBe(7)
+        expect(a.atomicToUnix(4)).toBe(8)
+        expect(a.atomicToUnix(5)).toBe(9)
+        expect(a.atomicToUnix(6)).toBe(9)
+        expect(a.atomicToUnix(7)).toBe(10)
+        expect(a.atomicToUnix(8)).toBe(11)
+        // no way to get 12
+        expect(a.atomicToUnix(9)).toBe(13)
+      })
+    })
 
-	{
-		// convert.oneToOne.atomicToUnix
-		try {
-			a.convert.oneToOne.atomicToUnix(2);
-			console.log(false);
-		} catch(e) {
-			console.log(true);
-		}
+    describe('convert.oneToOne.atomicToUnix', () => {
+      it('fails somewhere', () => {
+        expect(() => a.convert.oneToOne.atomicToUnix(2)).toThrow()
+      })
 
-		// bug
-		console.log(a.convert.oneToMany.unixToAtomic(7).length === 1);
-		console.log(a.convert.oneToMany.unixToAtomic(7)[0] === 3);
-		console.log(!isNaN(a.convert.oneToOne.unixToAtomic(7)));
+      it('works', () => {
+        expect(a.convert.oneToOne.atomicToUnix(3)).toBe(7)
+        expect(a.convert.oneToOne.atomicToUnix(4)).toBe(8)
+        expect(() => a.convert.oneToOne.atomicToUnix(5)).toThrow()
+        expect(a.convert.oneToOne.atomicToUnix(6)).toBe(9)
+        expect(a.convert.oneToOne.atomicToUnix(7)).toBe(10)
+        expect(a.convert.oneToOne.atomicToUnix(8)).toBe(11)
+        // no way to get 12
+        expect(a.convert.oneToOne.atomicToUnix(9)).toBe(13)
+      })
+    })
 
-		console.log(a.convert.oneToOne.atomicToUnix(3) === 7);
-		console.log(a.convert.oneToOne.atomicToUnix(4) === 8);
-		try {
-			a.convert.oneToOne.atomicToUnix(5);
-			console.log(false);
-		} catch(e) {
-			console.log(true);
-		}
-		console.log(a.convert.oneToOne.atomicToUnix(6) === 9);
-		console.log(a.convert.oneToOne.atomicToUnix(7) === 10);
-		console.log(a.convert.oneToOne.atomicToUnix(8) === 11);
-		// no way to get 12
-		console.log(a.convert.oneToOne.atomicToUnix(9) === 13);
-	}
+    describe('convert.oneToMany.unixToAtomic', () => {
+      it('works', () => {
+        expect(() => a.convert.oneToMany.unixToAtomic(6)).toThrow()
+        expect(a.convert.oneToMany.unixToAtomic(7)).toEqual([3])
+        expect(a.convert.oneToMany.unixToAtomic(8)).toEqual([4])
+        // No way to get 5
+        expect(a.convert.oneToMany.unixToAtomic(9)).toEqual([5, 6])
+        expect(a.convert.oneToMany.unixToAtomic(10)).toEqual([7])
+        expect(a.convert.oneToMany.unixToAtomic(11)).toEqual([8])
+        expect(a.convert.oneToMany.unixToAtomic(12)).toEqual([])
+        expect(a.convert.oneToMany.unixToAtomic(13)).toEqual([9])
+      })
+    })
 
-	{
-		// convert.oneToMany.unixToAtomic
-		try {
-			a.convert.oneToMany.unixToAtomic(6);
-			console.log(false);
-		} catch(e) {
-			console.log(true);
-		}
-		console.log(a.convert.oneToMany.unixToAtomic(7).length === 1);
-		console.log(a.convert.oneToMany.unixToAtomic(7)[0] === 3);
-		console.log(a.convert.oneToMany.unixToAtomic(8).length === 1);
-		console.log(a.convert.oneToMany.unixToAtomic(8)[0] === 4);
-		// No way to get 5
-		console.log(a.convert.oneToMany.unixToAtomic(9).length === 2);
-		console.log(a.convert.oneToMany.unixToAtomic(9)[0] === 5);
-		console.log(a.convert.oneToMany.unixToAtomic(9)[1] === 6);
-		console.log(a.convert.oneToMany.unixToAtomic(10).length === 1);
-		console.log(a.convert.oneToMany.unixToAtomic(10)[0] === 7);
-		console.log(a.convert.oneToMany.unixToAtomic(11).length === 1);
-		console.log(a.convert.oneToMany.unixToAtomic(11)[0] === 8);
-		console.log(a.convert.oneToMany.unixToAtomic(12).length === 0);
-		console.log(a.convert.oneToMany.unixToAtomic(13).length === 1);
-		console.log(a.convert.oneToMany.unixToAtomic(13)[0] === 9);
-	}
+    describe('convert.oneToOne.unixToAtomic', () => {
+      it('works', () => {
+        expect(() => a.convert.oneToOne.unixToAtomic(6)).toThrow()
+        expect(a.convert.oneToOne.unixToAtomic(7)).toBe(3)
+        expect(a.convert.oneToOne.unixToAtomic(8)).toBe(4)
+        // No way to get 5
+        expect(a.convert.oneToOne.unixToAtomic(9)).toBe(6)
+        expect(a.convert.oneToOne.unixToAtomic(10)).toBe(7)
+        expect(a.convert.oneToOne.unixToAtomic(11)).toBe(8)
+        expect(() => a.convert.oneToOne.unixToAtomic(12)).toThrow()
+        expect(a.convert.oneToOne.unixToAtomic(13)).toBe(9)
+      })
+    })
 
-	//                  inserted       removed
-	//                       \/         \/
-	// TAI:          [3][4][5][6][ 7][ 8][ 9][...]
-	// Unix: [...][6][7][8][9][9][10][11][13][...]
+    describe('unixToAtomic', () => {
+      it('works', () => {
+        expect(() => a.unixToAtomic(6)).toThrow()
+        expect(a.unixToAtomic(7)).toBe(3)
+        expect(a.unixToAtomic(8)).toBe(4)
+        // No way to get 5
+        expect(a.unixToAtomic(9)).toBe(6)
+        expect(a.unixToAtomic(10)).toBe(7)
+        expect(a.unixToAtomic(11)).toBe(8)
+        expect(() => a.unixToAtomic(12)).toThrow()
+        expect(a.unixToAtomic(13)).toBe(9)
+      })
+    })
 
-	{
-		// convert.oneToOne.unixToAtomic
-		try {
-			a.convert.oneToOne.unixToAtomic(6);
-			console.log(false);
-		} catch(e) {
-			console.log(true);
-		}
-		console.log(a.convert.oneToOne.unixToAtomic(7) === 3);
-		console.log(a.convert.oneToOne.unixToAtomic(8) === 4);
-		// No way to get 5
-		console.log(a.convert.oneToOne.unixToAtomic(9) === 6);
-		console.log(a.convert.oneToOne.unixToAtomic(10) === 7);
-		console.log(a.convert.oneToOne.unixToAtomic(11) === 8);
-		try {
-			a.convert.oneToOne.unixToAtomic(12);
-		} catch(e) {
-			console.log(true);
-		}
-		console.log(a.convert.oneToOne.unixToAtomic(13) === 9);
+    it('has a bug fixed', () => {
+      expect(a.convert.oneToMany.unixToAtomic(7)).toEqual([3])
+      expect(isNaN(a.convert.oneToOne.unixToAtomic(7))).toBe(false)
+    })
+  })
 
-		// = unixToAtomic
-		try {
-			a.unixToAtomic(6);
-			console.log(false);
-		} catch(e) {
-			console.log(true);
-		}
-		console.log(a.unixToAtomic(7) === 3);
-		console.log(a.unixToAtomic(8) === 4);
-		// No way to get 5
-		console.log(a.unixToAtomic(9) === 6);
-		console.log(a.unixToAtomic(10) === 7);
-		console.log(a.unixToAtomic(11) === 8);
-		try {
-			a.unixToAtomic(12);
-		} catch(e) {
-			console.log(true);
-		}
-		console.log(a.unixToAtomic(13) === 9);
-	}
-}
+  it('weird example with two removed leap seconds in succession', () => {
+    expect(() => build([
+      {atomic: 0, offset: 0},
+      {atomic: 3, offset: -1},
+      {atomic: 3, offset: -1}
+    ])).toThrow()
+  })
 
-{
-	// Weird example with two removed leap seconds in succession
-	try {
-		build([
-			{atomic: 0, offset:  0},
-			{atomic: 3, offset: -1},
-			{atomic: 3, offset: -1}
-		]);
-	} catch(e) {
-		console.log(true);
-	}
+  it('bizarre example where the first offset sets Unix back before the beginning of TAI', () => {
+    expect(() => build([
+      {atomic: 0, offset: 0},
+      {atomic: 3, offset: -5}
+    ])).not.toThrow()
+  })
 
-	// Bizarre example where the first offset sets Unix back before the beginning of TAI
-	try {
-		build([
-			{atomic: 0, offset:  0},
-			{atomic: 3, offset: -5}
-		]);
-	} catch(e) {
-		console.log(true);
-	}
-}
-
-// TODO: what if the first thing that happens is that we insert 5 leap seconds?
+  // TODO: what if the first thing that happens is that we insert 5 leap seconds?
+})
