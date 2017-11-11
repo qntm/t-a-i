@@ -56,7 +56,7 @@ Note! Use caution when constructing a `Date` object directly from a TAI millisec
 Shorthand for `tai.convert.oneToOne.unixToAtomic(unix)`.
 
 ### tai.atomicToUnix(atomic)
-Shorthand for `tai.convert.manyToOne.atomicToUnix(atomic)`.
+Shorthand for `tai.convert.oneToMany.atomicToUnix(atomic)`.
 
 ### tai.convert
 
