@@ -63,7 +63,7 @@ describe('TAI round trips', () => {
       94694412000
     ]
     numbers.forEach(number => {
-      it(number, () => {
+      it(String(number), () => {
         expect(tai.convert.oneToOne.atomicToUnix(tai.convert.oneToOne.unixToAtomic(number))).toBe(number)
       })
     })
@@ -136,7 +136,7 @@ describe('TAI round trips', () => {
       94694412000
     ]
     numbers.forEach(number => {
-      it(number, () => {
+      it(String(number), () => {
         expect(tai.convert.oneToOne.unixToAtomic(tai.convert.oneToOne.atomicToUnix(number))).toBe(number)
       })
     })
