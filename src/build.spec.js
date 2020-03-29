@@ -1,6 +1,6 @@
 'use strict'
 
-/* eslint-env jasmine */
+/* eslint-env jest */
 
 const build = require('./../src/build.js')
 

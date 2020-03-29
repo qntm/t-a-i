@@ -24,9 +24,9 @@
   cannot exactly represent the beginning of any period prior to 1972. Instead we use the
   smallest float which is a member of this period.
 
-  The same is true of `unixStart` and `unixEnd`. Ordinarily we would use a calculation
-  to determine `unixStart` and `unixEnd`, but since this yields very slight floating
-  point errors it is safer to give these explicitly. `unixStart` is the smallest Unix time
+  The same is true of `unixStartPicos` and `unixEnd`. Ordinarily we would use a calculation
+  to determine `unixStartPicos` and `unixEnd`, but since this yields very slight floating
+  point errors it is safer to give these explicitly. `unixStartPicos` is the smallest Unix time
   which is a member of the block. `unixEnd` is the smallest Unix time which is AFTER the end
   of it.
 */
@@ -34,24 +34,27 @@
 'use strict'
 
 module.exports = [{
+  blockStart_date: new Date(1961, 0 /* January */, 1),
+  blockRoot_mjd: 37300n,
+  offsetAtBlockRoot_picos: 1422818000000n,
+  driftRate_taiPicosPerUnixDay: 1296000000n
+
   // 1961-01-01 00:00:01.422818
   // -283996798577.1820
-  atomic: -283996798577.18194580078125,
+  // atomic: -283996798_577182000000n,
 
-  // 1961-01-01 00:00:00
-  unixStart: -283996800000,
 
   // 1961-07-31 23:59:59.950000749999988750000168749997468750038
-  unixEnd: -265680000049.999969482421875,
-  offset: 5682.77,
-  driftRate: 0.000000015
-}, {
+  // unixEnd: -265680000049.999969482421875,
+  // offsetAtUnixEpoch: 5682.77,
+  // driftRate: 15_000n // ps per s
+}/*, {
   // 1961-08-01 00:00:01.64757
   // -265679998352.4300
   atomic: -265679998352.42999267578125,
 
   // 1961-08-01 00:00:00
-  unixStart: -265680000000,
+  unixStartPicos: -265680000000,
 
   // 1962-01-01 00:00:00
   unixEnd: -252460800000,
@@ -63,7 +66,7 @@ module.exports = [{
   atomic: -252460798154.141998291015625,
 
   // 1962-01-01 00:00:00
-  unixStart: -252460800000,
+  unixStartPicos: -252460800000,
 
   // 1963-11-01 00:00:00.09999999870000001689999978030000285609996
   unixEnd: -194659199900,
@@ -75,7 +78,7 @@ module.exports = [{
   atomic: -194659197302.72119140625,
 
   // 1963-11-01 00:00:00
-  unixStart: -194659200000,
+  unixStartPicos: -194659200000,
 
   // 1964-01-01 00:00:00
   unixEnd: -189388800000,
@@ -87,7 +90,7 @@ module.exports = [{
   atomic: -189388797234.20599365234375,
 
   // 1964-01-01 00:00:00
-  unixStart: -189388800000,
+  unixStartPicos: -189388800000,
 
   // 1964-04-01 00:00:00.099999998500000022499999662500005062499924
   unixEnd: -181526399900,
@@ -99,7 +102,7 @@ module.exports = [{
   atomic: -181526397016.269989013671875,
 
   // 1964-04-01 00:00:00
-  unixStart: -181526400000,
+  unixStartPicos: -181526400000,
 
   // 1964-09-01 00:00:00.099999998500000022499999662500005062499924
   unixEnd: -168307199900,
@@ -111,7 +114,7 @@ module.exports = [{
   atomic: -168307196717.98199462890625,
 
   // 1964-09-01 00:00:00
-  unixStart: -168307200000,
+  unixStartPicos: -168307200000,
 
   // 1965-01-01 00:00:00.099999998500000022499999662500005062499924
   unixEnd: -157766399900,
@@ -123,7 +126,7 @@ module.exports = [{
   atomic: -157766396459.8699951171875,
 
   // 1965-01-01 00:00:00
-  unixStart: -157766400000,
+  unixStartPicos: -157766400000,
 
   // 1965-03-01 00:00:00.099999998500000022499999662500005062499924
   unixEnd: -152668799900,
@@ -135,7 +138,7 @@ module.exports = [{
   atomic: -152668796283.405975341796875,
 
   // 1965-03-01 00:00:00
-  unixStart: -152668800000,
+  unixStartPicos: -152668800000,
 
   // 1965-07-01 00:00:00.099999998500000022499999662500005062499924
   unixEnd: -142127999900,
@@ -147,7 +150,7 @@ module.exports = [{
   atomic: -142127996025.293975830078125,
 
   // 1965-07-01 00:00:00
-  unixStart: -142128000000,
+  unixStartPicos: -142128000000,
 
   // 1965-09-01 00:00:00.099999998500000022499999662500005062499924
   unixEnd: -136771199900,
@@ -159,7 +162,7 @@ module.exports = [{
   atomic: -136771195844.941986083984375,
 
   // 1965-09-01 00:00:00
-  unixStart: -136771200000,
+  unixStartPicos: -136771200000,
 
   // 1966-01-01 00:00:00
   unixEnd: -126230400000,
@@ -171,7 +174,7 @@ module.exports = [{
   atomic: -126230395686.829986572265625,
 
   // 1966-01-01 00:00:00
-  unixStart: -126230400000,
+  unixStartPicos: -126230400000,
 
   // 1968-01-31 23:59:59.90000000299999991000000269999991900000243
   unixEnd: -60480000099.99999237060546875,
@@ -183,7 +186,7 @@ module.exports = [{
   atomic: -60479993814.3179931640625,
 
   // 1968-02-01 00:00:00
-  unixStart: -60480000000,
+  unixStartPicos: -60480000000,
 
   // 1972-01-01 00:00:00.107757996767260096982197090534087283977381
   unixEnd: 63072000107.75800323486328125,
@@ -301,4 +304,4 @@ module.exports = [{
   // 2017-01-01 00:00:37
   atomic: 1483228837000,
   offset: 37000
-}]
+}*/]

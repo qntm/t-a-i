@@ -1,6 +1,6 @@
 'use strict'
 
-/* eslint-env jasmine */
+/* eslint-env jest */
 const tai = require('../src/t-a-i.js')
 
 describe('TAI round trips', () => {

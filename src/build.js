@@ -91,6 +91,10 @@ module.exports = leapSeconds => {
     removed leap second), throws an exception.
   */
   const oneToOneUnixToAtomic = unix => {
+    if (!Number.isInteger(unix)) {
+      throw Error(`Not an integer: ${unix}`)
+    }
+
     const many = oneToManyUnixToAtomic(unix)
     if (many.length === 0) {
       throw new Error('This Unix time never happened; it falls during a removed leap second.')
