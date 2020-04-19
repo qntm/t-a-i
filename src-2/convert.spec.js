@@ -4,9 +4,6 @@ const data = require('./data')
 const JAN = 0
 const DEC = 11
 
-const millis = (year, month, day, hours = 0, minutes = 0, seconds = 0, millis = 0) =>
-  BigInt(Date.UTC(year, month, day, hours, minutes, seconds, millis))
-
 const picos = (year, month, day, hours, minutes, seconds, millis, micros = 0n, nanos = 0n, picos = 0n) =>
   [Date.UTC(year, month, day, hours, minutes, seconds, millis), micros, nanos, picos]
     .reduce((acc, value) => acc * 1000n + BigInt(value), 0n)
@@ -16,54 +13,54 @@ describe('convert', () => {
 
   describe('unixMillisToAtomicPicosArray', () => {
     it('starts TAI at 1961-01-01 00:00:01.422818', () => {
-      expect(taiConvert.unixMillisToAtomicPicosArray(millis(1961, JAN, 1, 0, 0, 0, 0)))
+      expect(taiConvert.unixMillisToAtomicPicosArray(Date.UTC(1961, JAN, 1, 0, 0, 0, 0)))
         .toEqual([picos(1961, JAN, 1, 0, 0, 1, 422, 818, 0, 0)])
     })
 
     it('advances 15 TAI picoseconds per Unix millisecond', () => {
-      expect(taiConvert.unixMillisToAtomicPicosArray(millis(1961, JAN, 1, 0, 0, 0, 1)))
+      expect(taiConvert.unixMillisToAtomicPicosArray(Date.UTC(1961, JAN, 1, 0, 0, 0, 1)))
         .toEqual([picos(1961, JAN, 1, 0, 0, 1, 423, 818, 0, 15)])
-      expect(taiConvert.unixMillisToAtomicPicosArray(millis(1961, JAN, 1, 0, 0, 0, 2)))
+      expect(taiConvert.unixMillisToAtomicPicosArray(Date.UTC(1961, JAN, 1, 0, 0, 0, 2)))
         .toEqual([picos(1961, JAN, 1, 0, 0, 1, 424, 818, 0, 30)])
-      expect(taiConvert.unixMillisToAtomicPicosArray(millis(1961, JAN, 1, 0, 0, 0, 3)))
+      expect(taiConvert.unixMillisToAtomicPicosArray(Date.UTC(1961, JAN, 1, 0, 0, 0, 3)))
         .toEqual([picos(1961, JAN, 1, 0, 0, 1, 425, 818, 0, 45)])
     })
 
     it('advances 0.001296 TAI seconds per Unix day', () => {
-      expect(taiConvert.unixMillisToAtomicPicosArray(millis(1961, JAN, 2, 0, 0, 0, 0)))
+      expect(taiConvert.unixMillisToAtomicPicosArray(Date.UTC(1961, JAN, 2, 0, 0, 0, 0)))
         .toEqual([picos(1961, JAN, 2, 0, 0, 1, 424, 114, 0, 0)])
     })
 
     it('makes certain TAI millisecond counts inaccessible', () => {
-      expect(taiConvert.unixMillisToAtomicPicosArray(-283984666668n)).toEqual([-283984665244000000020n])
-      expect(taiConvert.unixMillisToAtomicPicosArray(-283984666667n)).toEqual([-283984665244000000005n])
+      expect(taiConvert.unixMillisToAtomicPicosArray(-283984666668)).toEqual([-283984665245000000020n])
+      expect(taiConvert.unixMillisToAtomicPicosArray(-283984666667)).toEqual([-283984665244000000005n])
       // it's not possible to get a result of [-283984665243xxxxxxxxxn]
-      expect(taiConvert.unixMillisToAtomicPicosArray(-283984666666n)).toEqual([-283984665242999999990n])
-      expect(taiConvert.unixMillisToAtomicPicosArray(-283984666665n)).toEqual([-283984665241999999975n])
+      expect(taiConvert.unixMillisToAtomicPicosArray(-283984666666)).toEqual([-283984665242999999990n])
+      expect(taiConvert.unixMillisToAtomicPicosArray(-283984666665)).toEqual([-283984665241999999975n])
     })
   })
 
   describe('unixMillisToAtomicMillisArray', () => {
     it('starts TAI at 1961-01-01 00:00:01.422', () => {
-      expect(taiConvert.unixMillisToAtomicMillisArray(millis(1961, JAN, 1, 0, 0, 0, 0)))
-        .toEqual([millis(1961, JAN, 1, 0, 0, 1, 422)]) // TODO: this should be an empty array in fact
+      expect(taiConvert.unixMillisToAtomicMillisArray(Date.UTC(1961, JAN, 1, 0, 0, 0, 0)))
+        .toEqual([Date.UTC(1961, JAN, 1, 0, 0, 1, 422)]) // TODO: this should be an empty array in fact
     })
 
     it('advances 15 TAI picoseconds per Unix millisecond', () => {
-      expect(taiConvert.unixMillisToAtomicMillisArray(millis(1961, JAN, 1, 0, 0, 0, 1))
-        .toEqual([millis(1961, JAN, 1, 0, 0, 1, 423])
-      expect(taiConvert.unixMillisToAtomicMillisArray(millis(1961, JAN, 1, 0, 0, 0, 2))
-        .toEqual([millis(1961, JAN, 1, 0, 0, 1, 424])
-      expect(taiConvert.unixMillisToAtomicMillisArray(millis(1961, JAN, 1, 0, 0, 0, 3))
-        .toEqual([millis(1961, JAN, 1, 0, 0, 1, 425])
+      expect(taiConvert.unixMillisToAtomicMillisArray(Date.UTC(1961, JAN, 1, 0, 0, 0, 1)))
+        .toEqual([Date.UTC(1961, JAN, 1, 0, 0, 1, 423)])
+      expect(taiConvert.unixMillisToAtomicMillisArray(Date.UTC(1961, JAN, 1, 0, 0, 0, 2)))
+        .toEqual([Date.UTC(1961, JAN, 1, 0, 0, 1, 424)])
+      expect(taiConvert.unixMillisToAtomicMillisArray(Date.UTC(1961, JAN, 1, 0, 0, 0, 3)))
+        .toEqual([Date.UTC(1961, JAN, 1, 0, 0, 1, 425)])
     })
 
-    it('first discontinuity', () => {
-      expect(taiConvert.unixToAtomics(-283984666668)).toEqual([-283984665246])
-      expect(taiConvert.unixToAtomics(-283984666667)).toEqual([-283984665245])
+    it('makes certain TAI millisecond counts inaccessible', () => {
+      expect(taiConvert.unixMillisToAtomicMillisArray(-283984666668)).toEqual([-283984665246])
+      expect(taiConvert.unixMillisToAtomicMillisArray(-283984666667)).toEqual([-283984665245])
       // It's not possible to get a result of [-283984665244]
-      expect(taiConvert.unixToAtomics(-283984666666)).toEqual([-283984665243])
-      expect(taiConvert.unixToAtomics(-283984666665)).toEqual([-283984665242])
+      expect(taiConvert.unixMillisToAtomicMillisArray(-283984666666)).toEqual([-283984665243])
+      expect(taiConvert.unixMillisToAtomicMillisArray(-283984666665)).toEqual([-283984665242])
     })
   })
 

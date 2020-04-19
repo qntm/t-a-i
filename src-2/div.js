@@ -1,15 +1,11 @@
 // BigInt division rounds towards zero but we need a division which rounds
-// towards negative infinity
+// towards negative infinity. Assume `b` is positive
 
-const roundNegativeInfinity = (a, b) => {
-  const modulus = (a % b) + (a >= 0n ? 0n : b)
-  return (a - modulus) / b
-}
+const roundNegativeInfinity = (a, b) =>
+  a / b - (a % b < 0n ? 1n : 0n)
 
-const roundPositiveInfinity = (a, b) => {
-  const antiModulus = (a <= 0n ? 0n : b) - a % b
-  return (antiModulus - a) / b
-}
+const roundPositiveInfinity = (a, b) =>
+  a / b + (a % b > 0n ? 1n : 0n)
 
 module.exports = {
   roundNegativeInfinity,

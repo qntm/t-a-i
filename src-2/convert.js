@@ -7,33 +7,45 @@ const picosPerMilli = 1000n * 1000n * 1000n
 module.exports = data => {
   const munged = munge(data)
 
-  // `current_unixMillis` must be a big integer
-  const unixMillisToAtomicPicosArray = current_unixMillis => munged
-    .map(({
+  const unixMillisToAtomicPicosArray = unixMillis => {
+    if (!Number.isInteger(unixMillis)) {
+      throw Error(`Not an integer: ${unixMillis}`)
+    }
+
+    if (BigInt(unixMillis) < munged[0].blockStart_unixMillis) {
+      throw Error(`Out of bounds: ${unixMillis}`)
+    }
+
+    const atomicPicosArray = []
+
+    munged.forEach(({
       blockStart_atomicPicos,
       blockEnd_atomicPicos,
       ratio_atomicPicosPerUnixMilli,
       offsetAtUnixEpoch_atomicPicos
-    }) => offsetAtUnixEpoch_atomicPicos + current_unixMillis * ratio_atomicPicosPerUnixMilli)
-    .filter(current_atomicPicos =>
-      blockStart_atomicPicos <= current_atomicPicos &&
-      current_atomicPicos < blockEnd_atomicPicos
-    )
+    }) => {
+      // Depending on its parameters, each block linearly transforms `unixMillis`
+      // into a different `atomicPicos`
+      const atomicPicos = offsetAtUnixEpoch_atomicPicos + BigInt(unixMillis) * ratio_atomicPicosPerUnixMilli
 
-  const unixMillisToAtomicMillisArray = current_unixMillis => {
-    if (!Number.isInteger(current_unixMillis)) {
-      throw Error(`Not an integer: ${current_unixMillis}`)
-    }
+      // Keep only the ones still falling in the block
+      if (
+        blockStart_atomicPicos <= atomicPicos &&
+        atomicPicos < blockEnd_atomicPicos
+      ) {
+        atomicPicosArray.push(atomicPicos)
+      }
+    })
 
-    if (current_unixMillis < munged[0].blockStart_unixMillis) {
-      throw Error(`Out of bounds: ${current_unixMillis}`)
-    }
+    return atomicPicosArray
+  }
 
-    return unixMillisToAtomicPicosArray(BigInt(current_unixMillis)).map(current_atomicPicos =>
+  const unixMillisToAtomicMillisArray = unixMillis => {
+    return unixMillisToAtomicPicosArray(unixMillis).map(atomicPicos =>
       // When converting a TAI picosecond count to a TAI millisecond count it is
       // important that we always round towards negative infinity, so that we do
       // not accidentally return a TAI millisecond count from the next block up
-      Number(div.roundNegativeInfinity(current_atomicPicos, picosPerMilli))
+      Number(div.roundNegativeInfinity(atomicPicos, picosPerMilli))
     )
   }
 
