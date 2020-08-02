@@ -30,7 +30,7 @@ module.exports = data => {
       - root_unixMillis * driftRate_atomicPicosPerUnixMilli
 
     const blockStart_atomicPicos = offsetAtUnixEpoch_atomicPicos
-      + blockStart_unixMillis * ratio_atomicPicosPerUnixMilli
+      + blockStart_unixMillis * (picosPerMilli + driftRate_atomicPicosPerUnixMilli)
 
     return {
       blockStart_unixMillis,

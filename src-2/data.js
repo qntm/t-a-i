@@ -13,7 +13,7 @@ const NOV = 10
 
 // First column: Unix millisecond count when this relationship became effective
 // Second column: TAI minus UTC in TAI picoseconds as of the root point
-// Third column: root point in UTC days since MJD epoch, defaults to 0n
+// Third column: "root" point in UTC days since MJD epoch, defaults to 0n
 // Fourth column: Drift rate in TAI picoseconds per UTC day, defaults to 0n
 
 module.exports = [
