@@ -16,8 +16,8 @@
   "author": "qntm",
   "license": "MIT",
   "devDependencies": {
-    "jasmine": "^2.8.0",
-    "standard": "^10.0.3"
+    "jasmine": "^3.6.1",
+    "standard": "^14.3.4"
   },
   "files": [
     "src"
