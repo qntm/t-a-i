@@ -17,7 +17,7 @@
   "license": "MIT",
   "devDependencies": {
     "jasmine": "^3.6.1",
-    "standard": "^15.0.0"
+    "standard": "^16.0.1"
   },
   "files": [
     "src"
