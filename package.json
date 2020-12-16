@@ -7,14 +7,18 @@
     "type": "git",
     "url": "git://github.com/qntm/t-a-i.git"
   },
-  "main": "./src/t-a-i.js",
+  "main": "./src",
   "scripts": {
+    "postpublish": "npm version patch && git push",
     "test": "npx standard --fix && npx jest"
   },
   "author": "qntm",
   "license": "MIT",
   "devDependencies": {
     "jest": "^25.2.3",
-    "standard": "^10.0.3"
-  }
+    "standard": "^16.0.3"
+  },
+  "files": [
+    "// TODO"
+  ]
 }

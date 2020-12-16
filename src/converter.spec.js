@@ -1,3 +1,5 @@
+/* eslint-env jest */
+
 const convert = require('./convert')
 const data = require('./data')
 
@@ -288,4 +290,3 @@ describe('convert', () => {
   */
   })
 })
-
