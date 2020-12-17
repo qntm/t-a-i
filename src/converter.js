@@ -5,123 +5,140 @@ module.exports = blocks => {
     throw Error('No blocks')
   }
 
-  const unixMillisToAtomicMillisArray = unixMillis => {
+  const unixMillisToBlocksWithAtomicPicos = unixMillis => {
     if (!Number.isInteger(unixMillis)) {
       throw Error(`Not an integer: ${unixMillis}`)
     }
 
-    if (BigInt(unixMillis) < blocks[0].blockStart.unixMillis) {
+    if (unixMillis < blocks[0].blockStart.unixMillis) {
       // Pre-1961
       throw Error(`Out of bounds: ${unixMillis}`)
     }
 
-    const atomicMillisArray = []
-
-    blocks.forEach(({
-      blockStart,
-      blockEnd,
-      ratio,
-      offsetAtUnixEpoch
-    }) => {
-      // Depending on its parameters, each block linearly transforms `unixMillis`
-      // into a different `atomicPicos`
-      const atomicPicos = offsetAtUnixEpoch.atomicPicos + BigInt(unixMillis) * ratio.atomicPicosPerUnixMilli
-      const atomicMillis = atomicPicos / picosPerMilli // rounds towards 0n
-
-      // Keep only the ones still falling in the block
-      if (
-        blockStart.atomicMillis <= atomicMillis &&
-        atomicMillis < blockEnd.atomicMillis
-      ) {
-        atomicMillisArray.push(Number(atomicMillis))
-      }
-    })
-
-    return atomicMillisArray
+    return blocks
+      .filter(block =>
+        // Input has to be in range
+        block.blockStart.unixMillis <= unixMillis &&
+        unixMillis < block.blockEnd.unixMillis
+      )
+      .map(block => ({
+        block,
+        // Depending on its parameters, each block linearly transforms `unixMillis`
+        // into a different `atomicPicos`. This value is always exact.
+        atomicPicos: BigInt(unixMillis) * block.ratio.atomicPicosPerUnixMilli + block.offsetAtUnixEpoch.atomicPicos
+      }))
+      .filter(({ block, atomicPicos }) =>
+        // This filter should never catch anything really
+        block.blockStart.atomicPicos <= atomicPicos &&
+        atomicPicos < block.blockEnd.atomicPicos
+      )
   }
 
-  const unixMillisToAtomicMillis = unixMillis => {
+  const unixMillisToAtomicPicosArray = unixMillis =>
+    unixMillisToBlocksWithAtomicPicos(unixMillis)
+      .map(({ atomicPicos }) => atomicPicos)
+
+  const unixMillisToAtomicMillisArray = unixMillis =>
+    unixMillisToBlocksWithAtomicPicos(unixMillis)
+      .map(({ block, atomicPicos }) => ({
+        block,
+
+        // This rounds towards 0n. This is potentially problematic because even if the atomic
+        // picosecond count is part of this block, the rounded millisecond count may not...
+        atomicMillis: atomicPicos / picosPerMilli
+      }))
+      .filter(({ block, atomicMillis }) =>
+        // ...hence this additional test
+        block.blockStart.atomicMillis <= atomicMillis &&
+        atomicMillis < block.blockEnd.atomicMillis
+      )
+      .map(({ atomicMillis }) => Number(atomicMillis))
+
+  const unixMillisToCanonicalAtomicPicos = unixMillis => {
+    const atomicPicosArray = unixMillisToAtomicPicosArray(unixMillis)
+    const i = atomicPicosArray.length - 1
+    if (!(i in atomicPicosArray)) {
+      // Removed leap second; this Unix time never occurred
+      throw Error(`No TAI equivalent: ${unixMillis}`)
+    }
+    return atomicPicosArray[i]
+  }
+
+  const unixMillisToCanonicalAtomicMillis = unixMillis => {
     const atomicMillisArray = unixMillisToAtomicMillisArray(unixMillis)
     const i = atomicMillisArray.length - 1
     if (!(i in atomicMillisArray)) {
       // Removed leap second; this Unix time never occurred
       throw Error(`No TAI equivalent: ${unixMillis}`)
     }
-
     return atomicMillisArray[i]
   }
 
-  const atomicMillisToUnixMillis = atomicMillis => {
+  /// /////////////////////////////////////
+
+  const atomicMillisToBlockWithUnixMillis = atomicMillis => {
     if (!Number.isInteger(atomicMillis)) {
       throw Error(`Not an integer: ${atomicMillis}`)
     }
 
-    if (BigInt(atomicMillis) < blocks[0].blockStart.atomicMillis) {
+    if (atomicMillis < blocks[0].blockStart.atomicMillis) {
       // Pre-1961
       throw Error(`Out of bounds: ${atomicMillis}`)
     }
 
-    const unixMillisArray = []
+    const block = blocks.find(block =>
+      block.blockStart.atomicMillis <= atomicMillis &&
+      atomicMillis < block.blockEnd.atomicMillis
+    )
 
-    blocks.forEach(({
-      blockStart,
-      blockEnd,
-      ratio,
-      offsetAtUnixEpoch
-    }) => {
-      // Depending on its parameters, each block linearly transforms `atomicPicos`
-      // into a different `unixMillis`
-      const atomicPicos = BigInt(atomicMillis) * picosPerMilli
-      const unixMillis = (atomicPicos - offsetAtUnixEpoch.atomicPicos) /
-        ratio.atomicPicosPerUnixMilli // Rounds towards 0n
+    // This division rounds towards 0n.
+    // That rounding can theoretically take the result *outside* of the block.
+    const unixMillis = (BigInt(atomicMillis) * picosPerMilli - block.offsetAtUnixEpoch.atomicPicos) /
+      block.ratio.atomicPicosPerUnixMilli
 
-      // Keep only the ones still falling in the block
-      if (
-        blockStart.unixMillis <= unixMillis &&
-        unixMillis < blockEnd.unixMillis
-      ) {
-        unixMillisArray.push(Number(unixMillis))
-      }
-    })
-
-    if (!(0 in unixMillisArray)) {
+    if (
+      unixMillis < block.blockStart.unixMillis ||
+      block.blockEnd.unixMillis <= unixMillis
+    ) {
       throw Error(`Atomic time not found: ${atomicMillis}. This should be impossible`)
     }
 
-    if (1 in unixMillisArray) {
-      throw Error(`Ambiguous atomic time: ${atomicMillis}. This should be impossible`)
-    }
+    return { block, unixMillis }
+  }
 
-    return Number(unixMillisArray[0])
+  const atomicMillisToUnixMillis = atomicMillis => {
+    const { unixMillis } = atomicMillisToBlockWithUnixMillis(atomicMillis)
+
+    return Number(unixMillis)
   }
 
   const canonicalAtomicMillisToUnixMillis = atomicMillis => {
-    const unixMillis = atomicMillisToUnixMillis(atomicMillis)
+    const { block, unixMillis } = atomicMillisToBlockWithUnixMillis(atomicMillis)
 
-    // OK so a single Unix millisecond count can technically appear in multiple blocks
-    // And if it does appear in multiple blocks, this means it has multiple atomic time preimages.
-    // So we need to make sure we have the "canonical" (latest) atomic time preimage
-    if (blocks.some(block =>
-      block.blockStart.unixMillis <= unixMillis &&
-      unixMillis < block.blockEnd.unixMillis &&
-      !(
-        block.blockStart.atomicMillis <= atomicMillis &&
-        atomicMillis < block.blockEnd.atomicMillis
-      )
-    )) {
+    if (block.overlapStart.atomicMillis <= atomicMillis) {
+      // There is a later atomic time which converts to the same UTC time as this one
+      // That means we are "non-canonical"
       throw Error(`No UTC equivalent: ${atomicMillis}`)
     }
 
-    return unixMillis
+    // The division and rounding could theoretically take us from an atomic time outside of the
+    // overlap to a Unix time inside of it?
+    if (block.overlapStart.unixMillis <= unixMillis) {
+      throw Error(`Atomic time not found: ${atomicMillis}. This should be impossible`)
+    }
+
+    return Number(unixMillis)
   }
 
   return {
     oneToMany: {
+      unixToAtomicPicos: unixMillisToAtomicPicosArray,
       unixToAtomic: unixMillisToAtomicMillisArray,
       atomicToUnix: atomicMillisToUnixMillis
     },
     oneToOne: {
-      unixToAtomic: unixMillisToAtomicMillis,
+      unixToAtomicPicos: unixMillisToCanonicalAtomicPicos,
+      unixToAtomic: unixMillisToCanonicalAtomicMillis,
       atomicToUnix: canonicalAtomicMillisToUnixMillis
     }
   }

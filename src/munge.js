@@ -78,11 +78,29 @@ module.exports = data => {
       ) {
         datum.blockEnd.unixMillis++
       }
+
+      // This can be before, exactly at, or after blockEnd. Before is the case we care about most.
+      datum.overlapStart = {
+        unixMillis: arr[i + 1].blockStart.unixMillis
+      }
+      datum.overlapStart.atomicPicos = datum.overlapStart.unixMillis * datum.ratio.atomicPicosPerUnixMilli +
+        datum.offsetAtUnixEpoch.atomicPicos
+
+      // The earliest precise atomic millisecond count which is part of the overlap
+      datum.overlapStart.atomicMillis = datum.overlapStart.atomicPicos / picosPerMilli - 1n
+      while (datum.overlapStart.atomicMillis * picosPerMilli < datum.overlapStart.atomicPicos) {
+        datum.overlapStart.atomicMillis++
+      }
     } else {
       datum.blockEnd = {
         atomicPicos: Infinity,
         atomicMillis: Infinity,
         unixMillis: Infinity
+      }
+      datum.overlapStart = {
+        unixMillis: Infinity,
+        atomicPicos: Infinity,
+        atomicMillis: Infinity
       }
     }
   })

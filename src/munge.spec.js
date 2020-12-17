@@ -25,6 +25,11 @@ describe('munge', () => {
       },
       offsetAtUnixEpoch: {
         atomicPicos: 0n
+      },
+      overlapStart: {
+        atomicPicos: Infinity,
+        atomicMillis: Infinity,
+        unixMillis: Infinity
       }
     }])
   })
@@ -48,6 +53,11 @@ describe('munge', () => {
       },
       offsetAtUnixEpoch: {
         atomicPicos: -4_000_000_000_000n
+      },
+      overlapStart: {
+        atomicPicos: Infinity,
+        atomicMillis: Infinity,
+        unixMillis: Infinity
       }
     }])
   })
@@ -77,6 +87,11 @@ describe('munge', () => {
       },
       offsetAtUnixEpoch: {
         atomicPicos: -4_000_000_000_000n
+      },
+      overlapStart: {
+        atomicPicos: 5_000_000_000_000n,
+        atomicMillis: 5_000n,
+        unixMillis: 9_000n
       }
     }, {
       blockStart: {
@@ -94,6 +109,11 @@ describe('munge', () => {
       },
       offsetAtUnixEpoch: {
         atomicPicos: -3_000_000_000_000n
+      },
+      overlapStart: {
+        atomicPicos: 10_000_000_000_000n,
+        atomicMillis: 10_000n,
+        unixMillis: 13_000n
       }
     }, {
       blockStart: {
@@ -111,6 +131,11 @@ describe('munge', () => {
       },
       offsetAtUnixEpoch: {
         atomicPicos: -4_000_000_000_000n
+      },
+      overlapStart: {
+        atomicPicos: Infinity,
+        atomicMillis: Infinity,
+        unixMillis: Infinity
       }
     }])
   })
@@ -134,6 +159,11 @@ describe('munge', () => {
       },
       offsetAtUnixEpoch: {
         atomicPicos: 5_682_770_000_000n
+      },
+      overlapStart: {
+        atomicPicos: Infinity,
+        atomicMillis: Infinity,
+        unixMillis: Infinity
       }
     }])
   })
@@ -227,6 +257,96 @@ describe('munge', () => {
       1_000_000_000n,
       1_000_000_000n,
       1_000_000_000n
+    ])
+  })
+
+  it('generates proper overlaps', () => {
+    expect(munge(taiData).map(block => block.blockEnd.atomicPicos - block.overlapStart.atomicPicos)).toEqual([
+      -50_000_000_000n,
+      0n,
+      100_000_000_000n,
+      0n,
+      100_000_000_000n,
+      100_000_000_000n,
+      100_000_000_000n,
+      100_000_000_000n,
+      100_000_000_000n,
+      100_000_000_000n,
+      0n,
+      -100_000_000_000n,
+      107_758_000_000n,
+      1_000_000_000_000n,
+      1_000_000_000_000n,
+      1_000_000_000_000n,
+      1_000_000_000_000n,
+      1_000_000_000_000n,
+      1_000_000_000_000n,
+      1_000_000_000_000n,
+      1_000_000_000_000n,
+      1_000_000_000_000n,
+      1_000_000_000_000n,
+      1_000_000_000_000n,
+      1_000_000_000_000n,
+      1_000_000_000_000n,
+      1_000_000_000_000n,
+      1_000_000_000_000n,
+      1_000_000_000_000n,
+      1_000_000_000_000n,
+      1_000_000_000_000n,
+      1_000_000_000_000n,
+      1_000_000_000_000n,
+      1_000_000_000_000n,
+      1_000_000_000_000n,
+      1_000_000_000_000n,
+      1_000_000_000_000n,
+      1_000_000_000_000n,
+      1_000_000_000_000n,
+      1_000_000_000_000n,
+      NaN // `Infinity - Infinity`
+    ])
+
+    expect(munge(taiData).map(block => block.blockEnd.atomicMillis - block.overlapStart.atomicMillis)).toEqual([
+      -50n,
+      0n,
+      100n,
+      0n,
+      100n,
+      100n,
+      100n,
+      100n,
+      100n,
+      100n,
+      0n,
+      -100n,
+      107n,
+      1_000n,
+      1_000n,
+      1_000n,
+      1_000n,
+      1_000n,
+      1_000n,
+      1_000n,
+      1_000n,
+      1_000n,
+      1_000n,
+      1_000n,
+      1_000n,
+      1_000n,
+      1_000n,
+      1_000n,
+      1_000n,
+      1_000n,
+      1_000n,
+      1_000n,
+      1_000n,
+      1_000n,
+      1_000n,
+      1_000n,
+      1_000n,
+      1_000n,
+      1_000n,
+      1_000n,
+      NaN // `Infinity - Infinity`
     ])
   })
 })
