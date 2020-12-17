@@ -21,11 +21,18 @@ describe('Converter', () => {
     it('fails on a non-integer number of milliseconds', () => {
       expect(() => converter.oneToOne.unixToAtomic(89.3)).toThrowError('Not an integer: 89.3')
       expect(() => converter.oneToOne.unixToAtomic('boop')).toThrowError('Not an integer: boop')
+      expect(() => converter.oneToOne.atomicToUnix(Infinity)).toThrowError('Not an integer: Infinity')
+      expect(() => converter.oneToOne.atomicToUnix('boops')).toThrowError('Not an integer: boops')
     })
 
     it('fails when the Unix count is out of bounds', () => {
       expect(converter.oneToOne.unixToAtomic(0)).toBe(0)
       expect(() => converter.oneToOne.unixToAtomic(-1)).toThrowError('Out of bounds: -1')
+    })
+
+    it('fails when the atomic count is out of bounds', () => {
+      expect(converter.oneToOne.atomicToUnix(0)).toBe(0)
+      expect(() => converter.oneToOne.atomicToUnix(-1)).toThrowError('Out of bounds: -1')
     })
 
     it('manages basic conversions', () => {
