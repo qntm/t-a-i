@@ -140,6 +140,12 @@ describe('munge', () => {
     }])
   })
 
+  it('fails on a bad drift rate', () => {
+    expect(() => munge([
+      [BigInt(Date.UTC(1961, JAN, 1)), 1_422_818_000_000n, 37_300n, 1_000_000_000n]
+    ])).toThrowError('Could not compute precise drift rate')
+  })
+
   it('works with the first line of real data', () => {
     expect(munge([
       [BigInt(Date.UTC(1961, JAN, 1)), 1_422_818_000_000n, 37_300n, 1_296_000_000n]
