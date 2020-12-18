@@ -48,6 +48,5 @@ Temporary Items
 
 # Mine
 node_modules
-tai.xlsx
-t-a-i.xlsx
+*.xlsx
 coverage
