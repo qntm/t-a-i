@@ -437,6 +437,11 @@ describe('Converter', () => {
             unixMillis: 1,
             atomicPicos: 900_000_000n // block start intentionally doesn't include TAI epoch
           },
+          driftRate: {
+            atomicPicosPerUnixDay: 0n,
+            atomicPicosPerUnixMilli: 0n,
+            atomicSecondsPerUnixDay: 0
+          },
           ratio: {
             atomicPicosPerUnixMilli: 1_000_000_000n
           },
@@ -471,6 +476,11 @@ describe('Converter', () => {
             unixMillis: -1,
             atomicPicos: -900_000_000n
           },
+          driftRate: {
+            atomicPicosPerUnixDay: 0n,
+            atomicPicosPerUnixMilli: 0n,
+            atomicSecondsPerUnixDay: 0
+          },
           ratio: {
             atomicPicosPerUnixMilli: 1_000_000_000n
           },
@@ -489,6 +499,11 @@ describe('Converter', () => {
           start: {
             unixMillis: 1,
             atomicPicos: -100_000_000n
+          },
+          driftRate: {
+            atomicPicosPerUnixDay: 0n,
+            atomicPicosPerUnixMilli: 0n,
+            atomicSecondsPerUnixDay: 0
           },
           ratio: {
             atomicPicosPerUnixMilli: 1_000_000_000n

@@ -58,8 +58,6 @@ module.exports = data => {
     block.start.atomicPicos = BigInt(block.start.unixMillis) * block.ratio.atomicPicosPerUnixMilli +
       block.offsetAtUnixEpoch.atomicPicos 
 
-    delete block.driftRate
-
     return block
   })
 
