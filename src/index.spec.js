@@ -57,10 +57,8 @@ describe('convert', () => {
       expect(() => atomicToUnix(-283996798578)).toThrow() // same
 
       // Actual start of TAI: 1961-01-01 00:00:01.422818
-      // There is no TAI millisecond count which converts to 1961-01-01 00:00:00.000 UTC
-
-      expect(atomicToUnix(Date.UTC(1961, JAN, 1, 0, 0, 1, 423))).toBe(Date.UTC(1961, JAN, 1, 0, 0, 0, 1))
-      expect(atomicToUnix(-283996798577)).toBe(-283996799999) // same
+      expect(atomicToUnix(Date.UTC(1961, JAN, 1, 0, 0, 1, 423))).toBe(Date.UTC(1961, JAN, 1, 0, 0, 0, 0))
+      expect(atomicToUnix(-283996798577)).toBe(-283996800000) // same
     })
 
     it('start of 1972', () => {
@@ -105,9 +103,8 @@ describe('convert', () => {
       expect(() => atomicToUnix(-283996798578)).toThrow() // same
 
       // Actual start of TAI: 1961-01-01 00:00:01.422818
-      // There is no TAI millisecond count which converts to 1961-01-01 00:00:00.000 UTC
-      expect(atomicToUnix(Date.UTC(1961, JAN, 1, 0, 0, 1, 423))).toBe(Date.UTC(1961, JAN, 1, 0, 0, 0, 1))
-      expect(atomicToUnix(-283996798577)).toBe(-283996799999) // same
+      expect(atomicToUnix(Date.UTC(1961, JAN, 1, 0, 0, 1, 423))).toBe(Date.UTC(1961, JAN, 1, 0, 0, 0, 0))
+      expect(atomicToUnix(-283996798577)).toBe(-283996800000) // same
     })
 
     it('handles the start of 1972', () => {

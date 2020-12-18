@@ -64,7 +64,7 @@ module.exports = data => {
         // end of the block
         /* istanbul ignore next */
         if (block.blockEnd.atomicPicos <= atomicPicosRounded) {
-          return false
+          throw Error(`Atomic time rounded up past end of block. This should be impossible`)
         }
 
         return true
@@ -119,10 +119,12 @@ module.exports = data => {
 
     const block = blocks[blockIndex]
 
-    // This division rounds towards 0n.
+    // This division rounds towards negative infinity.
     // Could rounding theoretically take the result *outside* of the block?
-    const unixMillis = (atomicPicos - block.offsetAtUnixEpoch.atomicPicos) /
+    const unixMillis = div(
+      atomicPicos - block.offsetAtUnixEpoch.atomicPicos,
       block.ratio.atomicPicosPerUnixMilli
+    )
 
     const atomicPicos2 = unixMillis * block.ratio.atomicPicosPerUnixMilli +
       block.offsetAtUnixEpoch.atomicPicos
@@ -136,6 +138,9 @@ module.exports = data => {
       throw Error(`Atomic time not found: ${atomicMillis}. This should be impossible`)
     }
 
+    // This is also impossible. `atomicPicos2` cannot be greater than `atomicPicos`, which is in
+    // the block.
+    /* istanbul ignore next */
     if (block.blockEnd.atomicPicos <= atomicPicos2) {
       throw Error(`Atomic time not found: ${atomicMillis}. This should be impossible`)
     }
@@ -158,10 +163,11 @@ module.exports = data => {
       throw Error(`No UTC equivalent: ${atomicMillis}`)
     }
 
-    const atomicPicos2 = unixMillis * block.ratio.atomicPicosPerUnixMilli + block.offsetAtUnixEpoch.atomicPicos
+    const atomicPicos2 = unixMillis * block.ratio.atomicPicosPerUnixMilli +
+      block.offsetAtUnixEpoch.atomicPicos
 
-    // The division and rounding could theoretically take us from an atomic time outside of the
-    // overlap to a Unix time inside of it?
+    // This should be impossible, `atomicPicos2` is less than or equal to `atomicPicos`
+    /* istanbul ignore next */
     if (block.overlapStart.atomicPicos <= atomicPicos2) {
       throw Error(`Atomic time not found: ${atomicMillis}. This should be impossible`)
     }
