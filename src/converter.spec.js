@@ -27,12 +27,12 @@ describe('Converter', () => {
 
     it('fails when the Unix count is out of bounds', () => {
       expect(converter.oneToOne.unixToAtomic(0)).toBe(0)
-      expect(() => converter.oneToOne.unixToAtomic(-1)).toThrowError('Out of bounds: -1')
+      expect(() => converter.oneToOne.unixToAtomic(-1)).toThrowError('No TAI equivalent: -1')
     })
 
     it('fails when the atomic count is out of bounds', () => {
       expect(converter.oneToOne.atomicToUnix(0)).toBe(0)
-      expect(() => converter.oneToOne.atomicToUnix(-1)).toThrowError('Out of bounds: -1')
+      expect(() => converter.oneToOne.atomicToUnix(-1)).toThrowError('No UTC equivalent: -1')
     })
 
     it('manages basic conversions', () => {
@@ -416,6 +416,11 @@ describe('Converter', () => {
         expect(converter.oneToOne.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)))
           .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0))
       })
+    })
+  })
+
+  describe('insane edge cases', () => {
+    it('when unixMillis converts to an atomicPicos which fits but an atomicMillis which does not', () => {
     })
   })
 })

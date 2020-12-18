@@ -1,3 +1,6 @@
+// Several complex conditions in this code are intentionally left more complex than strictly
+// necessary, in order to encourage testing
+
 const picosPerMilli = 1000n * 1000n * 1000n
 
 module.exports = blocks => {
@@ -10,28 +13,27 @@ module.exports = blocks => {
       throw Error(`Not an integer: ${unixMillis}`)
     }
 
-    if (unixMillis < blocks[0].blockStart.unixMillis) {
-      // Pre-1961
-      throw Error(`Out of bounds: ${unixMillis}`)
-    }
+    unixMillis = BigInt(unixMillis)
 
     return blocks
-      .filter(block =>
-        // Input has to be in range
-        block.blockStart.unixMillis <= unixMillis &&
-        unixMillis < block.blockEnd.unixMillis
-      )
       .map(block => ({
         block,
+
         // Depending on its parameters, each block linearly transforms `unixMillis`
         // into a different `atomicPicos`. This value is always exact.
-        atomicPicos: BigInt(unixMillis) * block.ratio.atomicPicosPerUnixMilli + block.offsetAtUnixEpoch.atomicPicos
+        atomicPicos: unixMillis * block.ratio.atomicPicosPerUnixMilli +
+          block.offsetAtUnixEpoch.atomicPicos
       }))
-      .filter(({ block, atomicPicos }) =>
-        // This filter should never catch anything really
-        block.blockStart.atomicPicos <= atomicPicos &&
-        atomicPicos < block.blockEnd.atomicPicos
-      )
+      .filter(({ block, atomicPicos }) => {
+        // Input has to be in range.
+        if (atomicPicos < block.blockStart.atomicPicos) {
+          return false
+        }
+        if (block.blockEnd.atomicPicos <= atomicPicos) {
+          return false
+        }
+        return true
+      })
   }
 
   const unixMillisToAtomicPicosArray = unixMillis =>
@@ -44,14 +46,19 @@ module.exports = blocks => {
         block,
 
         // This rounds towards 0n. This is potentially problematic because even if the atomic
-        // picosecond count is part of this block, the rounded millisecond count may not...
+        // picosecond count is part of this block, the rounded millisecond count may not be...
         atomicMillis: atomicPicos / picosPerMilli
       }))
-      .filter(({ block, atomicMillis }) =>
+      .filter(({ block, atomicMillis }) => {
         // ...hence this additional test
-        block.blockStart.atomicMillis <= atomicMillis &&
-        atomicMillis < block.blockEnd.atomicMillis
-      )
+        if (atomicMillis * picosPerMilli < block.blockStart.atomicPicos) {
+          return false
+        }
+        if (block.blockEnd.atomicPicos <= atomicMillis * picosPerMilli) {
+          return false
+        }
+        return true
+      })
       .map(({ atomicMillis }) => Number(atomicMillis))
 
   const unixMillisToCanonicalAtomicPicos = unixMillis => {
@@ -81,25 +88,37 @@ module.exports = blocks => {
       throw Error(`Not an integer: ${atomicMillis}`)
     }
 
-    if (atomicMillis < blocks[0].blockStart.atomicMillis) {
+    atomicMillis = BigInt(atomicMillis)
+
+    const blockIndex = blocks.findIndex(block => {
+      if (atomicMillis * picosPerMilli < block.blockStart.atomicPicos) {
+        return false
+      }
+      if (block.blockEnd.atomicPicos <= atomicMillis * picosPerMilli) {
+        return false
+      }
+      return true
+    })
+
+    if (blockIndex === -1) {
       // Pre-1961
-      throw Error(`Out of bounds: ${atomicMillis}`)
+      throw Error(`No UTC equivalent: ${atomicMillis}`)
     }
 
-    const block = blocks.find(block =>
-      block.blockStart.atomicMillis <= atomicMillis &&
-      atomicMillis < block.blockEnd.atomicMillis
-    )
+    const block = blocks[blockIndex]
 
     // This division rounds towards 0n.
-    // That rounding can theoretically take the result *outside* of the block.
-    const unixMillis = (BigInt(atomicMillis) * picosPerMilli - block.offsetAtUnixEpoch.atomicPicos) /
+    // Could that rounding theoretically take the result *outside* of the block?
+    const unixMillis = (atomicMillis * picosPerMilli - block.offsetAtUnixEpoch.atomicPicos) /
       block.ratio.atomicPicosPerUnixMilli
 
-    if (
-      unixMillis < block.blockStart.unixMillis ||
-      block.blockEnd.unixMillis <= unixMillis
-    ) {
+    const atomicPicos2 = unixMillis * block.ratio.atomicPicosPerUnixMilli + block.offsetAtUnixEpoch.atomicPicos
+
+    if (atomicPicos2 < block.blockStart.atomicPicos) {
+      throw Error(`Atomic time not found: ${atomicMillis}. This should be impossible`)
+    }
+
+    if (block.blockEnd.atomicPicos <= atomicPicos2) {
       throw Error(`Atomic time not found: ${atomicMillis}. This should be impossible`)
     }
 
@@ -115,15 +134,19 @@ module.exports = blocks => {
   const canonicalAtomicMillisToUnixMillis = atomicMillis => {
     const { block, unixMillis } = atomicMillisToBlockWithUnixMillis(atomicMillis)
 
-    if (block.overlapStart.atomicMillis <= atomicMillis) {
+    atomicMillis = BigInt(atomicMillis)
+
+    if (block.overlapStart.atomicPicos <= atomicMillis * picosPerMilli) {
       // There is a later atomic time which converts to the same UTC time as this one
       // That means we are "non-canonical"
       throw Error(`No UTC equivalent: ${atomicMillis}`)
     }
 
+    const atomicPicos2 = unixMillis * block.ratio.atomicPicosPerUnixMilli + block.offsetAtUnixEpoch.atomicPicos
+
     // The division and rounding could theoretically take us from an atomic time outside of the
     // overlap to a Unix time inside of it?
-    if (block.overlapStart.unixMillis <= unixMillis) {
+    if (block.overlapStart.atomicPicos <= atomicPicos2) {
       throw Error(`Atomic time not found: ${atomicMillis}. This should be impossible`)
     }
 

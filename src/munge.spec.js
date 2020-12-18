@@ -12,13 +12,10 @@ describe('munge', () => {
     ])).toEqual([{
       blockStart: {
         atomicPicos: 0n,
-        atomicMillis: 0n,
         unixMillis: 0n
       },
       blockEnd: {
-        atomicPicos: Infinity,
-        atomicMillis: Infinity,
-        unixMillis: Infinity
+        atomicPicos: Infinity
       },
       ratio: {
         atomicPicosPerUnixMilli: 1000_000_000n
@@ -27,9 +24,7 @@ describe('munge', () => {
         atomicPicos: 0n
       },
       overlapStart: {
-        atomicPicos: Infinity,
-        atomicMillis: Infinity,
-        unixMillis: Infinity
+        atomicPicos: Infinity
       }
     }])
   })
@@ -40,13 +35,10 @@ describe('munge', () => {
     ])).toEqual([{
       blockStart: {
         unixMillis: 7n,
-        atomicMillis: -3993n,
         atomicPicos: -3_993_000_000_000n
       },
       blockEnd: {
-        atomicPicos: Infinity,
-        atomicMillis: Infinity,
-        unixMillis: Infinity
+        atomicPicos: Infinity
       },
       ratio: {
         atomicPicosPerUnixMilli: 1_000_000_000n
@@ -55,9 +47,7 @@ describe('munge', () => {
         atomicPicos: -4_000_000_000_000n
       },
       overlapStart: {
-        atomicPicos: Infinity,
-        atomicMillis: Infinity,
-        unixMillis: Infinity
+        atomicPicos: Infinity
       }
     }])
   })
@@ -74,12 +64,9 @@ describe('munge', () => {
     ])).toEqual([{
       blockStart: {
         unixMillis: -1000n,
-        atomicMillis: -5000n,
         atomicPicos: -5_000_000_000_000n
       },
       blockEnd: {
-        unixMillis: 10000n,
-        atomicMillis: 6_000n,
         atomicPicos: 6_000_000_000_000n
       },
       ratio: {
@@ -89,19 +76,14 @@ describe('munge', () => {
         atomicPicos: -4_000_000_000_000n
       },
       overlapStart: {
-        atomicPicos: 5_000_000_000_000n,
-        atomicMillis: 5_000n,
-        unixMillis: 9_000n
+        atomicPicos: 5_000_000_000_000n
       }
     }, {
       blockStart: {
         unixMillis: 9000n,
-        atomicMillis: 6000n,
         atomicPicos: 6_000_000_000_000n
       },
       blockEnd: {
-        unixMillis: 12000n,
-        atomicMillis: 9_000n,
         atomicPicos: 9_000_000_000_000n
       },
       ratio: {
@@ -111,20 +93,15 @@ describe('munge', () => {
         atomicPicos: -3_000_000_000_000n
       },
       overlapStart: {
-        atomicPicos: 10_000_000_000_000n,
-        atomicMillis: 10_000n,
-        unixMillis: 13_000n
+        atomicPicos: 10_000_000_000_000n
       }
     }, {
       blockStart: {
         unixMillis: 13000n,
-        atomicMillis: 9000n,
         atomicPicos: 9_000_000_000_000n
       },
       blockEnd: {
-        atomicPicos: Infinity,
-        atomicMillis: Infinity,
-        unixMillis: Infinity
+        atomicPicos: Infinity
       },
       ratio: {
         atomicPicosPerUnixMilli: 1_000_000_000n
@@ -133,32 +110,27 @@ describe('munge', () => {
         atomicPicos: -4_000_000_000_000n
       },
       overlapStart: {
-        atomicPicos: Infinity,
-        atomicMillis: Infinity,
-        unixMillis: Infinity
+        atomicPicos: Infinity
       }
     }])
   })
 
   it('fails on a bad drift rate', () => {
     expect(() => munge([
-      [BigInt(Date.UTC(1961, JAN, 1)), 1_422_818_000_000n, 37_300n, 1_000_000_000n]
+      [BigInt(Date.UTC(1961, JAN, 1)), 1_422_818_000_000n, 37_300n, 0.001]
     ])).toThrowError('Could not compute precise drift rate')
   })
 
   it('works with the first line of real data', () => {
     expect(munge([
-      [BigInt(Date.UTC(1961, JAN, 1)), 1_422_818_000_000n, 37_300n, 1_296_000_000n]
+      [BigInt(Date.UTC(1961, JAN, 1)), 1_422_818_000_000n, 37_300n, 0.001_296]
     ])).toEqual([{
       blockStart: {
         unixMillis: -283_996_800_000n,
-        atomicMillis: -283_996_798_577n,
         atomicPicos: -283_996_798_577_182_000_000n
       },
       blockEnd: {
-        atomicPicos: Infinity,
-        atomicMillis: Infinity,
-        unixMillis: Infinity
+        atomicPicos: Infinity
       },
       ratio: {
         atomicPicosPerUnixMilli: 1_000_000_015n
@@ -167,9 +139,7 @@ describe('munge', () => {
         atomicPicos: 5_682_770_000_000n
       },
       overlapStart: {
-        atomicPicos: Infinity,
-        atomicMillis: Infinity,
-        unixMillis: Infinity
+        atomicPicos: Infinity
       }
     }])
   })
@@ -308,50 +278,6 @@ describe('munge', () => {
       1_000_000_000_000n,
       1_000_000_000_000n,
       1_000_000_000_000n,
-      NaN // `Infinity - Infinity`
-    ])
-
-    expect(munge(taiData).map(block => block.blockEnd.atomicMillis - block.overlapStart.atomicMillis)).toEqual([
-      -50n,
-      0n,
-      100n,
-      0n,
-      100n,
-      100n,
-      100n,
-      100n,
-      100n,
-      100n,
-      0n,
-      -100n,
-      107n,
-      1_000n,
-      1_000n,
-      1_000n,
-      1_000n,
-      1_000n,
-      1_000n,
-      1_000n,
-      1_000n,
-      1_000n,
-      1_000n,
-      1_000n,
-      1_000n,
-      1_000n,
-      1_000n,
-      1_000n,
-      1_000n,
-      1_000n,
-      1_000n,
-      1_000n,
-      1_000n,
-      1_000n,
-      1_000n,
-      1_000n,
-      1_000n,
-      1_000n,
-      1_000n,
-      1_000n,
       NaN // `Infinity - Infinity`
     ])
   })

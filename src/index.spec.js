@@ -151,7 +151,8 @@ describe('convert', () => {
 
   describe('Unix->TAI conversions', () => {
     it('The NEW earliest instant in TAI', () => {
-      expect(() => taiConverter.oneToMany.unixToAtomic(Date.UTC(1960, DEC, 31, 23, 59, 59, 999))).toThrow()
+      expect(taiConverter.oneToMany.unixToAtomic(Date.UTC(1960, DEC, 31, 23, 59, 59, 999)))
+        .toEqual([])
     })
 
     it('icky', () => {

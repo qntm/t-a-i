@@ -2,6 +2,7 @@
 
 const NOV = 10
 
+const picosPerSecond = 1000 * 1000 * 1000 * 1000
 const picosPerMilli = 1000n * 1000n * 1000n
 const millisPerDay = 24n * 60n * 60n * 1000n
 
@@ -13,28 +14,28 @@ const mjdEpoch = {
 // computed
 module.exports = data => {
   const munged = data.map(datum => {
-    const [a, b, c = 0n, d = 0n] = datum
-    const blockStart = {
-      unixMillis: a
-    }
-    const offsetAtRoot = {
-      atomicPicos: b
-    }
-    const root = {
-      mjds: c
-    }
-    const driftRate = {
-      atomicPicosPerUnixDay: d
-    }
+    const blockStart = {}
+    const offsetAtRoot = {}
+    const root = {}
+    const driftRate = {};
+
+    [
+      blockStart.unixMillis,
+      offsetAtRoot.atomicPicos,
+      root.mjds = 0n,
+      driftRate.atomicSecondsPerUnixDay = 0
+    ] = datum
 
     root.unixMillis = mjdEpoch.unixMillis + root.mjds * millisPerDay
 
+    driftRate.atomicPicosPerUnixDay = BigInt(driftRate.atomicSecondsPerUnixDay * picosPerSecond)
     driftRate.atomicPicosPerUnixMilli = driftRate.atomicPicosPerUnixDay / millisPerDay
+    // Typically 15n
+
     if (driftRate.atomicPicosPerUnixMilli * millisPerDay !== driftRate.atomicPicosPerUnixDay) {
       // Rounding occurred
       throw Error('Could not compute precise drift rate')
     }
-    // Typically 15n
 
     const ratio = {
       atomicPicosPerUnixMilli: picosPerMilli + driftRate.atomicPicosPerUnixMilli
@@ -48,12 +49,6 @@ module.exports = data => {
     blockStart.atomicPicos = offsetAtUnixEpoch.atomicPicos +
       blockStart.unixMillis * ratio.atomicPicosPerUnixMilli
 
-    // The earliest precise atomic millisecond count which IS in the block
-    blockStart.atomicMillis = blockStart.atomicPicos / picosPerMilli - 1n
-    while (blockStart.atomicMillis * picosPerMilli < blockStart.atomicPicos) {
-      blockStart.atomicMillis++
-    }
-
     return {
       blockStart,
       ratio,
@@ -61,46 +56,24 @@ module.exports = data => {
     }
   })
 
-  munged.forEach((datum, i, arr) => {
+  munged.forEach((block, i, arr) => {
     if (i + 1 in arr) {
       // Block end is exclusive: these are the earliest precise counts which are NOT in the block.
-      datum.blockEnd = {
-        atomicPicos: arr[i + 1].blockStart.atomicPicos,
-        atomicMillis: arr[i + 1].blockStart.atomicMillis
+      block.blockEnd = {
+        atomicPicos: arr[i + 1].blockStart.atomicPicos
       }
 
-      // This is NOT just arr[i + 1].blockStart.unixMillis, there is likely a discontinuity
-      datum.blockEnd.unixMillis = (datum.blockEnd.atomicPicos - datum.offsetAtUnixEpoch.atomicPicos) /
-        datum.ratio.atomicPicosPerUnixMilli - 1n
-      while (
-        datum.blockEnd.unixMillis * datum.ratio.atomicPicosPerUnixMilli + datum.offsetAtUnixEpoch.atomicPicos <
-          datum.blockEnd.atomicPicos
-      ) {
-        datum.blockEnd.unixMillis++
-      }
-
-      // This can be before, exactly at, or after blockEnd. Before is the case we care about most.
-      datum.overlapStart = {
-        unixMillis: arr[i + 1].blockStart.unixMillis
-      }
-      datum.overlapStart.atomicPicos = datum.overlapStart.unixMillis * datum.ratio.atomicPicosPerUnixMilli +
-        datum.offsetAtUnixEpoch.atomicPicos
-
-      // The earliest precise atomic millisecond count which is part of the overlap
-      datum.overlapStart.atomicMillis = datum.overlapStart.atomicPicos / picosPerMilli - 1n
-      while (datum.overlapStart.atomicMillis * picosPerMilli < datum.overlapStart.atomicPicos) {
-        datum.overlapStart.atomicMillis++
+      // This can be before, exactly at, or after `blockEnd`. Before is the case we care about most.
+      block.overlapStart = {
+        atomicPicos: arr[i + 1].blockStart.unixMillis * block.ratio.atomicPicosPerUnixMilli +
+          block.offsetAtUnixEpoch.atomicPicos
       }
     } else {
-      datum.blockEnd = {
-        atomicPicos: Infinity,
-        atomicMillis: Infinity,
-        unixMillis: Infinity
+      block.blockEnd = {
+        atomicPicos: Infinity
       }
-      datum.overlapStart = {
-        unixMillis: Infinity,
-        atomicPicos: Infinity,
-        atomicMillis: Infinity
+      block.overlapStart = {
+        atomicPicos: Infinity
       }
     }
   })
