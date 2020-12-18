@@ -81,57 +81,57 @@ describe('convert', () => {
 
     it('start of 1972', () => {
       expect(atomicToUnix(Date.UTC(1972, JAN, 1, 0, 0, 9, 998)))
-      .toBe(Date.UTC(1972, JAN, 1, 0, 0, 0, 105))
+        .toBe(Date.UTC(1972, JAN, 1, 0, 0, 0, 105))
       expect(atomicToUnix(Date.UTC(1972, JAN, 1, 0, 0, 9, 998)))
-      .toBe(63072000105) // same
+        .toBe(63072000105) // same
 
       expect(atomicToUnix(Date.UTC(1972, JAN, 1, 0, 0, 9, 999)))
-      .toBe(Date.UTC(1972, JAN, 1, 0, 0, 0, 106))
+        .toBe(Date.UTC(1972, JAN, 1, 0, 0, 0, 106))
       expect(atomicToUnix(Date.UTC(1972, JAN, 1, 0, 0, 9, 999)))
-      .toBe(63072000106) // same
+        .toBe(63072000106) // same
 
       // After this point in time, conversions become far simpler and always integer numbers of milliseconds
       expect(atomicToUnix(Date.UTC(1972, JAN, 1, 0, 0, 10, 0)))
-      .toBe(Date.UTC(1972, JAN, 1, 0, 0, 0, 0))
+        .toBe(Date.UTC(1972, JAN, 1, 0, 0, 0, 0))
       expect(atomicToUnix(Date.UTC(1972, JAN, 1, 0, 0, 10, 1)))
-      .toBe(Date.UTC(1972, JAN, 1, 0, 0, 0, 1))
+        .toBe(Date.UTC(1972, JAN, 1, 0, 0, 0, 1))
       expect(atomicToUnix(Date.UTC(1972, JAN, 1, 0, 0, 10, 2)))
-      .toBe(Date.UTC(1972, JAN, 1, 0, 0, 0, 2))
+        .toBe(Date.UTC(1972, JAN, 1, 0, 0, 0, 2))
       // etc.
     })
 
     it('typical', () => {
       // A typical leap second from the past, note repetition
       expect(atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 29, 750)))
-      .toBe(Date.UTC(1998, DEC, 31, 23, 59, 58, 750))
+        .toBe(Date.UTC(1998, DEC, 31, 23, 59, 58, 750))
       expect(atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 30, 0)))
-      .toBe(Date.UTC(1998, DEC, 31, 23, 59, 59, 0))
+        .toBe(Date.UTC(1998, DEC, 31, 23, 59, 59, 0))
       expect(atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 30, 250)))
-      .toBe(Date.UTC(1998, DEC, 31, 23, 59, 59, 250))
+        .toBe(Date.UTC(1998, DEC, 31, 23, 59, 59, 250))
       expect(atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 30, 500)))
-      .toBe(Date.UTC(1998, DEC, 31, 23, 59, 59, 500))
+        .toBe(Date.UTC(1998, DEC, 31, 23, 59, 59, 500))
       expect(atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 30, 750)))
-      .toBe(Date.UTC(1998, DEC, 31, 23, 59, 59, 750))
+        .toBe(Date.UTC(1998, DEC, 31, 23, 59, 59, 750))
       expect(atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 31, 0)))
-      .toBe(Date.UTC(1999, JAN, 1, 0, 0, 0, 0))
+        .toBe(Date.UTC(1999, JAN, 1, 0, 0, 0, 0))
       expect(atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 31, 250)))
-      .toBe(Date.UTC(1999, JAN, 1, 0, 0, 0, 250))
+        .toBe(Date.UTC(1999, JAN, 1, 0, 0, 0, 250))
       expect(atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 31, 500)))
-      .toBe(Date.UTC(1999, JAN, 1, 0, 0, 0, 500))
+        .toBe(Date.UTC(1999, JAN, 1, 0, 0, 0, 500))
       expect(atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 31, 750)))
-      .toBe(Date.UTC(1999, JAN, 1, 0, 0, 0, 750))
+        .toBe(Date.UTC(1999, JAN, 1, 0, 0, 0, 750))
       expect(atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 32, 0)))
-      .toBe(Date.UTC(1999, JAN, 1, 0, 0, 0, 0)) // repetition
+        .toBe(Date.UTC(1999, JAN, 1, 0, 0, 0, 0)) // repetition
       expect(atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 32, 250)))
-      .toBe(Date.UTC(1999, JAN, 1, 0, 0, 0, 250)) // repetition
+        .toBe(Date.UTC(1999, JAN, 1, 0, 0, 0, 250)) // repetition
       expect(atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 32, 500)))
-      .toBe(Date.UTC(1999, JAN, 1, 0, 0, 0, 500)) // repetition
+        .toBe(Date.UTC(1999, JAN, 1, 0, 0, 0, 500)) // repetition
       expect(atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 32, 750)))
-      .toBe(Date.UTC(1999, JAN, 1, 0, 0, 0, 750)) // repetition
+        .toBe(Date.UTC(1999, JAN, 1, 0, 0, 0, 750)) // repetition
       expect(atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 33, 0)))
-      .toBe(Date.UTC(1999, JAN, 1, 0, 0, 1, 0))
+        .toBe(Date.UTC(1999, JAN, 1, 0, 0, 1, 0))
       expect(atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 33, 250)))
-      .toBe(Date.UTC(1999, JAN, 1, 0, 0, 1, 250))
+        .toBe(Date.UTC(1999, JAN, 1, 0, 0, 1, 250))
     })
   })
 
@@ -144,66 +144,66 @@ describe('convert', () => {
 
       // Actual start of TAI: 1961-01-01 00:00:01.422818
       expect(atomicToUnix(Date.UTC(1961, JAN, 1, 0, 0, 1, 423)))
-      .toBe(Date.UTC(1961, JAN, 1, 0, 0, 0, 0))
+        .toBe(Date.UTC(1961, JAN, 1, 0, 0, 0, 0))
       expect(atomicToUnix(-283996798577))
-      .toBe(-283996800000) // same
+        .toBe(-283996800000) // same
     })
 
     it('handles the start of 1972', () => {
       expect(atomicToUnix(Date.UTC(1972, JAN, 1, 0, 0, 10, 0)))
-      .toBe(Date.UTC(1972, JAN, 1, 0, 0, 0, 0))
+        .toBe(Date.UTC(1972, JAN, 1, 0, 0, 0, 0))
     })
 
     it('0.107758 seconds added, start of 1972', () => {
       expect(atomicToUnix(Date.UTC(1972, JAN, 1, 0, 0, 9, 890)))
-      .toBe(Date.UTC(1971, DEC, 31, 23, 59, 59, 997))
+        .toBe(Date.UTC(1971, DEC, 31, 23, 59, 59, 997))
       expect(atomicToUnix(Date.UTC(1972, JAN, 1, 0, 0, 9, 891)))
-      .toBe(Date.UTC(1971, DEC, 31, 23, 59, 59, 998))
+        .toBe(Date.UTC(1971, DEC, 31, 23, 59, 59, 998))
       expect(atomicToUnix(Date.UTC(1972, JAN, 1, 0, 0, 9, 892)))
-      .toBe(Date.UTC(1971, DEC, 31, 23, 59, 59, 999))
+        .toBe(Date.UTC(1971, DEC, 31, 23, 59, 59, 999))
       // instants from 1972-01-01 00:00:09.892242 TAI onwards have multiple preimages
       expect(() => atomicToUnix(Date.UTC(1972, JAN, 1, 0, 0, 9, 893))).toThrow()
       expect(() => atomicToUnix(Date.UTC(1972, JAN, 1, 0, 0, 9, 999))).toThrow()
       // Leap time over
       expect(atomicToUnix(Date.UTC(1972, JAN, 1, 0, 0, 10, 0)))
-      .toBe(Date.UTC(1972, JAN, 1, 0, 0, 0, 0))
+        .toBe(Date.UTC(1972, JAN, 1, 0, 0, 0, 0))
 
       // After this point in time, conversions become far simpler and always integer numbers of milliseconds
       expect(atomicToUnix(Date.UTC(1972, JAN, 1, 0, 0, 10, 1)))
-      .toBe(Date.UTC(1972, JAN, 1, 0, 0, 0, 1))
+        .toBe(Date.UTC(1972, JAN, 1, 0, 0, 0, 1))
       expect(atomicToUnix(Date.UTC(1972, JAN, 1, 0, 0, 10, 2)))
-      .toBe(Date.UTC(1972, JAN, 1, 0, 0, 0, 2))
+        .toBe(Date.UTC(1972, JAN, 1, 0, 0, 0, 2))
       // etc.
     })
 
     it('typical', () => {
       // A typical leap second from the past, note non-canonical times
       expect(atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 29, 750)))
-      .toBe(Date.UTC(1998, DEC, 31, 23, 59, 58, 750))
+        .toBe(Date.UTC(1998, DEC, 31, 23, 59, 58, 750))
       expect(atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 30, 0)))
-      .toBe(Date.UTC(1998, DEC, 31, 23, 59, 59, 0))
+        .toBe(Date.UTC(1998, DEC, 31, 23, 59, 59, 0))
       expect(atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 30, 250)))
-      .toBe(Date.UTC(1998, DEC, 31, 23, 59, 59, 250))
+        .toBe(Date.UTC(1998, DEC, 31, 23, 59, 59, 250))
       expect(atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 30, 500)))
-      .toBe(Date.UTC(1998, DEC, 31, 23, 59, 59, 500))
+        .toBe(Date.UTC(1998, DEC, 31, 23, 59, 59, 500))
       expect(atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 30, 750)))
-      .toBe(Date.UTC(1998, DEC, 31, 23, 59, 59, 750))
+        .toBe(Date.UTC(1998, DEC, 31, 23, 59, 59, 750))
       expect(() => atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 31, 0))).toThrow()
       expect(() => atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 31, 250))).toThrow()
       expect(() => atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 31, 500))).toThrow()
       expect(() => atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 31, 750))).toThrow()
       expect(atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 32, 0)))
-      .toBe(Date.UTC(1999, JAN, 1, 0, 0, 0, 0))
+        .toBe(Date.UTC(1999, JAN, 1, 0, 0, 0, 0))
       expect(atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 32, 250)))
-      .toBe(Date.UTC(1999, JAN, 1, 0, 0, 0, 250))
+        .toBe(Date.UTC(1999, JAN, 1, 0, 0, 0, 250))
       expect(atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 32, 500)))
-      .toBe(Date.UTC(1999, JAN, 1, 0, 0, 0, 500))
+        .toBe(Date.UTC(1999, JAN, 1, 0, 0, 0, 500))
       expect(atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 32, 750)))
-      .toBe(Date.UTC(1999, JAN, 1, 0, 0, 0, 750))
+        .toBe(Date.UTC(1999, JAN, 1, 0, 0, 0, 750))
       expect(atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 33, 0)))
-      .toBe(Date.UTC(1999, JAN, 1, 0, 0, 1, 0))
+        .toBe(Date.UTC(1999, JAN, 1, 0, 0, 1, 0))
       expect(atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 33, 250)))
-      .toBe(Date.UTC(1999, JAN, 1, 0, 0, 1, 250))
+        .toBe(Date.UTC(1999, JAN, 1, 0, 0, 1, 250))
     })
   })
 
@@ -222,76 +222,83 @@ describe('convert', () => {
 
     it('icky', () => {
       // Again with the icky floating point comparisons. Fun fact! There is about 105 leap milliseconds here!
-      expect(tai.oneToMany.unixToAtomic(Date.UTC(1972, JAN, 1, 0, 0, 0, 0))).toEqual([
-        Date.UTC(1972, JAN, 1, 0, 0, 9, 892), // should be + 0.242004 but rounded towards 1970
-        Date.UTC(1972, JAN, 1, 0, 0, 10, 0)
-      ])
+      expect(tai.oneToMany.unixToAtomic(Date.UTC(1972, JAN, 1, 0, 0, 0, 0)))
+        .toEqual([
+          Date.UTC(1972, JAN, 1, 0, 0, 9, 892), // should be + 0.242004 but rounded towards 1970
+          Date.UTC(1972, JAN, 1, 0, 0, 10, 0)
+        ])
       expect(tai.oneToMany.unixToAtomic(Date.UTC(1972, JAN, 1, 0, 0, 0, 1)).length)
-      .toBe(2)
+        .toBe(2)
       expect(tai.oneToMany.unixToAtomic(Date.UTC(1972, JAN, 1, 0, 0, 0, 1))[1])
-      .toBe(Date.UTC(1972, JAN, 1, 0, 0, 10, 1))
+        .toBe(Date.UTC(1972, JAN, 1, 0, 0, 10, 1))
       expect(tai.oneToOne.unixToAtomic(Date.UTC(1972, JAN, 1, 0, 0, 0, 2)))
-      .toBe(Date.UTC(1972, JAN, 1, 0, 0, 10, 2))
+        .toBe(Date.UTC(1972, JAN, 1, 0, 0, 10, 2))
       // etc.
     })
 
     it('typical', () => {
       // A typical leap second from the past, note repetition
       expect(tai.oneToOne.unixToAtomic(Date.UTC(1998, DEC, 31, 23, 59, 58, 750)))
-      .toBe(Date.UTC(1999, JAN, 1, 0, 0, 29, 750))
+        .toBe(Date.UTC(1999, JAN, 1, 0, 0, 29, 750))
       expect(tai.oneToOne.unixToAtomic(Date.UTC(1998, DEC, 31, 23, 59, 59, 0)))
-      .toBe(Date.UTC(1999, JAN, 1, 0, 0, 30, 0))
+        .toBe(Date.UTC(1999, JAN, 1, 0, 0, 30, 0))
       expect(tai.oneToOne.unixToAtomic(Date.UTC(1998, DEC, 31, 23, 59, 59, 250)))
-      .toBe(Date.UTC(1999, JAN, 1, 0, 0, 30, 250))
+        .toBe(Date.UTC(1999, JAN, 1, 0, 0, 30, 250))
       expect(tai.oneToOne.unixToAtomic(Date.UTC(1998, DEC, 31, 23, 59, 59, 500)))
-      .toBe(Date.UTC(1999, JAN, 1, 0, 0, 30, 500))
+        .toBe(Date.UTC(1999, JAN, 1, 0, 0, 30, 500))
 
-      expect(tai.oneToMany.unixToAtomic(Date.UTC(1998, DEC, 31, 23, 59, 59, 750))).toEqual([
-        Date.UTC(1999, JAN, 1, 0, 0, 30, 750)
-      ])
+      expect(tai.oneToMany.unixToAtomic(Date.UTC(1998, DEC, 31, 23, 59, 59, 750)))
+        .toEqual([
+          Date.UTC(1999, JAN, 1, 0, 0, 30, 750)
+        ])
       expect(tai.oneToOne.unixToAtomic(Date.UTC(1998, DEC, 31, 23, 59, 59, 750)))
-      .toBe(Date.UTC(1999, JAN, 1, 0, 0, 30, 750))
+        .toBe(Date.UTC(1999, JAN, 1, 0, 0, 30, 750))
 
-      expect(tai.oneToMany.unixToAtomic(Date.UTC(1999, JAN, 1, 0, 0, 0, 0))).toEqual([
-        Date.UTC(1999, JAN, 1, 0, 0, 31, 0),
-        Date.UTC(1999, JAN, 1, 0, 0, 32, 0)
-      ])
+      expect(tai.oneToMany.unixToAtomic(Date.UTC(1999, JAN, 1, 0, 0, 0, 0)))
+        .toEqual([
+          Date.UTC(1999, JAN, 1, 0, 0, 31, 0),
+          Date.UTC(1999, JAN, 1, 0, 0, 32, 0)
+        ])
       expect(tai.oneToOne.unixToAtomic(Date.UTC(1999, JAN, 1, 0, 0, 0, 0)))
-      .toBe(Date.UTC(1999, JAN, 1, 0, 0, 32, 0))
+        .toBe(Date.UTC(1999, JAN, 1, 0, 0, 32, 0))
 
-      expect(tai.oneToMany.unixToAtomic(Date.UTC(1999, JAN, 1, 0, 0, 0, 250))).toEqual([
-        Date.UTC(1999, JAN, 1, 0, 0, 31, 250),
-        Date.UTC(1999, JAN, 1, 0, 0, 32, 250)
-      ])
+      expect(tai.oneToMany.unixToAtomic(Date.UTC(1999, JAN, 1, 0, 0, 0, 250)))
+        .toEqual([
+          Date.UTC(1999, JAN, 1, 0, 0, 31, 250),
+          Date.UTC(1999, JAN, 1, 0, 0, 32, 250)
+        ])
       expect(tai.oneToOne.unixToAtomic(Date.UTC(1999, JAN, 1, 0, 0, 0, 250)))
-      .toBe(Date.UTC(1999, JAN, 1, 0, 0, 32, 250))
+        .toBe(Date.UTC(1999, JAN, 1, 0, 0, 32, 250))
 
-      expect(tai.oneToMany.unixToAtomic(Date.UTC(1999, JAN, 1, 0, 0, 0, 500))).toEqual([
-        Date.UTC(1999, JAN, 1, 0, 0, 31, 500),
-        Date.UTC(1999, JAN, 1, 0, 0, 32, 500)
-      ])
+      expect(tai.oneToMany.unixToAtomic(Date.UTC(1999, JAN, 1, 0, 0, 0, 500)))
+        .toEqual([
+          Date.UTC(1999, JAN, 1, 0, 0, 31, 500),
+          Date.UTC(1999, JAN, 1, 0, 0, 32, 500)
+        ])
       expect(tai.oneToOne.unixToAtomic(Date.UTC(1999, JAN, 1, 0, 0, 0, 500)))
-      .toBe(Date.UTC(1999, JAN, 1, 0, 0, 32, 500))
+        .toBe(Date.UTC(1999, JAN, 1, 0, 0, 32, 500))
 
-      expect(tai.oneToMany.unixToAtomic(Date.UTC(1999, JAN, 1, 0, 0, 0, 750))).toEqual([
-        Date.UTC(1999, JAN, 1, 0, 0, 31, 750),
-        Date.UTC(1999, JAN, 1, 0, 0, 32, 750)
-      ])
+      expect(tai.oneToMany.unixToAtomic(Date.UTC(1999, JAN, 1, 0, 0, 0, 750)))
+        .toEqual([
+          Date.UTC(1999, JAN, 1, 0, 0, 31, 750),
+          Date.UTC(1999, JAN, 1, 0, 0, 32, 750)
+        ])
       expect(tai.oneToOne.unixToAtomic(Date.UTC(1999, JAN, 1, 0, 0, 0, 750)))
-      .toBe(Date.UTC(1999, JAN, 1, 0, 0, 32, 750))
+        .toBe(Date.UTC(1999, JAN, 1, 0, 0, 32, 750))
 
-      expect(tai.oneToMany.unixToAtomic(Date.UTC(1999, JAN, 1, 0, 0, 1, 0))).toEqual([
-        Date.UTC(1999, JAN, 1, 0, 0, 33, 0)
-      ])
+      expect(tai.oneToMany.unixToAtomic(Date.UTC(1999, JAN, 1, 0, 0, 1, 0)))
+        .toEqual([
+          Date.UTC(1999, JAN, 1, 0, 0, 33, 0)
+        ])
       expect(tai.oneToOne.unixToAtomic(Date.UTC(1999, JAN, 1, 0, 0, 1, 0)))
-      .toBe(Date.UTC(1999, JAN, 1, 0, 0, 33, 0))
+        .toBe(Date.UTC(1999, JAN, 1, 0, 0, 33, 0))
       expect(tai.oneToOne.unixToAtomic(Date.UTC(1999, JAN, 1, 0, 0, 1, 250)))
-      .toBe(Date.UTC(1999, JAN, 1, 0, 0, 33, 250))
+        .toBe(Date.UTC(1999, JAN, 1, 0, 0, 33, 250))
     })
 
     it('Now-ish', () => {
       expect(tai.oneToOne.unixToAtomic(Date.UTC(2016, OCT, 27, 20, 5, 14, 678)))
-      .toBe(Date.UTC(2016, OCT, 27, 20, 5, 50, 678))
+        .toBe(Date.UTC(2016, OCT, 27, 20, 5, 50, 678))
     })
   })
 
@@ -304,12 +311,14 @@ describe('convert', () => {
       .toBe(915148799000)
     expect(tai.oneToOne.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 30)))
       .toBe(Date.UTC(1998, DEC, 31, 23, 59, 59))
-    expect(tai.oneToMany.unixToAtomic(915148800000)).toEqual([915148831000, 915148832000])
+    expect(tai.oneToMany.unixToAtomic(915148800000))
+      .toEqual([915148831000, 915148832000])
     expect(tai.oneToMany.atomicToUnix(915148831000))
       .toBe(915148800000)
     expect(tai.oneToMany.atomicToUnix(915148832000))
       .toBe(915148800000)
-    expect(() => tai.oneToOne.atomicToUnix(915148831000)).toThrow()
+    expect(() => tai.oneToOne.atomicToUnix(915148831000))
+      .toThrow()
   })
 
   it('Crazy pre-1972 nonsense', () => {

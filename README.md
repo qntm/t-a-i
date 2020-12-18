@@ -30,13 +30,13 @@ const tai = require("t-a-i")
 const unixStart = Date.UTC(1972, 0, 1) // 63_072_000_000
 const unixEnd   = Date.UTC(1973, 0, 1) // 94_694_400_000
 
-console.log(end - start)
+console.log(unixEnd - unixStart)
 // 31_622_400_000 milliseconds - wrong answer!
 
-const taiStart = tai.oneToOne.unixToAtomic(unixStart) // 63_072_010_000
-const taiEnd   = tai.oneToOne.unixToAtomic(unixEnd)   // 94_694_412_000
+const atomicStart = tai.oneToOne.unixToAtomic(unixStart) // 63_072_010_000
+const atomicEnd   = tai.oneToOne.unixToAtomic(unixEnd)   // 94_694_412_000
 
-console.log(taiEnd - taiStart)
+console.log(atomicEnd - atomicStart)
 // 31_622_402_000 milliseconds - right, including two leap seconds!
 ```
 
@@ -45,23 +45,34 @@ What is the current offset between TAI and Unix time?
 ```javascript
 const now = Date.now()
 const offset = tai.oneToOne.unixToAtomic(now) - now
+
+console.log(offset)
 // 37_000 at the time of writing; TAI is 37 seconds ahead of Unix time
+```
+
+What was TAI, exactly, at the Unix epoch?
+
+```javascript
+tai.oneToOne.unixToAtomicPicos(0)
+// 8000_082_000_000n TAI picoseconds, i.e. 1970-01-01 00:00:08.000_082 TAI
 ```
 
 Note! Use caution when constructing a `Date` object directly from a TAI millisecond count. A `Date` represents an instant in Unix time, not an instant in TAI, and the object's method names and method behaviours reflect this. Instead, consider using a [`TaiDate`](https://github.com/ferno/tai-date)!
 
 ## API
 
-All conversion methods throw an exception if the input or output is prior to the beginning of TAI, which was, equivalently:
+Note that the beginning of TAI was, equivalently:
 
 * 1961-01-01 00:00:00.000000 UTC
 * 1961-01-01 00:00:01.422818 TAI
 * -283996800000.000 Unix time
 * -283996798577.182 TAI milliseconds
 
-All methods throw exceptions if not passed an integer number of milliseconds.
+Methods fail or return empty result sets if called with times before the beginning of TAI.
 
-Note that for times prior to the beginning of 1972, TAI milliseconds and Unix milliseconds were not the same length. Results are always integer numbers of milliseconds, with fractions rounded towards `0`.
+All methods throw exceptions if not passed an integer number of milliseconds. For example, calling `atomicToUnix(-283996798577.182)` throws an exception.
+
+Note that for times prior to the beginning of 1972, TAI milliseconds and Unix milliseconds were not the same length. Results are always integer numbers of milliseconds, with fractions rounded towards negative infinity. In most cases, this means that **round trips do not work**.
 
 ### tai.oneToMany
 
@@ -78,6 +89,19 @@ const unix = 915_148_800_001
 tai.oneToMany.unixToAtomic(unix)
 // [915_148_831_001, 915_148_832_001]
 // i.e. [1999-01-01 00:00:31.001 TAI, 1999-01-01 00:00:32.001 TAI]
+```
+
+#### tai.oneToMany.unixToAtomicPicos(unix)
+
+As `tai.oneToMany.unixToAtomic`, but returns an array of precise TAI picosecond counts as `BigInt`s.
+
+```javascript
+const unix = -157_766_399_910
+// 1965-01-01 00:00:00.090 UTC
+
+tai.oneToMany.unixToAtomicPicos(unix)
+// [-157_766_396_469_869_998_650n, -157_766_396_369_869_998_650n]
+// i.e. [1965-01-01 00:00:03.530_130_001_350 TAI, 1965-01-01 00:00:03.630_130_001_350 TAI]
 ```
 
 #### tai.oneToMany.atomicToUnix(atomic)
@@ -113,9 +137,22 @@ tai.oneToOne.unixToAtomic(unix)
 // i.e. 1999-01-01 00:00:32.001 TAI
 ```
 
+#### tai.oneToOne.unixToAtomicPicos(unix)
+
+As `tai.oneToOne.unixToAtomic`, but returns a precise TAI picosecond count as a `BigInt`.
+
+```javascript
+const unix = -157_766_399_910
+// 1965-01-01 00:00:00.090 UTC
+
+tai.oneToOne.unixToAtomicPicos(unix)
+// -157_766_396_369_869_998_650n
+// i.e. 1965-01-01 00:00:03.630_130_001_350 TAI
+```
+
 #### tai.oneToOne.atomicToUnix(atomic)
 
-Convert a number of TAI milliseconds back to Unix milliseconds. If the TAI time falls during the first part of an inserted leap second, it is not a "canonical" TAI instant, so throw an exception.
+Convertx a number of TAI milliseconds back to Unix milliseconds. If the TAI time falls during the first part of an inserted leap second, it is not a "canonical" TAI instant, so throws an exception.
 
 ```javascript
 const atomic1 = 915_148_831_001 // 1999-01-01 00:00:31.001 TAI
