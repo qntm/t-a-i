@@ -1,5 +1,5 @@
 // Several complex conditions in this code are intentionally left more complex than strictly
-// necessary, in order to encourage testing
+// necessary, in order to force more exhaustive testing
 
 const picosPerMilli = 1000n * 1000n * 1000n
 

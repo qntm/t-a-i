@@ -117,13 +117,79 @@ describe('munge', () => {
 
   it('fails on a bad drift rate', () => {
     expect(() => munge([
-      [Date.UTC(1961, JAN, 1), 1.422_818_0, 37_300n, 0.001]
+      [Date.UTC(1961, JAN, 1), 1.422_818_0, 37_300, 0.001]
     ])).toThrowError('Could not compute precise drift rate')
+  })
+
+  it('fails on a negative ratio', () => {
+    // TAI runs way faster than UTC
+    expect(munge([
+      [Date.UTC(1970, JAN, 1), 0, 40_587, 8.640_0]
+    ])).toEqual([{
+      blockStart: { unixMillis: 0, atomicPicos: 0n },
+      ratio: { atomicPicosPerUnixMilli: 1_000_100_000n },
+      offsetAtUnixEpoch: { atomicPicos: 0n },
+      blockEnd: { atomicPicos: Infinity },
+      overlapStart: { atomicPicos: Infinity }
+    }])
+
+    // UTC and TAI run at identical rates
+    expect(munge([
+      [Date.UTC(1970, JAN, 1), 0, 40_587, 0]
+    ])).toEqual([{
+      blockStart: { unixMillis: 0, atomicPicos: 0n },
+      ratio: { atomicPicosPerUnixMilli: 1_000_000_000n },
+      offsetAtUnixEpoch: { atomicPicos: 0n },
+      blockEnd: { atomicPicos: Infinity },
+      overlapStart: { atomicPicos: Infinity }
+    }])
+
+    // TAI runs way slower than UTC
+    expect(munge([
+      [Date.UTC(1970, JAN, 1), 0, 40_587, -8.640_0]
+    ])).toEqual([{
+      blockStart: { unixMillis: 0, atomicPicos: 0n },
+      ratio: { atomicPicosPerUnixMilli: 999_900_000n },
+      offsetAtUnixEpoch: { atomicPicos: 0n },
+      blockEnd: { atomicPicos: Infinity },
+      overlapStart: { atomicPicos: Infinity }
+    }])
+
+    // TAI moves at one ten-thousandth the rate of UTC!
+    // Equivalently, UTC moves 10,000 times the rate of TAI
+    expect(munge([
+      [Date.UTC(1970, JAN, 1), 0, 40_587, -86_400 + 8.640_0]
+    ])).toEqual([{
+      blockStart: { unixMillis: 0, atomicPicos: 0n },
+      ratio: { atomicPicosPerUnixMilli: 100_000n },
+      offsetAtUnixEpoch: { atomicPicos: 0n },
+      blockEnd: { atomicPicos: Infinity },
+      overlapStart: { atomicPicos: Infinity }
+    }])
+
+    // TAI does not move at ALL
+    // Equivalently, UTC moves infinitely quickly.
+    // Technically we do still allow this, although conversions from TAI to UTC cause divide-by-
+    // zero errors.
+    expect(munge([
+      [Date.UTC(1970, JAN, 1), 0, 40_587, -86_400]
+    ])).toEqual([{
+      blockStart: { unixMillis: 0, atomicPicos: 0n },
+      ratio: { atomicPicosPerUnixMilli: 0n },
+      offsetAtUnixEpoch: { atomicPicos: 0n },
+      blockEnd: { atomicPicos: Infinity },
+      overlapStart: { atomicPicos: Infinity }
+    }])
+
+    // TAI runs backwards: OK this is actually illegal and unsupported right now
+    expect(() => munge([
+      [Date.UTC(1970, JAN, 1), 0, 40_587, -86_400 - 8.640_0]
+    ])).toThrowError('Universal Time cannot run backwards yet')
   })
 
   it('works with the first line of real data', () => {
     expect(munge([
-      [Date.UTC(1961, JAN, 1), 1.422_818_0, 37_300n, 0.001_296]
+      [Date.UTC(1961, JAN, 1), 1.422_818_0, 37_300, 0.001_296]
     ])).toEqual([{
       blockStart: {
         unixMillis: -283_996_800_000,
