@@ -9,10 +9,6 @@ const picosPerMilli = 1000n * 1000n * 1000n
 module.exports = data => {
   const blocks = munge(data)
 
-  if (!(0 in blocks)) {
-    throw Error('No blocks')
-  }
-
   const unixMillisToBlocksWithAtomicPicos = unixMillis => {
     if (!Number.isInteger(unixMillis)) {
       throw Error(`Not an integer: ${unixMillis}`)
@@ -63,7 +59,7 @@ module.exports = data => {
         }
 
         // No need to test against the block end, since we rounded towards negative infinity.
-        // Even if the block length is 0 it would be impossible for this to happen
+        // Even if the block length is 0 it would be impossible for upward overflow to happen
         return true
       })
       .map(({ atomicMillis }) => Number(atomicMillis))
@@ -132,18 +128,18 @@ module.exports = data => {
         block.offsetAtUnixEpoch.atomicPicos
       : Infinity
 
-    const overlaps = overlapStart.atomicPicos <= BigInt(atomicMillis) * picosPerMilli
+    const overlapsNextBlock = overlapStart.atomicPicos <= BigInt(atomicMillis) * picosPerMilli
 
-    return { unixMillis, overlaps }
+    return { unixMillis, overlapsNextBlock }
   }
 
   const atomicMillisToUnixMillis = atomicMillis =>
     atomicMillisToBlockWithUnixMillis(atomicMillis).unixMillis
 
   const canonicalAtomicMillisToUnixMillis = atomicMillis => {
-    const { unixMillis, overlaps } = atomicMillisToBlockWithUnixMillis(atomicMillis)
+    const { unixMillis, overlapsNextBlock } = atomicMillisToBlockWithUnixMillis(atomicMillis)
 
-    if (overlaps) {
+    if (overlapsNextBlock) {
       // There is a later atomic time which converts to the same UTC time as this one
       // That means we are "non-canonical"
       throw Error(`No UTC equivalent: ${atomicMillis}`)

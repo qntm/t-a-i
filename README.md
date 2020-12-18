@@ -206,58 +206,10 @@ Unix time seems to be built around an assumption that UTC follows an idealised G
 * 0.000 Unix time
 * 8000.082 TAI milliseconds
 
-, not counting leap seconds. For example, 1999-01-01 00:00:00 UTC is 915148800000 Unix milliseconds.
+, not counting leap seconds. For example, 1999-01-01 00:00:00 UTC is 915,148,800,000 Unix milliseconds.
 
 Unix time can be computed from any Gregorian calendar date and time using a relatively simple piece of arithmetic, and the reverse calculation is also simple. Unix time can be extended backwards to negative numbers.
 
-Unix time therefore has the same issues as UTC when it comes to removed time; certain millisecond counts literally never happened. During inserted time, since Unix time is a simple real number, it can't express a time like "23:59:60", so it simply overruns, then backtracks and repeats itself.
-
-### TAI milliseconds
+Unix time therefore has the same issues as UTC when it comes to removed time; certain millisecond counts literally never happened. During inserted time, since Unix time is a simple real number, it can't express a time like "23:59:60", so it must overrun, then backtrack and repeat itself.
 
 Ironically, TAI fits the description of an idealised Gregorian calendar much better. Applying the same arithmetic to a TAI date yields TAI time, which is the number of TAI milliseconds since 1970-01-01 00:00:00 TAI.
-
-A one-time calculation using the Unix epoch as our new root yields this raw data:
-
-| Starting from this Unix time | TAI - Unix =                                       | Notes                                                |
-| ----------------------------:| --------------------------------------------------:| ---------------------------------------------------- |
-|                -283996800000 | 0.000000015&nbsp;*&nbsp;Unix&nbsp;+&nbsp;5682.7700 | Beginning of TAI                                     |
-|                -265680000000 | 0.000000015&nbsp;*&nbsp;Unix&nbsp;+&nbsp;5632.7700 | 0.05 TAI seconds removed from UTC                    |
-|                -252460800000 | 0.000000013&nbsp;*&nbsp;Unix&nbsp;+&nbsp;5127.8484 | Drift rate reduced, no discontinuity in UTC          |
-|                -194659200000 | 0.000000013&nbsp;*&nbsp;Unix&nbsp;+&nbsp;5227.8484 | 0.1 TAI seconds added to UTC                         |
-|                -189388800000 | 0.000000015&nbsp;*&nbsp;Unix&nbsp;+&nbsp;5606.6260 | Drift rate restored, no discontinuity in UTC         |
-|                -181526400000 | 0.000000015&nbsp;*&nbsp;Unix&nbsp;+&nbsp;5706.6260 | 0.1 TAI seconds added to UTC                         |
-|                -168307200000 | 0.000000015&nbsp;*&nbsp;Unix&nbsp;+&nbsp;5806.6260 | 0.1 TAI seconds added to UTC                         |
-|                -157766400000 | 0.000000015&nbsp;*&nbsp;Unix&nbsp;+&nbsp;5906.6260 | 0.1 TAI seconds added to UTC                         |
-|                -152668800000 | 0.000000015&nbsp;*&nbsp;Unix&nbsp;+&nbsp;6006.6260 | 0.1 TAI seconds added to UTC                         |
-|                -142128000000 | 0.000000015&nbsp;*&nbsp;Unix&nbsp;+&nbsp;6106.6260 | 0.1 TAI seconds added to UTC                         |
-|                -136771200000 | 0.000000015&nbsp;*&nbsp;Unix&nbsp;+&nbsp;6206.6260 | 0.1 TAI seconds added to UTC                         |
-|                -126230400000 | 0.000000030&nbsp;*&nbsp;Unix&nbsp;+&nbsp;8100.0820 | Drift rate doubled, no discontinuity in UTC          |
-|                 -60480000000 | 0.000000030&nbsp;*&nbsp;Unix&nbsp;+&nbsp;8000.0820 | 0.1 TAI seconds removed from UTC                     | 
-|                  63072010000 |                                         10000.0000 | 0.107758 TAI seconds added to UTC, drift rate zeroed |
-|                  78796810000 |                                         11000.0000 | 1.0 seconds added to UTC                             |
-|                  94694410000 |                                         12000.0000 | 1.0 seconds added to UTC                             |
-|                 126230410000 |                                         13000.0000 | etc.                                                 |
-|                 157766410000 |                                         14000.0000 |                                                      |
-|                 189302410000 |                                         15000.0000 |                                                      |
-|                 220924810000 |                                         16000.0000 |                                                      |
-|                 252460810000 |                                         17000.0000 |                                                      |
-|                 283996810000 |                                         18000.0000 |                                                      |
-|                 315532810000 |                                         19000.0000 |                                                      |
-|                 362793620000 |                                         20000.0000 |                                                      |
-|                 394329620000 |                                         21000.0000 |                                                      |
-|                 425865620000 |                                         22000.0000 |                                                      |
-|                 489024020000 |                                         23000.0000 |                                                      |
-|                 567993620000 |                                         24000.0000 |                                                      |
-|                 631152020000 |                                         25000.0000 |                                                      |
-|                 662688020000 |                                         26000.0000 |                                                      |
-|                 709948820000 |                                         27000.0000 |                                                      |
-|                 741484820000 |                                         28000.0000 |                                                      |
-|                 773020820000 |                                         29000.0000 |                                                      |
-|                 820454430000 |                                         30000.0000 |                                                      |
-|                 867715230000 |                                         31000.0000 |                                                      |
-|                 915148830000 |                                         32000.0000 |                                                      |
-|                1136073630000 |                                         33000.0000 |                                                      |
-|                1230768030000 |                                         34000.0000 |                                                      |
-|                1341100830000 |                                         35000.0000 |                                                      |
-|                1435708830000 |                                         36000.0000 |                                                      |
-|                1483228830000 |                                         37000.0000 |                                                      |

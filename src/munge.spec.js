@@ -91,7 +91,7 @@ describe('munge', () => {
     ])).toThrowError('Could not compute precise drift rate')
   })
 
-  it('fails on a negative ratio', () => {
+  it('allows a negative ratio somehow', () => {
     // TAI runs way faster than UTC
     expect(munge([
       [Date.UTC(1970, JAN, 1), 0, 40_587, 8.640_0]
@@ -141,17 +141,14 @@ describe('munge', () => {
       offsetAtUnixEpoch: { atomicPicos: 0n }
     }])
 
-    // TAI runs backwards: OK this is actually illegal and unsupported right now
-    expect(() => munge([
+    // TAI runs backwards: wild and highly untested but sure!
+    expect(munge([
       [Date.UTC(1970, JAN, 1), 0, 40_587, -86_400 - 8.640_0]
-    ])).toThrowError('Universal Time cannot run backwards yet')
-  })
-
-  it('fails on disordered blocks', () => {
-    expect(() => munge([
-      [Date.UTC(1970, JAN, 1, 0, 0, 0), 0, 40_587, 0],
-      [Date.UTC(1970, JAN, 1, 0, 0, 1), -2, 40_587, 0]
-    ])).toThrowError('Disordered blocks are not supported yet')
+    ])).toEqual([{
+      start: { unixMillis: 0, atomicPicos: 0n },
+      ratio: { atomicPicosPerUnixMilli: -100_000n },
+      offsetAtUnixEpoch: { atomicPicos: 0n }
+    }])
   })
 
   it('works with the first line of real data', () => {

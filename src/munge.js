@@ -44,10 +44,6 @@ module.exports = data => {
     ratio.atomicPicosPerUnixMilli = picosPerMilli + driftRate.atomicPicosPerUnixMilli
     // Typically 1_000_000_015n
 
-    if (ratio.atomicPicosPerUnixMilli < 0n) {
-      throw Error('Universal Time cannot run backwards yet')
-    }
-
     // `4.313_170_0 * 1000_000_000_000` evaluates to `4_313_170_000_000.000_5` so we must round
     offsetAtRoot.atomicPicos = BigInt(Math.round(offsetAtRoot.atomicSeconds * picosPerSecond))
 
@@ -62,18 +58,6 @@ module.exports = data => {
       start,
       ratio,
       offsetAtUnixEpoch
-    }
-  })
-
-  munged.forEach((block, i, arr) => {
-    if (i + 1 in arr) {
-      if (arr[i + 1].start.atomicPicos < block.start.atomicPicos) {
-        throw Error('Disordered blocks are not supported yet')
-      }
-
-      if (arr[i + 1].start.atomicPicos === block.start.atomicPicos) {
-        // throw Error('Zero-length blocks are not supported yet')
-      }
     }
   })
 

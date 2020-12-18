@@ -8,10 +8,6 @@ const DEC = 11
 const picosPerMilli = 1000n * 1000n * 1000n
 
 describe('Converter', () => {
-  it('fails on no data', () => {
-    expect(() => Converter([])).toThrowError('No blocks')
-  })
-
   describe('one block', () => {
     const data = [
       [Date.UTC(1970, JAN, 1), 0]
@@ -309,7 +305,7 @@ describe('Converter', () => {
         // no atomicToUnix can return the value above
       })
 
-      it('final instant of the Unix time discontinuity: one Unix time is two TAI times', () => {
+      it('final instant of the Unix time discontinuity: one Unix time is zero TAI times', () => {
         expect(converter.oneToMany.unixToAtomicPicos(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
           .toEqual([])
         expect(converter.oneToMany.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
