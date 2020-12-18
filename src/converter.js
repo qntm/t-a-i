@@ -124,16 +124,25 @@ module.exports = data => {
     // rounding may have occurred, rounding was towards negative infinity - there's no chance we
     // left the block by accident.
 
-    return { block, unixMillis }
+    // This can be before, exactly at, or after `end`. Before is the case we care about most.
+    const overlapStart = {}
+    overlapStart.atomicPicos = blockIndex + 1 in blocks
+      ? BigInt(blocks[blockIndex + 1].start.unixMillis) * block.ratio.atomicPicosPerUnixMilli +
+        block.offsetAtUnixEpoch.atomicPicos
+      : Infinity
+  
+    const overlaps = overlapStart.atomicPicos <= BigInt(atomicMillis) * picosPerMilli
+
+    return { unixMillis, overlaps }
   }
 
   const atomicMillisToUnixMillis = atomicMillis =>
     atomicMillisToBlockWithUnixMillis(atomicMillis).unixMillis
 
   const canonicalAtomicMillisToUnixMillis = atomicMillis => {
-    const { block, unixMillis } = atomicMillisToBlockWithUnixMillis(atomicMillis)
+    const { unixMillis, overlaps } = atomicMillisToBlockWithUnixMillis(atomicMillis)
 
-    if (block.overlapStart.atomicPicos <= BigInt(atomicMillis) * picosPerMilli) {
+    if (overlaps) {
       // There is a later atomic time which converts to the same UTC time as this one
       // That means we are "non-canonical"
       throw Error(`No UTC equivalent: ${atomicMillis}`)

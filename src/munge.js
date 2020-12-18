@@ -73,13 +73,6 @@ module.exports = data => {
         throw Error('Zero-length blocks are not supported yet')
       }
     }
-
-    // This can be before, exactly at, or after `end`. Before is the case we care about most.
-    block.overlapStart = {}
-    block.overlapStart.atomicPicos = i + 1 in arr
-      ? BigInt(arr[i + 1].start.unixMillis) * block.ratio.atomicPicosPerUnixMilli +
-        block.offsetAtUnixEpoch.atomicPicos
-      : Infinity
   })
 
   return munged

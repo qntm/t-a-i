@@ -27,9 +27,6 @@ describe('munge', () => {
       offsetAtRoot: {
         atomicPicos: 0n,
         atomicSeconds: 0
-      },
-      overlapStart: {
-        atomicPicos: Infinity
       }
     }])
   })
@@ -55,9 +52,6 @@ describe('munge', () => {
       offsetAtRoot: {
         atomicPicos: -4_000_000_000_000n,
         atomicSeconds: -4
-      },
-      overlapStart: {
-        atomicPicos: Infinity
       }
     }])
   })
@@ -89,9 +83,6 @@ describe('munge', () => {
       offsetAtRoot: {
         atomicPicos: -4_000_000_000_000n,
         atomicSeconds: -4
-      },
-      overlapStart: {
-        atomicPicos: 5_000_000_000_000n
       }
     }, {
       start: {
@@ -111,9 +102,6 @@ describe('munge', () => {
       offsetAtRoot: {
         atomicPicos: -3_000_000_000_000n,
         atomicSeconds: -3
-      },
-      overlapStart: {
-        atomicPicos: 10_000_000_000_000n
       }
     }, {
       start: {
@@ -133,9 +121,6 @@ describe('munge', () => {
       offsetAtRoot: {
         atomicPicos: -4_000_000_000_000n,
         atomicSeconds: -4
-      },
-      overlapStart: {
-        atomicPicos: Infinity
       }
     }])
   })
@@ -155,8 +140,7 @@ describe('munge', () => {
       ratio: { atomicPicosPerUnixMilli: 1_000_100_000n },
       offsetAtUnixEpoch: { atomicPicos: 0n },
       root: { mjds: 40587, unixMillis: 0 },
-      offsetAtRoot: { atomicPicos: 0n, atomicSeconds: 0 },
-      overlapStart: { atomicPicos: Infinity }
+      offsetAtRoot: { atomicPicos: 0n, atomicSeconds: 0 }
     }])
 
     // UTC and TAI run at identical rates
@@ -167,8 +151,7 @@ describe('munge', () => {
       ratio: { atomicPicosPerUnixMilli: 1_000_000_000n },
       offsetAtUnixEpoch: { atomicPicos: 0n },
       root: { mjds: 40587, unixMillis: 0 },
-      offsetAtRoot: { atomicPicos: 0n, atomicSeconds: 0 },
-      overlapStart: { atomicPicos: Infinity }
+      offsetAtRoot: { atomicPicos: 0n, atomicSeconds: 0 }
     }])
 
     // TAI runs way slower than UTC
@@ -179,8 +162,7 @@ describe('munge', () => {
       ratio: { atomicPicosPerUnixMilli: 999_900_000n },
       offsetAtUnixEpoch: { atomicPicos: 0n },
       root: { mjds: 40587, unixMillis: 0 },
-      offsetAtRoot: { atomicPicos: 0n, atomicSeconds: 0 },
-      overlapStart: { atomicPicos: Infinity }
+      offsetAtRoot: { atomicPicos: 0n, atomicSeconds: 0 }
     }])
 
     // TAI moves at one ten-thousandth the rate of UTC!
@@ -192,8 +174,7 @@ describe('munge', () => {
       ratio: { atomicPicosPerUnixMilli: 100_000n },
       offsetAtUnixEpoch: { atomicPicos: 0n },
       root: { mjds: 40587, unixMillis: 0 },
-      offsetAtRoot: { atomicPicos: 0n, atomicSeconds: 0 },
-      overlapStart: { atomicPicos: Infinity }
+      offsetAtRoot: { atomicPicos: 0n, atomicSeconds: 0 }
     }])
 
     // TAI does not move at ALL
@@ -207,8 +188,7 @@ describe('munge', () => {
       ratio: { atomicPicosPerUnixMilli: 0n },
       offsetAtUnixEpoch: { atomicPicos: 0n },
       root: { mjds: 40587, unixMillis: 0 },
-      offsetAtRoot: { atomicPicos: 0n, atomicSeconds: 0 },
-      overlapStart: { atomicPicos: Infinity }
+      offsetAtRoot: { atomicPicos: 0n, atomicSeconds: 0 }
     }])
 
     // TAI runs backwards: OK this is actually illegal and unsupported right now
@@ -252,9 +232,6 @@ describe('munge', () => {
       offsetAtRoot: {
         atomicPicos: 1_422_818_000_000n,
         atomicSeconds: 1.422_818_0
-      },
-      overlapStart: {
-        atomicPicos: Infinity
       }
     }])
   })
@@ -353,7 +330,14 @@ describe('munge', () => {
 
   it('generates proper overlaps', () => {
     expect(munge(taiData).map((block, i, arr) =>
-      (i + 1 in arr ? arr[i + 1].start.atomicPicos : Infinity) - block.overlapStart.atomicPicos
+      i + 1 in arr
+        ? (
+          // block end minus overlap start
+          arr[i + 1].start.atomicPicos -
+          BigInt(arr[i + 1].start.unixMillis) * block.ratio.atomicPicosPerUnixMilli -
+          block.offsetAtUnixEpoch.atomicPicos
+        )
+        : NaN
     )).toEqual([
       -50_000_000_000n,
       0n,

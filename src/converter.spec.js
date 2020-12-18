@@ -450,9 +450,6 @@ describe('Converter', () => {
           offsetAtRoot: {
             atomicPicos: -100_000_000n,
             atomicSeconds: -0.0001
-          },
-          overlapStart: {
-            atomicPicos: Infinity
           }
         }])
 
@@ -487,9 +484,6 @@ describe('Converter', () => {
           offsetAtRoot: {
             atomicPicos: 100_000_000n,
             atomicSeconds: 0.0001
-          },
-          overlapStart: {
-            atomicPicos: 1_100_000_000n
           }
         }, {
           start: {
@@ -509,9 +503,6 @@ describe('Converter', () => {
           offsetAtRoot: {
             atomicPicos: -1100_000_000n,
             atomicSeconds: -0.0011
-          },
-          overlapStart: {
-            atomicPicos: Infinity
           }
         }])
 
