@@ -429,19 +429,19 @@ describe('Converter', () => {
     describe('when unixMillis converts to an atomicPicos which fits but an atomicMillis which does not', () => {
       it('at the start of the block', () => {
         const blocks = munge([
-          [BigInt(Date.UTC(1970, JAN, 1, 0, 0, 0, 1)), -100n]
+          [BigInt(Date.UTC(1970, JAN, 1, 0, 0, 0, 1)), -100_000_000n]
         ])
 
         expect(blocks).toEqual([{
           blockStart: {
             unixMillis: 1n,
-            atomicPicos: 999_999_900n // block start intentionally doesn't include TAI epoch
+            atomicPicos: 900_000_000n // block start intentionally doesn't include TAI epoch
           },
           ratio: {
             atomicPicosPerUnixMilli: 1_000_000_000n
           },
           offsetAtUnixEpoch: {
-            atomicPicos: -100n
+            atomicPicos: -100_000_000n
           },
           blockEnd: {
             atomicPicos: Infinity
@@ -452,45 +452,44 @@ describe('Converter', () => {
         }])
 
         const converter = Converter(blocks)
-        expect(converter.oneToMany.unixToAtomicPicos(1)).toEqual([999_999_900n])
+        expect(converter.oneToMany.unixToAtomicPicos(1)).toEqual([900_000_000n])
         // rounds down to 0, which is not in the block
         expect(converter.oneToMany.unixToAtomic(1)).toEqual([])
       })
 
       it('at the end of the block', () => {
-        // TODO: unmunge this
         const blocks = munge([
-          [BigInt(Date.UTC(1969, DEC, 31, 23, 59, 59, 999)), 100n],
-          [BigInt(Date.UTC(1970, JAN, 1, 0, 0, 0, 1)), -1_000_000_100n]
+          [BigInt(Date.UTC(1969, DEC, 31, 23, 59, 59, 999)), 100_000_000n],
+          [BigInt(Date.UTC(1970, JAN, 1, 0, 0, 0, 1)), -1_100_000_000n]
         ])
 
         expect(blocks).toEqual([{
           blockStart: {
             unixMillis: -1n,
-            atomicPicos: -999_999_900n
+            atomicPicos: -900_000_000n
           },
           ratio: {
             atomicPicosPerUnixMilli: 1_000_000_000n
           },
           offsetAtUnixEpoch: {
-            atomicPicos: 100n
+            atomicPicos: 100_000_000n
           },
           blockEnd: {
-            atomicPicos: -100n // block end intentionally doesn't include TAI epoch
+            atomicPicos: -100_000_000n // block end intentionally doesn't include TAI epoch
           },
           overlapStart: {
-            atomicPicos: 1_000_000_100n
+            atomicPicos: 1_100_000_000n
           }
         }, {
           blockStart: {
             unixMillis: 1n,
-            atomicPicos: -100n
+            atomicPicos: -100_000_000n
           },
           ratio: {
             atomicPicosPerUnixMilli: 1_000_000_000n
           },
           offsetAtUnixEpoch: {
-            atomicPicos: -1_000_000_100n
+            atomicPicos: -1_100_000_000n
           },
           blockEnd: {
             atomicPicos: Infinity
@@ -501,7 +500,7 @@ describe('Converter', () => {
         }])
 
         const converter = Converter(blocks)
-        expect(converter.oneToMany.unixToAtomicPicos(-1)).toEqual([-999_999_900n])
+        expect(converter.oneToMany.unixToAtomicPicos(-1)).toEqual([-900_000_000n])
         // rounds up to 0, which is not in the block
         expect(converter.oneToMany.unixToAtomic(-1)).toEqual([])
       })
