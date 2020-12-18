@@ -14,24 +14,11 @@ describe('munge', () => {
         atomicPicos: 0n,
         unixMillis: 0
       },
-      driftRate: {
-        atomicPicosPerUnixDay: 0n,
-        atomicPicosPerUnixMilli: 0n,
-        atomicSecondsPerUnixDay: 0
-      },
       ratio: {
         atomicPicosPerUnixMilli: 1000_000_000n
       },
       offsetAtUnixEpoch: {
         atomicPicos: 0n
-      },
-      root: {
-        mjds: 0,
-        unixMillis: -3_506_716_800_000
-      },
-      offsetAtRoot: {
-        atomicPicos: 0n,
-        atomicSeconds: 0
       }
     }])
   })
@@ -44,24 +31,11 @@ describe('munge', () => {
         unixMillis: 7,
         atomicPicos: -3_993_000_000_000n
       },
-      driftRate: {
-        atomicPicosPerUnixDay: 0n,
-        atomicPicosPerUnixMilli: 0n,
-        atomicSecondsPerUnixDay: 0
-      },
       ratio: {
         atomicPicosPerUnixMilli: 1_000_000_000n
       },
       offsetAtUnixEpoch: {
         atomicPicos: -4_000_000_000_000n
-      },
-      root: {
-        mjds: 0,
-        unixMillis: -3_506_716_800_000
-      },
-      offsetAtRoot: {
-        atomicPicos: -4_000_000_000_000n,
-        atomicSeconds: -4
       }
     }])
   })
@@ -80,72 +54,33 @@ describe('munge', () => {
         unixMillis: -1000,
         atomicPicos: -5_000_000_000_000n
       },
-      driftRate: {
-        atomicPicosPerUnixDay: 0n,
-        atomicPicosPerUnixMilli: 0n,
-        atomicSecondsPerUnixDay: 0
-      },
       ratio: {
         atomicPicosPerUnixMilli: 1_000_000_000n
       },
       offsetAtUnixEpoch: {
         atomicPicos: -4_000_000_000_000n
-      },
-      root: {
-        mjds: 0,
-        unixMillis: -3_506_716_800_000
-      },
-      offsetAtRoot: {
-        atomicPicos: -4_000_000_000_000n,
-        atomicSeconds: -4
       }
     }, {
       start: {
         unixMillis: 9000,
         atomicPicos: 6_000_000_000_000n
       },
-      driftRate: {
-        atomicPicosPerUnixDay: 0n,
-        atomicPicosPerUnixMilli: 0n,
-        atomicSecondsPerUnixDay: 0
-      },
       ratio: {
         atomicPicosPerUnixMilli: 1_000_000_000n
       },
       offsetAtUnixEpoch: {
         atomicPicos: -3_000_000_000_000n
-      },
-      root: {
-        mjds: 0,
-        unixMillis: -3_506_716_800_000
-      },
-      offsetAtRoot: {
-        atomicPicos: -3_000_000_000_000n,
-        atomicSeconds: -3
       }
     }, {
       start: {
         unixMillis: 13000,
         atomicPicos: 9_000_000_000_000n
       },
-      driftRate: {
-        atomicPicosPerUnixDay: 0n,
-        atomicPicosPerUnixMilli: 0n,
-        atomicSecondsPerUnixDay: 0
-      },
       ratio: {
         atomicPicosPerUnixMilli: 1_000_000_000n
       },
       offsetAtUnixEpoch: {
         atomicPicos: -4_000_000_000_000n
-      },
-      root: {
-        mjds: 0,
-        unixMillis: -3_506_716_800_000
-      },
-      offsetAtRoot: {
-        atomicPicos: -4_000_000_000_000n,
-        atomicSeconds: -4
       }
     }])
   })
@@ -162,15 +97,8 @@ describe('munge', () => {
       [Date.UTC(1970, JAN, 1), 0, 40_587, 8.640_0]
     ])).toEqual([{
       start: { unixMillis: 0, atomicPicos: 0n },
-      driftRate: {
-        atomicPicosPerUnixDay: 8_640_000_000_000n,
-        atomicPicosPerUnixMilli: 100_000n,
-        atomicSecondsPerUnixDay: 8.64
-      },
       ratio: { atomicPicosPerUnixMilli: 1_000_100_000n },
-      offsetAtUnixEpoch: { atomicPicos: 0n },
-      root: { mjds: 40587, unixMillis: 0 },
-      offsetAtRoot: { atomicPicos: 0n, atomicSeconds: 0 }
+      offsetAtUnixEpoch: { atomicPicos: 0n }
     }])
 
     // UTC and TAI run at identical rates
@@ -178,15 +106,8 @@ describe('munge', () => {
       [Date.UTC(1970, JAN, 1), 0, 40_587, 0]
     ])).toEqual([{
       start: { unixMillis: 0, atomicPicos: 0n },
-      driftRate: {
-        atomicPicosPerUnixDay: 0n,
-        atomicPicosPerUnixMilli: 0n,
-        atomicSecondsPerUnixDay: 0
-      },
       ratio: { atomicPicosPerUnixMilli: 1_000_000_000n },
-      offsetAtUnixEpoch: { atomicPicos: 0n },
-      root: { mjds: 40587, unixMillis: 0 },
-      offsetAtRoot: { atomicPicos: 0n, atomicSeconds: 0 }
+      offsetAtUnixEpoch: { atomicPicos: 0n }
     }])
 
     // TAI runs way slower than UTC
@@ -194,15 +115,8 @@ describe('munge', () => {
       [Date.UTC(1970, JAN, 1), 0, 40_587, -8.640_0]
     ])).toEqual([{
       start: { unixMillis: 0, atomicPicos: 0n },
-      driftRate: {
-        atomicPicosPerUnixDay: -8_640_000_000_000n,
-        atomicPicosPerUnixMilli: -100_000n,
-        atomicSecondsPerUnixDay: -8.64
-      },
       ratio: { atomicPicosPerUnixMilli: 999_900_000n },
-      offsetAtUnixEpoch: { atomicPicos: 0n },
-      root: { mjds: 40587, unixMillis: 0 },
-      offsetAtRoot: { atomicPicos: 0n, atomicSeconds: 0 }
+      offsetAtUnixEpoch: { atomicPicos: 0n }
     }])
 
     // TAI moves at one ten-thousandth the rate of UTC!
@@ -211,15 +125,8 @@ describe('munge', () => {
       [Date.UTC(1970, JAN, 1), 0, 40_587, -86_400 + 8.640_0]
     ])).toEqual([{
       start: { unixMillis: 0, atomicPicos: 0n },
-      driftRate: {
-        atomicPicosPerUnixDay: -86_391_360_000_000_000n,
-        atomicPicosPerUnixMilli: -999_900_000n,
-        atomicSecondsPerUnixDay: -86_400 + 8.640_0
-      },
       ratio: { atomicPicosPerUnixMilli: 100_000n },
-      offsetAtUnixEpoch: { atomicPicos: 0n },
-      root: { mjds: 40587, unixMillis: 0 },
-      offsetAtRoot: { atomicPicos: 0n, atomicSeconds: 0 }
+      offsetAtUnixEpoch: { atomicPicos: 0n }
     }])
 
     // TAI does not move at ALL
@@ -230,28 +137,14 @@ describe('munge', () => {
       [Date.UTC(1970, JAN, 1), 0, 40_587, -86_400]
     ])).toEqual([{
       start: { unixMillis: 0, atomicPicos: 0n },
-      driftRate: {
-        atomicPicosPerUnixDay: -86_400_000_000_000_000n,
-        atomicPicosPerUnixMilli: -1_000_000_000n,
-        atomicSecondsPerUnixDay: -86_400
-      },
       ratio: { atomicPicosPerUnixMilli: 0n },
-      offsetAtUnixEpoch: { atomicPicos: 0n },
-      root: { mjds: 40587, unixMillis: 0 },
-      offsetAtRoot: { atomicPicos: 0n, atomicSeconds: 0 }
+      offsetAtUnixEpoch: { atomicPicos: 0n }
     }])
 
     // TAI runs backwards: OK this is actually illegal and unsupported right now
     expect(() => munge([
       [Date.UTC(1970, JAN, 1), 0, 40_587, -86_400 - 8.640_0]
     ])).toThrowError('Universal Time cannot run backwards yet')
-  })
-
-  it('fails on zero-length blocks', () => {
-    expect(() => munge([
-      [Date.UTC(1970, JAN, 1), 0, 40_587, 0],
-      [Date.UTC(1970, JAN, 1), 0, 40_587, 0.086_400],
-    ])).toThrowError('Zero-length blocks are not supported yet')
   })
 
   it('fails on disordered blocks', () => {
@@ -269,24 +162,11 @@ describe('munge', () => {
         unixMillis: -283_996_800_000,
         atomicPicos: -283_996_798_577_182_000_000n
       },
-      driftRate: {
-        atomicPicosPerUnixDay: 1_296_000_000n,
-        atomicPicosPerUnixMilli: 15n,
-        atomicSecondsPerUnixDay: 0.001296
-      },
       ratio: {
         atomicPicosPerUnixMilli: 1_000_000_015n
       },
       offsetAtUnixEpoch: {
         atomicPicos: 5_682_770_000_000n
-      },
-      root: {
-        mjds: 37_300,
-        unixMillis: -283_996_800_000
-      },
-      offsetAtRoot: {
-        atomicPicos: 1_422_818_000_000n,
-        atomicSeconds: 1.422_818_0
       }
     }])
   })

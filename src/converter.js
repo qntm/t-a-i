@@ -62,7 +62,8 @@ module.exports = data => {
           return false
         }
 
-        // No need to test against the block end, since we rounded towards negative infinity
+        // No need to test against the block end, since we rounded towards negative infinity.
+        // Even if the block length is 0 it would be impossible for this to happen
         return true
       })
       .map(({ atomicMillis }) => Number(atomicMillis))

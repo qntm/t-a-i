@@ -14,51 +14,53 @@ const mjdEpoch = {
 // computed
 module.exports = data => {
   const munged = data.map(datum => {
-    const block = {
-      start: {},
-      offsetAtRoot: {},
-      root: {},
-      driftRate: {}
-    };
-
+    const start = {}
+    const offsetAtRoot = {}
+    const root = {}
+    const driftRate = {};
+    
     [
-      block.start.unixMillis,
-      block.offsetAtRoot.atomicSeconds,
-      block.root.mjds = 0,
-      block.driftRate.atomicSecondsPerUnixDay = 0
+      start.unixMillis,
+      offsetAtRoot.atomicSeconds,
+      root.mjds = 0,
+      driftRate.atomicSecondsPerUnixDay = 0
     ] = datum
 
-    block.root.unixMillis = mjdEpoch.unixMillis + block.root.mjds * millisPerDay
+    root.unixMillis = mjdEpoch.unixMillis + root.mjds * millisPerDay
 
     // `8.640_0 * 1000_000_000_000` evaluates to `8_640_000_000_000.001` so we must round
-    block.driftRate.atomicPicosPerUnixDay = BigInt(Math.round(block.driftRate.atomicSecondsPerUnixDay * picosPerSecond))
-    block.driftRate.atomicPicosPerUnixMilli = block.driftRate.atomicPicosPerUnixDay / BigInt(millisPerDay)
+    driftRate.atomicPicosPerUnixDay = BigInt(Math.round(driftRate.atomicSecondsPerUnixDay * picosPerSecond))
+    driftRate.atomicPicosPerUnixMilli = driftRate.atomicPicosPerUnixDay / BigInt(millisPerDay)
     // Typically 15n
 
-    if (block.driftRate.atomicPicosPerUnixMilli * BigInt(millisPerDay) !== block.driftRate.atomicPicosPerUnixDay) {
+    if (driftRate.atomicPicosPerUnixMilli * BigInt(millisPerDay) !== driftRate.atomicPicosPerUnixDay) {
       // Rounding occurred
       throw Error('Could not compute precise drift rate')
     }
 
-    block.ratio = {}
-    block.ratio.atomicPicosPerUnixMilli = picosPerMilli + block.driftRate.atomicPicosPerUnixMilli
+    const ratio = {}
+    ratio.atomicPicosPerUnixMilli = picosPerMilli + driftRate.atomicPicosPerUnixMilli
     // Typically 1_000_000_015n
 
-    if (block.ratio.atomicPicosPerUnixMilli < 0n) {
+    if (ratio.atomicPicosPerUnixMilli < 0n) {
       throw Error('Universal Time cannot run backwards yet')
     }
 
     // `4.313_170_0 * 1000_000_000_000` evaluates to `4_313_170_000_000.000_5` so we must round
-    block.offsetAtRoot.atomicPicos = BigInt(Math.round(block.offsetAtRoot.atomicSeconds * picosPerSecond))
+    offsetAtRoot.atomicPicos = BigInt(Math.round(offsetAtRoot.atomicSeconds * picosPerSecond))
 
-    block.offsetAtUnixEpoch = {}
-    block.offsetAtUnixEpoch.atomicPicos = block.offsetAtRoot.atomicPicos -
-      BigInt(block.root.unixMillis) * block.driftRate.atomicPicosPerUnixMilli
+    const offsetAtUnixEpoch = {}
+    offsetAtUnixEpoch.atomicPicos = offsetAtRoot.atomicPicos -
+      BigInt(root.unixMillis) * driftRate.atomicPicosPerUnixMilli
 
-    block.start.atomicPicos = BigInt(block.start.unixMillis) * block.ratio.atomicPicosPerUnixMilli +
-      block.offsetAtUnixEpoch.atomicPicos 
+    start.atomicPicos = BigInt(start.unixMillis) * ratio.atomicPicosPerUnixMilli +
+      offsetAtUnixEpoch.atomicPicos 
 
-    return block
+    return {
+      start,
+      ratio,
+      offsetAtUnixEpoch
+    }
   })
 
   munged.forEach((block, i, arr) => {
@@ -68,7 +70,7 @@ module.exports = data => {
       }
 
       if (arr[i + 1].start.atomicPicos === block.start.atomicPicos) {
-        throw Error('Zero-length blocks are not supported yet')
+        // throw Error('Zero-length blocks are not supported yet')
       }
     }
   })

@@ -437,24 +437,11 @@ describe('Converter', () => {
             unixMillis: 1,
             atomicPicos: 900_000_000n // block start intentionally doesn't include TAI epoch
           },
-          driftRate: {
-            atomicPicosPerUnixDay: 0n,
-            atomicPicosPerUnixMilli: 0n,
-            atomicSecondsPerUnixDay: 0
-          },
           ratio: {
             atomicPicosPerUnixMilli: 1_000_000_000n
           },
           offsetAtUnixEpoch: {
             atomicPicos: -100_000_000n
-          },
-          root: {
-            mjds: 0,
-            unixMillis: -3_506_716_800_000
-          },
-          offsetAtRoot: {
-            atomicPicos: -100_000_000n,
-            atomicSeconds: -0.0001
           }
         }])
 
@@ -476,48 +463,22 @@ describe('Converter', () => {
             unixMillis: -1,
             atomicPicos: -900_000_000n
           },
-          driftRate: {
-            atomicPicosPerUnixDay: 0n,
-            atomicPicosPerUnixMilli: 0n,
-            atomicSecondsPerUnixDay: 0
-          },
           ratio: {
             atomicPicosPerUnixMilli: 1_000_000_000n
           },
           offsetAtUnixEpoch: {
             atomicPicos: 100_000_000n
-          },
-          root: {
-            mjds: 0,
-            unixMillis: -3_506_716_800_000
-          },
-          offsetAtRoot: {
-            atomicPicos: 100_000_000n,
-            atomicSeconds: 0.0001
           }
         }, {
           start: {
             unixMillis: 1,
             atomicPicos: -100_000_000n
           },
-          driftRate: {
-            atomicPicosPerUnixDay: 0n,
-            atomicPicosPerUnixMilli: 0n,
-            atomicSecondsPerUnixDay: 0
-          },
           ratio: {
             atomicPicosPerUnixMilli: 1_000_000_000n
           },
           offsetAtUnixEpoch: {
             atomicPicos: -1_100_000_000n
-          },
-          root: {
-            mjds: 0,
-            unixMillis: -3_506_716_800_000
-          },
-          offsetAtRoot: {
-            atomicPicos: -1100_000_000n,
-            atomicSeconds: -0.0011
           }
         }])
 
@@ -526,6 +487,44 @@ describe('Converter', () => {
         // rounds up to 0, which is not in the block
         expect(converter.oneToMany.unixToAtomic(-1)).toEqual([])
       })
+    })
+
+    it('when a block has length 0', () => {
+      const data = [
+        [Date.UTC(1970, JAN, 1), 0, 40_587, 0],
+        [Date.UTC(1970, JAN, 1), 0, 40_587, 0.086_400]
+      ]
+
+      expect(munge(data)).toEqual([{
+        start: {
+          unixMillis: 0,
+          atomicPicos: 0n
+        },
+        ratio: {
+          atomicPicosPerUnixMilli: 1_000_000_000n
+        },
+        offsetAtUnixEpoch: {
+          atomicPicos: 0n
+        }
+      }, {
+        start: {
+          // Same start point as previous block, so previous block has length 0 TAI seconds
+          unixMillis: 0,
+          atomicPicos: 0n
+        },
+        ratio: {
+          atomicPicosPerUnixMilli: 1_000_001_000n
+        },
+        offsetAtUnixEpoch: {
+          atomicPicos: 0n
+        }
+      }])
+
+      const converter = Converter(data)
+      expect(converter.oneToMany.unixToAtomicPicos(0)).toEqual([0n])
+      expect(converter.oneToMany.unixToAtomic(0)).toEqual([0])
+      expect(converter.oneToMany.unixToAtomicPicos(1)).toEqual([1_000_001_000n])
+      expect(converter.oneToMany.unixToAtomic(1)).toEqual([1])
     })
   })
 })
