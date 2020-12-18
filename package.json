@@ -19,6 +19,7 @@
     "standard": "^16.0.3"
   },
   "files": [
-    "// TODO"
+    "src",
+    "!src/**.spec.js"
   ]
 }
