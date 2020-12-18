@@ -1,9 +1,12 @@
 // Several complex conditions in this code are intentionally left more complex than strictly
 // necessary, in order to force more exhaustive testing
+const munge = require('./munge')
 
 const picosPerMilli = 1000n * 1000n * 1000n
 
-module.exports = blocks => {
+module.exports = data => {
+  const blocks = munge(data)
+
   if (!(0 in blocks)) {
     throw Error('No blocks')
   }

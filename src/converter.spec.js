@@ -8,15 +8,15 @@ const DEC = 11
 const picosPerMilli = 1000n * 1000n * 1000n
 
 describe('Converter', () => {
-  it('fails on no blocks', () => {
+  it('fails on no data', () => {
     expect(() => Converter([])).toThrowError('No blocks')
   })
 
   describe('one block', () => {
-    const basicBlocks = munge([
+    const data = [
       [Date.UTC(1970, JAN, 1), 0]
-    ])
-    const converter = Converter(basicBlocks)
+    ]
+    const converter = Converter(data)
 
     it('fails on a non-integer number of milliseconds', () => {
       expect(() => converter.oneToOne.unixToAtomic(89.3)).toThrowError('Not an integer: 89.3')
@@ -46,11 +46,11 @@ describe('Converter', () => {
   })
 
   describe('inserted leap second', () => {
-    const twoBlocks = munge([
+    const data = [
       [Date.UTC(1970, JAN, 1), 0],
       [Date.UTC(1980, JAN, 1), 1],
-    ])
-    const converter = Converter(twoBlocks)
+    ]
+    const converter = Converter(data)
 
     describe('conversions grouped by instant', () => {
       it('start of time', () => {
@@ -259,11 +259,11 @@ describe('Converter', () => {
   })
 
   describe('removed leap second', () => {
-    const twoBlocks = munge([
+    const data = [
       [Date.UTC(1970, JAN, 1), 0],
       [Date.UTC(1980, JAN, 1), -1],
-    ])
-    const converter = Converter(twoBlocks)
+    ]
+    const converter = Converter(data)
 
     describe('conversions grouped by instant', () => {
       it('start of time', () => {
@@ -428,11 +428,11 @@ describe('Converter', () => {
   describe('insane edge cases', () => {
     describe('when unixMillis converts to an atomicPicos which fits but an atomicMillis which does not', () => {
       it('at the start of the block', () => {
-        const blocks = munge([
+        const data = [
           [Date.UTC(1970, JAN, 1, 0, 0, 0, 1), -0.0001]
-        ])
+        ]
 
-        expect(blocks).toEqual([{
+        expect(munge(data)).toEqual([{
           blockStart: {
             unixMillis: 1,
             atomicPicos: 900_000_000n // block start intentionally doesn't include TAI epoch
@@ -451,19 +451,19 @@ describe('Converter', () => {
           }
         }])
 
-        const converter = Converter(blocks)
+        const converter = Converter(data)
         expect(converter.oneToMany.unixToAtomicPicos(1)).toEqual([900_000_000n])
         // rounds down to 0, which is not in the block
         expect(converter.oneToMany.unixToAtomic(1)).toEqual([])
       })
 
       it('at the end of the block', () => {
-        const blocks = munge([
+        const data = [
           [Date.UTC(1969, DEC, 31, 23, 59, 59, 999), 0.0001],
           [Date.UTC(1970, JAN, 1, 0, 0, 0, 1), -0.0011]
-        ])
+        ]
 
-        expect(blocks).toEqual([{
+        expect(munge(data)).toEqual([{
           blockStart: {
             unixMillis: -1,
             atomicPicos: -900_000_000n
@@ -499,7 +499,7 @@ describe('Converter', () => {
           }
         }])
 
-        const converter = Converter(blocks)
+        const converter = Converter(data)
         expect(converter.oneToMany.unixToAtomicPicos(-1)).toEqual([-900_000_000n])
         // rounds up to 0, which is not in the block
         expect(converter.oneToMany.unixToAtomic(-1)).toEqual([])
