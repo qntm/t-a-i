@@ -86,7 +86,7 @@ module.exports = data => {
 
   /// /////////////////////////////////////
 
-  const atomicMillisToBlockWithUnixMillis = atomicMillis => {
+  const atomicMillisToUnixMillisWithOverlap = atomicMillis => {
     if (!Number.isInteger(atomicMillis)) {
       throw Error(`Not an integer: ${atomicMillis}`)
     }
@@ -134,10 +134,10 @@ module.exports = data => {
   }
 
   const atomicMillisToUnixMillis = atomicMillis =>
-    atomicMillisToBlockWithUnixMillis(atomicMillis).unixMillis
+    atomicMillisToUnixMillisWithOverlap(atomicMillis).unixMillis
 
   const canonicalAtomicMillisToUnixMillis = atomicMillis => {
-    const { unixMillis, overlapsNextBlock } = atomicMillisToBlockWithUnixMillis(atomicMillis)
+    const { unixMillis, overlapsNextBlock } = atomicMillisToUnixMillisWithOverlap(atomicMillis)
 
     if (overlapsNextBlock) {
       // There is a later atomic time which converts to the same UTC time as this one
