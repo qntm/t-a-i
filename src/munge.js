@@ -7,7 +7,7 @@ const picosPerMilli = 1000n * 1000n * 1000n
 const millisPerDay = 24n * 60n * 60n * 1000n
 
 const mjdEpoch = {
-  unixMillis: BigInt(Date.UTC(1858, NOV, 17))
+  unixMillis: Date.UTC(1858, NOV, 17)
 }
 
 // Input some raw TAI-UTC data, output the same data but with some extremely useful extra values
@@ -21,12 +21,12 @@ module.exports = data => {
 
     [
       blockStart.unixMillis,
-      offsetAtRoot.atomicPicos,
-      root.mjds = 0n,
+      offsetAtRoot.atomicSeconds,
+      root.mjds = 0,
       driftRate.atomicSecondsPerUnixDay = 0
     ] = datum
 
-    root.unixMillis = mjdEpoch.unixMillis + root.mjds * millisPerDay
+    root.unixMillis = BigInt(mjdEpoch.unixMillis) + BigInt(root.mjds) * millisPerDay
 
     driftRate.atomicPicosPerUnixDay = BigInt(driftRate.atomicSecondsPerUnixDay * picosPerSecond)
     driftRate.atomicPicosPerUnixMilli = driftRate.atomicPicosPerUnixDay / millisPerDay
@@ -41,6 +41,9 @@ module.exports = data => {
       atomicPicosPerUnixMilli: picosPerMilli + driftRate.atomicPicosPerUnixMilli
       // Typically 1_000_000_015n
     }
+
+    // `4.313_170_0 * 1000_000_000_000` evaluates to `4_313_170_000_000.000_5` so we must round
+    offsetAtRoot.atomicPicos = BigInt(Math.round(offsetAtRoot.atomicSeconds * picosPerSecond))
 
     const offsetAtUnixEpoch = {
       atomicPicos: offsetAtRoot.atomicPicos - root.unixMillis * driftRate.atomicPicosPerUnixMilli

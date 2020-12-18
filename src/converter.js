@@ -88,6 +88,8 @@ module.exports = blocks => {
     }
 
     const atomicPicos = BigInt(atomicMillis) * picosPerMilli
+    // TODO: how about rounding `atomicPicos` to the nearest Unix millisecond here instead?
+    // What if more than one block matches??
 
     const blockIndex = blocks.findIndex(block => {
       if (atomicPicos < block.blockStart.atomicPicos) {
@@ -107,12 +109,17 @@ module.exports = blocks => {
     const block = blocks[blockIndex]
 
     // This division rounds towards 0n.
-    // Could that rounding theoretically take the result *outside* of the block?
+    // Could rounding theoretically take the result *outside* of the block?
     const unixMillis = (atomicPicos - block.offsetAtUnixEpoch.atomicPicos) /
       block.ratio.atomicPicosPerUnixMilli
 
     const atomicPicos2 = unixMillis * block.ratio.atomicPicosPerUnixMilli + block.offsetAtUnixEpoch.atomicPicos
 
+    // This case is impossible. Because the block start is always a whole number of Unix
+    // milliseconds, this would mean the precise result of `unixMillis` was *less* than this and
+    // rounded down, which means `atomicPicos` also would have to be before the start of the block,
+    // which we already tested for
+    /* istanbul ignore next */
     if (atomicPicos2 < block.blockStart.atomicPicos) {
       throw Error(`Atomic time not found: ${atomicMillis}. This should be impossible`)
     }

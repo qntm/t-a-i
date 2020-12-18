@@ -8,7 +8,7 @@ const JAN = 0
 describe('munge', () => {
   it('works in the simplest possible case', () => {
     expect(munge([
-      [BigInt(Date.UTC(1970, JAN, 1)), 0n]
+      [BigInt(Date.UTC(1970, JAN, 1)), 0]
     ])).toEqual([{
       blockStart: {
         atomicPicos: 0n,
@@ -31,7 +31,7 @@ describe('munge', () => {
 
   it('works when there is an initial offset', () => {
     expect(munge([
-      [7n, -4_000_000_000_000n]
+      [7n, -4]
     ])).toEqual([{
       blockStart: {
         unixMillis: 7n,
@@ -58,9 +58,9 @@ describe('munge', () => {
     // TAI:          [3][4][5][6][ 7][ 8][ 9][...]
     // Unix: [...][6][7][8][9][9][10][11][13][...]
     expect(munge([
-      [-1000n, -4_000_000_000_000n],
-      [9000n, -3_000_000_000_000n], // inserted leap millisecond
-      [13000n, -4_000_000_000_000n] // removed leap millisecond
+      [-1000n, -4],
+      [9000n, -3], // inserted leap millisecond
+      [13000n, -4] // removed leap millisecond
     ])).toEqual([{
       blockStart: {
         unixMillis: -1000n,
@@ -117,13 +117,13 @@ describe('munge', () => {
 
   it('fails on a bad drift rate', () => {
     expect(() => munge([
-      [BigInt(Date.UTC(1961, JAN, 1)), 1_422_818_000_000n, 37_300n, 0.001]
+      [BigInt(Date.UTC(1961, JAN, 1)), 1.422_818_0, 37_300n, 0.001]
     ])).toThrowError('Could not compute precise drift rate')
   })
 
   it('works with the first line of real data', () => {
     expect(munge([
-      [BigInt(Date.UTC(1961, JAN, 1)), 1_422_818_000_000n, 37_300n, 0.001_296]
+      [BigInt(Date.UTC(1961, JAN, 1)), 1.422_818_0, 37_300n, 0.001_296]
     ])).toEqual([{
       blockStart: {
         unixMillis: -283_996_800_000n,
