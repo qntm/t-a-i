@@ -58,7 +58,7 @@ module.exports = data => {
 
   munged.forEach((block, i, arr) => {
     if (i + 1 in arr) {
-      // Block end is exclusive: these are the earliest precise counts which are NOT in the block.
+      // Block end is exclusive: this is the earliest precise count which is NOT in the block.
       block.blockEnd = {
         atomicPicos: arr[i + 1].blockStart.atomicPicos
       }

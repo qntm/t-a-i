@@ -13,19 +13,17 @@ module.exports = blocks => {
       throw Error(`Not an integer: ${unixMillis}`)
     }
 
-    unixMillis = BigInt(unixMillis)
-
     return blocks
       .map(block => ({
         block,
 
         // Depending on its parameters, each block linearly transforms `unixMillis`
-        // into a different `atomicPicos`. This value is always exact.
-        atomicPicos: unixMillis * block.ratio.atomicPicosPerUnixMilli +
+        // into a different `atomicPicos`. This value is always exact...
+        atomicPicos: BigInt(unixMillis) * block.ratio.atomicPicosPerUnixMilli +
           block.offsetAtUnixEpoch.atomicPicos
       }))
       .filter(({ block, atomicPicos }) => {
-        // Input has to be in range.
+        // ...however, the result has to still be in the block!
         if (atomicPicos < block.blockStart.atomicPicos) {
           return false
         }
@@ -51,10 +49,11 @@ module.exports = blocks => {
       }))
       .filter(({ block, atomicMillis }) => {
         // ...hence this additional test
-        if (atomicMillis * picosPerMilli < block.blockStart.atomicPicos) {
+        const atomicPicosRounded = atomicMillis * picosPerMilli
+        if (atomicPicosRounded < block.blockStart.atomicPicos) {
           return false
         }
-        if (block.blockEnd.atomicPicos <= atomicMillis * picosPerMilli) {
+        if (block.blockEnd.atomicPicos <= atomicPicosRounded) {
           return false
         }
         return true
@@ -88,13 +87,13 @@ module.exports = blocks => {
       throw Error(`Not an integer: ${atomicMillis}`)
     }
 
-    atomicMillis = BigInt(atomicMillis)
+    const atomicPicos = BigInt(atomicMillis) * picosPerMilli
 
     const blockIndex = blocks.findIndex(block => {
-      if (atomicMillis * picosPerMilli < block.blockStart.atomicPicos) {
+      if (atomicPicos < block.blockStart.atomicPicos) {
         return false
       }
-      if (block.blockEnd.atomicPicos <= atomicMillis * picosPerMilli) {
+      if (block.blockEnd.atomicPicos <= atomicPicos) {
         return false
       }
       return true
@@ -109,7 +108,7 @@ module.exports = blocks => {
 
     // This division rounds towards 0n.
     // Could that rounding theoretically take the result *outside* of the block?
-    const unixMillis = (atomicMillis * picosPerMilli - block.offsetAtUnixEpoch.atomicPicos) /
+    const unixMillis = (atomicPicos - block.offsetAtUnixEpoch.atomicPicos) /
       block.ratio.atomicPicosPerUnixMilli
 
     const atomicPicos2 = unixMillis * block.ratio.atomicPicosPerUnixMilli + block.offsetAtUnixEpoch.atomicPicos

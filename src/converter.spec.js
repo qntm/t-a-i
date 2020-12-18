@@ -346,7 +346,8 @@ describe('Converter', () => {
 
     describe('conversions grouped by method', () => {
       it('oneToMany.unixToAtomicPicos', () => {
-        expect(converter.oneToMany.unixToAtomicPicos(0)).toEqual([0n])
+        expect(converter.oneToMany.unixToAtomicPicos(0))
+          .toEqual([0n])
         expect(converter.oneToMany.unixToAtomicPicos(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)))
           .toEqual([
             BigInt(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)) * picosPerMilli
@@ -362,7 +363,8 @@ describe('Converter', () => {
       })
 
       it('oneToMany.unixToAtomic', () => {
-        expect(converter.oneToMany.unixToAtomic(0)).toEqual([0])
+        expect(converter.oneToMany.unixToAtomic(0))
+          .toEqual([0])
         expect(converter.oneToMany.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)))
           .toEqual([
             Date.UTC(1979, DEC, 31, 23, 59, 58, 999)
@@ -378,7 +380,8 @@ describe('Converter', () => {
       })
 
       it('oneToMany.atomicToUnix', () => {
-        expect(converter.oneToMany.atomicToUnix(0)).toBe(0)
+        expect(converter.oneToMany.atomicToUnix(0))
+          .toBe(0)
         expect(converter.oneToMany.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)))
           .toBe(Date.UTC(1979, DEC, 31, 23, 59, 58, 999))
         expect(converter.oneToMany.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)))
@@ -386,7 +389,8 @@ describe('Converter', () => {
       })
 
       it('oneToOne.unixToAtomicPicos', () => {
-        expect(converter.oneToOne.unixToAtomicPicos(0)).toBe(0n)
+        expect(converter.oneToOne.unixToAtomicPicos(0))
+          .toBe(0n)
         expect(converter.oneToOne.unixToAtomicPicos(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)))
           .toBe(BigInt(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)) * picosPerMilli)
         expect(() => converter.oneToOne.unixToAtomicPicos(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)))
@@ -398,7 +402,8 @@ describe('Converter', () => {
       })
 
       it('oneToOne.unixToAtomic', () => {
-        expect(converter.oneToOne.unixToAtomic(0)).toBe(0)
+        expect(converter.oneToOne.unixToAtomic(0))
+          .toBe(0)
         expect(converter.oneToOne.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)))
           .toBe(Date.UTC(1979, DEC, 31, 23, 59, 58, 999))
         expect(() => converter.oneToOne.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)))
@@ -410,7 +415,8 @@ describe('Converter', () => {
       })
 
       it('oneToOne.atomicToUnix', () => {
-        expect(converter.oneToOne.atomicToUnix(0)).toBe(0)
+        expect(converter.oneToOne.atomicToUnix(0))
+          .toBe(0)
         expect(converter.oneToOne.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)))
           .toBe(Date.UTC(1979, DEC, 31, 23, 59, 58, 999))
         expect(converter.oneToOne.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)))
@@ -420,7 +426,85 @@ describe('Converter', () => {
   })
 
   describe('insane edge cases', () => {
-    it('when unixMillis converts to an atomicPicos which fits but an atomicMillis which does not', () => {
+    describe('when unixMillis converts to an atomicPicos which fits but an atomicMillis which does not', () => {
+      it('at the start of the block', () => {
+        const blocks = munge([
+          [BigInt(Date.UTC(1970, JAN, 1, 0, 0, 0, 1)), -100n]
+        ])
+
+        expect(blocks).toEqual([{
+          blockStart: {
+            unixMillis: 1n,
+            atomicPicos: 999_999_900n // block start intentionally doesn't include TAI epoch
+          },
+          ratio: {
+            atomicPicosPerUnixMilli: 1_000_000_000n
+          },
+          offsetAtUnixEpoch: {
+            atomicPicos: -100n
+          },
+          blockEnd: {
+            atomicPicos: Infinity
+          },
+          overlapStart: {
+            atomicPicos: Infinity
+          }
+        }])
+
+        const converter = Converter(blocks)
+        expect(converter.oneToMany.unixToAtomicPicos(1)).toEqual([999_999_900n])
+        // rounds down to 0, which is not in the block
+        expect(converter.oneToMany.unixToAtomic(1)).toEqual([])
+      })
+
+      it('at the end of the block', () => {
+        // TODO: unmunge this
+        const blocks = munge([
+          [BigInt(Date.UTC(1969, DEC, 31, 23, 59, 59, 999)), 100n],
+          [BigInt(Date.UTC(1970, JAN, 1, 0, 0, 0, 1)), -1_000_000_100n]
+        ])
+
+        expect(blocks).toEqual([{
+          blockStart: {
+            unixMillis: -1n,
+            atomicPicos: -999_999_900n
+          },
+          ratio: {
+            atomicPicosPerUnixMilli: 1_000_000_000n
+          },
+          offsetAtUnixEpoch: {
+            atomicPicos: 100n
+          },
+          blockEnd: {
+            atomicPicos: -100n // block end intentionally doesn't include TAI epoch
+          },
+          overlapStart: {
+            atomicPicos: 1_000_000_100n
+          }
+        }, {
+          blockStart: {
+            unixMillis: 1n,
+            atomicPicos: -100n
+          },
+          ratio: {
+            atomicPicosPerUnixMilli: 1_000_000_000n
+          },
+          offsetAtUnixEpoch: {
+            atomicPicos: -1_000_000_100n
+          },
+          blockEnd: {
+            atomicPicos: Infinity
+          },
+          overlapStart: {
+            atomicPicos: Infinity
+          }
+        }])
+
+        const converter = Converter(blocks)
+        expect(converter.oneToMany.unixToAtomicPicos(-1)).toEqual([-999_999_900n])
+        // rounds up to 0, which is not in the block
+        expect(converter.oneToMany.unixToAtomic(-1)).toEqual([])
+      })
     })
   })
 })
