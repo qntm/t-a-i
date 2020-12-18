@@ -150,7 +150,7 @@ describe('munge', () => {
   it('fails on disordered blocks', () => {
     expect(() => munge([
       [Date.UTC(1970, JAN, 1, 0, 0, 0), 0, 40_587, 0],
-      [Date.UTC(1970, JAN, 1, 0, 0, 1), -2, 40_587, 0],
+      [Date.UTC(1970, JAN, 1, 0, 0, 1), -2, 40_587, 0]
     ])).toThrowError('Disordered blocks are not supported yet')
   })
 
@@ -265,13 +265,13 @@ describe('munge', () => {
 
   it('generates proper overlaps', () => {
     expect(munge(taiData).map((block, i, arr) =>
+      // block end minus overlap start
       i + 1 in arr
         ? (
-          // block end minus overlap start
-          arr[i + 1].start.atomicPicos -
+            arr[i + 1].start.atomicPicos -
           BigInt(arr[i + 1].start.unixMillis) * block.ratio.atomicPicosPerUnixMilli -
           block.offsetAtUnixEpoch.atomicPicos
-        )
+          )
         : NaN
     )).toEqual([
       -50_000_000_000n,

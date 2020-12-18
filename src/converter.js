@@ -131,7 +131,7 @@ module.exports = data => {
       ? BigInt(blocks[blockIndex + 1].start.unixMillis) * block.ratio.atomicPicosPerUnixMilli +
         block.offsetAtUnixEpoch.atomicPicos
       : Infinity
-  
+
     const overlaps = overlapStart.atomicPicos <= BigInt(atomicMillis) * picosPerMilli
 
     return { unixMillis, overlaps }

@@ -10,15 +10,17 @@ const mjdEpoch = {
   unixMillis: Date.UTC(1858, NOV, 17)
 }
 
-// Input some raw TAI-UTC data, output the same data but with some extremely useful extra values
-// computed
+// Input some raw TAI-UTC data, output the same data but altered to be more consumable for our
+// purposes: start point is expressed both in Unix milliseconds and TAI picoseconds, ratio between
+// TAI picoseconds and UTC milliseconds is given as a precise BigInt, and the root is moved to the
+// Unix epoch
 module.exports = data => {
   const munged = data.map(datum => {
     const start = {}
     const offsetAtRoot = {}
     const root = {}
     const driftRate = {};
-    
+
     [
       start.unixMillis,
       offsetAtRoot.atomicSeconds,
@@ -54,7 +56,7 @@ module.exports = data => {
       BigInt(root.unixMillis) * driftRate.atomicPicosPerUnixMilli
 
     start.atomicPicos = BigInt(start.unixMillis) * ratio.atomicPicosPerUnixMilli +
-      offsetAtUnixEpoch.atomicPicos 
+      offsetAtUnixEpoch.atomicPicos
 
     return {
       start,

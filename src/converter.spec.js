@@ -48,7 +48,7 @@ describe('Converter', () => {
   describe('inserted leap second', () => {
     const data = [
       [Date.UTC(1970, JAN, 1), 0],
-      [Date.UTC(1980, JAN, 1), 1],
+      [Date.UTC(1980, JAN, 1), 1]
     ]
     const converter = Converter(data)
 
@@ -261,7 +261,7 @@ describe('Converter', () => {
   describe('removed leap second', () => {
     const data = [
       [Date.UTC(1970, JAN, 1), 0],
-      [Date.UTC(1980, JAN, 1), -1],
+      [Date.UTC(1980, JAN, 1), -1]
     ]
     const converter = Converter(data)
 
