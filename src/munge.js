@@ -14,70 +14,64 @@ const mjdEpoch = {
 // computed
 module.exports = data => {
   const munged = data.map(datum => {
-    const start = {}
-    const offsetAtRoot = {}
-    const root = {}
-    const driftRate = {};
+    const block = {
+      start: {},
+      offsetAtRoot: {},
+      root: {},
+      driftRate: {}
+    };
 
     [
-      start.unixMillis,
-      offsetAtRoot.atomicSeconds,
-      root.mjds = 0,
-      driftRate.atomicSecondsPerUnixDay = 0
+      block.start.unixMillis,
+      block.offsetAtRoot.atomicSeconds,
+      block.root.mjds = 0,
+      block.driftRate.atomicSecondsPerUnixDay = 0
     ] = datum
 
-    root.unixMillis = mjdEpoch.unixMillis + root.mjds * millisPerDay
+    block.root.unixMillis = mjdEpoch.unixMillis + block.root.mjds * millisPerDay
 
     // `8.640_0 * 1000_000_000_000` evaluates to `8_640_000_000_000.001` so we must round
-    driftRate.atomicPicosPerUnixDay = BigInt(Math.round(driftRate.atomicSecondsPerUnixDay * picosPerSecond))
-    driftRate.atomicPicosPerUnixMilli = driftRate.atomicPicosPerUnixDay / BigInt(millisPerDay)
+    block.driftRate.atomicPicosPerUnixDay = BigInt(Math.round(block.driftRate.atomicSecondsPerUnixDay * picosPerSecond))
+    block.driftRate.atomicPicosPerUnixMilli = block.driftRate.atomicPicosPerUnixDay / BigInt(millisPerDay)
     // Typically 15n
 
-    if (driftRate.atomicPicosPerUnixMilli * BigInt(millisPerDay) !== driftRate.atomicPicosPerUnixDay) {
+    if (block.driftRate.atomicPicosPerUnixMilli * BigInt(millisPerDay) !== block.driftRate.atomicPicosPerUnixDay) {
       // Rounding occurred
       throw Error('Could not compute precise drift rate')
     }
 
-    const ratio = {}
-    ratio.atomicPicosPerUnixMilli = picosPerMilli + driftRate.atomicPicosPerUnixMilli
+    block.ratio = {}
+    block.ratio.atomicPicosPerUnixMilli = picosPerMilli + block.driftRate.atomicPicosPerUnixMilli
     // Typically 1_000_000_015n
 
-    if (ratio.atomicPicosPerUnixMilli < 0n) {
+    if (block.ratio.atomicPicosPerUnixMilli < 0n) {
       throw Error('Universal Time cannot run backwards yet')
     }
 
     // `4.313_170_0 * 1000_000_000_000` evaluates to `4_313_170_000_000.000_5` so we must round
-    offsetAtRoot.atomicPicos = BigInt(Math.round(offsetAtRoot.atomicSeconds * picosPerSecond))
+    block.offsetAtRoot.atomicPicos = BigInt(Math.round(block.offsetAtRoot.atomicSeconds * picosPerSecond))
 
-    const offsetAtUnixEpoch = {}
-    offsetAtUnixEpoch.atomicPicos = offsetAtRoot.atomicPicos -
-      BigInt(root.unixMillis) * driftRate.atomicPicosPerUnixMilli
+    block.offsetAtUnixEpoch = {}
+    block.offsetAtUnixEpoch.atomicPicos = block.offsetAtRoot.atomicPicos -
+      BigInt(block.root.unixMillis) * block.driftRate.atomicPicosPerUnixMilli
 
-    start.atomicPicos = BigInt(start.unixMillis) * ratio.atomicPicosPerUnixMilli +
-      offsetAtUnixEpoch.atomicPicos 
+    block.start.atomicPicos = BigInt(block.start.unixMillis) * block.ratio.atomicPicosPerUnixMilli +
+      block.offsetAtUnixEpoch.atomicPicos 
 
-    return {
-      start,
-      ratio,
-      root,
-      offsetAtRoot,
-      offsetAtUnixEpoch
-    }
+    delete block.driftRate
+
+    return block
   })
 
   munged.forEach((block, i, arr) => {
-    // Block end is exclusive: this is the earliest precise count which is NOT in the block.
-    block.end = {}
-    block.end.atomicPicos = i + 1 in arr
-      ? arr[i + 1].start.atomicPicos
-      : Infinity
+    if (i + 1 in arr) {
+      if (arr[i + 1].start.atomicPicos < block.start.atomicPicos) {
+        throw Error('Disordered blocks are not supported yet')
+      }
 
-    if (block.end.atomicPicos < block.start.atomicPicos) {
-      throw Error('Disordered blocks are not supported yet')
-    }
-
-    if (block.end.atomicPicos === block.start.atomicPicos) {
-      throw Error('Zero-length blocks are not supported yet')
+      if (arr[i + 1].start.atomicPicos === block.start.atomicPicos) {
+        throw Error('Zero-length blocks are not supported yet')
+      }
     }
 
     // This can be before, exactly at, or after `end`. Before is the case we care about most.

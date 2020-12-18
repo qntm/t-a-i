@@ -443,9 +443,6 @@ describe('Converter', () => {
           offsetAtUnixEpoch: {
             atomicPicos: -100_000_000n
           },
-          end: {
-            atomicPicos: Infinity
-          },
           root: {
             mjds: 0,
             unixMillis: -3_506_716_800_000
@@ -471,6 +468,7 @@ describe('Converter', () => {
           [Date.UTC(1970, JAN, 1, 0, 0, 0, 1), -0.0011]
         ]
 
+        // first block's end intentionally doesn't include TAI epoch
         expect(munge(data)).toEqual([{
           start: {
             unixMillis: -1,
@@ -481,9 +479,6 @@ describe('Converter', () => {
           },
           offsetAtUnixEpoch: {
             atomicPicos: 100_000_000n
-          },
-          end: {
-            atomicPicos: -100_000_000n // block end intentionally doesn't include TAI epoch
           },
           root: {
             mjds: 0,
@@ -506,9 +501,6 @@ describe('Converter', () => {
           },
           offsetAtUnixEpoch: {
             atomicPicos: -1_100_000_000n
-          },
-          end: {
-            atomicPicos: Infinity
           },
           root: {
             mjds: 0,

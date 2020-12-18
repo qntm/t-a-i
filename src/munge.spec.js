@@ -14,9 +14,6 @@ describe('munge', () => {
         atomicPicos: 0n,
         unixMillis: 0
       },
-      end: {
-        atomicPicos: Infinity
-      },
       ratio: {
         atomicPicosPerUnixMilli: 1000_000_000n
       },
@@ -44,9 +41,6 @@ describe('munge', () => {
       start: {
         unixMillis: 7,
         atomicPicos: -3_993_000_000_000n
-      },
-      end: {
-        atomicPicos: Infinity
       },
       ratio: {
         atomicPicosPerUnixMilli: 1_000_000_000n
@@ -82,9 +76,6 @@ describe('munge', () => {
         unixMillis: -1000,
         atomicPicos: -5_000_000_000_000n
       },
-      end: {
-        atomicPicos: 6_000_000_000_000n
-      },
       ratio: {
         atomicPicosPerUnixMilli: 1_000_000_000n
       },
@@ -107,9 +98,6 @@ describe('munge', () => {
         unixMillis: 9000,
         atomicPicos: 6_000_000_000_000n
       },
-      end: {
-        atomicPicos: 9_000_000_000_000n
-      },
       ratio: {
         atomicPicosPerUnixMilli: 1_000_000_000n
       },
@@ -131,9 +119,6 @@ describe('munge', () => {
       start: {
         unixMillis: 13000,
         atomicPicos: 9_000_000_000_000n
-      },
-      end: {
-        atomicPicos: Infinity
       },
       ratio: {
         atomicPicosPerUnixMilli: 1_000_000_000n
@@ -169,7 +154,6 @@ describe('munge', () => {
       start: { unixMillis: 0, atomicPicos: 0n },
       ratio: { atomicPicosPerUnixMilli: 1_000_100_000n },
       offsetAtUnixEpoch: { atomicPicos: 0n },
-      end: { atomicPicos: Infinity },
       root: { mjds: 40587, unixMillis: 0 },
       offsetAtRoot: { atomicPicos: 0n, atomicSeconds: 0 },
       overlapStart: { atomicPicos: Infinity }
@@ -182,7 +166,6 @@ describe('munge', () => {
       start: { unixMillis: 0, atomicPicos: 0n },
       ratio: { atomicPicosPerUnixMilli: 1_000_000_000n },
       offsetAtUnixEpoch: { atomicPicos: 0n },
-      end: { atomicPicos: Infinity },
       root: { mjds: 40587, unixMillis: 0 },
       offsetAtRoot: { atomicPicos: 0n, atomicSeconds: 0 },
       overlapStart: { atomicPicos: Infinity }
@@ -195,7 +178,6 @@ describe('munge', () => {
       start: { unixMillis: 0, atomicPicos: 0n },
       ratio: { atomicPicosPerUnixMilli: 999_900_000n },
       offsetAtUnixEpoch: { atomicPicos: 0n },
-      end: { atomicPicos: Infinity },
       root: { mjds: 40587, unixMillis: 0 },
       offsetAtRoot: { atomicPicos: 0n, atomicSeconds: 0 },
       overlapStart: { atomicPicos: Infinity }
@@ -209,7 +191,6 @@ describe('munge', () => {
       start: { unixMillis: 0, atomicPicos: 0n },
       ratio: { atomicPicosPerUnixMilli: 100_000n },
       offsetAtUnixEpoch: { atomicPicos: 0n },
-      end: { atomicPicos: Infinity },
       root: { mjds: 40587, unixMillis: 0 },
       offsetAtRoot: { atomicPicos: 0n, atomicSeconds: 0 },
       overlapStart: { atomicPicos: Infinity }
@@ -225,7 +206,6 @@ describe('munge', () => {
       start: { unixMillis: 0, atomicPicos: 0n },
       ratio: { atomicPicosPerUnixMilli: 0n },
       offsetAtUnixEpoch: { atomicPicos: 0n },
-      end: { atomicPicos: Infinity },
       root: { mjds: 40587, unixMillis: 0 },
       offsetAtRoot: { atomicPicos: 0n, atomicSeconds: 0 },
       overlapStart: { atomicPicos: Infinity }
@@ -258,9 +238,6 @@ describe('munge', () => {
       start: {
         unixMillis: -283_996_800_000,
         atomicPicos: -283_996_798_577_182_000_000n
-      },
-      end: {
-        atomicPicos: Infinity
       },
       ratio: {
         atomicPicosPerUnixMilli: 1_000_000_015n
@@ -375,7 +352,9 @@ describe('munge', () => {
   })
 
   it('generates proper overlaps', () => {
-    expect(munge(taiData).map(block => block.end.atomicPicos - block.overlapStart.atomicPicos)).toEqual([
+    expect(munge(taiData).map((block, i, arr) =>
+      (i + 1 in arr ? arr[i + 1].start.atomicPicos : Infinity) - block.overlapStart.atomicPicos
+    )).toEqual([
       -50_000_000_000n,
       0n,
       100_000_000_000n,

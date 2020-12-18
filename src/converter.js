@@ -27,12 +27,14 @@ module.exports = data => {
         atomicPicos: BigInt(unixMillis) * block.ratio.atomicPicosPerUnixMilli +
           block.offsetAtUnixEpoch.atomicPicos
       }))
-      .filter(({ block, atomicPicos }) => {
+      .filter(({ block, atomicPicos }, i, arr) => {
         // ...however, the result has to still be in the block!
         if (atomicPicos < block.start.atomicPicos) {
+          // Result falls before this block began, whoops
           return false
         }
-        if (block.end.atomicPicos <= atomicPicos) {
+        if (i + 1 in arr && arr[i + 1].block.start.atomicPicos <= atomicPicos) {
+          // Result falls in next block, whoops
           return false
         }
         return true
@@ -53,20 +55,14 @@ module.exports = data => {
         // be...
         atomicMillis: div(atomicPicos, picosPerMilli)
       }))
-      .filter(({ block, atomicMillis }) => {
+      .filter(({ block, atomicMillis }, i, arr) => {
         // ...hence this additional test
         const atomicPicosRounded = atomicMillis * picosPerMilli
         if (atomicPicosRounded < block.start.atomicPicos) {
           return false
         }
 
-        // This case is impossible. We round towards negative infinity, we cannot round up, past the
-        // end of the block
-        /* istanbul ignore next */
-        if (block.end.atomicPicos <= atomicPicosRounded) {
-          throw Error(`Atomic time rounded up past end of block. This should be impossible`)
-        }
-
+        // No need to test against the block end, since we rounded towards negative infinity
         return true
       })
       .map(({ atomicMillis }) => Number(atomicMillis))
@@ -100,11 +96,13 @@ module.exports = data => {
 
     const atomicPicos = BigInt(atomicMillis) * picosPerMilli
 
-    const blockIndex = blocks.findIndex(block => {
+    const blockIndex = blocks.findIndex((block, i, arr) => {
       if (atomicPicos < block.start.atomicPicos) {
+        // atomicPicos is before this block started
         return false
       }
-      if (block.end.atomicPicos <= atomicPicos) {
+      if (i + 1 in arr && arr[i + 1].start.atomicPicos <= atomicPicos) {
+        // atomicPicos is after next block started
         return false
       }
       return true
