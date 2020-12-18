@@ -50,7 +50,8 @@ module.exports = data => {
     offsetAtRoot.atomicPicos = BigInt(Math.round(offsetAtRoot.atomicSeconds * picosPerSecond))
 
     const offsetAtUnixEpoch = {}
-    offsetAtUnixEpoch.atomicPicos = offsetAtRoot.atomicPicos - BigInt(root.unixMillis) * driftRate.atomicPicosPerUnixMilli
+    offsetAtUnixEpoch.atomicPicos = offsetAtRoot.atomicPicos -
+      BigInt(root.unixMillis) * driftRate.atomicPicosPerUnixMilli
 
     blockStart.atomicPicos = BigInt(blockStart.unixMillis) * ratio.atomicPicosPerUnixMilli +
       offsetAtUnixEpoch.atomicPicos 

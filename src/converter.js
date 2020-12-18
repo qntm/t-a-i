@@ -1,5 +1,7 @@
 // Several complex conditions in this code are intentionally left more complex than strictly
 // necessary, in order to force more exhaustive testing
+
+const div = require('./div')
 const munge = require('./munge')
 
 const picosPerMilli = 1000n * 1000n * 1000n
@@ -46,9 +48,10 @@ module.exports = data => {
       .map(({ block, atomicPicos }) => ({
         block,
 
-        // This rounds towards 0n. This is potentially problematic because even if the atomic
-        // picosecond count is part of this block, the rounded millisecond count may not be...
-        atomicMillis: atomicPicos / picosPerMilli
+        // This rounds towards negative infinity. This is potentially problematic because even if
+        // the atomic picosecond count is part of this block, the rounded millisecond count may not
+        // be...
+        atomicMillis: div(atomicPicos, picosPerMilli)
       }))
       .filter(({ block, atomicMillis }) => {
         // ...hence this additional test
@@ -56,9 +59,14 @@ module.exports = data => {
         if (atomicPicosRounded < block.blockStart.atomicPicos) {
           return false
         }
+
+        // This case is impossible. We round towards negative infinity, we cannot round up, past the
+        // end of the block
+        /* istanbul ignore next */
         if (block.blockEnd.atomicPicos <= atomicPicosRounded) {
           return false
         }
+
         return true
       })
       .map(({ atomicMillis }) => Number(atomicMillis))
@@ -116,7 +124,8 @@ module.exports = data => {
     const unixMillis = (atomicPicos - block.offsetAtUnixEpoch.atomicPicos) /
       block.ratio.atomicPicosPerUnixMilli
 
-    const atomicPicos2 = unixMillis * block.ratio.atomicPicosPerUnixMilli + block.offsetAtUnixEpoch.atomicPicos
+    const atomicPicos2 = unixMillis * block.ratio.atomicPicosPerUnixMilli +
+      block.offsetAtUnixEpoch.atomicPicos
 
     // This case is impossible. Because the block start is always a whole number of Unix
     // milliseconds, this would mean the precise result of `unixMillis` was *less* than this and
@@ -143,9 +152,7 @@ module.exports = data => {
   const canonicalAtomicMillisToUnixMillis = atomicMillis => {
     const { block, unixMillis } = atomicMillisToBlockWithUnixMillis(atomicMillis)
 
-    atomicMillis = BigInt(atomicMillis)
-
-    if (block.overlapStart.atomicPicos <= atomicMillis * picosPerMilli) {
+    if (block.overlapStart.atomicPicos <= BigInt(atomicMillis) * picosPerMilli) {
       // There is a later atomic time which converts to the same UTC time as this one
       // That means we are "non-canonical"
       throw Error(`No UTC equivalent: ${atomicMillis}`)

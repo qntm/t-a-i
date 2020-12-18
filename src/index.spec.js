@@ -15,29 +15,37 @@ const DEC = 11
 
 describe('convert', () => {
   describe('oneToMany.unixToAtomic', () => {
+    const unixToAtomicPicos = taiConverter.oneToMany.unixToAtomicPicos
     const unixToAtomic = taiConverter.oneToMany.unixToAtomic
 
     it('starts TAI at 1961-01-01 00:00:01.422818', () => {
-      expect(unixToAtomic(Date.UTC(1961, JAN, 1, 0, 0, 0, 0))).toEqual([Date.UTC(1961, JAN, 1, 0, 0, 1, 423)])
+      // 00:00:01.422818 is in range, but rounds down to 00:00:01.422 which is not
+      expect(unixToAtomicPicos(Date.UTC(1961, JAN, 1, 0, 0, 0, 0))).toEqual([-283_996_798_577_182_000_000n])
+      expect(unixToAtomic(Date.UTC(1961, JAN, 1, 0, 0, 0, 0))).toEqual([])
     })
 
     it('advances 15 TAI picoseconds per Unix millisecond', () => {
-      expect(unixToAtomic(Date.UTC(1961, JAN, 1, 0, 0, 0, 1))).toEqual([Date.UTC(1961, JAN, 1, 0, 0, 1, 424)])
-      expect(unixToAtomic(Date.UTC(1961, JAN, 1, 0, 0, 0, 2))).toEqual([Date.UTC(1961, JAN, 1, 0, 0, 1, 425)])
-      expect(unixToAtomic(Date.UTC(1961, JAN, 1, 0, 0, 0, 3))).toEqual([Date.UTC(1961, JAN, 1, 0, 0, 1, 426)])
+      expect(unixToAtomicPicos(Date.UTC(1961, JAN, 1, 0, 0, 0, 1))).toEqual([-283_996_798_576_181_999_985n])
+      expect(unixToAtomicPicos(Date.UTC(1961, JAN, 1, 0, 0, 0, 2))).toEqual([-283_996_798_575_181_999_970n])
+      expect(unixToAtomicPicos(Date.UTC(1961, JAN, 1, 0, 0, 0, 3))).toEqual([-283_996_798_574_181_999_955n])
+
+      expect(unixToAtomic(Date.UTC(1961, JAN, 1, 0, 0, 0, 1))).toEqual([Date.UTC(1961, JAN, 1, 0, 0, 1, 423)])
+      expect(unixToAtomic(Date.UTC(1961, JAN, 1, 0, 0, 0, 2))).toEqual([Date.UTC(1961, JAN, 1, 0, 0, 1, 424)])
+      expect(unixToAtomic(Date.UTC(1961, JAN, 1, 0, 0, 0, 3))).toEqual([Date.UTC(1961, JAN, 1, 0, 0, 1, 425)])
     })
 
     it('advances 0.001296 TAI seconds per Unix day', () => {
-      expect(unixToAtomic(Date.UTC(1961, JAN, 2, 0, 0, 0, 0))).toEqual([Date.UTC(1961, JAN, 2, 0, 0, 1, 425)])
-      // It's 1.424114 but gets rounded towards 1970
+      expect(unixToAtomicPicos(Date.UTC(1961, JAN, 2, 0, 0, 0, 0))).toEqual([-283_910_398_575_886_000_000n])
+      expect(unixToAtomic(Date.UTC(1961, JAN, 2, 0, 0, 0, 0))).toEqual([Date.UTC(1961, JAN, 2, 0, 0, 1, 424)])
+      // It's 1.424114 but gets rounded down to 1.424000
     })
 
     it('makes certain TAI millisecond counts inaccessible', () => {
-      expect(unixToAtomic(-283984666668)).toEqual([-283984665245]) // -283984665245.000000020 rounded towards 0
-      expect(unixToAtomic(-283984666667)).toEqual([-283984665244]) // -283984665244.000000005 rounded towards 0
-      // it's not possible to get a result of [-283984665243.xxxxxxxxxn]
-      expect(unixToAtomic(-283984666666)).toEqual([-283984665242]) // -283984665242.999999990 rounded towards 0
-      expect(unixToAtomic(-283984666665)).toEqual([-283984665241]) // -283984665241.999999975 rounded towards 0
+      expect(unixToAtomic(-283984666668)).toEqual([-283984665246]) // -283984665245.000000020 rounded towards negative infinity
+      expect(unixToAtomic(-283984666667)).toEqual([-283984665245]) // -283984665244.000000005 rounded towards negative infinity
+      // it's not possible to get a result of [-283984665244.xxxxxxxxxn]
+      expect(unixToAtomic(-283984666666)).toEqual([-283984665243]) // -283984665242.999999990 rounded towards negative infinity
+      expect(unixToAtomic(-283984666665)).toEqual([-283984665242]) // -283984665241.999999975 rounded towards negative infinity
     })
   })
 
@@ -227,7 +235,26 @@ describe('convert', () => {
   })
 
   it('Crazy pre-1972 nonsense', () => {
-    expect(Math.abs(taiConverter.oneToOne.unixToAtomic(Date.UTC(1962, JAN, 1, 0, 0, 0)) - (Date.UTC(1962, JAN, 1, 0, 0, 1, 845) + 0.858)) < 0.0001)
+    // TAI picosecond count rounds to -252_460_798_155 which is not in range
+    expect(taiConverter.oneToMany.unixToAtomicPicos(Date.UTC(1962, JAN, 1, 0, 0, 0, 0)))
+      .toEqual([-252_460_798_154_142_000_000n])
+    expect(taiConverter.oneToOne.unixToAtomicPicos(Date.UTC(1962, JAN, 1, 0, 0, 0, 0)))
+      .toEqual(-252_460_798_154_142_000_000n)
+    expect(taiConverter.oneToMany.unixToAtomic(Date.UTC(1962, JAN, 1, 0, 0, 0, 0)))
+      .toEqual([])
+    expect(() => taiConverter.oneToOne.unixToAtomic(Date.UTC(1962, JAN, 1, 0, 0, 0, 0)))
+      .toThrowError('No TAI equivalent: -252460800000')
+
+    expect(taiConverter.oneToMany.unixToAtomicPicos(Date.UTC(1962, JAN, 1, 0, 0, 0, 1)))
+      .toEqual([-252_460_798_153_141_999_987n])
+    expect(taiConverter.oneToOne.unixToAtomicPicos(Date.UTC(1962, JAN, 1, 0, 0, 0, 1)))
+      .toEqual(-252_460_798_153_141_999_987n)
+    expect(taiConverter.oneToMany.unixToAtomic(Date.UTC(1962, JAN, 1, 0, 0, 0, 1)))
+      .toEqual([-252_460_798_154])
+    expect(taiConverter.oneToOne.unixToAtomic(Date.UTC(1962, JAN, 1, 0, 0, 0, 1)))
+      .toEqual(-252_460_798_154)
+    expect(taiConverter.oneToOne.unixToAtomic(Date.UTC(1962, JAN, 1, 0, 0, 0, 1)))
+      .toEqual(Date.UTC(1962, JAN, 1, 0, 0, 1, 846)) // Same
   })
 
   it('inserted tenth', () => {
@@ -244,98 +271,98 @@ describe('convert', () => {
     // Which means that 23:59:59.950 UTC *does* actually exist...
     expect(taiConverter.oneToMany.unixToAtomic(Date.UTC(1961, JUL, 31, 23, 59, 59, 949)).length).toBe(1)
 
-    // This Unix millisecond count converts to -265_679_998_352_430_000_750 atomic picoseconds, which IS
-    // in the block by 750ps, but that rounds to -265_679_998_352 atomic milliseconds, which is
-    // the precise end of the block i.e. excluded
-    expect(taiConverter.oneToMany.unixToAtomic(Date.UTC(1961, JUL, 31, 23, 59, 59, 950)).length).toBe(0)
+    expect(taiConverter.oneToMany.unixToAtomicPicos(Date.UTC(1961, JUL, 31, 23, 59, 59, 950)))
+      .toEqual([-265_679_998_352_430_000_750n])
+    expect(taiConverter.oneToMany.unixToAtomic(Date.UTC(1961, JUL, 31, 23, 59, 59, 950)))
+      .toEqual([-265_679_998_353])
 
     expect(taiConverter.oneToMany.unixToAtomic(Date.UTC(1961, JUL, 31, 23, 59, 59, 951)).length).toBe(0)
     expect(taiConverter.oneToMany.unixToAtomic(Date.UTC(1961, JUL, 31, 23, 59, 59, 999)).length).toBe(0)
-    expect(taiConverter.oneToMany.unixToAtomic(Date.UTC(1961, AUG, 1, 0, 0, 0, 0)).length).toBe(1)
+    expect(taiConverter.oneToMany.unixToAtomic(Date.UTC(1961, AUG, 1, 0, 0, 0, 0)).length).toBe(0)
     expect(taiConverter.oneToMany.unixToAtomic(Date.UTC(1961, AUG, 1, 0, 0, 0, 1)).length).toBe(1)
+    expect(taiConverter.oneToMany.unixToAtomic(Date.UTC(1961, AUG, 1, 0, 0, 0, 2)).length).toBe(1)
     expect(Math.abs(taiConverter.oneToMany.atomicToUnix(Date.UTC(1961, AUG, 1, 0, 0, 1, 647)) - Date.UTC(1961, AUG, 1, 0, 0, 0, 0)) < 0.0001)
   })
 
   it('boundaries', () => {
     // Let's check out some boundaries where the relationship between TAI and UTC changed
     // 1 January 1962: Perfect continuity (although the drift rate changed)
-    expect(taiConverter.oneToMany.unixToAtomic(Date.UTC(1961, DEC, 31, 23, 59, 59, 999)).length).toBe(1)
-    expect(taiConverter.oneToMany.unixToAtomic(Date.UTC(1962, JAN, 1, 0, 0, 0, 0)).length).toBe(1)
-    expect(taiConverter.oneToMany.unixToAtomic(Date.UTC(1962, JAN, 1, 0, 0, 0, 1)).length).toBe(1)
+    expect(taiConverter.oneToMany.unixToAtomicPicos(Date.UTC(1961, DEC, 31, 23, 59, 59, 999)).length).toBe(1)
+    expect(taiConverter.oneToMany.unixToAtomicPicos(Date.UTC(1962, JAN, 1, 0, 0, 0, 0)).length).toBe(1)
+    expect(taiConverter.oneToMany.unixToAtomicPicos(Date.UTC(1962, JAN, 1, 0, 0, 0, 1)).length).toBe(1)
 
     // 1 November 1963: 0.1 TAI seconds inserted
-    expect(taiConverter.oneToMany.unixToAtomic(Date.UTC(1963, OCT, 30, 23, 59, 59, 999)).length).toBe(1)
-    expect(taiConverter.oneToMany.unixToAtomic(Date.UTC(1963, NOV, 1, 0, 0, 0, 0)).length).toBe(2)
-    expect(taiConverter.oneToMany.unixToAtomic(Date.UTC(1963, NOV, 1, 0, 0, 0, 99)).length).toBe(2)
-    expect(taiConverter.oneToMany.unixToAtomic(Date.UTC(1963, NOV, 1, 0, 0, 0, 100)).length).toBe(1)
+    expect(taiConverter.oneToMany.unixToAtomicPicos(Date.UTC(1963, OCT, 30, 23, 59, 59, 999)).length).toBe(1)
+    expect(taiConverter.oneToMany.unixToAtomicPicos(Date.UTC(1963, NOV, 1, 0, 0, 0, 0)).length).toBe(2)
+    expect(taiConverter.oneToMany.unixToAtomicPicos(Date.UTC(1963, NOV, 1, 0, 0, 0, 99)).length).toBe(2)
+    expect(taiConverter.oneToMany.unixToAtomicPicos(Date.UTC(1963, NOV, 1, 0, 0, 0, 100)).length).toBe(1)
 
     // 1 January 1964: Perfect continuity (drift rate changes)
-    expect(taiConverter.oneToMany.unixToAtomic(Date.UTC(1963, DEC, 31, 23, 59, 59, 999)).length).toBe(1)
-    expect(taiConverter.oneToMany.unixToAtomic(Date.UTC(1964, JAN, 1, 0, 0, 0, 0)).length).toBe(1)
-    expect(taiConverter.oneToMany.unixToAtomic(Date.UTC(1964, JAN, 1, 0, 0, 0, 1)).length).toBe(1)
+    expect(taiConverter.oneToMany.unixToAtomicPicos(Date.UTC(1963, DEC, 31, 23, 59, 59, 999)).length).toBe(1)
+    expect(taiConverter.oneToMany.unixToAtomicPicos(Date.UTC(1964, JAN, 1, 0, 0, 0, 0)).length).toBe(1)
+    expect(taiConverter.oneToMany.unixToAtomicPicos(Date.UTC(1964, JAN, 1, 0, 0, 0, 1)).length).toBe(1)
 
     // 1 April 1964: 0.1 TAI seconds inserted
-    expect(taiConverter.oneToMany.unixToAtomic(Date.UTC(1964, MAR, 31, 23, 59, 59, 999)).length).toBe(1)
-    expect(taiConverter.oneToMany.unixToAtomic(Date.UTC(1964, APR, 1, 0, 0, 0, 0)).length).toBe(2)
-    expect(taiConverter.oneToMany.unixToAtomic(Date.UTC(1964, APR, 1, 0, 0, 0, 99)).length).toBe(2)
-    expect(taiConverter.oneToMany.unixToAtomic(Date.UTC(1964, APR, 1, 0, 0, 0, 100)).length).toBe(1)
+    expect(taiConverter.oneToMany.unixToAtomicPicos(Date.UTC(1964, MAR, 31, 23, 59, 59, 999)).length).toBe(1)
+    expect(taiConverter.oneToMany.unixToAtomicPicos(Date.UTC(1964, APR, 1, 0, 0, 0, 0)).length).toBe(2)
+    expect(taiConverter.oneToMany.unixToAtomicPicos(Date.UTC(1964, APR, 1, 0, 0, 0, 99)).length).toBe(2)
+    expect(taiConverter.oneToMany.unixToAtomicPicos(Date.UTC(1964, APR, 1, 0, 0, 0, 100)).length).toBe(1)
 
     // etc. (various occasions when 0.1 TAI seconds were inserted)
-    expect(taiConverter.oneToMany.unixToAtomic(Date.UTC(1964, SEP, 1, 0, 0, 0, 99)).length).toBe(2)
-    expect(taiConverter.oneToMany.unixToAtomic(Date.UTC(1965, JAN, 1, 0, 0, 0, 99)).length).toBe(2)
-    expect(taiConverter.oneToMany.unixToAtomic(Date.UTC(1965, MAR, 1, 0, 0, 0, 99)).length).toBe(2)
-    expect(taiConverter.oneToMany.unixToAtomic(Date.UTC(1965, JUL, 1, 0, 0, 0, 99)).length).toBe(2)
-    expect(taiConverter.oneToMany.unixToAtomic(Date.UTC(1965, SEP, 1, 0, 0, 0, 99)).length).toBe(2)
+    expect(taiConverter.oneToMany.unixToAtomicPicos(Date.UTC(1964, SEP, 1, 0, 0, 0, 99)).length).toBe(2)
+    expect(taiConverter.oneToMany.unixToAtomicPicos(Date.UTC(1965, JAN, 1, 0, 0, 0, 99)).length).toBe(2)
+    expect(taiConverter.oneToMany.unixToAtomicPicos(Date.UTC(1965, MAR, 1, 0, 0, 0, 99)).length).toBe(2)
+    expect(taiConverter.oneToMany.unixToAtomicPicos(Date.UTC(1965, JUL, 1, 0, 0, 0, 99)).length).toBe(2)
+    expect(taiConverter.oneToMany.unixToAtomicPicos(Date.UTC(1965, SEP, 1, 0, 0, 0, 99)).length).toBe(2)
 
     // 1 January 1966: Perfect continuity (drift rate changes)
-    expect(taiConverter.oneToMany.unixToAtomic(Date.UTC(1965, DEC, 31, 23, 59, 59, 999)).length).toBe(1)
-    expect(taiConverter.oneToMany.unixToAtomic(Date.UTC(1966, JAN, 1, 0, 0, 0, 0)).length).toBe(1)
-    expect(taiConverter.oneToMany.unixToAtomic(Date.UTC(1966, JAN, 1, 0, 0, 0, 1)).length).toBe(1)
+    expect(taiConverter.oneToMany.unixToAtomicPicos(Date.UTC(1965, DEC, 31, 23, 59, 59, 999)).length).toBe(1)
+    expect(taiConverter.oneToMany.unixToAtomicPicos(Date.UTC(1966, JAN, 1, 0, 0, 0, 0)).length).toBe(1)
+    expect(taiConverter.oneToMany.unixToAtomicPicos(Date.UTC(1966, JAN, 1, 0, 0, 0, 1)).length).toBe(1)
 
     // 1 February 1968: 0.1 TAI seconds removed
-    expect(taiConverter.oneToMany.unixToAtomic(Date.UTC(1968, JAN, 31, 23, 59, 59, 899)).length).toBe(1)
+    expect(taiConverter.oneToMany.unixToAtomicPicos(Date.UTC(1968, JAN, 31, 23, 59, 59, 899)).length).toBe(1)
+    expect(taiConverter.oneToMany.unixToAtomicPicos(Date.UTC(1968, JAN, 31, 23, 59, 59, 900)))
+      .toEqual([-60_479_993_814_318_003_000n])
+    expect(taiConverter.oneToMany.unixToAtomic(Date.UTC(1968, JAN, 31, 23, 59, 59, 900)))
+      .toEqual([-60_479_993_815])
 
-    // This Unix millisecond count is -60_479_993_814_318_003_000 TAI picoseconds, which is inside
-    // the block, but on division it rounds to -60_479_993_814n TAI milliseconds, which is right on
-    // the edge and hence excluded
-    expect(taiConverter.oneToMany.unixToAtomic(Date.UTC(1968, JAN, 31, 23, 59, 59, 900)).length).toBe(0)
-
-    expect(taiConverter.oneToMany.unixToAtomic(Date.UTC(1968, JAN, 31, 23, 59, 59, 901)).length).toBe(0)
-    expect(taiConverter.oneToMany.unixToAtomic(Date.UTC(1968, JAN, 31, 23, 59, 59, 999)).length).toBe(0)
-    expect(taiConverter.oneToMany.unixToAtomic(Date.UTC(1968, FEB, 1, 0, 0, 0, 0)).length).toBe(1)
+    expect(taiConverter.oneToMany.unixToAtomicPicos(Date.UTC(1968, JAN, 31, 23, 59, 59, 901)).length).toBe(0)
+    expect(taiConverter.oneToMany.unixToAtomicPicos(Date.UTC(1968, JAN, 31, 23, 59, 59, 999)).length).toBe(0)
+    expect(taiConverter.oneToMany.unixToAtomicPicos(Date.UTC(1968, FEB, 1, 0, 0, 0, 0)).length).toBe(1)
 
     // 1 January 1972: 0.107758 TAI seconds inserted
-    expect(taiConverter.oneToMany.unixToAtomic(Date.UTC(1971, DEC, 31, 23, 59, 59, 999)).length).toBe(1)
-    expect(taiConverter.oneToMany.unixToAtomic(Date.UTC(1972, JAN, 1, 0, 0, 0, 0)).length).toBe(2)
-    expect(taiConverter.oneToMany.unixToAtomic(Date.UTC(1972, JAN, 1, 0, 0, 0, 107)).length).toBe(2)
-    expect(taiConverter.oneToMany.unixToAtomic(Date.UTC(1972, JAN, 1, 0, 0, 0, 108)).length).toBe(1)
+    expect(taiConverter.oneToMany.unixToAtomicPicos(Date.UTC(1971, DEC, 31, 23, 59, 59, 999)).length).toBe(1)
+    expect(taiConverter.oneToMany.unixToAtomicPicos(Date.UTC(1972, JAN, 1, 0, 0, 0, 0)).length).toBe(2)
+    expect(taiConverter.oneToMany.unixToAtomicPicos(Date.UTC(1972, JAN, 1, 0, 0, 0, 107)).length).toBe(2)
+    expect(taiConverter.oneToMany.unixToAtomicPicos(Date.UTC(1972, JAN, 1, 0, 0, 0, 108)).length).toBe(1)
 
     // Removed time
-    expect(taiConverter.oneToMany.unixToAtomic(-265680000052).length).toBe(1)
-    expect(taiConverter.oneToMany.unixToAtomic(-265680000051).length).toBe(1)
-    expect(taiConverter.oneToMany.unixToAtomic(-265680000050).length).toBe(0)
-    expect(taiConverter.oneToMany.unixToAtomic(-265680000049).length).toBe(0)
+    expect(taiConverter.oneToMany.unixToAtomicPicos(-265680000051).length).toBe(1)
+    expect(taiConverter.oneToMany.unixToAtomicPicos(-265680000050).length).toBe(1)
+    expect(taiConverter.oneToMany.unixToAtomicPicos(-265680000049).length).toBe(0)
+    expect(taiConverter.oneToMany.unixToAtomicPicos(-265680000048).length).toBe(0)
 
-    expect(taiConverter.oneToMany.unixToAtomic(-252460800000).length).toBe(1)
-    expect(taiConverter.oneToMany.unixToAtomic(-194659199900).length).toBe(1)
-    expect(taiConverter.oneToMany.unixToAtomic(-189388800000).length).toBe(1)
-    expect(taiConverter.oneToMany.unixToAtomic(-181526399900).length).toBe(1)
-    expect(taiConverter.oneToMany.unixToAtomic(-168307199900).length).toBe(1)
-    expect(taiConverter.oneToMany.unixToAtomic(-157766399900).length).toBe(1)
-    expect(taiConverter.oneToMany.unixToAtomic(-152668799900).length).toBe(1)
-    expect(taiConverter.oneToMany.unixToAtomic(-142127999900).length).toBe(1)
-    expect(taiConverter.oneToMany.unixToAtomic(-136771199900).length).toBe(1)
-    expect(taiConverter.oneToMany.unixToAtomic(-126230400000).length).toBe(1)
+    expect(taiConverter.oneToMany.unixToAtomicPicos(-252460800000).length).toBe(1)
+    expect(taiConverter.oneToMany.unixToAtomicPicos(-194659199900).length).toBe(1)
+    expect(taiConverter.oneToMany.unixToAtomicPicos(-189388800000).length).toBe(1)
+    expect(taiConverter.oneToMany.unixToAtomicPicos(-181526399900).length).toBe(1)
+    expect(taiConverter.oneToMany.unixToAtomicPicos(-168307199900).length).toBe(1)
+    expect(taiConverter.oneToMany.unixToAtomicPicos(-157766399900).length).toBe(1)
+    expect(taiConverter.oneToMany.unixToAtomicPicos(-152668799900).length).toBe(1)
+    expect(taiConverter.oneToMany.unixToAtomicPicos(-142127999900).length).toBe(1)
+    expect(taiConverter.oneToMany.unixToAtomicPicos(-136771199900).length).toBe(1)
+    expect(taiConverter.oneToMany.unixToAtomicPicos(-126230400000).length).toBe(1)
 
     // Removed time
-    expect(taiConverter.oneToMany.unixToAtomic(-60480000102).length).toBe(1)
-    expect(taiConverter.oneToMany.unixToAtomic(-60480000101).length).toBe(1)
-    expect(taiConverter.oneToMany.unixToAtomic(-60480000100).length).toBe(0)
-    expect(taiConverter.oneToMany.unixToAtomic(-60480000099).length).toBe(0)
+    expect(taiConverter.oneToMany.unixToAtomicPicos(-60480000101).length).toBe(1)
+    expect(taiConverter.oneToMany.unixToAtomicPicos(-60480000100).length).toBe(1)
+    expect(taiConverter.oneToMany.unixToAtomicPicos(-60480000099).length).toBe(0)
+    expect(taiConverter.oneToMany.unixToAtomicPicos(-60480000098).length).toBe(0)
 
-    expect(taiConverter.oneToMany.unixToAtomic(63072000106).length).toBe(2)
-    expect(taiConverter.oneToMany.unixToAtomic(63072000107).length).toBe(2)
-    expect(taiConverter.oneToMany.unixToAtomic(63072000108).length).toBe(1)
-    expect(taiConverter.oneToMany.unixToAtomic(63072000109).length).toBe(1)
+    expect(taiConverter.oneToMany.unixToAtomicPicos(63072000106).length).toBe(2)
+    expect(taiConverter.oneToMany.unixToAtomicPicos(63072000107).length).toBe(2)
+    expect(taiConverter.oneToMany.unixToAtomicPicos(63072000108).length).toBe(1)
+    expect(taiConverter.oneToMany.unixToAtomicPicos(63072000109).length).toBe(1)
   })
 })
