@@ -25,108 +25,145 @@ npm install t-a-i
 Exactly how long was 1972?
 
 ```javascript
-var tai = require("t-a-i");
+const tai = require("t-a-i")
 
-var unixStart = Date.UTC(1972, 0, 1); // 63072000000
-var unixEnd   = Date.UTC(1973, 0, 1); // 94694400000
+const unixStart = Date.UTC(1972, 0, 1) // 63_072_000_000
+const unixEnd   = Date.UTC(1973, 0, 1) // 94_694_400_000
 
-console.log(end - start);
-// 31622400000 milliseconds - wrong answer!
+console.log(unixEnd - unixStart)
+// 31_622_400_000 milliseconds - wrong answer!
 
-var taiStart = tai.unixToAtomic(unixStart); // 63072010000
-var taiEnd   = tai.unixToAtomic(unixEnd);   // 94694412000
+const atomicStart = tai.oneToOne.unixToAtomic(unixStart) // 63_072_010_000
+const atomicEnd   = tai.oneToOne.unixToAtomic(unixEnd)   // 94_694_412_000
 
-console.log(taiEnd - taiStart);
-// 31622402000 milliseconds - right, including two leap seconds!
+console.log(atomicEnd - atomicStart)
+// 31_622_402_000 milliseconds - right, including two leap seconds!
 ```
 
 What is the current offset between TAI and Unix time?
 
 ```javascript
-var now = Date.now();
-var offset = tai.unixToAtomic(now) - now;
-// 37000 at the time of writing; TAI is 37 seconds ahead of Unix time
+const now = Date.now()
+const offset = tai.oneToOne.unixToAtomic(now) - now
+
+console.log(offset)
+// 37_000 at the time of writing; TAI is 37 seconds ahead of Unix time
+```
+
+What was TAI, exactly, at the Unix epoch?
+
+```javascript
+tai.oneToOne.unixToAtomicPicos(0)
+// 8000_082_000_000n TAI picoseconds, i.e. 1970-01-01 00:00:08.000_082 TAI
 ```
 
 Note! Use caution when constructing a `Date` object directly from a TAI millisecond count. A `Date` represents an instant in Unix time, not an instant in TAI, and the object's method names and method behaviours reflect this. Instead, consider using a [`TaiDate`](https://github.com/ferno/tai-date)!
 
 ## API
 
-### tai.unixToAtomic(unix)
-Shorthand for `tai.convert.oneToOne.unixToAtomic(unix)`.
-
-### tai.atomicToUnix(atomic)
-Shorthand for `tai.convert.oneToMany.atomicToUnix(atomic)`.
-
-### tai.convert
-
-Object containing conversion methods, sorted by relationship model. All conversion methods throw an exception if the input or output is prior to the beginning of TAI, which was, equivalently:
+Note that the beginning of TAI was, equivalently:
 
 * 1961-01-01 00:00:00.000000 UTC
 * 1961-01-01 00:00:01.422818 TAI
 * -283996800000.000 Unix time
 * -283996798577.182 TAI milliseconds
 
-### tai.convert.oneToMany
+Methods fail or return empty result sets if called with times before the beginning of TAI.
 
-These methods treat the relationship between Unix time and TAI as one-to-many.
+All methods throw exceptions if not passed an integer number of milliseconds. For example, calling `atomicToUnix(-283996798577.182)` throws an exception.
 
-### tai.convert.oneToMany.unixToAtomic(unix)
-Convert a number of Unix milliseconds to an array of possible TAI milliseconds counts. Ordinarily, this array will have a single entry. If the Unix time falls during an inserted leap second, the array will have two entries. If the Unix time falls during a removed leap second, the array will be empty.
+Note that for times prior to the beginning of 1972, TAI milliseconds and Unix milliseconds were not the same length. Results are always integer numbers of milliseconds, with fractions rounded towards negative infinity. In most cases, this means that **round trips do not work**.
 
-```javascript
-var unix = 915148800000;
-// 1999-01-01 00:00:00 UTC
+### tai.oneToMany
 
-tai.convert.oneToMany.unixToAtomic(unix);
-// [915148831000, 915148832000]
-// i.e. [1999-01-01 00:00:31 TAI, 1999-01-01 00:00:32 TAI]
-```
+These conversions treat the relationship between TAI and Unix as one-to-many. An instant in TAI may correspond to 0, 1 or 2 instants in Unix time.
 
-### tai.convert.oneToMany.atomicToUnix(atomic)
-Convert a number of TAI milliseconds to Unix milliseconds. Note that over the course of a leap second, two instants in TAI may convert back to the same instant in Unix time.
+#### tai.oneToMany.unixToAtomic(unix)
+
+Convert a number of Unix milliseconds to an array of possible TAI millisecond counts. Ordinarily, this array will have a single entry. If the Unix time falls during an inserted leap second, the array will have two entries. If the Unix time falls during a removed leap second, the array will be empty.
 
 ```javascript
-var atomic1 = 915148831000; // 1999-01-01 00:00:31 TAI
-var atomic2 = 915148832000; // 1999-01-01 00:00:32 TAI
+const unix = 915_148_800_001
+// 1999-01-01 00:00:00.001 UTC
 
-tai.convert.oneToMany.atomicToUnix(atomic1);
-// 915148800000
-// i.e. 1999-01-01 00:00:00 UTC
-
-tai.convert.oneToMany.atomicToUnix(atomic2);
-// 915148800000, same result
+tai.oneToMany.unixToAtomic(unix)
+// [915_148_831_001, 915_148_832_001]
+// i.e. [1999-01-01 00:00:31.001 TAI, 1999-01-01 00:00:32.001 TAI]
 ```
 
-### tai.convert.oneToOne
+#### tai.oneToMany.unixToAtomicPicos(unix)
 
-These methods treat the relationship between Unix time and TAI as one-to-one. Ambiguity is not tolerated. Round trips always work.
+As `tai.oneToMany.unixToAtomic`, but returns an array of precise TAI picosecond counts as `BigInt`s.
 
-### tai.convert.oneToOne.unixToAtomic(unix)
+```javascript
+const unix = -157_766_399_910
+// 1965-01-01 00:00:00.090 UTC
+
+tai.oneToMany.unixToAtomicPicos(unix)
+// [-157_766_396_469_869_998_650n, -157_766_396_369_869_998_650n]
+// i.e. [1965-01-01 00:00:03.530_130_001_350 TAI, 1965-01-01 00:00:03.630_130_001_350 TAI]
+```
+
+#### tai.oneToMany.atomicToUnix(atomic)
+
+Convert a number of TAI milliseconds to Unix milliseconds. Note that over the course of a leap second, two different instants in TAI may convert back to the same instant in Unix time.
+
+```javascript
+const atomic1 = 915_148_831_001 // 1999-01-01 00:00:31.001 TAI
+const atomic2 = 915_148_832_001 // 1999-01-01 00:00:32.001 TAI
+
+tai.oneToMany.atomicToUnix(atomic1)
+// 915_148_800_001
+// i.e. 1999-01-01 00:00:00.001 UTC
+
+tai.oneToMany.atomicToUnix(atomic2)
+// 915_148_800_001, same result
+```
+
+### tai.oneToOne
+
+These conversions treat the relationship between TAI and Unix as one-to-one. An instant in TAI corresponds to 1 instant in Unix time.
+
+#### tai.oneToOne.unixToAtomic(unix)
+
 Convert a number of Unix milliseconds to a number of TAI milliseconds. If the Unix time falls on an inserted leap second, it corresponds to *two* TAI instants, so we return the later ("canonical") of the two. If the Unix time falls on a removed leap second, we throw an exception.
 
 ```javascript
-var unix = 915148800000;
-// 1999-01-01 00:00:00 UTC
+const unix = 915_148_800_001
+// 1999-01-01 00:00:00.001 UTC
 
-tai.unixToAtomic(unix);
-// 915148832000
-// i.e. 1999-01-01 00:00:32 TAI
+tai.oneToOne.unixToAtomic(unix)
+// 915_148_832_001
+// i.e. 1999-01-01 00:00:32.001 TAI
 ```
 
-### tai.convert.oneToOne.atomicToUnix(atomic)
-Convert a number of TAI milliseconds back to Unix milliseconds. If the TAI time falls during the first part of an inserted leap second, throw an exception.
+#### tai.oneToOne.unixToAtomicPicos(unix)
+
+As `tai.oneToOne.unixToAtomic`, but returns a precise TAI picosecond count as a `BigInt`.
 
 ```javascript
-var atomic1 = 915148831000; // 1999-01-01 00:00:31 TAI
-var atomic2 = 915148832000; // 1999-01-01 00:00:32 TAI
+const unix = -157_766_399_910
+// 1965-01-01 00:00:00.090 UTC
 
-tai.convert.oneToOne.atomicToUnix(915148831000);
+tai.oneToOne.unixToAtomicPicos(unix)
+// -157_766_396_369_869_998_650n
+// i.e. 1965-01-01 00:00:03.630_130_001_350 TAI
+```
+
+#### tai.oneToOne.atomicToUnix(atomic)
+
+Convertx a number of TAI milliseconds back to Unix milliseconds. If the TAI time falls during the first part of an inserted leap second, it is not a "canonical" TAI instant, so throws an exception.
+
+```javascript
+const atomic1 = 915_148_831_001 // 1999-01-01 00:00:31.001 TAI
+const atomic2 = 915_148_832_001 // 1999-01-01 00:00:32.001 TAI
+
+tai.oneToOne.atomicToUnix(atomic1)
 // throws exception
 
-tai.convert.oneToOne.atomicToUnix(915148832000);
-// 915148800000
-// i.e. 1999-01-01 00:00:00 UTC
+tai.oneToOne.atomicToUnix(atomic2)
+// 915_148_800_001
+// i.e. 1999-01-01 00:00:00.001 UTC
 ```
 
 ## Background: TAI vs UTC vs Unix
@@ -206,58 +243,10 @@ Unix time seems to be built around an assumption that UTC follows an idealised G
 * 0.000 Unix time
 * 8000.082 TAI milliseconds
 
-, not counting leap seconds. For example, 1999-01-01 00:00:00 UTC is 915148800000 Unix milliseconds.
+, not counting leap seconds. For example, 1999-01-01 00:00:00 UTC is 915,148,800,000 Unix milliseconds.
 
 Unix time can be computed from any Gregorian calendar date and time using a relatively simple piece of arithmetic, and the reverse calculation is also simple. Unix time can be extended backwards to negative numbers.
 
-Unix time therefore has the same issues as UTC when it comes to removed time; certain millisecond counts literally never happened. During inserted time, since Unix time is a simple real number, it can't express a time like "23:59:60", so it simply overruns, then backtracks and repeats itself.
-
-### TAI milliseconds
+Unix time therefore has the same issues as UTC when it comes to removed time; certain millisecond counts literally never happened. During inserted time, since Unix time is a simple real number, it can't express a time like "23:59:60", so it must overrun, then backtrack and repeat itself.
 
 Ironically, TAI fits the description of an idealised Gregorian calendar much better. Applying the same arithmetic to a TAI date yields TAI time, which is the number of TAI milliseconds since 1970-01-01 00:00:00 TAI.
-
-A one-time calculation using the Unix epoch as our new root yields this raw data:
-
-| Starting from this Unix time | TAI - Unix =                                       | Notes                                                |
-| ----------------------------:| --------------------------------------------------:| ---------------------------------------------------- |
-|                -283996800000 | 0.000000015&nbsp;*&nbsp;Unix&nbsp;+&nbsp;5682.7700 | Beginning of TAI                                     |
-|                -265680000000 | 0.000000015&nbsp;*&nbsp;Unix&nbsp;+&nbsp;5632.7700 | 0.05 TAI seconds removed from UTC                    |
-|                -252460800000 | 0.000000013&nbsp;*&nbsp;Unix&nbsp;+&nbsp;5127.8484 | Drift rate reduced, no discontinuity in UTC          |
-|                -194659200000 | 0.000000013&nbsp;*&nbsp;Unix&nbsp;+&nbsp;5227.8484 | 0.1 TAI seconds added to UTC                         |
-|                -189388800000 | 0.000000015&nbsp;*&nbsp;Unix&nbsp;+&nbsp;5606.6260 | Drift rate restored, no discontinuity in UTC         |
-|                -181526400000 | 0.000000015&nbsp;*&nbsp;Unix&nbsp;+&nbsp;5706.6260 | 0.1 TAI seconds added to UTC                         |
-|                -168307200000 | 0.000000015&nbsp;*&nbsp;Unix&nbsp;+&nbsp;5806.6260 | 0.1 TAI seconds added to UTC                         |
-|                -157766400000 | 0.000000015&nbsp;*&nbsp;Unix&nbsp;+&nbsp;5906.6260 | 0.1 TAI seconds added to UTC                         |
-|                -152668800000 | 0.000000015&nbsp;*&nbsp;Unix&nbsp;+&nbsp;6006.6260 | 0.1 TAI seconds added to UTC                         |
-|                -142128000000 | 0.000000015&nbsp;*&nbsp;Unix&nbsp;+&nbsp;6106.6260 | 0.1 TAI seconds added to UTC                         |
-|                -136771200000 | 0.000000015&nbsp;*&nbsp;Unix&nbsp;+&nbsp;6206.6260 | 0.1 TAI seconds added to UTC                         |
-|                -126230400000 | 0.000000030&nbsp;*&nbsp;Unix&nbsp;+&nbsp;8100.0820 | Drift rate doubled, no discontinuity in UTC          |
-|                 -60480000000 | 0.000000030&nbsp;*&nbsp;Unix&nbsp;+&nbsp;8000.0820 | 0.1 TAI seconds removed from UTC                     | 
-|                  63072010000 |                                         10000.0000 | 0.107758 TAI seconds added to UTC, drift rate zeroed |
-|                  78796810000 |                                         11000.0000 | 1.0 seconds added to UTC                             |
-|                  94694410000 |                                         12000.0000 | 1.0 seconds added to UTC                             |
-|                 126230410000 |                                         13000.0000 | etc.                                                 |
-|                 157766410000 |                                         14000.0000 |                                                      |
-|                 189302410000 |                                         15000.0000 |                                                      |
-|                 220924810000 |                                         16000.0000 |                                                      |
-|                 252460810000 |                                         17000.0000 |                                                      |
-|                 283996810000 |                                         18000.0000 |                                                      |
-|                 315532810000 |                                         19000.0000 |                                                      |
-|                 362793620000 |                                         20000.0000 |                                                      |
-|                 394329620000 |                                         21000.0000 |                                                      |
-|                 425865620000 |                                         22000.0000 |                                                      |
-|                 489024020000 |                                         23000.0000 |                                                      |
-|                 567993620000 |                                         24000.0000 |                                                      |
-|                 631152020000 |                                         25000.0000 |                                                      |
-|                 662688020000 |                                         26000.0000 |                                                      |
-|                 709948820000 |                                         27000.0000 |                                                      |
-|                 741484820000 |                                         28000.0000 |                                                      |
-|                 773020820000 |                                         29000.0000 |                                                      |
-|                 820454430000 |                                         30000.0000 |                                                      |
-|                 867715230000 |                                         31000.0000 |                                                      |
-|                 915148830000 |                                         32000.0000 |                                                      |
-|                1136073630000 |                                         33000.0000 |                                                      |
-|                1230768030000 |                                         34000.0000 |                                                      |
-|                1341100830000 |                                         35000.0000 |                                                      |
-|                1435708830000 |                                         36000.0000 |                                                      |
-|                1483228830000 |                                         37000.0000 |                                                      |

@@ -1,25 +1,25 @@
 {
   "name": "t-a-i",
-  "version": "1.0.16",
+  "version": "2.0.0",
   "description": "Converts Unix milliseconds to and from International Atomic Time (TAI) milliseconds",
   "homepage": "https://github.com/qntm/t-a-i",
   "repository": {
     "type": "git",
     "url": "git://github.com/qntm/t-a-i.git"
   },
-  "main": "./src/t-a-i.js",
+  "main": "./src",
   "scripts": {
-    "standard": "standard",
-    "jasmine": "jasmine",
-    "test": "npm run jasmine -- test/*.js"
+    "postpublish": "npm version patch && git push",
+    "test": "standard --fix && jest"
   },
   "author": "qntm",
   "license": "MIT",
   "devDependencies": {
-    "jasmine": "^3.6.1",
-    "standard": "^16.0.1"
+    "jest": "^25.2.3",
+    "standard": "^16.0.3"
   },
   "files": [
-    "src"
+    "src",
+    "!src/**.spec.js"
   ]
 }
