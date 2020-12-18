@@ -10,6 +10,8 @@ New methods `tai.oneToMany.unixToAtomicPicos` and `tai.oneToOne.unixToAtomicPico
 
 Internal logic for conversions prior to 1972 (variable-length Unix seconds) has been fine-tuned.
 
+Support for Node.js 10 is dropped.
+
 ## 1.x.x
 
 Initial release.
