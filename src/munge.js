@@ -59,6 +59,7 @@ module.exports = data => {
     return {
       start,
       ratio,
+      root,
       offsetAtRoot,
       offsetAtUnixEpoch
     }

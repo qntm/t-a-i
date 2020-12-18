@@ -23,6 +23,10 @@ describe('munge', () => {
       offsetAtUnixEpoch: {
         atomicPicos: 0n
       },
+      root: {
+        mjds: 0,
+        unixMillis: -3_506_716_800_000
+      },
       offsetAtRoot: {
         atomicPicos: 0n,
         atomicSeconds: 0
@@ -49,6 +53,10 @@ describe('munge', () => {
       },
       offsetAtUnixEpoch: {
         atomicPicos: -4_000_000_000_000n
+      },
+      root: {
+        mjds: 0,
+        unixMillis: -3_506_716_800_000
       },
       offsetAtRoot: {
         atomicPicos: -4_000_000_000_000n,
@@ -83,6 +91,10 @@ describe('munge', () => {
       offsetAtUnixEpoch: {
         atomicPicos: -4_000_000_000_000n
       },
+      root: {
+        mjds: 0,
+        unixMillis: -3_506_716_800_000
+      },
       offsetAtRoot: {
         atomicPicos: -4_000_000_000_000n,
         atomicSeconds: -4
@@ -104,6 +116,10 @@ describe('munge', () => {
       offsetAtUnixEpoch: {
         atomicPicos: -3_000_000_000_000n
       },
+      root: {
+        mjds: 0,
+        unixMillis: -3_506_716_800_000
+      },
       offsetAtRoot: {
         atomicPicos: -3_000_000_000_000n,
         atomicSeconds: -3
@@ -124,6 +140,10 @@ describe('munge', () => {
       },
       offsetAtUnixEpoch: {
         atomicPicos: -4_000_000_000_000n
+      },
+      root: {
+        mjds: 0,
+        unixMillis: -3_506_716_800_000
       },
       offsetAtRoot: {
         atomicPicos: -4_000_000_000_000n,
@@ -150,6 +170,7 @@ describe('munge', () => {
       ratio: { atomicPicosPerUnixMilli: 1_000_100_000n },
       offsetAtUnixEpoch: { atomicPicos: 0n },
       end: { atomicPicos: Infinity },
+      root: { mjds: 40587, unixMillis: 0 },
       offsetAtRoot: { atomicPicos: 0n, atomicSeconds: 0 },
       overlapStart: { atomicPicos: Infinity }
     }])
@@ -162,6 +183,7 @@ describe('munge', () => {
       ratio: { atomicPicosPerUnixMilli: 1_000_000_000n },
       offsetAtUnixEpoch: { atomicPicos: 0n },
       end: { atomicPicos: Infinity },
+      root: { mjds: 40587, unixMillis: 0 },
       offsetAtRoot: { atomicPicos: 0n, atomicSeconds: 0 },
       overlapStart: { atomicPicos: Infinity }
     }])
@@ -174,6 +196,7 @@ describe('munge', () => {
       ratio: { atomicPicosPerUnixMilli: 999_900_000n },
       offsetAtUnixEpoch: { atomicPicos: 0n },
       end: { atomicPicos: Infinity },
+      root: { mjds: 40587, unixMillis: 0 },
       offsetAtRoot: { atomicPicos: 0n, atomicSeconds: 0 },
       overlapStart: { atomicPicos: Infinity }
     }])
@@ -187,6 +210,7 @@ describe('munge', () => {
       ratio: { atomicPicosPerUnixMilli: 100_000n },
       offsetAtUnixEpoch: { atomicPicos: 0n },
       end: { atomicPicos: Infinity },
+      root: { mjds: 40587, unixMillis: 0 },
       offsetAtRoot: { atomicPicos: 0n, atomicSeconds: 0 },
       overlapStart: { atomicPicos: Infinity }
     }])
@@ -202,6 +226,7 @@ describe('munge', () => {
       ratio: { atomicPicosPerUnixMilli: 0n },
       offsetAtUnixEpoch: { atomicPicos: 0n },
       end: { atomicPicos: Infinity },
+      root: { mjds: 40587, unixMillis: 0 },
       offsetAtRoot: { atomicPicos: 0n, atomicSeconds: 0 },
       overlapStart: { atomicPicos: Infinity }
     }])
@@ -242,6 +267,10 @@ describe('munge', () => {
       },
       offsetAtUnixEpoch: {
         atomicPicos: 5_682_770_000_000n
+      },
+      root: {
+        mjds: 37_300,
+        unixMillis: -283_996_800_000
       },
       offsetAtRoot: {
         atomicPicos: 1_422_818_000_000n,

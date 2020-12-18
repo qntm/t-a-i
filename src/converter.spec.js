@@ -446,6 +446,10 @@ describe('Converter', () => {
           end: {
             atomicPicos: Infinity
           },
+          root: {
+            mjds: 0,
+            unixMillis: -3_506_716_800_000
+          },
           offsetAtRoot: {
             atomicPicos: -100_000_000n,
             atomicSeconds: -0.0001
@@ -481,6 +485,10 @@ describe('Converter', () => {
           end: {
             atomicPicos: -100_000_000n // block end intentionally doesn't include TAI epoch
           },
+          root: {
+            mjds: 0,
+            unixMillis: -3_506_716_800_000
+          },
           offsetAtRoot: {
             atomicPicos: 100_000_000n,
             atomicSeconds: 0.0001
@@ -501,6 +509,10 @@ describe('Converter', () => {
           },
           end: {
             atomicPicos: Infinity
+          },
+          root: {
+            mjds: 0,
+            unixMillis: -3_506_716_800_000
           },
           offsetAtRoot: {
             atomicPicos: -1100_000_000n,
