@@ -64,14 +64,18 @@ module.exports = data => {
 
   munged.forEach((block, i, arr) => {
     // Block end is exclusive: this is the earliest precise count which is NOT in the block.
-    // If the ratio is such that Universal Time runs backwards relative to TAI, or if the blocks are
-    // not given in increasing order of start time, it is possible that `blockEnd` could be *before*
-    // `blockStart`.
-    // TODO: figure out what to do about those possible cases
     block.blockEnd = {}
     block.blockEnd.atomicPicos = i + 1 in arr
       ? arr[i + 1].blockStart.atomicPicos
       : Infinity
+
+    if (block.blockEnd.atomicPicos < block.blockStart.atomicPicos) {
+      throw Error('Disordered blocks are not supported yet')
+    }
+
+    if (block.blockEnd.atomicPicos === block.blockStart.atomicPicos) {
+      throw Error('Zero-length blocks are not supported yet')
+    }
 
     // This can be before, exactly at, or after `blockEnd`. Before is the case we care about most.
     block.overlapStart = {}

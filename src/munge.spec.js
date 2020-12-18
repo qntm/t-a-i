@@ -187,6 +187,20 @@ describe('munge', () => {
     ])).toThrowError('Universal Time cannot run backwards yet')
   })
 
+  it('fails on zero-length blocks', () => {
+    expect(() => munge([
+      [Date.UTC(1970, JAN, 1), 0, 40_587, 0],
+      [Date.UTC(1970, JAN, 1), 0, 40_587, 0.086_400],
+    ])).toThrowError('Zero-length blocks are not supported yet')
+  })
+
+  it('fails on disordered blocks', () => {
+    expect(() => munge([
+      [Date.UTC(1970, JAN, 1, 0, 0, 0), 0, 40_587, 0],
+      [Date.UTC(1970, JAN, 1, 0, 0, 1), -2, 40_587, 0],
+    ])).toThrowError('Disordered blocks are not supported yet')
+  })
+
   it('works with the first line of real data', () => {
     expect(munge([
       [Date.UTC(1961, JAN, 1), 1.422_818_0, 37_300, 0.001_296]
