@@ -10,11 +10,11 @@ describe('munge', () => {
     expect(munge([
       [Date.UTC(1970, JAN, 1), 0]
     ])).toEqual([{
-      blockStart: {
+      start: {
         atomicPicos: 0n,
         unixMillis: 0
       },
-      blockEnd: {
+      end: {
         atomicPicos: Infinity
       },
       ratio: {
@@ -22,6 +22,10 @@ describe('munge', () => {
       },
       offsetAtUnixEpoch: {
         atomicPicos: 0n
+      },
+      offsetAtRoot: {
+        atomicPicos: 0n,
+        atomicSeconds: 0
       },
       overlapStart: {
         atomicPicos: Infinity
@@ -33,11 +37,11 @@ describe('munge', () => {
     expect(munge([
       [7, -4]
     ])).toEqual([{
-      blockStart: {
+      start: {
         unixMillis: 7,
         atomicPicos: -3_993_000_000_000n
       },
-      blockEnd: {
+      end: {
         atomicPicos: Infinity
       },
       ratio: {
@@ -45,6 +49,10 @@ describe('munge', () => {
       },
       offsetAtUnixEpoch: {
         atomicPicos: -4_000_000_000_000n
+      },
+      offsetAtRoot: {
+        atomicPicos: -4_000_000_000_000n,
+        atomicSeconds: -4
       },
       overlapStart: {
         atomicPicos: Infinity
@@ -62,11 +70,11 @@ describe('munge', () => {
       [9000, -3], // inserted leap second
       [13000, -4] // removed leap second
     ])).toEqual([{
-      blockStart: {
+      start: {
         unixMillis: -1000,
         atomicPicos: -5_000_000_000_000n
       },
-      blockEnd: {
+      end: {
         atomicPicos: 6_000_000_000_000n
       },
       ratio: {
@@ -75,15 +83,19 @@ describe('munge', () => {
       offsetAtUnixEpoch: {
         atomicPicos: -4_000_000_000_000n
       },
+      offsetAtRoot: {
+        atomicPicos: -4_000_000_000_000n,
+        atomicSeconds: -4
+      },
       overlapStart: {
         atomicPicos: 5_000_000_000_000n
       }
     }, {
-      blockStart: {
+      start: {
         unixMillis: 9000,
         atomicPicos: 6_000_000_000_000n
       },
-      blockEnd: {
+      end: {
         atomicPicos: 9_000_000_000_000n
       },
       ratio: {
@@ -92,15 +104,19 @@ describe('munge', () => {
       offsetAtUnixEpoch: {
         atomicPicos: -3_000_000_000_000n
       },
+      offsetAtRoot: {
+        atomicPicos: -3_000_000_000_000n,
+        atomicSeconds: -3
+      },
       overlapStart: {
         atomicPicos: 10_000_000_000_000n
       }
     }, {
-      blockStart: {
+      start: {
         unixMillis: 13000,
         atomicPicos: 9_000_000_000_000n
       },
-      blockEnd: {
+      end: {
         atomicPicos: Infinity
       },
       ratio: {
@@ -108,6 +124,10 @@ describe('munge', () => {
       },
       offsetAtUnixEpoch: {
         atomicPicos: -4_000_000_000_000n
+      },
+      offsetAtRoot: {
+        atomicPicos: -4_000_000_000_000n,
+        atomicSeconds: -4
       },
       overlapStart: {
         atomicPicos: Infinity
@@ -126,10 +146,11 @@ describe('munge', () => {
     expect(munge([
       [Date.UTC(1970, JAN, 1), 0, 40_587, 8.640_0]
     ])).toEqual([{
-      blockStart: { unixMillis: 0, atomicPicos: 0n },
+      start: { unixMillis: 0, atomicPicos: 0n },
       ratio: { atomicPicosPerUnixMilli: 1_000_100_000n },
       offsetAtUnixEpoch: { atomicPicos: 0n },
-      blockEnd: { atomicPicos: Infinity },
+      end: { atomicPicos: Infinity },
+      offsetAtRoot: { atomicPicos: 0n, atomicSeconds: 0 },
       overlapStart: { atomicPicos: Infinity }
     }])
 
@@ -137,10 +158,11 @@ describe('munge', () => {
     expect(munge([
       [Date.UTC(1970, JAN, 1), 0, 40_587, 0]
     ])).toEqual([{
-      blockStart: { unixMillis: 0, atomicPicos: 0n },
+      start: { unixMillis: 0, atomicPicos: 0n },
       ratio: { atomicPicosPerUnixMilli: 1_000_000_000n },
       offsetAtUnixEpoch: { atomicPicos: 0n },
-      blockEnd: { atomicPicos: Infinity },
+      end: { atomicPicos: Infinity },
+      offsetAtRoot: { atomicPicos: 0n, atomicSeconds: 0 },
       overlapStart: { atomicPicos: Infinity }
     }])
 
@@ -148,10 +170,11 @@ describe('munge', () => {
     expect(munge([
       [Date.UTC(1970, JAN, 1), 0, 40_587, -8.640_0]
     ])).toEqual([{
-      blockStart: { unixMillis: 0, atomicPicos: 0n },
+      start: { unixMillis: 0, atomicPicos: 0n },
       ratio: { atomicPicosPerUnixMilli: 999_900_000n },
       offsetAtUnixEpoch: { atomicPicos: 0n },
-      blockEnd: { atomicPicos: Infinity },
+      end: { atomicPicos: Infinity },
+      offsetAtRoot: { atomicPicos: 0n, atomicSeconds: 0 },
       overlapStart: { atomicPicos: Infinity }
     }])
 
@@ -160,10 +183,11 @@ describe('munge', () => {
     expect(munge([
       [Date.UTC(1970, JAN, 1), 0, 40_587, -86_400 + 8.640_0]
     ])).toEqual([{
-      blockStart: { unixMillis: 0, atomicPicos: 0n },
+      start: { unixMillis: 0, atomicPicos: 0n },
       ratio: { atomicPicosPerUnixMilli: 100_000n },
       offsetAtUnixEpoch: { atomicPicos: 0n },
-      blockEnd: { atomicPicos: Infinity },
+      end: { atomicPicos: Infinity },
+      offsetAtRoot: { atomicPicos: 0n, atomicSeconds: 0 },
       overlapStart: { atomicPicos: Infinity }
     }])
 
@@ -174,10 +198,11 @@ describe('munge', () => {
     expect(munge([
       [Date.UTC(1970, JAN, 1), 0, 40_587, -86_400]
     ])).toEqual([{
-      blockStart: { unixMillis: 0, atomicPicos: 0n },
+      start: { unixMillis: 0, atomicPicos: 0n },
       ratio: { atomicPicosPerUnixMilli: 0n },
       offsetAtUnixEpoch: { atomicPicos: 0n },
-      blockEnd: { atomicPicos: Infinity },
+      end: { atomicPicos: Infinity },
+      offsetAtRoot: { atomicPicos: 0n, atomicSeconds: 0 },
       overlapStart: { atomicPicos: Infinity }
     }])
 
@@ -205,11 +230,11 @@ describe('munge', () => {
     expect(munge([
       [Date.UTC(1961, JAN, 1), 1.422_818_0, 37_300, 0.001_296]
     ])).toEqual([{
-      blockStart: {
+      start: {
         unixMillis: -283_996_800_000,
         atomicPicos: -283_996_798_577_182_000_000n
       },
-      blockEnd: {
+      end: {
         atomicPicos: Infinity
       },
       ratio: {
@@ -217,6 +242,10 @@ describe('munge', () => {
       },
       offsetAtUnixEpoch: {
         atomicPicos: 5_682_770_000_000n
+      },
+      offsetAtRoot: {
+        atomicPicos: 1_422_818_000_000n,
+        atomicSeconds: 1.422_818_0
       },
       overlapStart: {
         atomicPicos: Infinity
@@ -317,7 +346,7 @@ describe('munge', () => {
   })
 
   it('generates proper overlaps', () => {
-    expect(munge(taiData).map(block => block.blockEnd.atomicPicos - block.overlapStart.atomicPicos)).toEqual([
+    expect(munge(taiData).map(block => block.end.atomicPicos - block.overlapStart.atomicPicos)).toEqual([
       -50_000_000_000n,
       0n,
       100_000_000_000n,

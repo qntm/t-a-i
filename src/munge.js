@@ -14,13 +14,13 @@ const mjdEpoch = {
 // computed
 module.exports = data => {
   const munged = data.map(datum => {
-    const blockStart = {}
+    const start = {}
     const offsetAtRoot = {}
     const root = {}
     const driftRate = {};
 
     [
-      blockStart.unixMillis,
+      start.unixMillis,
       offsetAtRoot.atomicSeconds,
       root.mjds = 0,
       driftRate.atomicSecondsPerUnixDay = 0
@@ -53,35 +53,36 @@ module.exports = data => {
     offsetAtUnixEpoch.atomicPicos = offsetAtRoot.atomicPicos -
       BigInt(root.unixMillis) * driftRate.atomicPicosPerUnixMilli
 
-    blockStart.atomicPicos = BigInt(blockStart.unixMillis) * ratio.atomicPicosPerUnixMilli +
+    start.atomicPicos = BigInt(start.unixMillis) * ratio.atomicPicosPerUnixMilli +
       offsetAtUnixEpoch.atomicPicos 
 
     return {
-      blockStart,
+      start,
       ratio,
+      offsetAtRoot,
       offsetAtUnixEpoch
     }
   })
 
   munged.forEach((block, i, arr) => {
     // Block end is exclusive: this is the earliest precise count which is NOT in the block.
-    block.blockEnd = {}
-    block.blockEnd.atomicPicos = i + 1 in arr
-      ? arr[i + 1].blockStart.atomicPicos
+    block.end = {}
+    block.end.atomicPicos = i + 1 in arr
+      ? arr[i + 1].start.atomicPicos
       : Infinity
 
-    if (block.blockEnd.atomicPicos < block.blockStart.atomicPicos) {
+    if (block.end.atomicPicos < block.start.atomicPicos) {
       throw Error('Disordered blocks are not supported yet')
     }
 
-    if (block.blockEnd.atomicPicos === block.blockStart.atomicPicos) {
+    if (block.end.atomicPicos === block.start.atomicPicos) {
       throw Error('Zero-length blocks are not supported yet')
     }
 
-    // This can be before, exactly at, or after `blockEnd`. Before is the case we care about most.
+    // This can be before, exactly at, or after `end`. Before is the case we care about most.
     block.overlapStart = {}
     block.overlapStart.atomicPicos = i + 1 in arr
-      ? BigInt(arr[i + 1].blockStart.unixMillis) * block.ratio.atomicPicosPerUnixMilli +
+      ? BigInt(arr[i + 1].start.unixMillis) * block.ratio.atomicPicosPerUnixMilli +
         block.offsetAtUnixEpoch.atomicPicos
       : Infinity
   })

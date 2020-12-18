@@ -29,10 +29,10 @@ module.exports = data => {
       }))
       .filter(({ block, atomicPicos }) => {
         // ...however, the result has to still be in the block!
-        if (atomicPicos < block.blockStart.atomicPicos) {
+        if (atomicPicos < block.start.atomicPicos) {
           return false
         }
-        if (block.blockEnd.atomicPicos <= atomicPicos) {
+        if (block.end.atomicPicos <= atomicPicos) {
           return false
         }
         return true
@@ -56,14 +56,14 @@ module.exports = data => {
       .filter(({ block, atomicMillis }) => {
         // ...hence this additional test
         const atomicPicosRounded = atomicMillis * picosPerMilli
-        if (atomicPicosRounded < block.blockStart.atomicPicos) {
+        if (atomicPicosRounded < block.start.atomicPicos) {
           return false
         }
 
         // This case is impossible. We round towards negative infinity, we cannot round up, past the
         // end of the block
         /* istanbul ignore next */
-        if (block.blockEnd.atomicPicos <= atomicPicosRounded) {
+        if (block.end.atomicPicos <= atomicPicosRounded) {
           throw Error(`Atomic time rounded up past end of block. This should be impossible`)
         }
 
@@ -99,14 +99,12 @@ module.exports = data => {
     }
 
     const atomicPicos = BigInt(atomicMillis) * picosPerMilli
-    // TODO: how about rounding `atomicPicos` to the nearest Unix millisecond here instead?
-    // What if more than one block matches??
 
     const blockIndex = blocks.findIndex(block => {
-      if (atomicPicos < block.blockStart.atomicPicos) {
+      if (atomicPicos < block.start.atomicPicos) {
         return false
       }
-      if (block.blockEnd.atomicPicos <= atomicPicos) {
+      if (block.end.atomicPicos <= atomicPicos) {
         return false
       }
       return true
@@ -119,40 +117,20 @@ module.exports = data => {
 
     const block = blocks[blockIndex]
 
-    // This division rounds towards negative infinity.
-    // Could rounding theoretically take the result *outside* of the block?
-    const unixMillis = div(
+    const unixMillis = Number(div(
       atomicPicos - block.offsetAtUnixEpoch.atomicPicos,
       block.ratio.atomicPicosPerUnixMilli
-    )
+    ))
 
-    const atomicPicos2 = unixMillis * block.ratio.atomicPicosPerUnixMilli +
-      block.offsetAtUnixEpoch.atomicPicos
-
-    // This case is impossible. Because the block start is always a whole number of Unix
-    // milliseconds, this would mean the precise result of `unixMillis` was *less* than this and
-    // rounded down, which means `atomicPicos` also would have to be before the start of the block,
-    // which we already tested for
-    /* istanbul ignore next */
-    if (atomicPicos2 < block.blockStart.atomicPicos) {
-      throw Error(`Atomic time not found: ${atomicMillis}. This should be impossible`)
-    }
-
-    // This is also impossible. `atomicPicos2` cannot be greater than `atomicPicos`, which is in
-    // the block.
-    /* istanbul ignore next */
-    if (block.blockEnd.atomicPicos <= atomicPicos2) {
-      throw Error(`Atomic time not found: ${atomicMillis}. This should be impossible`)
-    }
+    // There is no need to separately check that `unixMillis` is still in the block. Although some
+    // rounding may have occurred, rounding was towards negative infinity - there's no chance we
+    // left the block by accident.
 
     return { block, unixMillis }
   }
 
-  const atomicMillisToUnixMillis = atomicMillis => {
-    const { unixMillis } = atomicMillisToBlockWithUnixMillis(atomicMillis)
-
-    return Number(unixMillis)
-  }
+  const atomicMillisToUnixMillis = atomicMillis =>
+    atomicMillisToBlockWithUnixMillis(atomicMillis).unixMillis
 
   const canonicalAtomicMillisToUnixMillis = atomicMillis => {
     const { block, unixMillis } = atomicMillisToBlockWithUnixMillis(atomicMillis)
@@ -163,16 +141,10 @@ module.exports = data => {
       throw Error(`No UTC equivalent: ${atomicMillis}`)
     }
 
-    const atomicPicos2 = unixMillis * block.ratio.atomicPicosPerUnixMilli +
-      block.offsetAtUnixEpoch.atomicPicos
+    // There is no need to separately check that `unixMillis` is still in the non-overlap section
+    // of the block, for the same reason we don't need to check that it's in the block at all.
 
-    // This should be impossible, `atomicPicos2` is less than or equal to `atomicPicos`
-    /* istanbul ignore next */
-    if (block.overlapStart.atomicPicos <= atomicPicos2) {
-      throw Error(`Atomic time not found: ${atomicMillis}. This should be impossible`)
-    }
-
-    return Number(unixMillis)
+    return unixMillis
   }
 
   return {

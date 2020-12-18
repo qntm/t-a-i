@@ -433,7 +433,7 @@ describe('Converter', () => {
         ]
 
         expect(munge(data)).toEqual([{
-          blockStart: {
+          start: {
             unixMillis: 1,
             atomicPicos: 900_000_000n // block start intentionally doesn't include TAI epoch
           },
@@ -443,8 +443,12 @@ describe('Converter', () => {
           offsetAtUnixEpoch: {
             atomicPicos: -100_000_000n
           },
-          blockEnd: {
+          end: {
             atomicPicos: Infinity
+          },
+          offsetAtRoot: {
+            atomicPicos: -100_000_000n,
+            atomicSeconds: -0.0001
           },
           overlapStart: {
             atomicPicos: Infinity
@@ -464,7 +468,7 @@ describe('Converter', () => {
         ]
 
         expect(munge(data)).toEqual([{
-          blockStart: {
+          start: {
             unixMillis: -1,
             atomicPicos: -900_000_000n
           },
@@ -474,14 +478,18 @@ describe('Converter', () => {
           offsetAtUnixEpoch: {
             atomicPicos: 100_000_000n
           },
-          blockEnd: {
+          end: {
             atomicPicos: -100_000_000n // block end intentionally doesn't include TAI epoch
+          },
+          offsetAtRoot: {
+            atomicPicos: 100_000_000n,
+            atomicSeconds: 0.0001
           },
           overlapStart: {
             atomicPicos: 1_100_000_000n
           }
         }, {
-          blockStart: {
+          start: {
             unixMillis: 1,
             atomicPicos: -100_000_000n
           },
@@ -491,8 +499,12 @@ describe('Converter', () => {
           offsetAtUnixEpoch: {
             atomicPicos: -1_100_000_000n
           },
-          blockEnd: {
+          end: {
             atomicPicos: Infinity
+          },
+          offsetAtRoot: {
+            atomicPicos: -1100_000_000n,
+            atomicSeconds: -0.0011
           },
           overlapStart: {
             atomicPicos: Infinity
