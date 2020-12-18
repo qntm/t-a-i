@@ -8,11 +8,11 @@ const JAN = 0
 describe('munge', () => {
   it('works in the simplest possible case', () => {
     expect(munge([
-      [BigInt(Date.UTC(1970, JAN, 1)), 0]
+      [Date.UTC(1970, JAN, 1), 0]
     ])).toEqual([{
       blockStart: {
         atomicPicos: 0n,
-        unixMillis: 0n
+        unixMillis: 0
       },
       blockEnd: {
         atomicPicos: Infinity
@@ -31,10 +31,10 @@ describe('munge', () => {
 
   it('works when there is an initial offset', () => {
     expect(munge([
-      [7n, -4]
+      [7, -4]
     ])).toEqual([{
       blockStart: {
-        unixMillis: 7n,
+        unixMillis: 7,
         atomicPicos: -3_993_000_000_000n
       },
       blockEnd: {
@@ -58,12 +58,12 @@ describe('munge', () => {
     // TAI:          [3][4][5][6][ 7][ 8][ 9][...]
     // Unix: [...][6][7][8][9][9][10][11][13][...]
     expect(munge([
-      [-1000n, -4],
-      [9000n, -3], // inserted leap millisecond
-      [13000n, -4] // removed leap millisecond
+      [-1000, -4],
+      [9000, -3], // inserted leap second
+      [13000, -4] // removed leap second
     ])).toEqual([{
       blockStart: {
-        unixMillis: -1000n,
+        unixMillis: -1000,
         atomicPicos: -5_000_000_000_000n
       },
       blockEnd: {
@@ -80,7 +80,7 @@ describe('munge', () => {
       }
     }, {
       blockStart: {
-        unixMillis: 9000n,
+        unixMillis: 9000,
         atomicPicos: 6_000_000_000_000n
       },
       blockEnd: {
@@ -97,7 +97,7 @@ describe('munge', () => {
       }
     }, {
       blockStart: {
-        unixMillis: 13000n,
+        unixMillis: 13000,
         atomicPicos: 9_000_000_000_000n
       },
       blockEnd: {
@@ -117,16 +117,16 @@ describe('munge', () => {
 
   it('fails on a bad drift rate', () => {
     expect(() => munge([
-      [BigInt(Date.UTC(1961, JAN, 1)), 1.422_818_0, 37_300n, 0.001]
+      [Date.UTC(1961, JAN, 1), 1.422_818_0, 37_300n, 0.001]
     ])).toThrowError('Could not compute precise drift rate')
   })
 
   it('works with the first line of real data', () => {
     expect(munge([
-      [BigInt(Date.UTC(1961, JAN, 1)), 1.422_818_0, 37_300n, 0.001_296]
+      [Date.UTC(1961, JAN, 1), 1.422_818_0, 37_300n, 0.001_296]
     ])).toEqual([{
       blockStart: {
-        unixMillis: -283_996_800_000n,
+        unixMillis: -283_996_800_000,
         atomicPicos: -283_996_798_577_182_000_000n
       },
       blockEnd: {

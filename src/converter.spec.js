@@ -14,7 +14,7 @@ describe('Converter', () => {
 
   describe('one block', () => {
     const basicBlocks = munge([
-      [BigInt(Date.UTC(1970, JAN, 1)), 0]
+      [Date.UTC(1970, JAN, 1), 0]
     ])
     const converter = Converter(basicBlocks)
 
@@ -47,8 +47,8 @@ describe('Converter', () => {
 
   describe('inserted leap second', () => {
     const twoBlocks = munge([
-      [BigInt(Date.UTC(1970, JAN, 1)), 0],
-      [BigInt(Date.UTC(1980, JAN, 1)), 1],
+      [Date.UTC(1970, JAN, 1), 0],
+      [Date.UTC(1980, JAN, 1), 1],
     ])
     const converter = Converter(twoBlocks)
 
@@ -260,8 +260,8 @@ describe('Converter', () => {
 
   describe('removed leap second', () => {
     const twoBlocks = munge([
-      [BigInt(Date.UTC(1970, JAN, 1)), 0],
-      [BigInt(Date.UTC(1980, JAN, 1)), -1],
+      [Date.UTC(1970, JAN, 1), 0],
+      [Date.UTC(1980, JAN, 1), -1],
     ])
     const converter = Converter(twoBlocks)
 
@@ -429,12 +429,12 @@ describe('Converter', () => {
     describe('when unixMillis converts to an atomicPicos which fits but an atomicMillis which does not', () => {
       it('at the start of the block', () => {
         const blocks = munge([
-          [BigInt(Date.UTC(1970, JAN, 1, 0, 0, 0, 1)), -0.0001]
+          [Date.UTC(1970, JAN, 1, 0, 0, 0, 1), -0.0001]
         ])
 
         expect(blocks).toEqual([{
           blockStart: {
-            unixMillis: 1n,
+            unixMillis: 1,
             atomicPicos: 900_000_000n // block start intentionally doesn't include TAI epoch
           },
           ratio: {
@@ -459,13 +459,13 @@ describe('Converter', () => {
 
       it('at the end of the block', () => {
         const blocks = munge([
-          [BigInt(Date.UTC(1969, DEC, 31, 23, 59, 59, 999)), 0.0001],
-          [BigInt(Date.UTC(1970, JAN, 1, 0, 0, 0, 1)), -0.0011]
+          [Date.UTC(1969, DEC, 31, 23, 59, 59, 999), 0.0001],
+          [Date.UTC(1970, JAN, 1, 0, 0, 0, 1), -0.0011]
         ])
 
         expect(blocks).toEqual([{
           blockStart: {
-            unixMillis: -1n,
+            unixMillis: -1,
             atomicPicos: -900_000_000n
           },
           ratio: {
@@ -482,7 +482,7 @@ describe('Converter', () => {
           }
         }, {
           blockStart: {
-            unixMillis: 1n,
+            unixMillis: 1,
             atomicPicos: -100_000_000n
           },
           ratio: {

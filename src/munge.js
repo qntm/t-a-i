@@ -50,7 +50,7 @@ module.exports = data => {
     }
 
     blockStart.atomicPicos = offsetAtUnixEpoch.atomicPicos +
-      blockStart.unixMillis * ratio.atomicPicosPerUnixMilli
+      BigInt(blockStart.unixMillis) * ratio.atomicPicosPerUnixMilli
 
     return {
       blockStart,
@@ -68,7 +68,7 @@ module.exports = data => {
 
       // This can be before, exactly at, or after `blockEnd`. Before is the case we care about most.
       block.overlapStart = {
-        atomicPicos: arr[i + 1].blockStart.unixMillis * block.ratio.atomicPicosPerUnixMilli +
+        atomicPicos: BigInt(arr[i + 1].blockStart.unixMillis) * block.ratio.atomicPicosPerUnixMilli +
           block.offsetAtUnixEpoch.atomicPicos
       }
     } else {
