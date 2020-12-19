@@ -12,7 +12,7 @@ Because Unix time ignores leap seconds, it is not generally possible to determin
 2. Perform your arithmetic.
 3. Convert the TAI results back to Unix time.
 
-The relationship between TAI and UTC is well-defined as far back as 1 January 1961. Prior to 1 January 1972, the relationship was quite complex: TAI seconds were not the same length as UTC seconds; time was inserted in fractions of TAI seconds; time was sometimes removed; time was modified at the beginning of any month, not just January or July. `t-a-i` handles all of these conversions correctly and returns results accurate to at least the millisecond.
+The relationship between TAI and UTC is well-defined as far back as 1 January 1961. Prior to 1 January 1972, the relationship was quite complex: TAI seconds were not the same length as UTC seconds; time was inserted in fractions of TAI seconds; time was sometimes removed; time was modified at the beginning of any month, not just January or July. `t-a-i` handles all of these conversions correctly and returns results accurate to the millisecond. `t-a-i` also provides methods for returning exact TAI picosecond counts, for cases where the TAI millisecond count would be inexact.
 
 ## Installation
 
@@ -61,26 +61,37 @@ Note! Use caution when constructing a `Date` object directly from a TAI millisec
 
 ## API
 
-Note that the beginning of TAI was, equivalently:
+All methods throw exceptions if not passed an integer number of milliseconds.
 
-* 1961-01-01 00:00:00.000000 UTC
-* 1961-01-01 00:00:01.422818 TAI
-* -283996800000.000 Unix time
-* -283996798577.182 TAI milliseconds
+Methods fail or return empty result sets if called with times before the beginning of TAI, which was, equivalently:
 
-Methods fail or return empty result sets if called with times before the beginning of TAI.
+* 1961-01-01 00:00:00.000_000 UTC
+* 1961-01-01 00:00:01.422_818 TAI
+* -283_996_800_000.000 Unix time
+* -283_996_798_577.182 TAI milliseconds
 
-All methods throw exceptions if not passed an integer number of milliseconds. For example, calling `atomicToUnix(-283996798577.182)` throws an exception.
-
-Note that for times prior to the beginning of 1972, TAI milliseconds and Unix milliseconds were not the same length. Results are always integer numbers of milliseconds, with fractions rounded towards negative infinity. In most cases, this means that **round trips do not work**.
+Note that for times prior to the beginning of 1972, TAI milliseconds and Unix milliseconds were not the same length. Results are always integer numbers of milliseconds, with fractions rounded towards negative infinity.
 
 ### tai.oneToMany
 
 These conversions treat the relationship between TAI and Unix as one-to-many. An instant in TAI may correspond to 0, 1 or 2 instants in Unix time.
 
+#### tai.oneToMany.unixToAtomicPicos(unix)
+
+Convert a number of Unix milliseconds to an array of possible TAI picosecond counts. Ordinarily, this array will have a single entry. If the Unix time falls during an inserted leap second, the array will have two entries. If the Unix time falls during a removed leap second, or prior to the beginning of TAI, the array will be empty.
+
+```javascript
+const unix = -157_766_399_910
+// 1965-01-01 00:00:00.090 UTC
+
+tai.oneToMany.unixToAtomicPicos(unix)
+// [-157_766_396_469_869_998_650n, -157_766_396_369_869_998_650n]
+// i.e. [1965-01-01 00:00:03.530_130_001_350 TAI, 1965-01-01 00:00:03.630_130_001_350 TAI]
+```
+
 #### tai.oneToMany.unixToAtomic(unix)
 
-Convert a number of Unix milliseconds to an array of possible TAI millisecond counts. Ordinarily, this array will have a single entry. If the Unix time falls during an inserted leap second, the array will have two entries. If the Unix time falls during a removed leap second, the array will be empty.
+As `tai.oneToMany.unixToAtomicPicos`, but return values are rounded towards negative infinity to the nearest integer TAI millisecond count.
 
 ```javascript
 const unix = 915_148_800_001
@@ -91,17 +102,20 @@ tai.oneToMany.unixToAtomic(unix)
 // i.e. [1999-01-01 00:00:31.001 TAI, 1999-01-01 00:00:32.001 TAI]
 ```
 
-#### tai.oneToMany.unixToAtomicPicos(unix)
-
-As `tai.oneToMany.unixToAtomic`, but returns an array of precise TAI picosecond counts as `BigInt`s.
+Note that this rounding can result in values being omitted from the result:
 
 ```javascript
-const unix = -157_766_399_910
-// 1965-01-01 00:00:00.090 UTC
+const unix = -283_996_800_000
+// i.e. 1961-01-01 00:00:00.000_000 UTC, the beginning of TAI
 
-tai.oneToMany.unixToAtomicPicos(unix)
-// [-157_766_396_469_869_998_650n, -157_766_396_369_869_998_650n]
-// i.e. [1965-01-01 00:00:03.530_130_001_350 TAI, 1965-01-01 00:00:03.630_130_001_350 TAI]
+const atomicPicos = tai.oneToMany.unixToAtomicPicos()
+// [-283_996_798_577_182_000_000n]
+// i.e. [1961-01-01 00:00:01.422_818 TAI]
+
+const atomicMillis = tai.oneToMany.unixToAtomicMillis()
+// Returns an empty array [].
+// The rounded TAI millisecond count would be -283_996_798_578,
+// i.e. "1961-01-01 00:00:01.422_000 TAI", which is strictly before TAI began.
 ```
 
 #### tai.oneToMany.atomicToUnix(atomic)
@@ -124,9 +138,22 @@ tai.oneToMany.atomicToUnix(atomic2)
 
 These conversions treat the relationship between TAI and Unix as one-to-one. An instant in TAI corresponds to 1 instant in Unix time.
 
+#### tai.oneToOne.unixToAtomicPicos(unix)
+
+Convert a number of Unix milliseconds to a number of TAI picoseconds. If the Unix time falls on an inserted leap second, it corresponds to *two* TAI instants, so we return the later ("canonical") of the two. If the Unix time falls on a removed leap second, or prior to the beginning of TAI, we throw an exception.
+
+```javascript
+const unix = -157_766_399_910
+// 1965-01-01 00:00:00.090 UTC
+
+tai.oneToOne.unixToAtomicPicos(unix)
+// -157_766_396_369_869_998_650n
+// i.e. 1965-01-01 00:00:03.630_130_001_350 TAI
+```
+
 #### tai.oneToOne.unixToAtomic(unix)
 
-Convert a number of Unix milliseconds to a number of TAI milliseconds. If the Unix time falls on an inserted leap second, it corresponds to *two* TAI instants, so we return the later ("canonical") of the two. If the Unix time falls on a removed leap second, we throw an exception.
+As `tai.oneToOne.unixToAtomicPicos`, but rounds the result towards negative infinity to the nearest integer TAI millisecond count.
 
 ```javascript
 const unix = 915_148_800_001
@@ -137,17 +164,20 @@ tai.oneToOne.unixToAtomic(unix)
 // i.e. 1999-01-01 00:00:32.001 TAI
 ```
 
-#### tai.oneToOne.unixToAtomicPicos(unix)
-
-As `tai.oneToOne.unixToAtomic`, but returns a precise TAI picosecond count as a `BigInt`.
+Note that this rounding can result in values being omitted from the result:
 
 ```javascript
-const unix = -157_766_399_910
-// 1965-01-01 00:00:00.090 UTC
+const unix = -283_996_800_000
+// i.e. 1961-01-01 00:00:00.000_000 UTC, the beginning of TAI
 
-tai.oneToOne.unixToAtomicPicos(unix)
-// -157_766_396_369_869_998_650n
-// i.e. 1965-01-01 00:00:03.630_130_001_350 TAI
+const atomicPicos = tai.oneToOne.unixToAtomicPicos()
+// -283_996_798_577_182_000_000n
+// i.e. 1961-01-01 00:00:01.422_818 TAI
+
+const atomicMillis = tai.oneToMany.unixToAtomicMillis()
+// Throws an exception.
+// The rounded TAI millisecond count would be -283_996_798_578,
+// i.e. "1961-01-01 00:00:01.422_000 TAI", which is strictly before TAI began.
 ```
 
 #### tai.oneToOne.atomicToUnix(atomic)
@@ -183,16 +213,16 @@ When TAI was first defined:
 * `1961 JAN  1` (midnight) is the UTC time when this relationship became effective.
 * `JD 2437300.5` is the [Julian date](https://en.wikipedia.org/wiki/Julian_day) when this relationship became effective. The Julian date is the number of UTC days elapsed since midday UTC on 24 November 4714 BCE (proleptic Gregorian calendar).
 * `0.001296 S` is the *drift rate* between TAI and UTC in TAI seconds per UTC day. For each full UTC day which elapses, a full TAI day plus 0.001296 TAI seconds elapses, causing TAI to progressively pull ahead of UTC.
-* `MJD` is the current Modified Julian date. The Modified Julian date is the Julian date minus 2400000.5, or equivalently the number of UTC days elapsed since midnight UTC on 17 November 1858.
+* `MJD` is the current Modified Julian date. The Modified Julian date is the Julian date minus 2_400_000.5, or equivalently the number of UTC days elapsed since midnight UTC on 17 November 1858.
 * `37300.` is the Modified Julian date of some (essentially arbitrary) root point, in this case midnight UTC on 1 January 1961.
 * So, `MJD - 37300.` is the number of UTC days since the root point.
-* And `(MJD - 37300.) X 0.001296 S` is offset accrued since the root point.
+* And `(MJD - 37300.) X 0.001296 S` is offset accrued since the root point, in TAI seconds.
 * `1.4228180 S` is the absolute offset of TAI from UTC as of that root point, in TAI seconds.
 * So, `1.4228180 S + (MJD - 37300.) X 0.001296 S` is the total offset between TAI and UTC in TAI seconds as of the current Modified Julian date.
 
-From this we compute that initially, 1961-01-01 00:00:00.000000 UTC was equal to 1961-01-01 00:00:01.422818 TAI. After one (Modified) Julian day, TAI had pulled ahead by another 0.001296 TAI seconds, so that 1961-01-02 00:00:00.000000 UTC was equal to 1961-01-02 00:00:01.424114 TAI.
+From this we compute that initially, 1961-01-01 00:00:00.000_000 UTC was equal to 1961-01-01 00:00:01.422_818 TAI. After one (Modified) Julian day, TAI had pulled ahead by another 0.001_296 TAI seconds, so that 1961-01-02 00:00:00.000_000 UTC was equal to 1961-01-02 00:00:01.424_114 TAI.
 
-This linear relationship was effective until the beginning of the next period (which we can compute as 1961-08-01 00:00:01.647570 TAI), when the parameters were changed.
+This linear relationship was effective until the beginning of the next period (which we can compute as 1961-08-01 00:00:01.647_570 TAI), when the parameters were changed.
 
 ### Discontinuities
 
@@ -200,13 +230,13 @@ More often than not, changing the parameters of the linear relationship introduc
 
 #### Example of inserted time
 
-At 1965-01-01 00:00:03.540130 TAI, the offset between TAI and UTC was increased by 0.1 TAI seconds, leaving all other parameters identical. At this instant, UTC jumped back 0.1 TAI seconds = 0.0999999985... UTC seconds, from 1965-01-01 00:00:00.0999999985... to 1965-01-01 00:00:00.000, and repeated that time. This means that e.g. 1965-01-01 00:00:00.05 UTC is ambiguous, and has two meanings in TAI.
+At 1965-01-01 00:00:03.540_130 TAI, the offset between TAI and UTC was increased by 0.1 TAI seconds, leaving all other parameters identical. At this instant, UTC jumped back 0.1 TAI seconds = 0.099_999_998_5... UTC seconds, from 1965-01-01 00:00:00.099_999_998_5... to 1965-01-01 00:00:00.000, and repeated that time. This means that e.g. 1965-01-01 00:00:00.05 UTC is ambiguous, and has two meanings in TAI.
 
-Equivalently, we could say that the last minute of 1964 was 0.1 TAI seconds longer than normal, so UTC counted up as far as 1964-12-31 23:59:60.0999999985... before advancing to 1965-01-01 00:00:00.000.
+Equivalently, we could say that the last minute of 1964 was 0.1 TAI seconds longer than normal, so UTC counted up as far as 1964-12-31 23:59:60.099_999_998_5... before advancing to 1965-01-01 00:00:00.000.
 
 #### Example of removed time
 
-At 1968-02-01 00:00:06.185682000 TAI, the offset between TAI and UTC was decreased by 0.1 TAI seconds, leaving all other parameters identical. At this instant, UTC jumped forward 0.1 TAI seconds = 0.099999997... UTC seconds, from 1968-01-31 23:59:59.9000000029... to 1968-02-01 00:00:00.000, skipping the intervening time. This means that e.g. 1968-01-31 23:59:59:95 UTC never happened, and has no interpretation in TAI.
+At 1968-02-01 00:00:06.185_682 TAI, the offset between TAI and UTC was decreased by 0.1 TAI seconds, leaving all other parameters identical. At this instant, UTC jumped forward 0.1 TAI seconds = 0.099_999_997... UTC seconds, from 1968-01-31 23:59:59.900_000_002_9... to 1968-02-01 00:00:00.000, skipping the intervening time. This means that e.g. 1968-01-31 23:59:59:95 UTC never happened, and has no interpretation in TAI.
 
 ### 1972 onwards
 
@@ -238,12 +268,12 @@ This has not happened since 1972, and is unlikely to ever happen.
 
 Unix time seems to be built around an assumption that UTC follows an idealised Gregorian calendar with no such discontinuities. Unix time counts the number of elapsed UTC milliseconds since the Unix epoch at, equivalently:
 
-* 1970-01-01 00:00:00.000000 UTC
-* 1970-01-01 00:00:08.000082 TAI
+* 1970-01-01 00:00:00.000_000 UTC
+* 1970-01-01 00:00:08.000_082 TAI
 * 0.000 Unix time
-* 8000.082 TAI milliseconds
+* 8_000.082 TAI milliseconds
 
-, not counting leap seconds. For example, 1999-01-01 00:00:00 UTC is 915,148,800,000 Unix milliseconds.
+, not counting leap seconds. For example, 1999-01-01 00:00:00 UTC is 915_148_800_000 Unix milliseconds.
 
 Unix time can be computed from any Gregorian calendar date and time using a relatively simple piece of arithmetic, and the reverse calculation is also simple. Unix time can be extended backwards to negative numbers.
 
