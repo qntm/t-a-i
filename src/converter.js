@@ -9,32 +9,37 @@ const picosPerMilli = 1000n * 1000n * 1000n
 module.exports = data => {
   const blocks = munge(data)
 
+  const atomicPicosInBlock = (atomicPicos, blockId) => {
+    // ...however, the result has to still be in the block!
+    if (atomicPicos < blocks[blockId].start.atomicPicos) {
+      // Falls before this block began, whoops
+      return false
+    }
+    if (blockId + 1 in blocks && blocks[blockId + 1].start.atomicPicos <= atomicPicos) {
+      // Result falls in next block, whoops
+      return false
+    }
+    return true
+  }
+
   const unixMillisToBlocksWithAtomicPicos = unixMillis => {
     if (!Number.isInteger(unixMillis)) {
       throw Error(`Not an integer: ${unixMillis}`)
     }
 
     return blocks
-      .map(block => ({
-        block,
+      .map((block, blockId) => ({
+        blockId,
 
         // Depending on its parameters, each block linearly transforms `unixMillis`
         // into a different `atomicPicos`. This value is always exact...
         atomicPicos: BigInt(unixMillis) * block.ratio.atomicPicosPerUnixMilli +
           block.offsetAtUnixEpoch.atomicPicos
       }))
-      .filter(({ block, atomicPicos }, i, arr) => {
+      .filter(({ blockId, atomicPicos }) =>
         // ...however, the result has to still be in the block!
-        if (atomicPicos < block.start.atomicPicos) {
-          // Result falls before this block began, whoops
-          return false
-        }
-        if (i + 1 in arr && arr[i + 1].block.start.atomicPicos <= atomicPicos) {
-          // Result falls in next block, whoops
-          return false
-        }
-        return true
-      })
+        atomicPicosInBlock(atomicPicos, blockId)
+      )
   }
 
   const unixMillisToAtomicPicosArray = unixMillis =>
@@ -43,26 +48,19 @@ module.exports = data => {
 
   const unixMillisToAtomicMillisArray = unixMillis =>
     unixMillisToBlocksWithAtomicPicos(unixMillis)
-      .map(({ block, atomicPicos }) => ({
-        block,
+      .map(({ blockId, atomicPicos }) => ({
+        blockId,
 
         // This rounds towards negative infinity. This is potentially problematic because even if
         // the atomic picosecond count is part of this block, the rounded millisecond count may not
         // be...
-        atomicMillis: div(atomicPicos, picosPerMilli)
+        atomicMillis: Number(div(atomicPicos, picosPerMilli))
       }))
-      .filter(({ block, atomicMillis }, i, arr) => {
+      .filter(({ blockId, atomicMillis }) =>
         // ...hence this additional test
-        const atomicPicosRounded = atomicMillis * picosPerMilli
-        if (atomicPicosRounded < block.start.atomicPicos) {
-          return false
-        }
-
-        // No need to test against the block end, since we rounded towards negative infinity.
-        // Even if the block length is 0 it would be impossible for upward overflow to happen
-        return true
-      })
-      .map(({ atomicMillis }) => Number(atomicMillis))
+        atomicPicosInBlock(BigInt(atomicMillis) * picosPerMilli, blockId)
+      )
+      .map(({ atomicMillis }) => atomicMillis)
 
   const unixMillisToCanonicalAtomicPicos = unixMillis => {
     const atomicPicosArray = unixMillisToAtomicPicosArray(unixMillis)
@@ -93,17 +91,9 @@ module.exports = data => {
 
     const atomicPicos = BigInt(atomicMillis) * picosPerMilli
 
-    const blockIndex = blocks.findIndex((block, i, arr) => {
-      if (atomicPicos < block.start.atomicPicos) {
-        // atomicPicos is before this block started
-        return false
-      }
-      if (i + 1 in arr && arr[i + 1].start.atomicPicos <= atomicPicos) {
-        // atomicPicos is after next block started
-        return false
-      }
-      return true
-    })
+    const blockIndex = blocks.findIndex((block, blockId) =>
+      atomicPicosInBlock(atomicPicos, blockId)
+    )
 
     if (blockIndex === -1) {
       // Pre-1961
