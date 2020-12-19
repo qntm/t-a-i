@@ -39,6 +39,15 @@ module.exports = data => {
       blocks[blockId].ratio.atomicPicosPerUnixMilli
     ))
 
+  // Some blocks' later UTC extents overlap the start of the next block, yielding a range of atomic
+  // picosecond counts which are "non-canonical" because a later picosecond count converts to the
+  // same Unix millisecond count.
+  const atomicPicosCanonical = (atomicPicos, blockId) =>
+    !blocks.some((otherBlock, otherBlockId) =>
+      otherBlockId > blockId &&
+      unixMillisToAtomicPicos(otherBlock.start.unixMillis, blockId) <= atomicPicos
+    )
+
   const unixMillisToBlocksWithAtomicPicos = unixMillis => {
     if (!Number.isInteger(unixMillis)) {
       throw Error(`Not an integer: ${unixMillis}`)
@@ -97,46 +106,39 @@ module.exports = data => {
 
   /// /////////////////////////////////////
 
-  const atomicMillisToUnixMillisWithOverlap = atomicMillis => {
+  const atomicMillisToUnixMillisWithBlock = atomicMillis => {
     if (!Number.isInteger(atomicMillis)) {
       throw Error(`Not an integer: ${atomicMillis}`)
     }
 
     const atomicPicos = BigInt(atomicMillis) * picosPerMilli
 
-    const blockIndex = blocks.findIndex((block, blockId) =>
+    const blockId = blocks.findIndex((block, blockId) =>
       atomicPicosInBlock(atomicPicos, blockId)
     )
 
-    if (blockIndex === -1) {
+    if (blockId === -1) {
       // Pre-1961
       throw Error(`No UTC equivalent: ${atomicMillis}`)
     }
 
-    const unixMillis = atomicPicosToUnixMillis(atomicPicos, blockIndex)
+    return {
+      blockId,
 
-    // There is no need to separately check that `unixMillis` is still in the block. Although some
-    // rounding may have occurred, rounding was towards negative infinity - there's no chance we
-    // left the block by accident.
-
-    // This can be before, exactly at, or after `end`. Before is the case we care about most.
-    const overlapStart = {}
-    overlapStart.atomicPicos = blockIndex + 1 in blocks
-      ? unixMillisToAtomicPicos(blocks[blockIndex + 1].start.unixMillis, blockIndex)
-      : Infinity
-
-    const overlapsNextBlock = overlapStart.atomicPicos <= atomicPicos
-
-    return { unixMillis, overlapsNextBlock }
+      // There is no need to separately check that `unixMillis` is still in the block. Although some
+      // rounding may have occurred, rounding was towards negative infinity - there's no chance we
+      // left the block by accident.
+      unixMillis: atomicPicosToUnixMillis(atomicPicos, blockId)
+    }
   }
 
   const atomicMillisToUnixMillis = atomicMillis =>
-    atomicMillisToUnixMillisWithOverlap(atomicMillis).unixMillis
+    atomicMillisToUnixMillisWithBlock(atomicMillis).unixMillis
 
   const canonicalAtomicMillisToUnixMillis = atomicMillis => {
-    const { unixMillis, overlapsNextBlock } = atomicMillisToUnixMillisWithOverlap(atomicMillis)
+    const { unixMillis, blockId } = atomicMillisToUnixMillisWithBlock(atomicMillis)
 
-    if (overlapsNextBlock) {
+    if (!atomicPicosCanonical(BigInt(atomicMillis) * picosPerMilli, blockId)) {
       // There is a later atomic time which converts to the same UTC time as this one
       // That means we are "non-canonical"
       throw Error(`No UTC equivalent: ${atomicMillis}`)
