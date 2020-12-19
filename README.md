@@ -54,7 +54,7 @@ What was TAI, exactly, at the Unix epoch?
 
 ```javascript
 tai.oneToOne.unixToAtomicPicos(0)
-// 8000_082_000_000n TAI picoseconds, i.e. 1970-01-01 00:00:08.000_082 TAI
+// 8_000_082_000_000n TAI picoseconds, i.e. 1970-01-01 00:00:08.000_082 TAI
 ```
 
 Note! Use caution when constructing a `Date` object directly from a TAI millisecond count. A `Date` represents an instant in Unix time, not an instant in TAI, and the object's method names and method behaviours reflect this. Instead, consider using a [`TaiDate`](https://github.com/ferno/tai-date)!
