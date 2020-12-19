@@ -9,6 +9,8 @@ const picosPerMilli = 1000n * 1000n * 1000n
 module.exports = data => {
   const blocks = munge(data)
 
+  /// Helper methods
+
   const atomicPicosInBlock = (atomicPicos, blockId) => {
     if (atomicPicos < blocks[blockId].start.atomicPicos) {
       // Falls before this block began, whoops
@@ -32,7 +34,8 @@ module.exports = data => {
     BigInt(unixMillis) * blocks[blockId].ratio.atomicPicosPerUnixMilli +
       blocks[blockId].offsetAtUnixEpoch.atomicPicos
 
-  // This result is rounded towards negative infinity
+  // This result is rounded towards negative infinity. This means that, provided that `atomicPicos`
+  // is in the block, `unixMillis` is also guaranteed to be in the block.
   const atomicPicosToUnixMillis = (atomicPicos, blockId) =>
     Number(div(
       atomicPicos - blocks[blockId].offsetAtUnixEpoch.atomicPicos,
@@ -47,6 +50,8 @@ module.exports = data => {
       otherBlockId > blockId &&
       unixMillisToAtomicPicos(otherBlock.start.unixMillis, blockId) <= atomicPicos
     )
+
+  /// Unix to TAI conversion methods
 
   const unixMillisToBlocksWithAtomicPicos = unixMillis => {
     if (!Number.isInteger(unixMillis)) {
@@ -87,24 +92,28 @@ module.exports = data => {
   const unixMillisToCanonicalAtomicPicos = unixMillis => {
     const atomicPicosArray = unixMillisToAtomicPicosArray(unixMillis)
     const i = atomicPicosArray.length - 1
+
     if (!(i in atomicPicosArray)) {
       // Removed leap second; this Unix time never occurred
       throw Error(`No TAI equivalent: ${unixMillis}`)
     }
+
     return atomicPicosArray[i]
   }
 
   const unixMillisToCanonicalAtomicMillis = unixMillis => {
     const atomicMillisArray = unixMillisToAtomicMillisArray(unixMillis)
     const i = atomicMillisArray.length - 1
+
     if (!(i in atomicMillisArray)) {
       // Removed leap second; this Unix time never occurred
       throw Error(`No TAI equivalent: ${unixMillis}`)
     }
+
     return atomicMillisArray[i]
   }
 
-  /// /////////////////////////////////////
+  /// TAI to Unix conversion methods
 
   const atomicMillisToUnixMillisWithBlock = atomicMillis => {
     if (!Number.isInteger(atomicMillis)) {
@@ -124,10 +133,6 @@ module.exports = data => {
 
     return {
       blockId,
-
-      // There is no need to separately check that `unixMillis` is still in the block. Although some
-      // rounding may have occurred, rounding was towards negative infinity - there's no chance we
-      // left the block by accident.
       unixMillis: atomicPicosToUnixMillis(atomicPicos, blockId)
     }
   }
@@ -143,9 +148,6 @@ module.exports = data => {
       // That means we are "non-canonical"
       throw Error(`No UTC equivalent: ${atomicMillis}`)
     }
-
-    // There is no need to separately check that `unixMillis` is still in the non-overlap section
-    // of the block, for the same reason we don't need to check that it's in the block at all.
 
     return unixMillis
   }
