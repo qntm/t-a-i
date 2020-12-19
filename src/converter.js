@@ -10,17 +10,34 @@ module.exports = data => {
   const blocks = munge(data)
 
   const atomicPicosInBlock = (atomicPicos, blockId) => {
-    // ...however, the result has to still be in the block!
     if (atomicPicos < blocks[blockId].start.atomicPicos) {
       // Falls before this block began, whoops
       return false
     }
-    if (blockId + 1 in blocks && blocks[blockId + 1].start.atomicPicos <= atomicPicos) {
+
+    if (
+      blockId + 1 in blocks &&
+      blocks[blockId + 1].start.atomicPicos <= atomicPicos
+    ) {
       // Result falls in next block, whoops
       return false
     }
+
     return true
   }
+
+  // Depending on its parameters, each block linearly transforms `unixMillis`
+  // into a different `atomicPicos`. This value is always exact
+  const unixMillisToAtomicPicos = (unixMillis, blockId) =>
+    BigInt(unixMillis) * blocks[blockId].ratio.atomicPicosPerUnixMilli +
+      blocks[blockId].offsetAtUnixEpoch.atomicPicos
+
+  // This result is rounded towards negative infinity
+  const atomicPicosToUnixMillis = (atomicPicos, blockId) =>
+    Number(div(
+      atomicPicos - blocks[blockId].offsetAtUnixEpoch.atomicPicos,
+      blocks[blockId].ratio.atomicPicosPerUnixMilli
+    ))
 
   const unixMillisToBlocksWithAtomicPicos = unixMillis => {
     if (!Number.isInteger(unixMillis)) {
@@ -30,11 +47,7 @@ module.exports = data => {
     return blocks
       .map((block, blockId) => ({
         blockId,
-
-        // Depending on its parameters, each block linearly transforms `unixMillis`
-        // into a different `atomicPicos`. This value is always exact...
-        atomicPicos: BigInt(unixMillis) * block.ratio.atomicPicosPerUnixMilli +
-          block.offsetAtUnixEpoch.atomicPicos
+        atomicPicos: unixMillisToAtomicPicos(unixMillis, blockId)
       }))
       .filter(({ blockId, atomicPicos }) =>
         // ...however, the result has to still be in the block!
@@ -100,12 +113,7 @@ module.exports = data => {
       throw Error(`No UTC equivalent: ${atomicMillis}`)
     }
 
-    const block = blocks[blockIndex]
-
-    const unixMillis = Number(div(
-      atomicPicos - block.offsetAtUnixEpoch.atomicPicos,
-      block.ratio.atomicPicosPerUnixMilli
-    ))
+    const unixMillis = atomicPicosToUnixMillis(atomicPicos, blockIndex)
 
     // There is no need to separately check that `unixMillis` is still in the block. Although some
     // rounding may have occurred, rounding was towards negative infinity - there's no chance we
@@ -114,11 +122,10 @@ module.exports = data => {
     // This can be before, exactly at, or after `end`. Before is the case we care about most.
     const overlapStart = {}
     overlapStart.atomicPicos = blockIndex + 1 in blocks
-      ? BigInt(blocks[blockIndex + 1].start.unixMillis) * block.ratio.atomicPicosPerUnixMilli +
-        block.offsetAtUnixEpoch.atomicPicos
+      ? unixMillisToAtomicPicos(blocks[blockIndex + 1].start.unixMillis, blockIndex)
       : Infinity
 
-    const overlapsNextBlock = overlapStart.atomicPicos <= BigInt(atomicMillis) * picosPerMilli
+    const overlapsNextBlock = overlapStart.atomicPicos <= atomicPicos
 
     return { unixMillis, overlapsNextBlock }
   }
