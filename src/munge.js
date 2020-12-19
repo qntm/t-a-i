@@ -30,6 +30,9 @@ module.exports = data => {
 
     root.unixMillis = mjdEpoch.unixMillis + root.mjds * millisPerDay
 
+    // `4.313_170_0 * 1000_000_000_000` evaluates to `4_313_170_000_000.000_5` so we must round
+    offsetAtRoot.atomicPicos = BigInt(Math.round(offsetAtRoot.atomicSeconds * picosPerSecond))
+
     // `8.640_0 * 1000_000_000_000` evaluates to `8_640_000_000_000.001` so we must round
     driftRate.atomicPicosPerUnixDay = BigInt(Math.round(driftRate.atomicSecondsPerUnixDay * picosPerSecond))
     driftRate.atomicPicosPerUnixMilli = driftRate.atomicPicosPerUnixDay / BigInt(millisPerDay)
@@ -40,16 +43,15 @@ module.exports = data => {
       throw Error('Could not compute precise drift rate')
     }
 
-    const ratio = {}
-    ratio.atomicPicosPerUnixMilli = picosPerMilli + driftRate.atomicPicosPerUnixMilli
-    // Typically 1_000_000_015n
+    const ratio = {
+      atomicPicosPerUnixMilli: picosPerMilli + driftRate.atomicPicosPerUnixMilli
+      // Typically 1_000_000_015n
+    }
 
-    // `4.313_170_0 * 1000_000_000_000` evaluates to `4_313_170_000_000.000_5` so we must round
-    offsetAtRoot.atomicPicos = BigInt(Math.round(offsetAtRoot.atomicSeconds * picosPerSecond))
-
-    const offsetAtUnixEpoch = {}
-    offsetAtUnixEpoch.atomicPicos = offsetAtRoot.atomicPicos -
-      BigInt(root.unixMillis) * driftRate.atomicPicosPerUnixMilli
+    const offsetAtUnixEpoch = {
+      atomicPicos: offsetAtRoot.atomicPicos -
+        BigInt(root.unixMillis) * driftRate.atomicPicosPerUnixMilli
+    }
 
     start.atomicPicos = BigInt(start.unixMillis) * ratio.atomicPicosPerUnixMilli +
       offsetAtUnixEpoch.atomicPicos

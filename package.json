@@ -10,7 +10,7 @@
   "main": "./src",
   "scripts": {
     "postpublish": "npm version patch && git push",
-    "test": "standard --fix && jest"
+    "test": "standard && jest"
   },
   "author": "qntm",
   "license": "MIT",
