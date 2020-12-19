@@ -14,6 +14,12 @@ Because Unix time ignores leap seconds, it is not generally possible to determin
 
 The relationship between TAI and UTC is well-defined as far back as 1 January 1961. Prior to 1 January 1972, the relationship was quite complex: TAI seconds were not the same length as UTC seconds; time was inserted in fractions of TAI seconds; time was sometimes removed; time was modified at the beginning of any month, not just January or July. `t-a-i` handles all of these conversions correctly and returns results accurate to the millisecond. `t-a-i` also provides methods for returning exact TAI picosecond counts, for cases where the TAI millisecond count would be inexact.
 
+## Important note!
+
+It is **strongly recommended** that you thoroughly unit test the behaviour of your code at leap second boundaries: before, during and after.
+
+The nature of the relationship between Unix time and TAI means that conversions behave consistently for years on end, and then, during leap seconds, suddenly display very different behaviour, **sometimes throwing exceptions**. Not only that, leap seconds are commonly inserted on New Year's Eve, which is a very inopportune time to be dealing with this kind of bug!
+
 ## Installation
 
 ```
@@ -70,13 +76,13 @@ Methods fail or return empty result sets if called with times before the beginni
 * -283_996_800_000.000 Unix time
 * -283_996_798_577.182 TAI milliseconds
 
-Note that for times prior to the beginning of 1972, TAI milliseconds and Unix milliseconds were not the same length. Results are always integer numbers of milliseconds, with fractions rounded towards negative infinity.
+Note that for times prior to the beginning of 1972, TAI milliseconds and Unix milliseconds were not the same length.
 
 ### tai.oneToMany
 
 These conversions treat the relationship between TAI and Unix as one-to-many. An instant in TAI may correspond to 0, 1 or 2 instants in Unix time.
 
-#### tai.oneToMany.unixToAtomicPicos(unix)
+#### tai.oneToMany.unixToAtomicPicos(unix: number): BigInt\[\]
 
 Convert a number of Unix milliseconds to an array of possible TAI picosecond counts. Ordinarily, this array will have a single entry. If the Unix time falls during an inserted leap second, the array will have two entries. If the Unix time falls during a removed leap second, or prior to the beginning of TAI, the array will be empty.
 
@@ -89,9 +95,9 @@ tai.oneToMany.unixToAtomicPicos(unix)
 // i.e. [1965-01-01 00:00:03.530_130_001_350 TAI, 1965-01-01 00:00:03.630_130_001_350 TAI]
 ```
 
-#### tai.oneToMany.unixToAtomic(unix)
+#### tai.oneToMany.unixToAtomic(unix: number): number\[\]
 
-As `tai.oneToMany.unixToAtomicPicos`, but return values are rounded towards negative infinity to the nearest integer TAI millisecond count.
+As `tai.oneToMany.unixToAtomicPicos`, but return value is an array of integer TAI millisecond counts.
 
 ```javascript
 const unix = 915_148_800_001
@@ -102,7 +108,7 @@ tai.oneToMany.unixToAtomic(unix)
 // i.e. [1999-01-01 00:00:31.001 TAI, 1999-01-01 00:00:32.001 TAI]
 ```
 
-Note that this rounding can result in values being omitted from the result:
+The conversion from picoseconds to milliseconds rounds fractional milliseconds towards negative infinity. Note that this rounding can result in values being omitted from the resulting array:
 
 ```javascript
 const unix = -283_996_800_000
@@ -115,10 +121,10 @@ const atomicPicos = tai.oneToMany.unixToAtomicPicos(unix)
 const atomicMillis = tai.oneToMany.unixToAtomicMillis(unix)
 // Returns an empty array [].
 // The rounded TAI millisecond count would be -283_996_798_578,
-// i.e. "1961-01-01 00:00:01.422_000 TAI", which is strictly before TAI began.
+// i.e. "1961-01-01 00:00:01.422_000 TAI", but that is before TAI began.
 ```
 
-#### tai.oneToMany.atomicToUnix(atomic)
+#### tai.oneToMany.atomicToUnix(atomic: number): number
 
 Convert a number of TAI milliseconds to Unix milliseconds. Note that over the course of a leap second, two different instants in TAI may convert back to the same instant in Unix time.
 
@@ -138,7 +144,7 @@ tai.oneToMany.atomicToUnix(atomic2)
 
 These conversions treat the relationship between TAI and Unix as one-to-one. An instant in TAI corresponds to 1 instant in Unix time.
 
-#### tai.oneToOne.unixToAtomicPicos(unix)
+#### tai.oneToOne.unixToAtomicPicos(unix: number): BigInt
 
 Convert a number of Unix milliseconds to a number of TAI picoseconds. If the Unix time falls on an inserted leap second, it corresponds to *two* TAI instants, so we return the later ("canonical") of the two. If the Unix time falls on a removed leap second, or prior to the beginning of TAI, we throw an exception.
 
@@ -151,9 +157,9 @@ tai.oneToOne.unixToAtomicPicos(unix)
 // i.e. 1965-01-01 00:00:03.630_130_001_350 TAI
 ```
 
-#### tai.oneToOne.unixToAtomic(unix)
+#### tai.oneToOne.unixToAtomic(unix: number): number
 
-As `tai.oneToOne.unixToAtomicPicos`, but rounds the result towards negative infinity to the nearest integer TAI millisecond count.
+As `tai.oneToOne.unixToAtomicPicos`, but converts the picosecond count to milliseconds.
 
 ```javascript
 const unix = 915_148_800_001
@@ -164,23 +170,23 @@ tai.oneToOne.unixToAtomic(unix)
 // i.e. 1999-01-01 00:00:32.001 TAI
 ```
 
-Note that this rounding can result in values being omitted from the result:
+Fractional milliseconds are rounded towards negative infinity. Note that this rounding can result in an exception being thrown:
 
 ```javascript
 const unix = -283_996_800_000
 // i.e. 1961-01-01 00:00:00.000_000 UTC, the beginning of TAI
 
-const atomicPicos = tai.oneToOne.unixToAtomicPicos()
+const atomicPicos = tai.oneToOne.unixToAtomicPicos(unix)
 // -283_996_798_577_182_000_000n
 // i.e. 1961-01-01 00:00:01.422_818 TAI
 
-const atomicMillis = tai.oneToMany.unixToAtomicMillis()
+const atomicMillis = tai.oneToMany.unixToAtomic(unix)
 // Throws an exception.
 // The rounded TAI millisecond count would be -283_996_798_578,
-// i.e. "1961-01-01 00:00:01.422_000 TAI", which is strictly before TAI began.
+// i.e. "1961-01-01 00:00:01.422_000 TAI", which is before TAI began.
 ```
 
-#### tai.oneToOne.atomicToUnix(atomic)
+#### tai.oneToOne.atomicToUnix(atomic: number): number
 
 Converts a number of TAI milliseconds back to Unix milliseconds. If the TAI time falls during the first part of an inserted leap second, it is not a "canonical" TAI instant, so throws an exception.
 
