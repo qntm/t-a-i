@@ -108,11 +108,11 @@ Note that this rounding can result in values being omitted from the result:
 const unix = -283_996_800_000
 // i.e. 1961-01-01 00:00:00.000_000 UTC, the beginning of TAI
 
-const atomicPicos = tai.oneToMany.unixToAtomicPicos()
+const atomicPicos = tai.oneToMany.unixToAtomicPicos(unix)
 // [-283_996_798_577_182_000_000n]
 // i.e. [1961-01-01 00:00:01.422_818 TAI]
 
-const atomicMillis = tai.oneToMany.unixToAtomicMillis()
+const atomicMillis = tai.oneToMany.unixToAtomicMillis(unix)
 // Returns an empty array [].
 // The rounded TAI millisecond count would be -283_996_798_578,
 // i.e. "1961-01-01 00:00:01.422_000 TAI", which is strictly before TAI began.
@@ -182,7 +182,7 @@ const atomicMillis = tai.oneToMany.unixToAtomicMillis()
 
 #### tai.oneToOne.atomicToUnix(atomic)
 
-Convertx a number of TAI milliseconds back to Unix milliseconds. If the TAI time falls during the first part of an inserted leap second, it is not a "canonical" TAI instant, so throws an exception.
+Converts a number of TAI milliseconds back to Unix milliseconds. If the TAI time falls during the first part of an inserted leap second, it is not a "canonical" TAI instant, so throws an exception.
 
 ```javascript
 const atomic1 = 915_148_831_001 // 1999-01-01 00:00:31.001 TAI
