@@ -80,7 +80,7 @@ Note that for times prior to the beginning of 1972, TAI milliseconds and Unix mi
 
 ### tai.oneToMany
 
-These conversions treat the relationship between TAI and Unix as one-to-many. An instant in Unix time may correspond to 0, 1 or 2 instants in TAI.
+These conversions treat the relationship between Unix and TAI as one-to-many. An instant in Unix time may correspond to 0, 1 or 2 instants in TAI.
 
 #### tai.oneToMany.unixToAtomicPicos(unix: number): BigInt\[\]
 
