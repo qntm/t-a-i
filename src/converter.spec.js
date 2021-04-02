@@ -433,6 +433,9 @@ describe('Converter', () => {
             unixMillis: 1,
             atomicPicos: 900_000_000n // block start intentionally doesn't include TAI epoch
           },
+          end: {
+            atomicPicos: Infinity
+          },
           ratio: {
             atomicPicosPerUnixMilli: 1_000_000_000n
           },
@@ -459,6 +462,9 @@ describe('Converter', () => {
             unixMillis: -1,
             atomicPicos: -900_000_000n
           },
+          end: {
+            atomicPicos: -100_000_000n
+          },
           ratio: {
             atomicPicosPerUnixMilli: 1_000_000_000n
           },
@@ -469,6 +475,9 @@ describe('Converter', () => {
           start: {
             unixMillis: 1,
             atomicPicos: -100_000_000n
+          },
+          end: {
+            atomicPicos: Infinity
           },
           ratio: {
             atomicPicosPerUnixMilli: 1_000_000_000n
@@ -496,6 +505,9 @@ describe('Converter', () => {
           unixMillis: 0,
           atomicPicos: 0n
         },
+        end: {
+          atomicPicos: 0n
+        },
         ratio: {
           atomicPicosPerUnixMilli: 1_000_000_000n
         },
@@ -507,6 +519,9 @@ describe('Converter', () => {
           // Same start point as previous block, so previous block has length 0 TAI seconds
           unixMillis: 0,
           atomicPicos: 0n
+        },
+        end: {
+          atomicPicos: Infinity
         },
         ratio: {
           atomicPicosPerUnixMilli: 1_000_001_000n

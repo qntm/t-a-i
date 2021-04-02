@@ -14,6 +14,9 @@ describe('munge', () => {
         atomicPicos: 0n,
         unixMillis: 0
       },
+      end: {
+        atomicPicos: Infinity
+      },
       ratio: {
         atomicPicosPerUnixMilli: 1000_000_000n
       },
@@ -30,6 +33,9 @@ describe('munge', () => {
       start: {
         unixMillis: 7,
         atomicPicos: -3_993_000_000_000n
+      },
+      end: {
+        atomicPicos: Infinity
       },
       ratio: {
         atomicPicosPerUnixMilli: 1_000_000_000n
@@ -54,6 +60,9 @@ describe('munge', () => {
         unixMillis: -1000,
         atomicPicos: -5_000_000_000_000n
       },
+      end: {
+        atomicPicos: 6_000_000_000_000n
+      },
       ratio: {
         atomicPicosPerUnixMilli: 1_000_000_000n
       },
@@ -65,6 +74,9 @@ describe('munge', () => {
         unixMillis: 9000,
         atomicPicos: 6_000_000_000_000n
       },
+      end: {
+        atomicPicos: 9_000_000_000_000n
+      },
       ratio: {
         atomicPicosPerUnixMilli: 1_000_000_000n
       },
@@ -75,6 +87,9 @@ describe('munge', () => {
       start: {
         unixMillis: 13000,
         atomicPicos: 9_000_000_000_000n
+      },
+      end: {
+        atomicPicos: Infinity
       },
       ratio: {
         atomicPicosPerUnixMilli: 1_000_000_000n
@@ -97,6 +112,7 @@ describe('munge', () => {
       [Date.UTC(1970, JAN, 1), 0, 40_587, 8.640_0]
     ])).toEqual([{
       start: { unixMillis: 0, atomicPicos: 0n },
+      end: { atomicPicos: Infinity },
       ratio: { atomicPicosPerUnixMilli: 1_000_100_000n },
       offsetAtUnixEpoch: { atomicPicos: 0n }
     }])
@@ -106,6 +122,7 @@ describe('munge', () => {
       [Date.UTC(1970, JAN, 1), 0, 40_587, 0]
     ])).toEqual([{
       start: { unixMillis: 0, atomicPicos: 0n },
+      end: { atomicPicos: Infinity },
       ratio: { atomicPicosPerUnixMilli: 1_000_000_000n },
       offsetAtUnixEpoch: { atomicPicos: 0n }
     }])
@@ -115,6 +132,7 @@ describe('munge', () => {
       [Date.UTC(1970, JAN, 1), 0, 40_587, -8.640_0]
     ])).toEqual([{
       start: { unixMillis: 0, atomicPicos: 0n },
+      end: { atomicPicos: Infinity },
       ratio: { atomicPicosPerUnixMilli: 999_900_000n },
       offsetAtUnixEpoch: { atomicPicos: 0n }
     }])
@@ -125,6 +143,7 @@ describe('munge', () => {
       [Date.UTC(1970, JAN, 1), 0, 40_587, -86_400 + 8.640_0]
     ])).toEqual([{
       start: { unixMillis: 0, atomicPicos: 0n },
+      end: { atomicPicos: Infinity },
       ratio: { atomicPicosPerUnixMilli: 100_000n },
       offsetAtUnixEpoch: { atomicPicos: 0n }
     }])
@@ -137,6 +156,7 @@ describe('munge', () => {
       [Date.UTC(1970, JAN, 1), 0, 40_587, -86_400]
     ])).toEqual([{
       start: { unixMillis: 0, atomicPicos: 0n },
+      end: { atomicPicos: Infinity },
       ratio: { atomicPicosPerUnixMilli: 0n },
       offsetAtUnixEpoch: { atomicPicos: 0n }
     }])
@@ -146,6 +166,7 @@ describe('munge', () => {
       [Date.UTC(1970, JAN, 1), 0, 40_587, -86_400 - 8.640_0]
     ])).toEqual([{
       start: { unixMillis: 0, atomicPicos: 0n },
+      end: { atomicPicos: Infinity },
       ratio: { atomicPicosPerUnixMilli: -100_000n },
       offsetAtUnixEpoch: { atomicPicos: 0n }
     }])
@@ -158,6 +179,9 @@ describe('munge', () => {
       start: {
         unixMillis: -283_996_800_000,
         atomicPicos: -283_996_798_577_182_000_000n
+      },
+      end: {
+        atomicPicos: Infinity
       },
       ratio: {
         atomicPicosPerUnixMilli: 1_000_000_015n

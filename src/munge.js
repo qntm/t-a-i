@@ -63,5 +63,19 @@ module.exports = data => {
     }
   })
 
+  // `end` is the first TAI instant when this block ceases to be applicable.
+  // `end` can equal or come before `start`, indicating that this block has no validity at all
+  let end = {
+    atomicPicos: Infinity
+  }
+  for (let blockId = munged.length - 1; blockId >= 0; blockId--) {
+    munged[blockId].end = end
+    if (munged[blockId].start.atomicPicos < end.atomicPicos) {
+      end = {
+        atomicPicos: munged[blockId].start.atomicPicos
+      }
+    }
+  }
+
   return munged
 }

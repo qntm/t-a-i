@@ -22,34 +22,21 @@ module.exports = data => {
 
   /// Helper methods
 
-  const atomicPicosInBlock = (atomicPicos, blockId) => {
-    if (atomicPicos < blocks[blockId].start.atomicPicos) {
-      // Falls before this block began, whoops
-      return false
-    }
-
-    for (let otherBlockId = blockId + 1; otherBlockId in blocks; otherBlockId++) {
-      if (blocks[otherBlockId].start.atomicPicos <= atomicPicos) {
-        // Result falls in a later block, whoops
-        return false
-      }
-    }
-
-    return true
-  }
+  const atomicPicosInBlock = (block, atomicPicos) =>
+    block.start.atomicPicos <= atomicPicos && atomicPicos < block.end.atomicPicos
 
   // Depending on its parameters, each block linearly transforms `unixMillis`
   // into a different `atomicPicos`. This value is always exact
-  const unixMillisToAtomicPicos = (unixMillis, blockId) =>
-    BigInt(unixMillis) * blocks[blockId].ratio.atomicPicosPerUnixMilli +
-      blocks[blockId].offsetAtUnixEpoch.atomicPicos
+  const unixMillisToAtomicPicos = (block, unixMillis) =>
+    BigInt(unixMillis) * block.ratio.atomicPicosPerUnixMilli +
+      block.offsetAtUnixEpoch.atomicPicos
 
   // This result is rounded towards negative infinity. This means that, provided that `atomicPicos`
   // is in the block, `unixMillis` is also guaranteed to be in the block.
-  const atomicPicosToUnixMillis = (atomicPicos, blockId) =>
+  const atomicPicosToUnixMillis = (block, atomicPicos) =>
     Number(div(
-      atomicPicos - blocks[blockId].offsetAtUnixEpoch.atomicPicos,
-      blocks[blockId].ratio.atomicPicosPerUnixMilli
+      atomicPicos - block.offsetAtUnixEpoch.atomicPicos,
+      block.ratio.atomicPicosPerUnixMilli
     ))
 
   /// Unix to TAI conversion methods
@@ -60,13 +47,13 @@ module.exports = data => {
     }
 
     return blocks
-      .map((block, blockId) => ({
-        blockId,
-        atomicPicos: unixMillisToAtomicPicos(unixMillis, blockId)
+      .map(block => ({
+        block,
+        atomicPicos: unixMillisToAtomicPicos(block, unixMillis)
       }))
-      .filter(({ blockId, atomicPicos }) =>
+      .filter(({ block, atomicPicos }) =>
         // ...however, the result has to still be in the block!
-        atomicPicosInBlock(atomicPicos, blockId)
+        atomicPicosInBlock(block, atomicPicos)
       )
   }
 
@@ -76,17 +63,17 @@ module.exports = data => {
 
   const unixMillisToAtomicMillisArray = unixMillis =>
     unixMillisToBlocksWithAtomicPicos(unixMillis)
-      .map(({ blockId, atomicPicos }) => ({
-        blockId,
+      .map(({ block, atomicPicos }) => ({
+        block,
 
         // This rounds towards negative infinity. This is potentially problematic because even if
         // the atomic picosecond count is part of this block, the rounded millisecond count may not
         // be...
         atomicMillis: Number(div(atomicPicos, picosPerMilli))
       }))
-      .filter(({ blockId, atomicMillis }) =>
+      .filter(({ block, atomicMillis }) =>
         // ...hence this additional test
-        atomicPicosInBlock(BigInt(atomicMillis) * picosPerMilli, blockId)
+        atomicPicosInBlock(block, BigInt(atomicMillis) * picosPerMilli)
       )
       .map(({ atomicMillis }) => atomicMillis)
 
@@ -123,8 +110,8 @@ module.exports = data => {
 
     const atomicPicos = BigInt(atomicMillis) * picosPerMilli
 
-    const blockId = blocks.findIndex((block, blockId) =>
-      atomicPicosInBlock(atomicPicos, blockId)
+    const blockId = blocks.findIndex(block =>
+      atomicPicosInBlock(block, atomicPicos)
     )
 
     if (blockId === -1) {
@@ -132,7 +119,7 @@ module.exports = data => {
       throw Error(`No UTC equivalent: ${atomicMillis}`)
     }
 
-    const unixMillis = atomicPicosToUnixMillis(atomicPicos, blockId)
+    const unixMillis = atomicPicosToUnixMillis(blocks[blockId], atomicPicos)
 
     if (overrun) {
       return unixMillis
