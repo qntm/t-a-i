@@ -826,7 +826,7 @@ describe('Converter', () => {
     describe('the Earth spins backwards', () => {
       // Starting from the origin, the Earth just spins in the opposite direction
       const data = [
-        [0, 0, 40_587, -172_800],
+        [0, 0, 40_587, -172_800]
       ]
       const converter = Converter(data)
 
