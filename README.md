@@ -22,8 +22,8 @@ The nature of the relationship between Unix time and TAI means that conversions 
 
 At the time of writing:
 
-* The most recent inserted leap second was at midnight UTC on 1 January 2017.
-* The most recent removed time was 0.1 TAI seconds, removed at midnight UTC on 1 February 1968.
+* The most recent inserted leap second was added at the end of 31 December 2016.
+* The most recent removed time was 0.1 TAI seconds, removed at the end of 31 January 1968.
 
 ## Installation
 
@@ -296,3 +296,9 @@ Unix time can be computed from any Gregorian calendar date and time using a rela
 Unix time therefore has the same issues as UTC when it comes to removed time; certain millisecond counts literally never happened. During inserted time, since Unix time is a simple real number, it can't express a time like "23:59:60", so it must overrun, then backtrack and repeat itself.
 
 Ironically, TAI fits the description of an idealised Gregorian calendar much better. Applying the same arithmetic to a TAI date yields TAI time, which is the number of TAI milliseconds since 1970-01-01 00:00:00 TAI.
+
+## Validity for the future
+
+Leap seconds (or the lack thereof) are announced in the International Earth Rotation and Reference Systems Service (IERS)'s six-monthly Bulletin C. For example, at the time of writing, [the latest such bulletin](https://datacenter.iers.org/data/latestVersion/16_BULLETIN_C16.txt) was published on 7 January 2021 and announced that there will be no leap second at the end of 30 June 2021. This means that `t-a-i`'s calculations are guaranteed to be correct up to, but not including, the *next* potential leap second, which in this case is at the end of 31 December 2021. At or beyond this point, the introduction of leap seconds cannot be predicted in advance, and the correctness of `t-a-i`'s behaviour cannot be guaranteed.
+
+As a result, `t-a-i`'s behaviour beyond the next-but-one (possible) leap second is considered to be in flux. Updates to the source data when new leap seconds are announced will not be considered breaking changes, and will not incur a major version bump.
