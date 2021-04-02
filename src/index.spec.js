@@ -162,8 +162,10 @@ describe('convert', () => {
       expect(atomicToUnix(Date.UTC(1972, JAN, 1, 0, 0, 9, 892)))
         .toBe(Date.UTC(1971, DEC, 31, 23, 59, 59, 999))
       // instants from 1972-01-01 00:00:09.892242 TAI onwards have multiple preimages
-      expect(() => atomicToUnix(Date.UTC(1972, JAN, 1, 0, 0, 9, 893))).toThrow()
-      expect(() => atomicToUnix(Date.UTC(1972, JAN, 1, 0, 0, 9, 999))).toThrow()
+      expect(atomicToUnix(Date.UTC(1972, JAN, 1, 0, 0, 9, 893)))
+        .toBe(Date.UTC(1972, JAN, 1, 0, 0, 0, 0)) // stalled
+      expect(atomicToUnix(Date.UTC(1972, JAN, 1, 0, 0, 9, 999)))
+        .toBe(Date.UTC(1972, JAN, 1, 0, 0, 0, 0)) // stalled
       // Leap time over
       expect(atomicToUnix(Date.UTC(1972, JAN, 1, 0, 0, 10, 0)))
         .toBe(Date.UTC(1972, JAN, 1, 0, 0, 0, 0))
@@ -188,12 +190,16 @@ describe('convert', () => {
         .toBe(Date.UTC(1998, DEC, 31, 23, 59, 59, 500))
       expect(atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 30, 750)))
         .toBe(Date.UTC(1998, DEC, 31, 23, 59, 59, 750))
-      expect(() => atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 31, 0))).toThrow()
-      expect(() => atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 31, 250))).toThrow()
-      expect(() => atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 31, 500))).toThrow()
-      expect(() => atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 31, 750))).toThrow()
+      expect(atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 31, 0)))
+        .toBe(Date.UTC(1999, JAN, 1, 0, 0, 0, 0)) // stalled
+      expect(atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 31, 250)))
+        .toBe(Date.UTC(1999, JAN, 1, 0, 0, 0, 0)) // stalled
+      expect(atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 31, 500)))
+        .toBe(Date.UTC(1999, JAN, 1, 0, 0, 0, 0)) // stalled
+      expect(atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 31, 750)))
+        .toBe(Date.UTC(1999, JAN, 1, 0, 0, 0, 0)) // stalled
       expect(atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 32, 0)))
-        .toBe(Date.UTC(1999, JAN, 1, 0, 0, 0, 0))
+        .toBe(Date.UTC(1999, JAN, 1, 0, 0, 0, 0)) // stalled
       expect(atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 32, 250)))
         .toBe(Date.UTC(1999, JAN, 1, 0, 0, 0, 250))
       expect(atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 32, 500)))
@@ -317,8 +323,11 @@ describe('convert', () => {
       .toBe(915148800000)
     expect(tai.oneToMany.atomicToUnix(915148832000))
       .toBe(915148800000)
-    expect(() => tai.oneToOne.atomicToUnix(915148831000))
-      .toThrow()
+
+    expect(tai.oneToOne.atomicToUnix(915_148_831_000)).toBe(915_148_800_000)
+    expect(tai.oneToOne.atomicToUnix(915_148_831_001)).toBe(915_148_800_000)
+    expect(tai.oneToOne.atomicToUnix(915_148_832_000)).toBe(915_148_800_000)
+    expect(tai.oneToOne.atomicToUnix(915_148_832_001)).toBe(915_148_800_001)
   })
 
   it('Crazy pre-1972 nonsense', () => {

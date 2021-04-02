@@ -80,7 +80,7 @@ Note that for times prior to the beginning of 1972, TAI milliseconds and Unix mi
 
 ### tai.oneToMany
 
-These conversions treat the relationship between Unix and TAI as one-to-many. An instant in Unix time may correspond to 0, 1 or 2 instants in TAI.
+These conversions treat the relationship between Unix and TAI as one-to-many. An instant in Unix time may correspond to 0, 1 or 2 instants in TAI. During an inserted leap second, Unix time **overruns, instantaneously backtracks, and repeats itself**.
 
 #### tai.oneToMany.unixToAtomicPicos(unix: number): BigInt\[\]
 
@@ -142,11 +142,11 @@ tai.oneToMany.atomicToUnix(atomic2)
 
 ### tai.oneToOne
 
-These conversions treat the relationship between TAI and Unix as one-to-one. An instant in TAI corresponds to 1 instant in Unix time.
+These conversions treat the relationship between Unix and TAI as one-to-one. An instant in Unix time corresponds to 1 instant in TAI. During an inserted leap second, Unix time **stalls for one second**.
 
 #### tai.oneToOne.unixToAtomicPicos(unix: number): BigInt
 
-Convert a number of Unix milliseconds to a number of TAI picoseconds. If the Unix time falls on an inserted leap second, it corresponds to *two* TAI instants, so we return the later ("canonical") of the two. If the Unix time falls on a removed leap second, or prior to the beginning of TAI, we throw an exception.
+Convert a number of Unix milliseconds to a number of TAI picoseconds. If the Unix time falls on a removed leap second, or prior to the beginning of TAI, we throw an exception.
 
 ```javascript
 const unix = -157_766_399_910
@@ -188,16 +188,21 @@ const atomicMillis = tai.oneToMany.unixToAtomic(unix)
 
 #### tai.oneToOne.atomicToUnix(atomic: number): number
 
-Converts a number of TAI milliseconds back to Unix milliseconds. If the TAI time falls during the first part of an inserted leap second, it is not a "canonical" TAI instant, so throws an exception.
+Converts a number of TAI milliseconds back to Unix milliseconds. If the TAI time falls during the first part of an inserted leap second, we see that Unix time is stalled here.
 
 ```javascript
-const atomic1 = 915_148_831_001 // 1999-01-01 00:00:31.001 TAI
-const atomic2 = 915_148_832_001 // 1999-01-01 00:00:32.001 TAI
+const atomic1 = 915_148_831_000 // 1999-01-01 00:00:31.000 TAI
+const atomic2 = 915_148_831_001 // 1999-01-01 00:00:31.001 TAI
+const atomic3 = 915_148_832_000 // 1999-01-01 00:00:32.000 TAI
+const atomic4 = 915_148_832_001 // 1999-01-01 00:00:32.001 TAI
 
 tai.oneToOne.atomicToUnix(atomic1)
-// throws exception
-
 tai.oneToOne.atomicToUnix(atomic2)
+tai.oneToOne.atomicToUnix(atomic3)
+// 915_148_800_000 in all cases
+// i.e. 1999-01-01 00:00:00.000 UTC
+
+tai.oneToOne.atomicToUnix(atomic4)
 // 915_148_800_001
 // i.e. 1999-01-01 00:00:00.001 UTC
 ```

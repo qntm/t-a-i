@@ -12,9 +12,6 @@
 // The logic below should work even if these rays proceed horizontally, or UTC runs backwards, or if
 // the rays are supplied in the wrong order or if the period of validity of a ray is 0.
 
-// Several complex conditions in this code are intentionally left more complex than strictly
-// necessary, in order to force more exhaustive testing
-
 const div = require('./div')
 const munge = require('./munge')
 
@@ -54,19 +51,6 @@ module.exports = data => {
       atomicPicos - blocks[blockId].offsetAtUnixEpoch.atomicPicos,
       blocks[blockId].ratio.atomicPicosPerUnixMilli
     ))
-
-  // Some blocks' later UTC extents overlap the start of the next block, yielding a range of atomic
-  // picosecond counts which are "non-canonical" because a later picosecond count converts to the
-  // same Unix millisecond count.
-  const atomicPicosCanonical = (atomicPicos, blockId) => {
-    for (let otherBlockId = blockId + 1; otherBlockId in blocks; otherBlockId++) {
-      if (unixMillisToAtomicPicos(otherBlock.start.unixMillis, blockId) <= atomicPicos) {
-        return false
-      }
-    }
-
-    return true
-  }
 
   /// Unix to TAI conversion methods
 
@@ -158,12 +142,15 @@ module.exports = data => {
     atomicMillisToUnixMillisWithBlock(atomicMillis).unixMillis
 
   const canonicalAtomicMillisToUnixMillis = atomicMillis => {
-    const { unixMillis, blockId } = atomicMillisToUnixMillisWithBlock(atomicMillis)
+    let { unixMillis, blockId } = atomicMillisToUnixMillisWithBlock(atomicMillis)
 
-    if (!atomicPicosCanonical(BigInt(atomicMillis) * picosPerMilli, blockId)) {
-      // There is a later atomic time which converts to the same UTC time as this one
-      // That means we are "non-canonical"
-      throw Error(`No UTC equivalent: ${atomicMillis}`)
+    // Some blocks' later UTC extents overlap the start of the next block, yielding a range of atomic
+    // picosecond counts which are "non-canonical" because a later picosecond count converts to the
+    // same Unix millisecond count.
+    for (let otherBlockId = blockId + 1; otherBlockId in blocks; otherBlockId++) {
+      if (blocks[otherBlockId].start.unixMillis <= unixMillis) {
+        unixMillis = blocks[otherBlockId].start.unixMillis
+      }
     }
 
     return unixMillis
