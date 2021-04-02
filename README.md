@@ -20,6 +20,11 @@ It is **strongly recommended** that you thoroughly unit test the behaviour of yo
 
 The nature of the relationship between Unix time and TAI means that conversions behave consistently for years on end, and then, during leap seconds, suddenly display very different behaviour, **sometimes throwing exceptions**. Not only that, leap seconds are commonly inserted on New Year's Eve, which is a very inopportune time to be dealing with this kind of bug!
 
+At the time of writing,
+
+* The most recent inserted leap second was at midnight UTC on 1 January 2017.
+* The most recent removed time was 0.1 TAI seconds, removed at midnight UTC on 1 February 1968.
+
 ## Installation
 
 ```
