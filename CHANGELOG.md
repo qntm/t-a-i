@@ -1,6 +1,10 @@
 # CHANGELOG
 
-## 2.x.x
+## 2.1.x
+
+`tai.oneToOne.atomicToUnix`'s behaviour has been changed to no longer throw exceptions in the event of trying to convert a "non-canonical" TAI millisecond count to Unix milliseconds. Instead, this conversion now behaves as if Unix time was paused during the inserted leap second. This more accurately reflects the assertion in the README that "Unix time ignores leap seconds". Documentation and unit tests have been updated accordingly.
+
+## 2.0.x
 
 Shorthand methods `tai.unixToAtomic` and `tai.atomicToUnix` have been removed; it's now required to explicitly choose either `tai.oneToMany` or `tai.oneToOne` when performing conversions.
 

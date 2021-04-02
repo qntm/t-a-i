@@ -679,19 +679,19 @@ describe('Converter', () => {
       })
 
       it('oneToOne.unixToAtomicPicos', () => {
-        expect(converter.oneToOne.unixToAtomicPicos(0)).toEqual(0n)
-        expect(converter.oneToOne.unixToAtomicPicos(999)).toEqual(999n * picosPerMilli)
-        expect(converter.oneToOne.unixToAtomicPicos(1000)).toEqual(2000n * picosPerMilli)
-        expect(converter.oneToOne.unixToAtomicPicos(1499)).toEqual(2499n * picosPerMilli)
-        expect(converter.oneToOne.unixToAtomicPicos(1500)).toEqual(3000n * picosPerMilli)
+        expect(converter.oneToOne.unixToAtomicPicos(0)).toBe(0n)
+        expect(converter.oneToOne.unixToAtomicPicos(999)).toBe(999n * picosPerMilli)
+        expect(converter.oneToOne.unixToAtomicPicos(1000)).toBe(2000n * picosPerMilli)
+        expect(converter.oneToOne.unixToAtomicPicos(1499)).toBe(2499n * picosPerMilli)
+        expect(converter.oneToOne.unixToAtomicPicos(1500)).toBe(3000n * picosPerMilli)
       })
 
       it('oneToOne.unixToAtomic', () => {
-        expect(converter.oneToOne.unixToAtomic(0)).toEqual(0)
-        expect(converter.oneToOne.unixToAtomic(999)).toEqual(999)
-        expect(converter.oneToOne.unixToAtomic(1000)).toEqual(2000)
-        expect(converter.oneToOne.unixToAtomic(1499)).toEqual(2499)
-        expect(converter.oneToOne.unixToAtomic(1500)).toEqual(3000)
+        expect(converter.oneToOne.unixToAtomic(0)).toBe(0)
+        expect(converter.oneToOne.unixToAtomic(999)).toBe(999)
+        expect(converter.oneToOne.unixToAtomic(1000)).toBe(2000)
+        expect(converter.oneToOne.unixToAtomic(1499)).toBe(2499)
+        expect(converter.oneToOne.unixToAtomic(1500)).toBe(3000)
       })
 
       it('oneToOne.atomicToUnix', () => {
@@ -783,23 +783,23 @@ describe('Converter', () => {
       })
 
       it('oneToOne.unixToAtomicPicos', () => {
-        expect(converter.oneToOne.unixToAtomicPicos(0)).toEqual(0n)
-        expect(converter.oneToOne.unixToAtomicPicos(499)).toEqual(499n * picosPerMilli)
-        expect(converter.oneToOne.unixToAtomicPicos(500)).toEqual(3000n * picosPerMilli)
-        expect(converter.oneToOne.unixToAtomicPicos(999)).toEqual(3499n * picosPerMilli)
-        expect(converter.oneToOne.unixToAtomicPicos(1000)).toEqual(3500n * picosPerMilli)
-        expect(converter.oneToOne.unixToAtomicPicos(1999)).toEqual(4499n * picosPerMilli)
-        expect(converter.oneToOne.unixToAtomicPicos(2000)).toEqual(4500n * picosPerMilli)
+        expect(converter.oneToOne.unixToAtomicPicos(0)).toBe(0n)
+        expect(converter.oneToOne.unixToAtomicPicos(499)).toBe(499n * picosPerMilli)
+        expect(converter.oneToOne.unixToAtomicPicos(500)).toBe(3000n * picosPerMilli)
+        expect(converter.oneToOne.unixToAtomicPicos(999)).toBe(3499n * picosPerMilli)
+        expect(converter.oneToOne.unixToAtomicPicos(1000)).toBe(3500n * picosPerMilli)
+        expect(converter.oneToOne.unixToAtomicPicos(1999)).toBe(4499n * picosPerMilli)
+        expect(converter.oneToOne.unixToAtomicPicos(2000)).toBe(4500n * picosPerMilli)
       })
 
       it('oneToOne.unixToAtomic', () => {
-        expect(converter.oneToOne.unixToAtomic(0)).toEqual(0)
-        expect(converter.oneToOne.unixToAtomic(499)).toEqual(499)
-        expect(converter.oneToOne.unixToAtomic(500)).toEqual(3000)
-        expect(converter.oneToOne.unixToAtomic(999)).toEqual(3499)
-        expect(converter.oneToOne.unixToAtomic(1000)).toEqual(3500)
-        expect(converter.oneToOne.unixToAtomic(1999)).toEqual(4499)
-        expect(converter.oneToOne.unixToAtomic(2000)).toEqual(4500)
+        expect(converter.oneToOne.unixToAtomic(0)).toBe(0)
+        expect(converter.oneToOne.unixToAtomic(499)).toBe(499)
+        expect(converter.oneToOne.unixToAtomic(500)).toBe(3000)
+        expect(converter.oneToOne.unixToAtomic(999)).toBe(3499)
+        expect(converter.oneToOne.unixToAtomic(1000)).toBe(3500)
+        expect(converter.oneToOne.unixToAtomic(1999)).toBe(4499)
+        expect(converter.oneToOne.unixToAtomic(2000)).toBe(4500)
       })
 
       it('oneToOne.atomicToUnix', () => {
@@ -820,5 +820,68 @@ describe('Converter', () => {
         expect(converter.oneToOne.atomicToUnix(4500)).toBe(2000)
       })
     })
+  })
+
+  describe('directed by Roland Emmerich', () => {
+    describe('the Earth spins backwards', () => {
+      // Starting from the origin, the Earth just spins in the opposite direction
+      const data = [
+        [0, 0, 40_587, -172_800],
+      ]
+      const converter = Converter(data)
+
+      it('oneToMany.unixToAtomicPicos', () => {
+        expect(converter.oneToMany.unixToAtomicPicos(-1000)).toEqual([1000n * picosPerMilli])
+        expect(converter.oneToMany.unixToAtomicPicos(-999)).toEqual([999n * picosPerMilli])
+        expect(converter.oneToMany.unixToAtomicPicos(-1)).toEqual([1n * picosPerMilli])
+        expect(converter.oneToMany.unixToAtomicPicos(0)).toEqual([0n])
+        expect(converter.oneToMany.unixToAtomicPicos(1)).toEqual([])
+      })
+
+      it('oneToMany.unixToAtomic', () => {
+        expect(converter.oneToMany.unixToAtomic(-1000)).toEqual([1000])
+        expect(converter.oneToMany.unixToAtomic(-999)).toEqual([999])
+        expect(converter.oneToMany.unixToAtomic(-1)).toEqual([1])
+        expect(converter.oneToMany.unixToAtomic(0)).toEqual([0])
+        expect(converter.oneToMany.unixToAtomic(1)).toEqual([])
+      })
+
+      it('oneToMany.atomicToUnix', () => {
+        expect(() => converter.oneToMany.atomicToUnix(-1)).toThrowError('No UTC equivalent: -1')
+        expect(converter.oneToMany.atomicToUnix(0)).toBe(0)
+        expect(converter.oneToMany.atomicToUnix(1)).toBe(-1)
+        expect(converter.oneToMany.atomicToUnix(999)).toBe(-999)
+        expect(converter.oneToMany.atomicToUnix(1000)).toBe(-1000)
+      })
+
+      it('oneToOne.unixToAtomicPicos', () => {
+        expect(converter.oneToOne.unixToAtomicPicos(-1000)).toBe(1000n * picosPerMilli)
+        expect(converter.oneToOne.unixToAtomicPicos(-999)).toBe(999n * picosPerMilli)
+        expect(converter.oneToOne.unixToAtomicPicos(-1)).toBe(1n * picosPerMilli)
+        expect(converter.oneToOne.unixToAtomicPicos(0)).toBe(0n)
+        expect(() => converter.oneToOne.unixToAtomicPicos(1)).toThrowError('No TAI equivalent: 1')
+      })
+
+      it('oneToOne.unixToAtomic', () => {
+        expect(converter.oneToOne.unixToAtomic(-1000)).toBe(1000)
+        expect(converter.oneToOne.unixToAtomic(-999)).toBe(999)
+        expect(converter.oneToOne.unixToAtomic(-1)).toBe(1)
+        expect(converter.oneToOne.unixToAtomic(0)).toBe(0)
+        expect(() => converter.oneToOne.unixToAtomic(1)).toThrowError('No TAI equivalent: 1')
+      })
+
+      it('oneToOne.atomicToUnix', () => {
+        expect(() => converter.oneToOne.atomicToUnix(-1)).toThrowError('No UTC equivalent: -1')
+        expect(converter.oneToOne.atomicToUnix(0)).toBe(0)
+        expect(converter.oneToOne.atomicToUnix(1)).toBe(-1)
+        expect(converter.oneToOne.atomicToUnix(999)).toBe(-999)
+        expect(converter.oneToOne.atomicToUnix(1000)).toBe(-1000)
+      })
+    })
+
+    // TODO:
+    // Earth spins forwards for 1 second, then instantaneously reverses direction
+    // Earth spins forwards for 1 second then discontinuously reverses direction
+    // Earth just stops spinning forever
   })
 })

@@ -116,7 +116,7 @@ module.exports = data => {
 
   /// TAI to Unix conversion methods
 
-  const atomicMillisToUnixMillisWithBlock = atomicMillis => {
+  const atomicMillisToUnixMillis = (atomicMillis, overrun) => {
     if (!Number.isInteger(atomicMillis)) {
       throw Error(`Not an integer: ${atomicMillis}`)
     }
@@ -132,40 +132,35 @@ module.exports = data => {
       throw Error(`No UTC equivalent: ${atomicMillis}`)
     }
 
-    return {
-      blockId,
-      unixMillis: atomicPicosToUnixMillis(atomicPicos, blockId)
-    }
-  }
+    const unixMillis = atomicPicosToUnixMillis(atomicPicos, blockId)
 
-  const atomicMillisToUnixMillis = atomicMillis =>
-    atomicMillisToUnixMillisWithBlock(atomicMillis).unixMillis
-
-  const canonicalAtomicMillisToUnixMillis = atomicMillis => {
-    let { unixMillis, blockId } = atomicMillisToUnixMillisWithBlock(atomicMillis)
-
-    // Some blocks' later UTC extents overlap the start of the next block, yielding a range of atomic
-    // picosecond counts which are "non-canonical" because a later picosecond count converts to the
-    // same Unix millisecond count.
-    for (let otherBlockId = blockId + 1; otherBlockId in blocks; otherBlockId++) {
-      if (blocks[otherBlockId].start.unixMillis <= unixMillis) {
-        unixMillis = blocks[otherBlockId].start.unixMillis
-      }
+    if (overrun) {
+      return unixMillis
     }
 
-    return unixMillis
+    // If a later block starts at a Unix time before this one, apply stalling behaviour
+    return Math.min(
+      unixMillis,
+      ...blocks.slice(blockId + 1).map(block => block.start.unixMillis)
+    )
   }
+
+  const atomicMillisToUnixMillisOverrun = atomicMillis =>
+    atomicMillisToUnixMillis(atomicMillis, true)
+
+  const atomicMillisToUnixMillisStall = atomicMillis =>
+    atomicMillisToUnixMillis(atomicMillis, false)
 
   return {
     oneToMany: {
       unixToAtomicPicos: unixMillisToAtomicPicosArray,
       unixToAtomic: unixMillisToAtomicMillisArray,
-      atomicToUnix: atomicMillisToUnixMillis
+      atomicToUnix: atomicMillisToUnixMillisOverrun
     },
     oneToOne: {
       unixToAtomicPicos: unixMillisToCanonicalAtomicPicos,
       unixToAtomic: unixMillisToCanonicalAtomicMillis,
-      atomicToUnix: canonicalAtomicMillisToUnixMillis
+      atomicToUnix: atomicMillisToUnixMillisStall
     }
   }
 }
