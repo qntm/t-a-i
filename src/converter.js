@@ -1,3 +1,17 @@
+// The way to think about this is a 2D graph with TAI on the X axis, UTC on the Y, and a collection
+// of numbered *rays*. Each ray starts at a well defined position in both TAI and UTC and proceeds
+// diagonally up and to the right, expressing *one* relationship between the two.
+// Typically each new ray is either (1) the previous ray translated up or down a little or (2) a
+// discrete change in direction/slope of the previous ray with no discontinuity.
+// A ray becomes invalid once we reach the TAI start point of the next (numerical) ray. So, every
+// TAI time (vertical line) intersects exactly one ray, and maps to exactly 1 UTC time, unless it
+// precedes the beginning of TAI.
+// A UTC time (horizontal line) can intersect 0, 1, 2 or theoretically many more rays, and hence map
+// to multiple TAI times. We can return an array of these, or just the result from the latest ray
+// (according to its numbering).
+// The logic below should work even if these rays proceed horizontally, or UTC runs backwards, or if
+// the rays are supplied in the wrong order or if the period of validity of a ray is 0.
+
 // Several complex conditions in this code are intentionally left more complex than strictly
 // necessary, in order to force more exhaustive testing
 
@@ -17,12 +31,11 @@ module.exports = data => {
       return false
     }
 
-    if (
-      blockId + 1 in blocks &&
-      blocks[blockId + 1].start.atomicPicos <= atomicPicos
-    ) {
-      // Result falls in next block, whoops
-      return false
+    for (let otherBlockId = blockId + 1; otherBlockId in blocks; otherBlockId++) {
+      if (blocks[otherBlockId].start.atomicPicos <= atomicPicos) {
+        // Result falls in a later block, whoops
+        return false
+      }
     }
 
     return true
@@ -45,11 +58,15 @@ module.exports = data => {
   // Some blocks' later UTC extents overlap the start of the next block, yielding a range of atomic
   // picosecond counts which are "non-canonical" because a later picosecond count converts to the
   // same Unix millisecond count.
-  const atomicPicosCanonical = (atomicPicos, blockId) =>
-    !blocks.some((otherBlock, otherBlockId) =>
-      otherBlockId > blockId &&
-      unixMillisToAtomicPicos(otherBlock.start.unixMillis, blockId) <= atomicPicos
-    )
+  const atomicPicosCanonical = (atomicPicos, blockId) => {
+    for (let otherBlockId = blockId + 1; otherBlockId in blocks; otherBlockId++) {
+      if (unixMillisToAtomicPicos(otherBlock.start.unixMillis, blockId) <= atomicPicos) {
+        return false
+      }
+    }
+
+    return true
+  }
 
   /// Unix to TAI conversion methods
 
