@@ -74,7 +74,7 @@ Note! Use caution when constructing a `Date` object directly from a TAI millisec
 
 All methods throw exceptions if not passed an integer number of milliseconds.
 
-Methods fail or return empty result sets if called with times before the beginning of TAI, which was, equivalently:
+Methods throw exceptions or return empty result sets if called with times before the beginning of TAI, which was, equivalently:
 
 * 1961-01-01 00:00:00.000_000 UTC
 * 1961-01-01 00:00:01.422_818 TAI
