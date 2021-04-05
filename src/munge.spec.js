@@ -193,7 +193,7 @@ describe('munge', () => {
   })
 
   it('generates proper offsets at the Unix epoch', () => {
-    expect(munge(taiData).map(block => block.offsetAtUnixEpoch.atomicPicos)).toEqual([
+    expect(munge(taiData).map(ray => ray.offsetAtUnixEpoch.atomicPicos)).toEqual([
       5_682_770_000_000n,
       5_632_770_000_000n,
       5_127_848_400_000n,
@@ -239,7 +239,7 @@ describe('munge', () => {
   })
 
   it('generates proper drift rates', () => {
-    expect(munge(taiData).map(block => block.ratio.atomicPicosPerUnixMilli)).toEqual([
+    expect(munge(taiData).map(ray => ray.ratio.atomicPicosPerUnixMilli)).toEqual([
       1_000_000_015n,
       1_000_000_015n,
       1_000_000_013n,
@@ -285,13 +285,13 @@ describe('munge', () => {
   })
 
   it('generates proper overlaps', () => {
-    expect(munge(taiData).map((block, i, arr) =>
-      // block end minus overlap start
-      i + 1 in arr
+    expect(munge(taiData).map((ray, i, rays) =>
+      // ray end minus overlap start
+      i + 1 in rays
         ? (
-            arr[i + 1].start.atomicPicos -
-          BigInt(arr[i + 1].start.unixMillis) * block.ratio.atomicPicosPerUnixMilli -
-          block.offsetAtUnixEpoch.atomicPicos
+            rays[i + 1].start.atomicPicos -
+          BigInt(rays[i + 1].start.unixMillis) * ray.ratio.atomicPicosPerUnixMilli -
+          ray.offsetAtUnixEpoch.atomicPicos
           )
         : NaN
     )).toEqual([
