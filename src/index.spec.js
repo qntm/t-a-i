@@ -1,6 +1,6 @@
 /* eslint-env jest */
 
-const { Converter, ONE_TO_MANY, ONE_TO_ONE } = require('.')
+const { Converter, INSERT_OVERRUN_ARRAY, INSERT_STALL_LAST } = require('.')
 
 const JAN = 0
 const FEB = 1
@@ -14,8 +14,8 @@ const NOV = 10
 const DEC = 11
 
 describe('Converter', () => {
-  describe('ONE_TO_MANY', () => {
-    const converter = Converter(ONE_TO_MANY)
+  describe('INSERT_OVERRUN_ARRAY', () => {
+    const converter = Converter(INSERT_OVERRUN_ARRAY)
 
     describe('unixToAtomic', () => {
       const unixToAtomicPicos = converter.unixToAtomicPicos
@@ -457,8 +457,8 @@ describe('Converter', () => {
     })
   })
 
-  describe('ONE_TO_ONE', () => {
-    const converter = Converter(ONE_TO_ONE)
+  describe('INSERT_STALL_LAST', () => {
+    const converter = Converter(INSERT_STALL_LAST)
 
     describe('atomicToUnix', () => {
       const atomicToUnix = converter.atomicToUnix

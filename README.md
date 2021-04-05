@@ -36,8 +36,8 @@ npm install t-a-i
 Exactly how long was 1972?
 
 ```javascript
-const { Converter, ONE_TO_ONE } = require("t-a-i")
-const converter = Converter(ONE_TO_ONE)
+const { Converter, INSERT_STALL_LAST } = require("t-a-i")
+const converter = Converter(INSERT_STALL_LAST)
 
 const unixStart = Date.UTC(1972, 0, 1) // 63_072_000_000
 const unixEnd   = Date.UTC(1973, 0, 1) // 94_694_400_000
@@ -84,19 +84,25 @@ Methods throw exceptions or return empty result sets if called with times before
 
 Note that for times prior to the beginning of 1972, TAI milliseconds and Unix milliseconds were not the same length.
 
-### ONE_TO_MANY
+### INSERT_OVERRUN_ARRAY
 
-This constant indicates that the converter should treat the relationship between Unix and TAI as one-to-many. During an inserted leap second, Unix time **overruns, instantaneously backtracks, and repeats itself**. An instant in Unix time may therefore correspond to 0, 1 or 2 instants in TAI. As a result, the returned value from a Unix to TAI conversion is an array with 0, 1 or 2 entries.
+This constant indicates that during inserted time, the converter should behave as if Unix time **overruns, instantaneously backtracks, and repeats itself**. One instant in Unix time may therefore correspond to 0, 1 or 2 instants in TAI.
 
-### ONE_TO_ONE
+* Unix-to-TAI conversions return an array with 0, 1 or 2 entries.
+* TAI-to-Unix conversions always work, but two instants in TAI may convert back to the same instant in Unix time.
 
-This constant indicates that the converter should treat the relationship between Unix and TAI as one-to-one. During an inserted leap second, Unix time **stalls for one second**. An instant in Unix time corresponds to 1 instant in TAI.
+### INSERT_STALL_LAST
 
-### Converter(ONE_TO_MANY | ONE_TO_ONE): converter
+This constant indicates that during inserted time, the converter should behave as if Unix time **stalls**.
 
-Returns a TAI/Unix converter object whose conversions obey the specified model.
+* Unix-to-TAI conversions return the last applicable instant in TAI - the end of the stall.
+* TAI-to-Unix conversions convert *any* input TAI instant during the stall to the same instant in Unix time.
 
-### Converter(ONE_TO_MANY).unixToAtomicPicos(unix: number): BigInt\[\]
+### Converter(INSERT_OVERRUN_ARRAY | INSERT_STALL_LAST): converter
+
+Returns a TAI/Unix converter object whose conversions obey the specified model. All `Converter` objects support the same methods: `unixToAtomicPicos`, `unixToAtomic` and `atomicToUnix`.
+
+### Converter(INSERT_OVERRUN_ARRAY).unixToAtomicPicos(unix: number): BigInt\[\]
 
 Convert a number of Unix milliseconds to an array of possible TAI picosecond counts. Ordinarily, this array will have a single entry. If the Unix time falls during an inserted leap second, the array will have two entries. If the Unix time falls during a removed leap second, or prior to the beginning of TAI, the array will be empty.
 
@@ -109,9 +115,9 @@ converter.unixToAtomicPicos(unix)
 // i.e. [1965-01-01 00:00:03.530_130_001_350 TAI, 1965-01-01 00:00:03.630_130_001_350 TAI]
 ```
 
-### Converter(ONE_TO_MANY).unixToAtomic(unix: number): number\[\]
+### Converter(INSERT_OVERRUN_ARRAY).unixToAtomic(unix: number): number\[\]
 
-As `Converter(ONE_TO_MANY).unixToAtomicPicos`, but return value is an array of integer TAI millisecond counts.
+As `Converter(INSERT_OVERRUN_ARRAY).unixToAtomicPicos`, but return value is an array of integer TAI millisecond counts.
 
 ```javascript
 const unix = 915_148_800_001
@@ -138,7 +144,7 @@ const atomicMillis = converter.unixToAtomicMillis(unix)
 // i.e. "1961-01-01 00:00:01.422_000 TAI", but that is before TAI began.
 ```
 
-### Converter(ONE_TO_MANY).atomicToUnix(atomic: number): number
+### Converter(INSERT_OVERRUN_ARRAY).atomicToUnix(atomic: number): number
 
 Convert a number of TAI milliseconds to Unix milliseconds. Note that over the course of a leap second, two different instants in TAI may convert back to the same instant in Unix time.
 
@@ -154,7 +160,7 @@ converter.atomicToUnix(atomic2)
 // 915_148_800_001, same result
 ```
 
-### Converter(ONE_TO_ONE).unixToAtomicPicos(unix: number): BigInt
+### Converter(INSERT_STALL_LAST).unixToAtomicPicos(unix: number): BigInt
 
 Convert a number of Unix milliseconds to a number of TAI picoseconds. If the Unix time falls on a removed leap second, or prior to the beginning of TAI, we throw an exception.
 
@@ -167,9 +173,9 @@ converter.unixToAtomicPicos(unix)
 // i.e. 1965-01-01 00:00:03.630_130_001_350 TAI
 ```
 
-### Converter(ONE_TO_ONE).unixToAtomic(unix: number): number
+### Converter(INSERT_STALL_LAST).unixToAtomic(unix: number): number
 
-As `Converter(ONE_TO_ONE).unixToAtomicPicos`, but converts the picosecond count to milliseconds.
+As `Converter(INSERT_STALL_LAST).unixToAtomicPicos`, but converts the picosecond count to milliseconds.
 
 ```javascript
 const unix = 915_148_800_001
@@ -186,17 +192,17 @@ Fractional milliseconds are rounded towards negative infinity. Note that this ro
 const unix = -283_996_800_000
 // i.e. 1961-01-01 00:00:00.000_000 UTC, the beginning of TAI
 
-const atomicPicos = Converter(ONE_TO_ONE).unixToAtomicPicos(unix)
+const atomicPicos = Converter(INSERT_STALL_LAST).unixToAtomicPicos(unix)
 // -283_996_798_577_182_000_000n
 // i.e. 1961-01-01 00:00:01.422_818 TAI
 
-const atomicMillis = Converter(ONE_TO_MANY).unixToAtomic(unix)
+const atomicMillis = Converter(INSERT_OVERRUN_ARRAY).unixToAtomic(unix)
 // Throws an exception.
 // The rounded TAI millisecond count would be -283_996_798_578,
 // i.e. "1961-01-01 00:00:01.422_000 TAI", which is before TAI began.
 ```
 
-### Converter(ONE_TO_ONE).atomicToUnix(atomic: number): number
+### Converter(INSERT_STALL_LAST).atomicToUnix(atomic: number): number
 
 Converts a number of TAI milliseconds back to Unix milliseconds. If the TAI time falls during the first part of an inserted leap second, we see that Unix time is stalled here.
 

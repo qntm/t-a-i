@@ -1,6 +1,6 @@
-const { ONE_TO_MANY, ONE_TO_ONE, Converter } = require('./converter')
+const { INSERT_OVERRUN_ARRAY, INSERT_STALL_LAST, Converter } = require('./converter')
 const taiData = require('./tai-data')
 
-module.exports.ONE_TO_MANY = ONE_TO_MANY
-module.exports.ONE_TO_ONE = ONE_TO_ONE
+module.exports.INSERT_OVERRUN_ARRAY = INSERT_OVERRUN_ARRAY
+module.exports.INSERT_STALL_LAST = INSERT_STALL_LAST
 module.exports.Converter = model => Converter(taiData, model)

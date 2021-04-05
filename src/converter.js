@@ -17,11 +17,11 @@ const munge = require('./munge')
 
 const picosPerMilli = 1000n * 1000n * 1000n
 
-const ONE_TO_MANY = 0
-const ONE_TO_ONE = 1
+const INSERT_OVERRUN_ARRAY = 0
+const INSERT_STALL_LAST = 1
 
-module.exports.ONE_TO_MANY = ONE_TO_MANY
-module.exports.ONE_TO_ONE = ONE_TO_ONE
+module.exports.INSERT_OVERRUN_ARRAY = INSERT_OVERRUN_ARRAY
+module.exports.INSERT_STALL_LAST = INSERT_STALL_LAST
 module.exports.Converter = (data, model) => {
   const rays = munge(data)
 
@@ -143,7 +143,7 @@ module.exports.Converter = (data, model) => {
   const atomicMillisToUnixMillisStall = atomicMillis =>
     atomicMillisToUnixMillis(atomicMillis, false)
 
-  if (model === ONE_TO_MANY) {
+  if (model === INSERT_OVERRUN_ARRAY) {
     return {
       unixToAtomicPicos: unixMillisToAtomicPicosArray,
       unixToAtomic: unixMillisToAtomicMillisArray,
@@ -151,7 +151,7 @@ module.exports.Converter = (data, model) => {
     }
   }
 
-  if (model === ONE_TO_ONE) {
+  if (model === INSERT_STALL_LAST) {
     return {
       unixToAtomicPicos: unixMillisToCanonicalAtomicPicos,
       unixToAtomic: unixMillisToCanonicalAtomicMillis,
