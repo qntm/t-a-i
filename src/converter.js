@@ -17,12 +17,13 @@ const munge = require('./munge')
 
 const picosPerMilli = 1000n * 1000n * 1000n
 
-const INSERT_OVERRUN_ARRAY = 0
-const INSERT_STALL_LAST = 1
+const INSERT_MODELS = {
+  OVERRUN_ARRAY: 0,
+  STALL_LAST: 1
+}
 
-module.exports.INSERT_OVERRUN_ARRAY = INSERT_OVERRUN_ARRAY
-module.exports.INSERT_STALL_LAST = INSERT_STALL_LAST
-module.exports.Converter = (data, model) => {
+module.exports.INSERT_MODELS = INSERT_MODELS
+module.exports.Converter = (data, insertModel) => {
   const rays = munge(data)
 
   /// Helper methods
@@ -108,7 +109,7 @@ module.exports.Converter = (data, model) => {
 
   /// TAI to Unix conversion methods
 
-  const atomicMillisToUnixMillis = (atomicMillis, overrun) => {
+  const atomicToUnix = atomicMillis => {
     if (!Number.isInteger(atomicMillis)) {
       throw Error(`Not an integer: ${atomicMillis}`)
     }
@@ -126,38 +127,32 @@ module.exports.Converter = (data, model) => {
 
     const unixMillis = atomicPicosToUnixMillis(rays[rayId], atomicPicos)
 
-    if (overrun) {
-      return unixMillis
-    }
+    return {
+      [INSERT_MODELS.OVERRUN_ARRAY]: unixMillis,
 
-    // If a later ray starts at a Unix time before this one, apply stalling behaviour
-    return Math.min(
-      unixMillis,
-      ...rays.slice(rayId + 1).map(ray => ray.start.unixMillis)
-    )
+      // If a later ray starts at a Unix time before this time, apply stalling behaviour
+      [INSERT_MODELS.STALL_LAST]: Math.min(
+        unixMillis,
+        ...rays.slice(rayId + 1).map(ray => ray.start.unixMillis)
+      )
+    }[insertModel]
   }
 
-  const atomicMillisToUnixMillisOverrun = atomicMillis =>
-    atomicMillisToUnixMillis(atomicMillis, true)
-
-  const atomicMillisToUnixMillisStall = atomicMillis =>
-    atomicMillisToUnixMillis(atomicMillis, false)
-
-  if (model === INSERT_OVERRUN_ARRAY) {
+  if (insertModel === INSERT_MODELS.OVERRUN_ARRAY) {
     return {
       unixToAtomicPicos: unixMillisToAtomicPicosArray,
       unixToAtomic: unixMillisToAtomicMillisArray,
-      atomicToUnix: atomicMillisToUnixMillisOverrun
+      atomicToUnix
     }
   }
 
-  if (model === INSERT_STALL_LAST) {
+  if (insertModel === INSERT_MODELS.STALL_LAST) {
     return {
       unixToAtomicPicos: unixMillisToCanonicalAtomicPicos,
       unixToAtomic: unixMillisToCanonicalAtomicMillis,
-      atomicToUnix: atomicMillisToUnixMillisStall
+      atomicToUnix
     }
   }
 
-  throw Error(`Unrecognised model: ${model}`)
+  throw Error(`Unrecognised model for inserted time: ${insertModel}`)
 }

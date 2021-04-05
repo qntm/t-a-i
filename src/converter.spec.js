@@ -1,7 +1,9 @@
 /* eslint-env jest */
 
-const { Converter, INSERT_OVERRUN_ARRAY, INSERT_STALL_LAST } = require('./converter')
+const { Converter, INSERT_MODELS } = require('./converter')
 const munge = require('./munge')
+
+const { OVERRUN_ARRAY, STALL_LAST } = INSERT_MODELS
 
 const JAN = 0
 const DEC = 11
@@ -15,12 +17,12 @@ describe('Converter', () => {
 
     describe('bad model', () => {
       it('throws', () => {
-        expect(() => Converter(data)).toThrowError('Unrecognised model: undefined')
+        expect(() => Converter(data)).toThrowError('Unrecognised model for inserted time: undefined')
       })
     })
 
-    describe('INSERT_STALL_LAST', () => {
-      const converter = Converter(data, INSERT_STALL_LAST)
+    describe('STALL_LAST', () => {
+      const converter = Converter(data, STALL_LAST)
 
       it('fails on a non-integer number of milliseconds', () => {
         expect(() => converter.unixToAtomic(89.3)).toThrowError('Not an integer: 89.3')
@@ -46,8 +48,8 @@ describe('Converter', () => {
       })
     })
 
-    describe('INSERT_OVERRUN_ARRAY', () => {
-      const converter = Converter(data, INSERT_OVERRUN_ARRAY)
+    describe('OVERRUN_ARRAY', () => {
+      const converter = Converter(data, OVERRUN_ARRAY)
 
       it('manages basic conversions', () => {
         expect(converter.unixToAtomicPicos(0)).toEqual([0n])
@@ -63,8 +65,8 @@ describe('Converter', () => {
       [Date.UTC(1980, JAN, 1), 1]
     ]
 
-    describe('INSERT_OVERRUN_ARRAY', () => {
-      const converter = Converter(data, INSERT_OVERRUN_ARRAY)
+    describe('OVERRUN_ARRAY', () => {
+      const converter = Converter(data, OVERRUN_ARRAY)
 
       describe('conversions grouped by instant', () => {
         it('start of time', () => {
@@ -197,8 +199,8 @@ describe('Converter', () => {
       })
     })
 
-    describe('INSERT_STALL_LAST', () => {
-      const converter = Converter(data, INSERT_STALL_LAST)
+    describe('STALL_LAST', () => {
+      const converter = Converter(data, STALL_LAST)
 
       describe('conversions grouped by instant', () => {
         it('start of time', () => {
@@ -298,8 +300,8 @@ describe('Converter', () => {
       [Date.UTC(1980, JAN, 1), -1]
     ]
 
-    describe('INSERT_OVERRUN_ARRAY', () => {
-      const converter = Converter(data, INSERT_OVERRUN_ARRAY)
+    describe('OVERRUN_ARRAY', () => {
+      const converter = Converter(data, OVERRUN_ARRAY)
 
       describe('conversions grouped by instant', () => {
         it('start of time', () => {
@@ -397,8 +399,8 @@ describe('Converter', () => {
       })
     })
 
-    describe('INSERT_STALL_LAST', () => {
-      const converter = Converter(data, INSERT_STALL_LAST)
+    describe('STALL_LAST', () => {
+      const converter = Converter(data, STALL_LAST)
 
       describe('conversions grouped by instant', () => {
         it('start of time', () => {
@@ -504,7 +506,7 @@ describe('Converter', () => {
           }
         }])
 
-        const converter = Converter(data, INSERT_OVERRUN_ARRAY)
+        const converter = Converter(data, OVERRUN_ARRAY)
         expect(converter.unixToAtomicPicos(1)).toEqual([900_000_000n])
         // rounds down to 0, which is not in the ray
         expect(converter.unixToAtomic(1)).toEqual([])
@@ -547,7 +549,7 @@ describe('Converter', () => {
           }
         }])
 
-        const converter = Converter(data, INSERT_OVERRUN_ARRAY)
+        const converter = Converter(data, OVERRUN_ARRAY)
         expect(converter.unixToAtomicPicos(-1)).toEqual([-900_000_000n])
         // rounds up to 0, which is not in the ray
         expect(converter.unixToAtomic(-1)).toEqual([])
@@ -591,7 +593,7 @@ describe('Converter', () => {
         }
       }])
 
-      const converter = Converter(data, INSERT_OVERRUN_ARRAY)
+      const converter = Converter(data, OVERRUN_ARRAY)
       expect(converter.unixToAtomicPicos(0)).toEqual([0n])
       expect(converter.unixToAtomic(0)).toEqual([0])
       expect(converter.unixToAtomicPicos(1)).toEqual([1_000_001_000n])
@@ -607,8 +609,8 @@ describe('Converter', () => {
         [1000, 2]
       ]
 
-      describe('INSERT_OVERRUN_ARRAY', () => {
-        const converter = Converter(data, INSERT_OVERRUN_ARRAY)
+      describe('OVERRUN_ARRAY', () => {
+        const converter = Converter(data, OVERRUN_ARRAY)
 
         it('unixToAtomicPicos', () => {
           expect(converter.unixToAtomicPicos(0)).toEqual([0n])
@@ -671,8 +673,8 @@ describe('Converter', () => {
         })
       })
 
-      describe('INSERT_STALL_LAST', () => {
-        const converter = Converter(data, INSERT_STALL_LAST)
+      describe('STALL_LAST', () => {
+        const converter = Converter(data, STALL_LAST)
 
         it('unixToAtomicPicos', () => {
           expect(converter.unixToAtomicPicos(0)).toBe(0n)
@@ -713,8 +715,8 @@ describe('Converter', () => {
         [1500, 1.5]
       ]
 
-      describe('INSERT_OVERRUN_ARRAY', () => {
-        const converter = Converter(data, INSERT_OVERRUN_ARRAY)
+      describe('OVERRUN_ARRAY', () => {
+        const converter = Converter(data, OVERRUN_ARRAY)
 
         it('unixToAtomicPicos', () => {
           expect(converter.unixToAtomicPicos(0)).toEqual([0n])
@@ -763,8 +765,8 @@ describe('Converter', () => {
         })
       })
 
-      describe('INSERT_STALL_LAST', () => {
-        const converter = Converter(data, INSERT_STALL_LAST)
+      describe('STALL_LAST', () => {
+        const converter = Converter(data, STALL_LAST)
 
         it('unixToAtomicPicos', () => {
           expect(converter.unixToAtomicPicos(0)).toBe(0n)
@@ -809,8 +811,8 @@ describe('Converter', () => {
         [500, 2.5]
       ]
 
-      describe('INSERT_OVERRUN_ARRAY', () => {
-        const converter = Converter(data, INSERT_OVERRUN_ARRAY)
+      describe('OVERRUN_ARRAY', () => {
+        const converter = Converter(data, OVERRUN_ARRAY)
 
         it('unixToAtomicPicos', () => {
           expect(converter.unixToAtomicPicos(0)).toEqual([0n])
@@ -874,8 +876,8 @@ describe('Converter', () => {
         })
       })
 
-      describe('INSERT_STALL_LAST', () => {
-        const converter = Converter(data, INSERT_STALL_LAST)
+      describe('STALL_LAST', () => {
+        const converter = Converter(data, STALL_LAST)
 
         it('unixToAtomicPicos', () => {
           expect(converter.unixToAtomicPicos(0)).toBe(0n)
@@ -925,8 +927,8 @@ describe('Converter', () => {
         [0, 0, 40_587, -172_800]
       ]
 
-      describe('INSERT_OVERRUN_ARRAY', () => {
-        const converter = Converter(data, INSERT_OVERRUN_ARRAY)
+      describe('OVERRUN_ARRAY', () => {
+        const converter = Converter(data, OVERRUN_ARRAY)
 
         it('unixToAtomicPicos', () => {
           expect(converter.unixToAtomicPicos(-1000)).toEqual([1000n * picosPerMilli])
@@ -953,8 +955,8 @@ describe('Converter', () => {
         })
       })
 
-      describe('INSERT_STALL_LAST', () => {
-        const converter = Converter(data, INSERT_STALL_LAST)
+      describe('STALL_LAST', () => {
+        const converter = Converter(data, STALL_LAST)
 
         it('unixToAtomicPicos', () => {
           expect(converter.unixToAtomicPicos(-1000)).toBe(1000n * picosPerMilli)
