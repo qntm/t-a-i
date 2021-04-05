@@ -8,7 +8,7 @@ const DEC = 11
 const picosPerMilli = 1000n * 1000n * 1000n
 
 describe('Converter', () => {
-  describe('one block', () => {
+  describe('one ray', () => {
     const data = [
       [Date.UTC(1970, JAN, 1), 0]
     ]
@@ -423,7 +423,7 @@ describe('Converter', () => {
 
   describe('insane edge cases', () => {
     describe('when unixMillis converts to an atomicPicos which fits but an atomicMillis which does not', () => {
-      it('at the start of the block', () => {
+      it('at the start of the ray', () => {
         const data = [
           [Date.UTC(1970, JAN, 1, 0, 0, 0, 1), -0.0001]
         ]
@@ -431,7 +431,10 @@ describe('Converter', () => {
         expect(munge(data)).toEqual([{
           start: {
             unixMillis: 1,
-            atomicPicos: 900_000_000n // block start intentionally doesn't include TAI epoch
+            atomicPicos: 900_000_000n // ray start intentionally doesn't include TAI epoch
+          },
+          end: {
+            atomicPicos: Infinity
           },
           ratio: {
             atomicPicosPerUnixMilli: 1_000_000_000n
@@ -443,21 +446,24 @@ describe('Converter', () => {
 
         const converter = Converter(data)
         expect(converter.oneToMany.unixToAtomicPicos(1)).toEqual([900_000_000n])
-        // rounds down to 0, which is not in the block
+        // rounds down to 0, which is not in the ray
         expect(converter.oneToMany.unixToAtomic(1)).toEqual([])
       })
 
-      it('at the end of the block', () => {
+      it('at the end of the ray', () => {
         const data = [
           [Date.UTC(1969, DEC, 31, 23, 59, 59, 999), 0.0001],
           [Date.UTC(1970, JAN, 1, 0, 0, 0, 1), -0.0011]
         ]
 
-        // first block's end intentionally doesn't include TAI epoch
+        // first ray's end intentionally doesn't include TAI epoch
         expect(munge(data)).toEqual([{
           start: {
             unixMillis: -1,
             atomicPicos: -900_000_000n
+          },
+          end: {
+            atomicPicos: -100_000_000n
           },
           ratio: {
             atomicPicosPerUnixMilli: 1_000_000_000n
@@ -470,6 +476,9 @@ describe('Converter', () => {
             unixMillis: 1,
             atomicPicos: -100_000_000n
           },
+          end: {
+            atomicPicos: Infinity
+          },
           ratio: {
             atomicPicosPerUnixMilli: 1_000_000_000n
           },
@@ -480,12 +489,12 @@ describe('Converter', () => {
 
         const converter = Converter(data)
         expect(converter.oneToMany.unixToAtomicPicos(-1)).toEqual([-900_000_000n])
-        // rounds up to 0, which is not in the block
+        // rounds up to 0, which is not in the ray
         expect(converter.oneToMany.unixToAtomic(-1)).toEqual([])
       })
     })
 
-    it('when a block has length 0', () => {
+    it('when a ray has length 0', () => {
       const data = [
         [Date.UTC(1970, JAN, 1), 0, 40_587, 0],
         [Date.UTC(1970, JAN, 1), 0, 40_587, 0.086_400]
@@ -496,6 +505,9 @@ describe('Converter', () => {
           unixMillis: 0,
           atomicPicos: 0n
         },
+        end: {
+          atomicPicos: 0n
+        },
         ratio: {
           atomicPicosPerUnixMilli: 1_000_000_000n
         },
@@ -504,9 +516,12 @@ describe('Converter', () => {
         }
       }, {
         start: {
-          // Same start point as previous block, so previous block has length 0 TAI seconds
+          // Same start point as previous ray, so previous ray has length 0 TAI seconds
           unixMillis: 0,
           atomicPicos: 0n
+        },
+        end: {
+          atomicPicos: Infinity
         },
         ratio: {
           atomicPicosPerUnixMilli: 1_000_001_000n

@@ -63,5 +63,19 @@ module.exports = data => {
     }
   })
 
+  // `end` is the first TAI instant when this ray ceases to be applicable.
+  // `end` can equal or come before `start`, indicating that this ray has no validity at all
+  let end = {
+    atomicPicos: Infinity
+  }
+  for (let rayId = munged.length - 1; rayId >= 0; rayId--) {
+    munged[rayId].end = end
+    if (munged[rayId].start.atomicPicos < end.atomicPicos) {
+      end = {
+        atomicPicos: munged[rayId].start.atomicPicos
+      }
+    }
+  }
+
   return munged
 }

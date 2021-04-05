@@ -18,75 +18,62 @@ const munge = require('./munge')
 const picosPerMilli = 1000n * 1000n * 1000n
 
 module.exports = data => {
-  const blocks = munge(data)
+  const rays = munge(data)
 
   /// Helper methods
 
-  const atomicPicosInBlock = (atomicPicos, blockId) => {
-    if (atomicPicos < blocks[blockId].start.atomicPicos) {
-      // Falls before this block began, whoops
-      return false
-    }
+  const atomicPicosInRay = (ray, atomicPicos) =>
+    ray.start.atomicPicos <= atomicPicos && atomicPicos < ray.end.atomicPicos
 
-    for (let otherBlockId = blockId + 1; otherBlockId in blocks; otherBlockId++) {
-      if (blocks[otherBlockId].start.atomicPicos <= atomicPicos) {
-        // Result falls in a later block, whoops
-        return false
-      }
-    }
-
-    return true
-  }
-
-  // Depending on its parameters, each block linearly transforms `unixMillis`
+  // Depending on its parameters, each ray linearly transforms `unixMillis`
   // into a different `atomicPicos`. This value is always exact
-  const unixMillisToAtomicPicos = (unixMillis, blockId) =>
-    BigInt(unixMillis) * blocks[blockId].ratio.atomicPicosPerUnixMilli +
-      blocks[blockId].offsetAtUnixEpoch.atomicPicos
+  const unixMillisToAtomicPicos = (ray, unixMillis) =>
+    BigInt(unixMillis) * ray.ratio.atomicPicosPerUnixMilli +
+      ray.offsetAtUnixEpoch.atomicPicos
 
   // This result is rounded towards negative infinity. This means that, provided that `atomicPicos`
-  // is in the block, `unixMillis` is also guaranteed to be in the block.
-  const atomicPicosToUnixMillis = (atomicPicos, blockId) =>
+  // is in the ray, `unixMillis` is also guaranteed to be in the ray.
+  const atomicPicosToUnixMillis = (ray, atomicPicos) =>
     Number(div(
-      atomicPicos - blocks[blockId].offsetAtUnixEpoch.atomicPicos,
-      blocks[blockId].ratio.atomicPicosPerUnixMilli
+      atomicPicos - ray.offsetAtUnixEpoch.atomicPicos,
+      ray.ratio.atomicPicosPerUnixMilli
     ))
 
   /// Unix to TAI conversion methods
 
-  const unixMillisToBlocksWithAtomicPicos = unixMillis => {
+  const unixMillisToRaysWithAtomicPicos = unixMillis => {
     if (!Number.isInteger(unixMillis)) {
       throw Error(`Not an integer: ${unixMillis}`)
     }
 
-    return blocks
-      .map((block, blockId) => ({
-        blockId,
-        atomicPicos: unixMillisToAtomicPicos(unixMillis, blockId)
+    return rays
+      .map(ray => ({
+        ray,
+        atomicPicos: unixMillisToAtomicPicos(ray, unixMillis)
       }))
-      .filter(({ blockId, atomicPicos }) =>
-        // ...however, the result has to still be in the block!
-        atomicPicosInBlock(atomicPicos, blockId)
+      .filter(({ ray, atomicPicos }) =>
+        // ...however, the result has to still be in the ray!
+        atomicPicosInRay(ray, atomicPicos)
       )
   }
 
   const unixMillisToAtomicPicosArray = unixMillis =>
-    unixMillisToBlocksWithAtomicPicos(unixMillis)
+    unixMillisToRaysWithAtomicPicos(unixMillis)
       .map(({ atomicPicos }) => atomicPicos)
 
   const unixMillisToAtomicMillisArray = unixMillis =>
-    unixMillisToBlocksWithAtomicPicos(unixMillis)
-      .map(({ blockId, atomicPicos }) => ({
-        blockId,
+    unixMillisToRaysWithAtomicPicos(unixMillis)
+      .map(({ ray, atomicPicos }) => ({
+        ray,
 
         // This rounds towards negative infinity. This is potentially problematic because even if
-        // the atomic picosecond count is part of this block, the rounded millisecond count may not
+        // the atomic picosecond count is part of this ray, the rounded millisecond count may not
         // be...
         atomicMillis: Number(div(atomicPicos, picosPerMilli))
       }))
-      .filter(({ blockId, atomicMillis }) =>
+      .filter(({ ray, atomicMillis }) =>
         // ...hence this additional test
-        atomicPicosInBlock(BigInt(atomicMillis) * picosPerMilli, blockId)
+        atomicPicosInRay(ray, BigInt(atomicMillis) * picosPerMilli)
       )
       .map(({ atomicMillis }) => atomicMillis)
 
@@ -123,25 +110,25 @@ module.exports = data => {
 
     const atomicPicos = BigInt(atomicMillis) * picosPerMilli
 
-    const blockId = blocks.findIndex((block, blockId) =>
-      atomicPicosInBlock(atomicPicos, blockId)
+    const rayId = rays.findIndex(ray =>
+      atomicPicosInRay(ray, atomicPicos)
     )
 
-    if (blockId === -1) {
+    if (rayId === -1) {
       // Pre-1961
       throw Error(`No UTC equivalent: ${atomicMillis}`)
     }
 
-    const unixMillis = atomicPicosToUnixMillis(atomicPicos, blockId)
+    const unixMillis = atomicPicosToUnixMillis(rays[rayId], atomicPicos)
 
     if (overrun) {
       return unixMillis
     }
 
-    // If a later block starts at a Unix time before this one, apply stalling behaviour
+    // If a later ray starts at a Unix time before this one, apply stalling behaviour
     return Math.min(
       unixMillis,
-      ...blocks.slice(blockId + 1).map(block => block.start.unixMillis)
+      ...rays.slice(rayId + 1).map(ray => ray.start.unixMillis)
     )
   }
 
