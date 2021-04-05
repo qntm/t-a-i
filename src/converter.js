@@ -17,7 +17,12 @@ const munge = require('./munge')
 
 const picosPerMilli = 1000n * 1000n * 1000n
 
-module.exports = data => {
+const ONE_TO_MANY = 0
+const ONE_TO_ONE = 1
+
+module.exports.ONE_TO_MANY = ONE_TO_MANY
+module.exports.ONE_TO_ONE = ONE_TO_ONE
+module.exports.Converter = (data, model) => {
   const rays = munge(data)
 
   /// Helper methods
@@ -138,16 +143,21 @@ module.exports = data => {
   const atomicMillisToUnixMillisStall = atomicMillis =>
     atomicMillisToUnixMillis(atomicMillis, false)
 
-  return {
-    oneToMany: {
+  if (model === ONE_TO_MANY) {
+    return {
       unixToAtomicPicos: unixMillisToAtomicPicosArray,
       unixToAtomic: unixMillisToAtomicMillisArray,
       atomicToUnix: atomicMillisToUnixMillisOverrun
-    },
-    oneToOne: {
+    }
+  }
+
+  if (model === ONE_TO_ONE) {
+    return {
       unixToAtomicPicos: unixMillisToCanonicalAtomicPicos,
       unixToAtomic: unixMillisToCanonicalAtomicMillis,
       atomicToUnix: atomicMillisToUnixMillisStall
     }
   }
+
+  throw Error(`Unrecognised model: ${model}`)
 }

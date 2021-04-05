@@ -1,6 +1,6 @@
 /* eslint-env jest */
 
-const Converter = require('./converter')
+const { Converter, ONE_TO_MANY, ONE_TO_ONE } = require('./converter')
 const munge = require('./munge')
 
 const JAN = 0
@@ -12,32 +12,48 @@ describe('Converter', () => {
     const data = [
       [Date.UTC(1970, JAN, 1), 0]
     ]
-    const converter = Converter(data)
 
-    it('fails on a non-integer number of milliseconds', () => {
-      expect(() => converter.oneToOne.unixToAtomic(89.3)).toThrowError('Not an integer: 89.3')
-      expect(() => converter.oneToOne.unixToAtomic('boop')).toThrowError('Not an integer: boop')
-      expect(() => converter.oneToOne.atomicToUnix(Infinity)).toThrowError('Not an integer: Infinity')
-      expect(() => converter.oneToOne.atomicToUnix('boops')).toThrowError('Not an integer: boops')
+    describe('bad model', () => {
+      it('throws', () => {
+        expect(() => Converter(data)).toThrowError('Unrecognised model: undefined')
+      })
     })
 
-    it('fails when the Unix count is out of bounds', () => {
-      expect(converter.oneToOne.unixToAtomic(0)).toBe(0)
-      expect(() => converter.oneToOne.unixToAtomic(-1)).toThrowError('No TAI equivalent: -1')
+    describe('ONE_TO_ONE', () => {
+      const converter = Converter(data, ONE_TO_ONE)
+
+      it('fails on a non-integer number of milliseconds', () => {
+        expect(() => converter.unixToAtomic(89.3)).toThrowError('Not an integer: 89.3')
+        expect(() => converter.unixToAtomic('boop')).toThrowError('Not an integer: boop')
+        expect(() => converter.atomicToUnix(Infinity)).toThrowError('Not an integer: Infinity')
+        expect(() => converter.atomicToUnix('boops')).toThrowError('Not an integer: boops')
+      })
+
+      it('fails when the Unix count is out of bounds', () => {
+        expect(converter.unixToAtomic(0)).toBe(0)
+        expect(() => converter.unixToAtomic(-1)).toThrowError('No TAI equivalent: -1')
+      })
+
+      it('fails when the atomic count is out of bounds', () => {
+        expect(converter.atomicToUnix(0)).toBe(0)
+        expect(() => converter.atomicToUnix(-1)).toThrowError('No UTC equivalent: -1')
+      })
+
+      it('manages basic conversions', () => {
+        expect(converter.unixToAtomicPicos(0)).toBe(0n)
+        expect(converter.unixToAtomic(0)).toBe(0)
+        expect(converter.atomicToUnix(0)).toBe(0)
+      })
     })
 
-    it('fails when the atomic count is out of bounds', () => {
-      expect(converter.oneToOne.atomicToUnix(0)).toBe(0)
-      expect(() => converter.oneToOne.atomicToUnix(-1)).toThrowError('No UTC equivalent: -1')
-    })
+    describe('ONE_TO_MANY', () => {
+      const converter = Converter(data, ONE_TO_MANY)
 
-    it('manages basic conversions', () => {
-      expect(converter.oneToMany.unixToAtomicPicos(0)).toEqual([0n])
-      expect(converter.oneToMany.unixToAtomic(0)).toEqual([0])
-      expect(converter.oneToMany.atomicToUnix(0)).toBe(0)
-      expect(converter.oneToOne.unixToAtomicPicos(0)).toBe(0n)
-      expect(converter.oneToOne.unixToAtomic(0)).toBe(0)
-      expect(converter.oneToOne.atomicToUnix(0)).toBe(0)
+      it('manages basic conversions', () => {
+        expect(converter.unixToAtomicPicos(0)).toEqual([0n])
+        expect(converter.unixToAtomic(0)).toEqual([0])
+        expect(converter.atomicToUnix(0)).toBe(0)
+      })
     })
   })
 
@@ -46,210 +62,232 @@ describe('Converter', () => {
       [Date.UTC(1970, JAN, 1), 0],
       [Date.UTC(1980, JAN, 1), 1]
     ]
-    const converter = Converter(data)
 
-    describe('conversions grouped by instant', () => {
-      it('start of time', () => {
-        expect(converter.oneToMany.unixToAtomicPicos(0)).toEqual([0n])
-        expect(converter.oneToMany.unixToAtomic(0)).toEqual([0])
-        expect(converter.oneToMany.atomicToUnix(0)).toBe(0)
-        expect(converter.oneToOne.unixToAtomicPicos(0)).toBe(0n)
-        expect(converter.oneToOne.unixToAtomic(0)).toBe(0)
-        expect(converter.oneToOne.atomicToUnix(0)).toBe(0)
+    describe('ONE_TO_MANY', () => {
+      const converter = Converter(data, ONE_TO_MANY)
+
+      describe('conversions grouped by instant', () => {
+        it('start of time', () => {
+          expect(converter.unixToAtomicPicos(0)).toEqual([0n])
+          expect(converter.unixToAtomic(0)).toEqual([0])
+          expect(converter.atomicToUnix(0)).toBe(0)
+        })
+
+        it('millisecond before inserted leap second discontinuity begins', () => {
+          expect(converter.unixToAtomicPicos(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
+            .toEqual([
+              BigInt(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)) * picosPerMilli
+            ])
+          expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
+            .toEqual([
+              Date.UTC(1979, DEC, 31, 23, 59, 59, 999)
+            ])
+          expect(converter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
+            .toBe(Date.UTC(1979, DEC, 31, 23, 59, 59, 999))
+        })
+
+        it('first instant of the Unix time discontinuity: one Unix time is two TAI times', () => {
+          expect(converter.unixToAtomicPicos(Date.UTC(1980, JAN, 1, 0, 0, 0)))
+            .toEqual([
+              BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0)) * picosPerMilli,
+              BigInt(Date.UTC(1980, JAN, 1, 0, 0, 1)) * picosPerMilli
+            ])
+          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0)))
+            .toEqual([
+              Date.UTC(1980, JAN, 1, 0, 0, 0),
+              Date.UTC(1980, JAN, 1, 0, 0, 1)
+            ])
+          expect(converter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 0)))
+            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0))
+          expect(converter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 1)))
+            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0))
+        })
+
+        it('final instant of the Unix time discontinuity: one Unix time is two TAI times', () => {
+          expect(converter.unixToAtomicPicos(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)))
+            .toEqual([
+              BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)) * picosPerMilli,
+              BigInt(Date.UTC(1980, JAN, 1, 0, 0, 1, 999)) * picosPerMilli
+            ])
+          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)))
+            .toEqual([
+              Date.UTC(1980, JAN, 1, 0, 0, 0, 999),
+              Date.UTC(1980, JAN, 1, 0, 0, 1, 999)
+            ])
+          expect(converter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)))
+            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0, 999))
+          expect(converter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 1, 999)))
+            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0, 999))
+        })
+
+        it('millisecond after discontinuity ends', () => {
+          expect(converter.unixToAtomicPicos(Date.UTC(1980, JAN, 1, 0, 0, 1)))
+            .toEqual([
+              BigInt(Date.UTC(1980, JAN, 1, 0, 0, 2)) * picosPerMilli
+            ])
+          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 1)))
+            .toEqual([
+              Date.UTC(1980, JAN, 1, 0, 0, 2)
+            ])
+          expect(converter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 2)))
+            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 1))
+        })
       })
 
-      it('millisecond before inserted leap second discontinuity begins', () => {
-        expect(converter.oneToMany.unixToAtomicPicos(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
-          .toEqual([
-            BigInt(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)) * picosPerMilli
-          ])
-        expect(converter.oneToMany.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
-          .toEqual([
-            Date.UTC(1979, DEC, 31, 23, 59, 59, 999)
-          ])
-        expect(converter.oneToMany.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
-          .toBe(Date.UTC(1979, DEC, 31, 23, 59, 59, 999))
+      describe('conversions grouped by method', () => {
+        it('unixToAtomicPicos', () => {
+          expect(converter.unixToAtomicPicos(0)).toEqual([0n])
+          expect(converter.unixToAtomicPicos(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
+            .toEqual([
+              BigInt(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)) * picosPerMilli
+            ])
+          expect(converter.unixToAtomicPicos(Date.UTC(1980, JAN, 1, 0, 0, 0)))
+            .toEqual([
+              BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0)) * picosPerMilli,
+              BigInt(Date.UTC(1980, JAN, 1, 0, 0, 1)) * picosPerMilli
+            ])
+          expect(converter.unixToAtomicPicos(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)))
+            .toEqual([
+              BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)) * picosPerMilli,
+              BigInt(Date.UTC(1980, JAN, 1, 0, 0, 1, 999)) * picosPerMilli
+            ])
+          expect(converter.unixToAtomicPicos(Date.UTC(1980, JAN, 1, 0, 0, 1)))
+            .toEqual([
+              BigInt(Date.UTC(1980, JAN, 1, 0, 0, 2)) * picosPerMilli
+            ])
+        })
 
-        expect(converter.oneToOne.unixToAtomicPicos(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
-          .toBe(BigInt(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)) * picosPerMilli)
-        expect(converter.oneToOne.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
-          .toBe(Date.UTC(1979, DEC, 31, 23, 59, 59, 999))
-        expect(converter.oneToOne.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
-          .toBe(Date.UTC(1979, DEC, 31, 23, 59, 59, 999))
-      })
+        it('unixToAtomic', () => {
+          expect(converter.unixToAtomic(0)).toEqual([0])
+          expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
+            .toEqual([
+              Date.UTC(1979, DEC, 31, 23, 59, 59, 999)
+            ])
+          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0)))
+            .toEqual([
+              Date.UTC(1980, JAN, 1, 0, 0, 0),
+              Date.UTC(1980, JAN, 1, 0, 0, 1)
+            ])
+          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)))
+            .toEqual([
+              Date.UTC(1980, JAN, 1, 0, 0, 0, 999),
+              Date.UTC(1980, JAN, 1, 0, 0, 1, 999)
+            ])
+          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 1)))
+            .toEqual([
+              Date.UTC(1980, JAN, 1, 0, 0, 2)
+            ])
+        })
 
-      it('first instant of the Unix time discontinuity: one Unix time is two TAI times', () => {
-        expect(converter.oneToMany.unixToAtomicPicos(Date.UTC(1980, JAN, 1, 0, 0, 0)))
-          .toEqual([
-            BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0)) * picosPerMilli,
-            BigInt(Date.UTC(1980, JAN, 1, 0, 0, 1)) * picosPerMilli
-          ])
-        expect(converter.oneToMany.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0)))
-          .toEqual([
-            Date.UTC(1980, JAN, 1, 0, 0, 0),
-            Date.UTC(1980, JAN, 1, 0, 0, 1)
-          ])
-        expect(converter.oneToMany.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 0)))
-          .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0))
-        expect(converter.oneToMany.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 1)))
-          .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0))
-
-        expect(converter.oneToOne.unixToAtomicPicos(Date.UTC(1980, JAN, 1, 0, 0, 0)))
-          .toBe(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 1)) * picosPerMilli)
-        expect(converter.oneToOne.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0)))
-          .toBe(Date.UTC(1980, JAN, 1, 0, 0, 1))
-        expect(converter.oneToOne.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 0)))
-          .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0)) // stalled
-        expect(converter.oneToOne.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 1)))
-          .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0))
-      })
-
-      it('final instant of the Unix time discontinuity: one Unix time is two TAI times', () => {
-        expect(converter.oneToMany.unixToAtomicPicos(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)))
-          .toEqual([
-            BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)) * picosPerMilli,
-            BigInt(Date.UTC(1980, JAN, 1, 0, 0, 1, 999)) * picosPerMilli
-          ])
-        expect(converter.oneToMany.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)))
-          .toEqual([
-            Date.UTC(1980, JAN, 1, 0, 0, 0, 999),
-            Date.UTC(1980, JAN, 1, 0, 0, 1, 999)
-          ])
-        expect(converter.oneToMany.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)))
-          .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0, 999))
-        expect(converter.oneToMany.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 1, 999)))
-          .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0, 999))
-
-        expect(converter.oneToOne.unixToAtomicPicos(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)))
-          .toBe(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 1, 999)) * picosPerMilli)
-        expect(converter.oneToOne.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)))
-          .toBe(Date.UTC(1980, JAN, 1, 0, 0, 1, 999))
-        expect(converter.oneToOne.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)))
-          .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0)) // stalled
-        expect(converter.oneToOne.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 1, 999)))
-          .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0, 999))
-      })
-
-      it('millisecond after discontinuity ends', () => {
-        expect(converter.oneToMany.unixToAtomicPicos(Date.UTC(1980, JAN, 1, 0, 0, 1)))
-          .toEqual([
-            BigInt(Date.UTC(1980, JAN, 1, 0, 0, 2)) * picosPerMilli
-          ])
-        expect(converter.oneToMany.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 1)))
-          .toEqual([
-            Date.UTC(1980, JAN, 1, 0, 0, 2)
-          ])
-        expect(converter.oneToMany.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 2)))
-          .toBe(Date.UTC(1980, JAN, 1, 0, 0, 1))
-
-        expect(converter.oneToOne.unixToAtomicPicos(Date.UTC(1980, JAN, 1, 0, 0, 1)))
-          .toBe(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 2)) * picosPerMilli)
-        expect(converter.oneToOne.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 1)))
-          .toBe(Date.UTC(1980, JAN, 1, 0, 0, 2))
-        expect(converter.oneToOne.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 2)))
-          .toBe(Date.UTC(1980, JAN, 1, 0, 0, 1))
+        it('atomicToUnix', () => {
+          expect(converter.atomicToUnix(0)).toBe(0)
+          expect(converter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
+            .toBe(Date.UTC(1979, DEC, 31, 23, 59, 59, 999))
+          expect(converter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 0)))
+            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0))
+          expect(converter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)))
+            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0, 999))
+          expect(converter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 1)))
+            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0))
+          expect(converter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 1, 999)))
+            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0, 999))
+          expect(converter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 2)))
+            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 1))
+        })
       })
     })
 
-    describe('conversions grouped by method', () => {
-      it('oneToMany.unixToAtomicPicos', () => {
-        expect(converter.oneToMany.unixToAtomicPicos(0)).toEqual([0n])
-        expect(converter.oneToMany.unixToAtomicPicos(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
-          .toEqual([
-            BigInt(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)) * picosPerMilli
-          ])
-        expect(converter.oneToMany.unixToAtomicPicos(Date.UTC(1980, JAN, 1, 0, 0, 0)))
-          .toEqual([
-            BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0)) * picosPerMilli,
-            BigInt(Date.UTC(1980, JAN, 1, 0, 0, 1)) * picosPerMilli
-          ])
-        expect(converter.oneToMany.unixToAtomicPicos(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)))
-          .toEqual([
-            BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)) * picosPerMilli,
-            BigInt(Date.UTC(1980, JAN, 1, 0, 0, 1, 999)) * picosPerMilli
-          ])
-        expect(converter.oneToMany.unixToAtomicPicos(Date.UTC(1980, JAN, 1, 0, 0, 1)))
-          .toEqual([
-            BigInt(Date.UTC(1980, JAN, 1, 0, 0, 2)) * picosPerMilli
-          ])
+    describe('ONE_TO_ONE', () => {
+      const converter = Converter(data, ONE_TO_ONE)
+
+      describe('conversions grouped by instant', () => {
+        it('start of time', () => {
+          expect(converter.unixToAtomicPicos(0)).toBe(0n)
+          expect(converter.unixToAtomic(0)).toBe(0)
+          expect(converter.atomicToUnix(0)).toBe(0)
+        })
+
+        it('millisecond before inserted leap second discontinuity begins', () => {
+          expect(converter.unixToAtomicPicos(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
+            .toBe(BigInt(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)) * picosPerMilli)
+          expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
+            .toBe(Date.UTC(1979, DEC, 31, 23, 59, 59, 999))
+          expect(converter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
+            .toBe(Date.UTC(1979, DEC, 31, 23, 59, 59, 999))
+        })
+
+        it('first instant of the Unix time discontinuity: one Unix time is two TAI times', () => {
+          expect(converter.unixToAtomicPicos(Date.UTC(1980, JAN, 1, 0, 0, 0)))
+            .toBe(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 1)) * picosPerMilli)
+          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0)))
+            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 1))
+          expect(converter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 0)))
+            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0)) // stalled
+          expect(converter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 1)))
+            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0))
+        })
+
+        it('final instant of the Unix time discontinuity: one Unix time is two TAI times', () => {
+          expect(converter.unixToAtomicPicos(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)))
+            .toBe(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 1, 999)) * picosPerMilli)
+          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)))
+            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 1, 999))
+          expect(converter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)))
+            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0)) // stalled
+          expect(converter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 1, 999)))
+            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0, 999))
+        })
+
+        it('millisecond after discontinuity ends', () => {
+          expect(converter.unixToAtomicPicos(Date.UTC(1980, JAN, 1, 0, 0, 1)))
+            .toBe(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 2)) * picosPerMilli)
+          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 1)))
+            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 2))
+          expect(converter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 2)))
+            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 1))
+        })
       })
 
-      it('oneToMany.unixToAtomic', () => {
-        expect(converter.oneToMany.unixToAtomic(0)).toEqual([0])
-        expect(converter.oneToMany.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
-          .toEqual([
-            Date.UTC(1979, DEC, 31, 23, 59, 59, 999)
-          ])
-        expect(converter.oneToMany.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0)))
-          .toEqual([
-            Date.UTC(1980, JAN, 1, 0, 0, 0),
-            Date.UTC(1980, JAN, 1, 0, 0, 1)
-          ])
-        expect(converter.oneToMany.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)))
-          .toEqual([
-            Date.UTC(1980, JAN, 1, 0, 0, 0, 999),
-            Date.UTC(1980, JAN, 1, 0, 0, 1, 999)
-          ])
-        expect(converter.oneToMany.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 1)))
-          .toEqual([
-            Date.UTC(1980, JAN, 1, 0, 0, 2)
-          ])
-      })
+      describe('conversions grouped by method', () => {
+        it('unixToAtomicPicos', () => {
+          expect(converter.unixToAtomicPicos(0)).toBe(0n)
+          expect(converter.unixToAtomicPicos(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
+            .toBe(BigInt(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)) * picosPerMilli)
+          expect(converter.unixToAtomicPicos(Date.UTC(1980, JAN, 1, 0, 0, 0)))
+            .toBe(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 1)) * picosPerMilli)
+          expect(converter.unixToAtomicPicos(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)))
+            .toBe(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 1, 999)) * picosPerMilli)
+          expect(converter.unixToAtomicPicos(Date.UTC(1980, JAN, 1, 0, 0, 1)))
+            .toBe(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 2)) * picosPerMilli)
+        })
 
-      it('oneToMany.atomicToUnix', () => {
-        expect(converter.oneToMany.atomicToUnix(0)).toBe(0)
-        expect(converter.oneToMany.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
-          .toBe(Date.UTC(1979, DEC, 31, 23, 59, 59, 999))
-        expect(converter.oneToMany.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 0)))
-          .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0))
-        expect(converter.oneToMany.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)))
-          .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0, 999))
-        expect(converter.oneToMany.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 1)))
-          .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0))
-        expect(converter.oneToMany.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 1, 999)))
-          .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0, 999))
-        expect(converter.oneToMany.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 2)))
-          .toBe(Date.UTC(1980, JAN, 1, 0, 0, 1))
-      })
+        it('unixToAtomic', () => {
+          expect(converter.unixToAtomic(0)).toBe(0)
+          expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
+            .toBe(Date.UTC(1979, DEC, 31, 23, 59, 59, 999))
+          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0)))
+            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 1))
+          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)))
+            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 1, 999))
+          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 1)))
+            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 2))
+        })
 
-      it('oneToOne.unixToAtomicPicos', () => {
-        expect(converter.oneToOne.unixToAtomicPicos(0)).toBe(0n)
-        expect(converter.oneToOne.unixToAtomicPicos(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
-          .toBe(BigInt(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)) * picosPerMilli)
-        expect(converter.oneToOne.unixToAtomicPicos(Date.UTC(1980, JAN, 1, 0, 0, 0)))
-          .toBe(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 1)) * picosPerMilli)
-        expect(converter.oneToOne.unixToAtomicPicos(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)))
-          .toBe(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 1, 999)) * picosPerMilli)
-        expect(converter.oneToOne.unixToAtomicPicos(Date.UTC(1980, JAN, 1, 0, 0, 1)))
-          .toBe(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 2)) * picosPerMilli)
-      })
-
-      it('oneToOne.unixToAtomic', () => {
-        expect(converter.oneToOne.unixToAtomic(0)).toBe(0)
-        expect(converter.oneToOne.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
-          .toBe(Date.UTC(1979, DEC, 31, 23, 59, 59, 999))
-        expect(converter.oneToOne.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0)))
-          .toBe(Date.UTC(1980, JAN, 1, 0, 0, 1))
-        expect(converter.oneToOne.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)))
-          .toBe(Date.UTC(1980, JAN, 1, 0, 0, 1, 999))
-        expect(converter.oneToOne.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 1)))
-          .toBe(Date.UTC(1980, JAN, 1, 0, 0, 2))
-      })
-
-      it('oneToOne.atomicToUnix', () => {
-        expect(converter.oneToOne.atomicToUnix(0)).toBe(0)
-        expect(converter.oneToOne.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
-          .toBe(Date.UTC(1979, DEC, 31, 23, 59, 59, 999))
-        expect(converter.oneToOne.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 0)))
-          .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0)) // stalled
-        expect(converter.oneToOne.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)))
-          .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0)) // stalled
-        expect(converter.oneToOne.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 1)))
-          .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0))
-        expect(converter.oneToOne.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 1, 999)))
-          .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0, 999))
-        expect(converter.oneToOne.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 2)))
-          .toBe(Date.UTC(1980, JAN, 1, 0, 0, 1))
+        it('atomicToUnix', () => {
+          expect(converter.atomicToUnix(0)).toBe(0)
+          expect(converter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
+            .toBe(Date.UTC(1979, DEC, 31, 23, 59, 59, 999))
+          expect(converter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 0)))
+            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0)) // stalled
+          expect(converter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)))
+            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0)) // stalled
+          expect(converter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 1)))
+            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0))
+          expect(converter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 1, 999)))
+            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0, 999))
+          expect(converter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 2)))
+            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 1))
+        })
       })
     })
   })
@@ -259,164 +297,186 @@ describe('Converter', () => {
       [Date.UTC(1970, JAN, 1), 0],
       [Date.UTC(1980, JAN, 1), -1]
     ]
-    const converter = Converter(data)
 
-    describe('conversions grouped by instant', () => {
-      it('start of time', () => {
-        expect(converter.oneToMany.unixToAtomicPicos(0)).toEqual([0n])
-        expect(converter.oneToMany.unixToAtomic(0)).toEqual([0])
-        expect(converter.oneToMany.atomicToUnix(0)).toBe(0)
-        expect(converter.oneToOne.unixToAtomicPicos(0)).toBe(0n)
-        expect(converter.oneToOne.unixToAtomic(0)).toBe(0)
-        expect(converter.oneToOne.atomicToUnix(0)).toBe(0)
+    describe('ONE_TO_MANY', () => {
+      const converter = Converter(data, ONE_TO_MANY)
+
+      describe('conversions grouped by instant', () => {
+        it('start of time', () => {
+          expect(converter.unixToAtomicPicos(0)).toEqual([0n])
+          expect(converter.unixToAtomic(0)).toEqual([0])
+          expect(converter.atomicToUnix(0)).toBe(0)
+        })
+
+        it('millisecond before removed leap second discontinuity begins', () => {
+          expect(converter.unixToAtomicPicos(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)))
+            .toEqual([
+              BigInt(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)) * picosPerMilli
+            ])
+          expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)))
+            .toEqual([
+              Date.UTC(1979, DEC, 31, 23, 59, 58, 999)
+            ])
+          expect(converter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)))
+            .toBe(Date.UTC(1979, DEC, 31, 23, 59, 58, 999))
+        })
+
+        it('first instant of the Unix time discontinuity: one Unix time is zero TAI times', () => {
+          expect(converter.unixToAtomicPicos(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)))
+            .toEqual([])
+          expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)))
+            .toEqual([])
+          // no atomicToUnix can return the value above
+        })
+
+        it('final instant of the Unix time discontinuity: one Unix time is zero TAI times', () => {
+          expect(converter.unixToAtomicPicos(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
+            .toEqual([])
+          expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
+            .toEqual([])
+          // no atomicToUnix can return the value above
+        })
+
+        it('millisecond after discontinuity ends', () => {
+          expect(converter.unixToAtomicPicos(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)))
+            .toEqual([
+              BigInt(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)) * picosPerMilli
+            ])
+          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0)))
+            .toEqual([
+              Date.UTC(1979, DEC, 31, 23, 59, 59, 0)
+            ])
+          expect(converter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)))
+            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0))
+        })
       })
 
-      it('millisecond before removed leap second discontinuity begins', () => {
-        expect(converter.oneToMany.unixToAtomicPicos(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)))
-          .toEqual([
-            BigInt(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)) * picosPerMilli
-          ])
-        expect(converter.oneToMany.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)))
-          .toEqual([
-            Date.UTC(1979, DEC, 31, 23, 59, 58, 999)
-          ])
-        expect(converter.oneToMany.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)))
-          .toBe(Date.UTC(1979, DEC, 31, 23, 59, 58, 999))
+      describe('conversions grouped by method', () => {
+        it('unixToAtomicPicos', () => {
+          expect(converter.unixToAtomicPicos(0))
+            .toEqual([0n])
+          expect(converter.unixToAtomicPicos(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)))
+            .toEqual([
+              BigInt(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)) * picosPerMilli
+            ])
+          expect(converter.unixToAtomicPicos(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)))
+            .toEqual([])
+          expect(converter.unixToAtomicPicos(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
+            .toEqual([])
+          expect(converter.unixToAtomicPicos(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)))
+            .toEqual([
+              BigInt(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)) * picosPerMilli
+            ])
+        })
 
-        expect(converter.oneToOne.unixToAtomicPicos(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)))
-          .toBe(BigInt(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)) * picosPerMilli)
-        expect(converter.oneToOne.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)))
-          .toBe(Date.UTC(1979, DEC, 31, 23, 59, 58, 999))
-        expect(converter.oneToOne.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)))
-          .toBe(Date.UTC(1979, DEC, 31, 23, 59, 58, 999))
-      })
+        it('unixToAtomic', () => {
+          expect(converter.unixToAtomic(0))
+            .toEqual([0])
+          expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)))
+            .toEqual([
+              Date.UTC(1979, DEC, 31, 23, 59, 58, 999)
+            ])
+          expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)))
+            .toEqual([])
+          expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
+            .toEqual([])
+          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0)))
+            .toEqual([
+              Date.UTC(1979, DEC, 31, 23, 59, 59, 0)
+            ])
+        })
 
-      it('first instant of the Unix time discontinuity: one Unix time is zero TAI times', () => {
-        expect(converter.oneToMany.unixToAtomicPicos(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)))
-          .toEqual([])
-        expect(converter.oneToMany.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)))
-          .toEqual([])
-        // no atomicToUnix can return the value above
-
-        expect(() => converter.oneToOne.unixToAtomicPicos(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)))
-          .toThrowError('No TAI equivalent: 315532799000')
-        expect(() => converter.oneToOne.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)))
-          .toThrowError('No TAI equivalent: 315532799000')
-        // no atomicToUnix can return the value above
-      })
-
-      it('final instant of the Unix time discontinuity: one Unix time is zero TAI times', () => {
-        expect(converter.oneToMany.unixToAtomicPicos(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
-          .toEqual([])
-        expect(converter.oneToMany.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
-          .toEqual([])
-        // no atomicToUnix can return the value above
-
-        expect(() => converter.oneToOne.unixToAtomicPicos(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
-          .toThrowError('No TAI equivalent: 315532799999')
-        expect(() => converter.oneToOne.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
-          .toThrowError('No TAI equivalent: 315532799999')
-        // no atomicToUnix can return the value above
-      })
-
-      it('millisecond after discontinuity ends', () => {
-        expect(converter.oneToMany.unixToAtomicPicos(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)))
-          .toEqual([
-            BigInt(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)) * picosPerMilli
-          ])
-        expect(converter.oneToMany.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0)))
-          .toEqual([
-            Date.UTC(1979, DEC, 31, 23, 59, 59, 0)
-          ])
-        expect(converter.oneToMany.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)))
-          .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0))
-
-        expect(converter.oneToOne.unixToAtomicPicos(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)))
-          .toBe(BigInt(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)) * picosPerMilli)
-        expect(converter.oneToOne.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0)))
-          .toBe(Date.UTC(1979, DEC, 31, 23, 59, 59, 0))
-        expect(converter.oneToOne.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)))
-          .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0))
+        it('atomicToUnix', () => {
+          expect(converter.atomicToUnix(0))
+            .toBe(0)
+          expect(converter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)))
+            .toBe(Date.UTC(1979, DEC, 31, 23, 59, 58, 999))
+          expect(converter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)))
+            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0))
+        })
       })
     })
 
-    describe('conversions grouped by method', () => {
-      it('oneToMany.unixToAtomicPicos', () => {
-        expect(converter.oneToMany.unixToAtomicPicos(0))
-          .toEqual([0n])
-        expect(converter.oneToMany.unixToAtomicPicos(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)))
-          .toEqual([
-            BigInt(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)) * picosPerMilli
-          ])
-        expect(converter.oneToMany.unixToAtomicPicos(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)))
-          .toEqual([])
-        expect(converter.oneToMany.unixToAtomicPicos(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
-          .toEqual([])
-        expect(converter.oneToMany.unixToAtomicPicos(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)))
-          .toEqual([
-            BigInt(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)) * picosPerMilli
-          ])
+    describe('ONE_TO_ONE', () => {
+      const converter = Converter(data, ONE_TO_ONE)
+
+      describe('conversions grouped by instant', () => {
+        it('start of time', () => {
+          expect(converter.unixToAtomicPicos(0)).toBe(0n)
+          expect(converter.unixToAtomic(0)).toBe(0)
+          expect(converter.atomicToUnix(0)).toBe(0)
+        })
+
+        it('millisecond before removed leap second discontinuity begins', () => {
+          expect(converter.unixToAtomicPicos(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)))
+            .toBe(BigInt(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)) * picosPerMilli)
+          expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)))
+            .toBe(Date.UTC(1979, DEC, 31, 23, 59, 58, 999))
+          expect(converter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)))
+            .toBe(Date.UTC(1979, DEC, 31, 23, 59, 58, 999))
+        })
+
+        it('first instant of the Unix time discontinuity: one Unix time is zero TAI times', () => {
+          expect(() => converter.unixToAtomicPicos(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)))
+            .toThrowError('No TAI equivalent: 315532799000')
+          expect(() => converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)))
+            .toThrowError('No TAI equivalent: 315532799000')
+          // no atomicToUnix can return the value above
+        })
+
+        it('final instant of the Unix time discontinuity: one Unix time is zero TAI times', () => {
+          expect(() => converter.unixToAtomicPicos(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
+            .toThrowError('No TAI equivalent: 315532799999')
+          expect(() => converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
+            .toThrowError('No TAI equivalent: 315532799999')
+          // no atomicToUnix can return the value above
+        })
+
+        it('millisecond after discontinuity ends', () => {
+          expect(converter.unixToAtomicPicos(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)))
+            .toBe(BigInt(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)) * picosPerMilli)
+          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0)))
+            .toBe(Date.UTC(1979, DEC, 31, 23, 59, 59, 0))
+          expect(converter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)))
+            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0))
+        })
       })
 
-      it('oneToMany.unixToAtomic', () => {
-        expect(converter.oneToMany.unixToAtomic(0))
-          .toEqual([0])
-        expect(converter.oneToMany.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)))
-          .toEqual([
-            Date.UTC(1979, DEC, 31, 23, 59, 58, 999)
-          ])
-        expect(converter.oneToMany.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)))
-          .toEqual([])
-        expect(converter.oneToMany.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
-          .toEqual([])
-        expect(converter.oneToMany.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0)))
-          .toEqual([
-            Date.UTC(1979, DEC, 31, 23, 59, 59, 0)
-          ])
-      })
+      describe('conversions grouped by method', () => {
+        it('unixToAtomicPicos', () => {
+          expect(converter.unixToAtomicPicos(0))
+            .toBe(0n)
+          expect(converter.unixToAtomicPicos(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)))
+            .toBe(BigInt(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)) * picosPerMilli)
+          expect(() => converter.unixToAtomicPicos(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)))
+            .toThrowError('No TAI equivalent: 315532799000')
+          expect(() => converter.unixToAtomicPicos(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
+            .toThrowError('No TAI equivalent: 315532799999')
+          expect(converter.unixToAtomicPicos(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)))
+            .toBe(BigInt(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)) * picosPerMilli)
+        })
 
-      it('oneToMany.atomicToUnix', () => {
-        expect(converter.oneToMany.atomicToUnix(0))
-          .toBe(0)
-        expect(converter.oneToMany.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)))
-          .toBe(Date.UTC(1979, DEC, 31, 23, 59, 58, 999))
-        expect(converter.oneToMany.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)))
-          .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0))
-      })
+        it('unixToAtomic', () => {
+          expect(converter.unixToAtomic(0))
+            .toBe(0)
+          expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)))
+            .toBe(Date.UTC(1979, DEC, 31, 23, 59, 58, 999))
+          expect(() => converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)))
+            .toThrowError('No TAI equivalent: 315532799000')
+          expect(() => converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
+            .toThrowError('No TAI equivalent: 315532799999')
+          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0)))
+            .toBe(Date.UTC(1979, DEC, 31, 23, 59, 59, 0))
+        })
 
-      it('oneToOne.unixToAtomicPicos', () => {
-        expect(converter.oneToOne.unixToAtomicPicos(0))
-          .toBe(0n)
-        expect(converter.oneToOne.unixToAtomicPicos(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)))
-          .toBe(BigInt(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)) * picosPerMilli)
-        expect(() => converter.oneToOne.unixToAtomicPicos(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)))
-          .toThrowError('No TAI equivalent: 315532799000')
-        expect(() => converter.oneToOne.unixToAtomicPicos(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
-          .toThrowError('No TAI equivalent: 315532799999')
-        expect(converter.oneToOne.unixToAtomicPicos(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)))
-          .toBe(BigInt(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)) * picosPerMilli)
-      })
-
-      it('oneToOne.unixToAtomic', () => {
-        expect(converter.oneToOne.unixToAtomic(0))
-          .toBe(0)
-        expect(converter.oneToOne.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)))
-          .toBe(Date.UTC(1979, DEC, 31, 23, 59, 58, 999))
-        expect(() => converter.oneToOne.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)))
-          .toThrowError('No TAI equivalent: 315532799000')
-        expect(() => converter.oneToOne.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
-          .toThrowError('No TAI equivalent: 315532799999')
-        expect(converter.oneToOne.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0)))
-          .toBe(Date.UTC(1979, DEC, 31, 23, 59, 59, 0))
-      })
-
-      it('oneToOne.atomicToUnix', () => {
-        expect(converter.oneToOne.atomicToUnix(0))
-          .toBe(0)
-        expect(converter.oneToOne.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)))
-          .toBe(Date.UTC(1979, DEC, 31, 23, 59, 58, 999))
-        expect(converter.oneToOne.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)))
-          .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0))
+        it('atomicToUnix', () => {
+          expect(converter.atomicToUnix(0))
+            .toBe(0)
+          expect(converter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)))
+            .toBe(Date.UTC(1979, DEC, 31, 23, 59, 58, 999))
+          expect(converter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)))
+            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0))
+        })
       })
     })
   })
@@ -444,10 +504,10 @@ describe('Converter', () => {
           }
         }])
 
-        const converter = Converter(data)
-        expect(converter.oneToMany.unixToAtomicPicos(1)).toEqual([900_000_000n])
+        const converter = Converter(data, ONE_TO_MANY)
+        expect(converter.unixToAtomicPicos(1)).toEqual([900_000_000n])
         // rounds down to 0, which is not in the ray
-        expect(converter.oneToMany.unixToAtomic(1)).toEqual([])
+        expect(converter.unixToAtomic(1)).toEqual([])
       })
 
       it('at the end of the ray', () => {
@@ -487,10 +547,10 @@ describe('Converter', () => {
           }
         }])
 
-        const converter = Converter(data)
-        expect(converter.oneToMany.unixToAtomicPicos(-1)).toEqual([-900_000_000n])
+        const converter = Converter(data, ONE_TO_MANY)
+        expect(converter.unixToAtomicPicos(-1)).toEqual([-900_000_000n])
         // rounds up to 0, which is not in the ray
-        expect(converter.oneToMany.unixToAtomic(-1)).toEqual([])
+        expect(converter.unixToAtomic(-1)).toEqual([])
       })
     })
 
@@ -531,11 +591,11 @@ describe('Converter', () => {
         }
       }])
 
-      const converter = Converter(data)
-      expect(converter.oneToMany.unixToAtomicPicos(0)).toEqual([0n])
-      expect(converter.oneToMany.unixToAtomic(0)).toEqual([0])
-      expect(converter.oneToMany.unixToAtomicPicos(1)).toEqual([1_000_001_000n])
-      expect(converter.oneToMany.unixToAtomic(1)).toEqual([1])
+      const converter = Converter(data, ONE_TO_MANY)
+      expect(converter.unixToAtomicPicos(0)).toEqual([0n])
+      expect(converter.unixToAtomic(0)).toEqual([0])
+      expect(converter.unixToAtomicPicos(1)).toEqual([1_000_001_000n])
+      expect(converter.unixToAtomic(1)).toEqual([1])
     })
   })
 
@@ -546,94 +606,101 @@ describe('Converter', () => {
         [1000, 1],
         [1000, 2]
       ]
-      const converter = Converter(data)
 
-      it('oneToMany.unixToAtomicPicos', () => {
-        expect(converter.oneToMany.unixToAtomicPicos(0)).toEqual([0n])
-        expect(converter.oneToMany.unixToAtomicPicos(999))
-          .toEqual([
-            999n * picosPerMilli
-          ])
-        expect(converter.oneToMany.unixToAtomicPicos(1000))
-          .toEqual([
-            1000n * picosPerMilli,
-            2000n * picosPerMilli,
-            3000n * picosPerMilli
-          ])
-        expect(converter.oneToMany.unixToAtomicPicos(1999))
-          .toEqual([
-            1999n * picosPerMilli,
-            2999n * picosPerMilli,
-            3999n * picosPerMilli
-          ])
-        expect(converter.oneToMany.unixToAtomicPicos(2000))
-          .toEqual([
-            4000n * picosPerMilli
-          ])
+      describe('ONE_TO_MANY', () => {
+        const converter = Converter(data, ONE_TO_MANY)
+
+        it('unixToAtomicPicos', () => {
+          expect(converter.unixToAtomicPicos(0)).toEqual([0n])
+          expect(converter.unixToAtomicPicos(999))
+            .toEqual([
+              999n * picosPerMilli
+            ])
+          expect(converter.unixToAtomicPicos(1000))
+            .toEqual([
+              1000n * picosPerMilli,
+              2000n * picosPerMilli,
+              3000n * picosPerMilli
+            ])
+          expect(converter.unixToAtomicPicos(1999))
+            .toEqual([
+              1999n * picosPerMilli,
+              2999n * picosPerMilli,
+              3999n * picosPerMilli
+            ])
+          expect(converter.unixToAtomicPicos(2000))
+            .toEqual([
+              4000n * picosPerMilli
+            ])
+        })
+
+        it('unixToAtomic', () => {
+          expect(converter.unixToAtomic(0)).toEqual([0])
+          expect(converter.unixToAtomic(999))
+            .toEqual([
+              999
+            ])
+          expect(converter.unixToAtomic(1000))
+            .toEqual([
+              1000,
+              2000,
+              3000
+            ])
+          expect(converter.unixToAtomic(1999))
+            .toEqual([
+              1999,
+              2999,
+              3999
+            ])
+          expect(converter.unixToAtomic(2000))
+            .toEqual([
+              4000
+            ])
+        })
+
+        it('atomicToUnix', () => {
+          expect(converter.atomicToUnix(0)).toBe(0)
+          expect(converter.atomicToUnix(1000)).toBe(1000)
+          expect(converter.atomicToUnix(1001)).toBe(1001)
+          expect(converter.atomicToUnix(1999)).toBe(1999)
+          expect(converter.atomicToUnix(2000)).toBe(1000)
+          expect(converter.atomicToUnix(2001)).toBe(1001)
+          expect(converter.atomicToUnix(2999)).toBe(1999)
+          expect(converter.atomicToUnix(3000)).toBe(1000)
+          expect(converter.atomicToUnix(3001)).toBe(1001)
+        })
       })
 
-      it('oneToMany.unixToAtomic', () => {
-        expect(converter.oneToMany.unixToAtomic(0)).toEqual([0])
-        expect(converter.oneToMany.unixToAtomic(999))
-          .toEqual([
-            999
-          ])
-        expect(converter.oneToMany.unixToAtomic(1000))
-          .toEqual([
-            1000,
-            2000,
-            3000
-          ])
-        expect(converter.oneToMany.unixToAtomic(1999))
-          .toEqual([
-            1999,
-            2999,
-            3999
-          ])
-        expect(converter.oneToMany.unixToAtomic(2000))
-          .toEqual([
-            4000
-          ])
-      })
+      describe('ONE_TO_ONE', () => {
+        const converter = Converter(data, ONE_TO_ONE)
 
-      it('oneToMany.atomicToUnix', () => {
-        expect(converter.oneToMany.atomicToUnix(0)).toBe(0)
-        expect(converter.oneToMany.atomicToUnix(1000)).toBe(1000)
-        expect(converter.oneToMany.atomicToUnix(1001)).toBe(1001)
-        expect(converter.oneToMany.atomicToUnix(1999)).toBe(1999)
-        expect(converter.oneToMany.atomicToUnix(2000)).toBe(1000)
-        expect(converter.oneToMany.atomicToUnix(2001)).toBe(1001)
-        expect(converter.oneToMany.atomicToUnix(2999)).toBe(1999)
-        expect(converter.oneToMany.atomicToUnix(3000)).toBe(1000)
-        expect(converter.oneToMany.atomicToUnix(3001)).toBe(1001)
-      })
+        it('unixToAtomicPicos', () => {
+          expect(converter.unixToAtomicPicos(0)).toBe(0n)
+          expect(converter.unixToAtomicPicos(999)).toBe(999n * picosPerMilli)
+          expect(converter.unixToAtomicPicos(1000)).toBe(3000n * picosPerMilli)
+          expect(converter.unixToAtomicPicos(1999)).toBe(3999n * picosPerMilli)
+          expect(converter.unixToAtomicPicos(2000)).toBe(4000n * picosPerMilli)
+        })
 
-      it('oneToOne.unixToAtomicPicos', () => {
-        expect(converter.oneToOne.unixToAtomicPicos(0)).toBe(0n)
-        expect(converter.oneToOne.unixToAtomicPicos(999)).toBe(999n * picosPerMilli)
-        expect(converter.oneToOne.unixToAtomicPicos(1000)).toBe(3000n * picosPerMilli)
-        expect(converter.oneToOne.unixToAtomicPicos(1999)).toBe(3999n * picosPerMilli)
-        expect(converter.oneToOne.unixToAtomicPicos(2000)).toBe(4000n * picosPerMilli)
-      })
+        it('unixToAtomic', () => {
+          expect(converter.unixToAtomic(0)).toBe(0)
+          expect(converter.unixToAtomic(999)).toBe(999)
+          expect(converter.unixToAtomic(1000)).toBe(3000)
+          expect(converter.unixToAtomic(1999)).toBe(3999)
+          expect(converter.unixToAtomic(2000)).toBe(4000)
+        })
 
-      it('oneToOne.unixToAtomic', () => {
-        expect(converter.oneToOne.unixToAtomic(0)).toBe(0)
-        expect(converter.oneToOne.unixToAtomic(999)).toBe(999)
-        expect(converter.oneToOne.unixToAtomic(1000)).toBe(3000)
-        expect(converter.oneToOne.unixToAtomic(1999)).toBe(3999)
-        expect(converter.oneToOne.unixToAtomic(2000)).toBe(4000)
-      })
-
-      it('oneToOne.atomicToUnix', () => {
-        expect(converter.oneToOne.atomicToUnix(0)).toBe(0)
-        expect(converter.oneToOne.atomicToUnix(1000)).toBe(1000)
-        expect(converter.oneToOne.atomicToUnix(1001)).toBe(1000)
-        expect(converter.oneToOne.atomicToUnix(1999)).toBe(1000)
-        expect(converter.oneToOne.atomicToUnix(2000)).toBe(1000)
-        expect(converter.oneToOne.atomicToUnix(2001)).toBe(1000)
-        expect(converter.oneToOne.atomicToUnix(2999)).toBe(1000)
-        expect(converter.oneToOne.atomicToUnix(3000)).toBe(1000)
-        expect(converter.oneToOne.atomicToUnix(3001)).toBe(1001)
+        it('atomicToUnix', () => {
+          expect(converter.atomicToUnix(0)).toBe(0)
+          expect(converter.atomicToUnix(1000)).toBe(1000)
+          expect(converter.atomicToUnix(1001)).toBe(1000)
+          expect(converter.atomicToUnix(1999)).toBe(1000)
+          expect(converter.atomicToUnix(2000)).toBe(1000)
+          expect(converter.atomicToUnix(2001)).toBe(1000)
+          expect(converter.atomicToUnix(2999)).toBe(1000)
+          expect(converter.atomicToUnix(3000)).toBe(1000)
+          expect(converter.atomicToUnix(3001)).toBe(1001)
+        })
       })
     })
 
@@ -645,84 +712,91 @@ describe('Converter', () => {
         [1000, 1],
         [1500, 1.5]
       ]
-      const converter = Converter(data)
 
-      it('oneToMany.unixToAtomicPicos', () => {
-        expect(converter.oneToMany.unixToAtomicPicos(0)).toEqual([0n])
-        expect(converter.oneToMany.unixToAtomicPicos(999))
-          .toEqual([
-            999n * picosPerMilli
-          ])
-        expect(converter.oneToMany.unixToAtomicPicos(1000))
-          .toEqual([
-            1000n * picosPerMilli,
-            2000n * picosPerMilli
-          ])
-        expect(converter.oneToMany.unixToAtomicPicos(1499))
-          .toEqual([
-            1499n * picosPerMilli,
-            2499n * picosPerMilli
-          ])
-        expect(converter.oneToMany.unixToAtomicPicos(1500))
-          .toEqual([
-            1500n * picosPerMilli,
-            2500n * picosPerMilli,
-            3000n * picosPerMilli
-          ])
+      describe('ONE_TO_MANY', () => {
+        const converter = Converter(data, ONE_TO_MANY)
+
+        it('unixToAtomicPicos', () => {
+          expect(converter.unixToAtomicPicos(0)).toEqual([0n])
+          expect(converter.unixToAtomicPicos(999))
+            .toEqual([
+              999n * picosPerMilli
+            ])
+          expect(converter.unixToAtomicPicos(1000))
+            .toEqual([
+              1000n * picosPerMilli,
+              2000n * picosPerMilli
+            ])
+          expect(converter.unixToAtomicPicos(1499))
+            .toEqual([
+              1499n * picosPerMilli,
+              2499n * picosPerMilli
+            ])
+          expect(converter.unixToAtomicPicos(1500))
+            .toEqual([
+              1500n * picosPerMilli,
+              2500n * picosPerMilli,
+              3000n * picosPerMilli
+            ])
+        })
+
+        it('unixToAtomic', () => {
+          expect(converter.unixToAtomic(0)).toEqual([0])
+          expect(converter.unixToAtomic(999)).toEqual([999])
+          expect(converter.unixToAtomic(1000)).toEqual([1000, 2000])
+          expect(converter.unixToAtomic(1499)).toEqual([1499, 2499])
+          expect(converter.unixToAtomic(1500)).toEqual([1500, 2500, 3000])
+        })
+
+        it('atomicToUnix', () => {
+          expect(converter.atomicToUnix(0)).toBe(0)
+          expect(converter.atomicToUnix(999)).toBe(999)
+          expect(converter.atomicToUnix(1000)).toBe(1000)
+          expect(converter.atomicToUnix(1001)).toBe(1001)
+          expect(converter.atomicToUnix(1999)).toBe(1999)
+          expect(converter.atomicToUnix(2000)).toBe(1000)
+          expect(converter.atomicToUnix(2001)).toBe(1001)
+          expect(converter.atomicToUnix(2499)).toBe(1499)
+          expect(converter.atomicToUnix(2500)).toBe(1500)
+          expect(converter.atomicToUnix(2999)).toBe(1999)
+          expect(converter.atomicToUnix(3000)).toBe(1500)
+        })
       })
 
-      it('oneToMany.unixToAtomic', () => {
-        expect(converter.oneToMany.unixToAtomic(0)).toEqual([0])
-        expect(converter.oneToMany.unixToAtomic(999)).toEqual([999])
-        expect(converter.oneToMany.unixToAtomic(1000)).toEqual([1000, 2000])
-        expect(converter.oneToMany.unixToAtomic(1499)).toEqual([1499, 2499])
-        expect(converter.oneToMany.unixToAtomic(1500)).toEqual([1500, 2500, 3000])
-      })
+      describe('ONE_TO_ONE', () => {
+        const converter = Converter(data, ONE_TO_ONE)
 
-      it('oneToMany.atomicToUnix', () => {
-        expect(converter.oneToMany.atomicToUnix(0)).toBe(0)
-        expect(converter.oneToMany.atomicToUnix(999)).toBe(999)
-        expect(converter.oneToMany.atomicToUnix(1000)).toBe(1000)
-        expect(converter.oneToMany.atomicToUnix(1001)).toBe(1001)
-        expect(converter.oneToMany.atomicToUnix(1999)).toBe(1999)
-        expect(converter.oneToMany.atomicToUnix(2000)).toBe(1000)
-        expect(converter.oneToMany.atomicToUnix(2001)).toBe(1001)
-        expect(converter.oneToMany.atomicToUnix(2499)).toBe(1499)
-        expect(converter.oneToMany.atomicToUnix(2500)).toBe(1500)
-        expect(converter.oneToMany.atomicToUnix(2999)).toBe(1999)
-        expect(converter.oneToMany.atomicToUnix(3000)).toBe(1500)
-      })
+        it('unixToAtomicPicos', () => {
+          expect(converter.unixToAtomicPicos(0)).toBe(0n)
+          expect(converter.unixToAtomicPicos(999)).toBe(999n * picosPerMilli)
+          expect(converter.unixToAtomicPicos(1000)).toBe(2000n * picosPerMilli)
+          expect(converter.unixToAtomicPicos(1499)).toBe(2499n * picosPerMilli)
+          expect(converter.unixToAtomicPicos(1500)).toBe(3000n * picosPerMilli)
+        })
 
-      it('oneToOne.unixToAtomicPicos', () => {
-        expect(converter.oneToOne.unixToAtomicPicos(0)).toBe(0n)
-        expect(converter.oneToOne.unixToAtomicPicos(999)).toBe(999n * picosPerMilli)
-        expect(converter.oneToOne.unixToAtomicPicos(1000)).toBe(2000n * picosPerMilli)
-        expect(converter.oneToOne.unixToAtomicPicos(1499)).toBe(2499n * picosPerMilli)
-        expect(converter.oneToOne.unixToAtomicPicos(1500)).toBe(3000n * picosPerMilli)
-      })
+        it('unixToAtomic', () => {
+          expect(converter.unixToAtomic(0)).toBe(0)
+          expect(converter.unixToAtomic(999)).toBe(999)
+          expect(converter.unixToAtomic(1000)).toBe(2000)
+          expect(converter.unixToAtomic(1499)).toBe(2499)
+          expect(converter.unixToAtomic(1500)).toBe(3000)
+        })
 
-      it('oneToOne.unixToAtomic', () => {
-        expect(converter.oneToOne.unixToAtomic(0)).toBe(0)
-        expect(converter.oneToOne.unixToAtomic(999)).toBe(999)
-        expect(converter.oneToOne.unixToAtomic(1000)).toBe(2000)
-        expect(converter.oneToOne.unixToAtomic(1499)).toBe(2499)
-        expect(converter.oneToOne.unixToAtomic(1500)).toBe(3000)
-      })
-
-      it('oneToOne.atomicToUnix', () => {
-        expect(converter.oneToOne.atomicToUnix(0)).toBe(0)
-        expect(converter.oneToOne.atomicToUnix(999)).toBe(999)
-        expect(converter.oneToOne.atomicToUnix(1000)).toBe(1000)
-        expect(converter.oneToOne.atomicToUnix(1001)).toBe(1000)
-        expect(converter.oneToOne.atomicToUnix(1999)).toBe(1000)
-        expect(converter.oneToOne.atomicToUnix(2000)).toBe(1000)
-        expect(converter.oneToOne.atomicToUnix(2001)).toBe(1001)
-        expect(converter.oneToOne.atomicToUnix(2499)).toBe(1499)
-        expect(converter.oneToOne.atomicToUnix(2500)).toBe(1500)
-        expect(converter.oneToOne.atomicToUnix(2501)).toBe(1500)
-        expect(converter.oneToOne.atomicToUnix(2999)).toBe(1500)
-        expect(converter.oneToOne.atomicToUnix(3000)).toBe(1500)
-        expect(converter.oneToOne.atomicToUnix(3001)).toBe(1501)
+        it('atomicToUnix', () => {
+          expect(converter.atomicToUnix(0)).toBe(0)
+          expect(converter.atomicToUnix(999)).toBe(999)
+          expect(converter.atomicToUnix(1000)).toBe(1000)
+          expect(converter.atomicToUnix(1001)).toBe(1000)
+          expect(converter.atomicToUnix(1999)).toBe(1000)
+          expect(converter.atomicToUnix(2000)).toBe(1000)
+          expect(converter.atomicToUnix(2001)).toBe(1001)
+          expect(converter.atomicToUnix(2499)).toBe(1499)
+          expect(converter.atomicToUnix(2500)).toBe(1500)
+          expect(converter.atomicToUnix(2501)).toBe(1500)
+          expect(converter.atomicToUnix(2999)).toBe(1500)
+          expect(converter.atomicToUnix(3000)).toBe(1500)
+          expect(converter.atomicToUnix(3001)).toBe(1501)
+        })
       })
     })
 
@@ -734,105 +808,112 @@ describe('Converter', () => {
         [1000, 1],
         [500, 2.5]
       ]
-      const converter = Converter(data)
 
-      it('oneToMany.unixToAtomicPicos', () => {
-        expect(converter.oneToMany.unixToAtomicPicos(0)).toEqual([0n])
-        expect(converter.oneToMany.unixToAtomicPicos(499))
-          .toEqual([
-            499n * picosPerMilli
-          ])
-        expect(converter.oneToMany.unixToAtomicPicos(500))
-          .toEqual([
-            500n * picosPerMilli,
-            3000n * picosPerMilli
-          ])
-        expect(converter.oneToMany.unixToAtomicPicos(999))
-          .toEqual([
-            999n * picosPerMilli,
-            3499n * picosPerMilli
-          ])
-        expect(converter.oneToMany.unixToAtomicPicos(1000))
-          .toEqual([
-            1000n * picosPerMilli,
-            2000n * picosPerMilli,
-            3500n * picosPerMilli
-          ])
-        expect(converter.oneToMany.unixToAtomicPicos(1999))
-          .toEqual([
-            1999n * picosPerMilli,
-            2999n * picosPerMilli,
-            4499n * picosPerMilli
-          ])
-        expect(converter.oneToMany.unixToAtomicPicos(2000))
-          .toEqual([
-            4500n * picosPerMilli
-          ])
+      describe('ONE_TO_MANY', () => {
+        const converter = Converter(data, ONE_TO_MANY)
+
+        it('unixToAtomicPicos', () => {
+          expect(converter.unixToAtomicPicos(0)).toEqual([0n])
+          expect(converter.unixToAtomicPicos(499))
+            .toEqual([
+              499n * picosPerMilli
+            ])
+          expect(converter.unixToAtomicPicos(500))
+            .toEqual([
+              500n * picosPerMilli,
+              3000n * picosPerMilli
+            ])
+          expect(converter.unixToAtomicPicos(999))
+            .toEqual([
+              999n * picosPerMilli,
+              3499n * picosPerMilli
+            ])
+          expect(converter.unixToAtomicPicos(1000))
+            .toEqual([
+              1000n * picosPerMilli,
+              2000n * picosPerMilli,
+              3500n * picosPerMilli
+            ])
+          expect(converter.unixToAtomicPicos(1999))
+            .toEqual([
+              1999n * picosPerMilli,
+              2999n * picosPerMilli,
+              4499n * picosPerMilli
+            ])
+          expect(converter.unixToAtomicPicos(2000))
+            .toEqual([
+              4500n * picosPerMilli
+            ])
+        })
+
+        it('unixToAtomic', () => {
+          expect(converter.unixToAtomic(0)).toEqual([0])
+          expect(converter.unixToAtomic(499)).toEqual([499])
+          expect(converter.unixToAtomic(500)).toEqual([500, 3000])
+          expect(converter.unixToAtomic(999)).toEqual([999, 3499])
+          expect(converter.unixToAtomic(1000)).toEqual([1000, 2000, 3500])
+          expect(converter.unixToAtomic(1999)).toEqual([1999, 2999, 4499])
+          expect(converter.unixToAtomic(2000)).toEqual([4500])
+        })
+
+        it('atomicToUnix', () => {
+          expect(converter.atomicToUnix(0)).toBe(0)
+          expect(converter.atomicToUnix(499)).toBe(499)
+          expect(converter.atomicToUnix(500)).toBe(500)
+          expect(converter.atomicToUnix(999)).toBe(999)
+          expect(converter.atomicToUnix(1000)).toBe(1000)
+          expect(converter.atomicToUnix(1001)).toBe(1001)
+          expect(converter.atomicToUnix(1999)).toBe(1999)
+          expect(converter.atomicToUnix(2000)).toBe(1000)
+          expect(converter.atomicToUnix(2001)).toBe(1001)
+          expect(converter.atomicToUnix(2999)).toBe(1999)
+          expect(converter.atomicToUnix(3000)).toBe(500)
+          expect(converter.atomicToUnix(3001)).toBe(501)
+          expect(converter.atomicToUnix(4499)).toBe(1999)
+          expect(converter.atomicToUnix(4500)).toBe(2000)
+        })
       })
 
-      it('oneToMany.unixToAtomic', () => {
-        expect(converter.oneToMany.unixToAtomic(0)).toEqual([0])
-        expect(converter.oneToMany.unixToAtomic(499)).toEqual([499])
-        expect(converter.oneToMany.unixToAtomic(500)).toEqual([500, 3000])
-        expect(converter.oneToMany.unixToAtomic(999)).toEqual([999, 3499])
-        expect(converter.oneToMany.unixToAtomic(1000)).toEqual([1000, 2000, 3500])
-        expect(converter.oneToMany.unixToAtomic(1999)).toEqual([1999, 2999, 4499])
-        expect(converter.oneToMany.unixToAtomic(2000)).toEqual([4500])
-      })
+      describe('ONE_TO_ONE', () => {
+        const converter = Converter(data, ONE_TO_ONE)
 
-      it('oneToMany.atomicToUnix', () => {
-        expect(converter.oneToMany.atomicToUnix(0)).toBe(0)
-        expect(converter.oneToMany.atomicToUnix(499)).toBe(499)
-        expect(converter.oneToMany.atomicToUnix(500)).toBe(500)
-        expect(converter.oneToMany.atomicToUnix(999)).toBe(999)
-        expect(converter.oneToMany.atomicToUnix(1000)).toBe(1000)
-        expect(converter.oneToMany.atomicToUnix(1001)).toBe(1001)
-        expect(converter.oneToMany.atomicToUnix(1999)).toBe(1999)
-        expect(converter.oneToMany.atomicToUnix(2000)).toBe(1000)
-        expect(converter.oneToMany.atomicToUnix(2001)).toBe(1001)
-        expect(converter.oneToMany.atomicToUnix(2999)).toBe(1999)
-        expect(converter.oneToMany.atomicToUnix(3000)).toBe(500)
-        expect(converter.oneToMany.atomicToUnix(3001)).toBe(501)
-        expect(converter.oneToMany.atomicToUnix(4499)).toBe(1999)
-        expect(converter.oneToMany.atomicToUnix(4500)).toBe(2000)
-      })
+        it('unixToAtomicPicos', () => {
+          expect(converter.unixToAtomicPicos(0)).toBe(0n)
+          expect(converter.unixToAtomicPicos(499)).toBe(499n * picosPerMilli)
+          expect(converter.unixToAtomicPicos(500)).toBe(3000n * picosPerMilli)
+          expect(converter.unixToAtomicPicos(999)).toBe(3499n * picosPerMilli)
+          expect(converter.unixToAtomicPicos(1000)).toBe(3500n * picosPerMilli)
+          expect(converter.unixToAtomicPicos(1999)).toBe(4499n * picosPerMilli)
+          expect(converter.unixToAtomicPicos(2000)).toBe(4500n * picosPerMilli)
+        })
 
-      it('oneToOne.unixToAtomicPicos', () => {
-        expect(converter.oneToOne.unixToAtomicPicos(0)).toBe(0n)
-        expect(converter.oneToOne.unixToAtomicPicos(499)).toBe(499n * picosPerMilli)
-        expect(converter.oneToOne.unixToAtomicPicos(500)).toBe(3000n * picosPerMilli)
-        expect(converter.oneToOne.unixToAtomicPicos(999)).toBe(3499n * picosPerMilli)
-        expect(converter.oneToOne.unixToAtomicPicos(1000)).toBe(3500n * picosPerMilli)
-        expect(converter.oneToOne.unixToAtomicPicos(1999)).toBe(4499n * picosPerMilli)
-        expect(converter.oneToOne.unixToAtomicPicos(2000)).toBe(4500n * picosPerMilli)
-      })
+        it('unixToAtomic', () => {
+          expect(converter.unixToAtomic(0)).toBe(0)
+          expect(converter.unixToAtomic(499)).toBe(499)
+          expect(converter.unixToAtomic(500)).toBe(3000)
+          expect(converter.unixToAtomic(999)).toBe(3499)
+          expect(converter.unixToAtomic(1000)).toBe(3500)
+          expect(converter.unixToAtomic(1999)).toBe(4499)
+          expect(converter.unixToAtomic(2000)).toBe(4500)
+        })
 
-      it('oneToOne.unixToAtomic', () => {
-        expect(converter.oneToOne.unixToAtomic(0)).toBe(0)
-        expect(converter.oneToOne.unixToAtomic(499)).toBe(499)
-        expect(converter.oneToOne.unixToAtomic(500)).toBe(3000)
-        expect(converter.oneToOne.unixToAtomic(999)).toBe(3499)
-        expect(converter.oneToOne.unixToAtomic(1000)).toBe(3500)
-        expect(converter.oneToOne.unixToAtomic(1999)).toBe(4499)
-        expect(converter.oneToOne.unixToAtomic(2000)).toBe(4500)
-      })
-
-      it('oneToOne.atomicToUnix', () => {
-        expect(converter.oneToOne.atomicToUnix(0)).toBe(0)
-        expect(converter.oneToOne.atomicToUnix(499)).toBe(499)
-        expect(converter.oneToOne.atomicToUnix(500)).toBe(500)
-        expect(converter.oneToOne.atomicToUnix(501)).toBe(500)
-        expect(converter.oneToOne.atomicToUnix(999)).toBe(500)
-        expect(converter.oneToOne.atomicToUnix(1000)).toBe(500)
-        expect(converter.oneToOne.atomicToUnix(1001)).toBe(500)
-        expect(converter.oneToOne.atomicToUnix(1999)).toBe(500)
-        expect(converter.oneToOne.atomicToUnix(2000)).toBe(500)
-        expect(converter.oneToOne.atomicToUnix(2001)).toBe(500)
-        expect(converter.oneToOne.atomicToUnix(2999)).toBe(500)
-        expect(converter.oneToOne.atomicToUnix(3000)).toBe(500)
-        expect(converter.oneToOne.atomicToUnix(3001)).toBe(501)
-        expect(converter.oneToOne.atomicToUnix(4499)).toBe(1999)
-        expect(converter.oneToOne.atomicToUnix(4500)).toBe(2000)
+        it('atomicToUnix', () => {
+          expect(converter.atomicToUnix(0)).toBe(0)
+          expect(converter.atomicToUnix(499)).toBe(499)
+          expect(converter.atomicToUnix(500)).toBe(500)
+          expect(converter.atomicToUnix(501)).toBe(500)
+          expect(converter.atomicToUnix(999)).toBe(500)
+          expect(converter.atomicToUnix(1000)).toBe(500)
+          expect(converter.atomicToUnix(1001)).toBe(500)
+          expect(converter.atomicToUnix(1999)).toBe(500)
+          expect(converter.atomicToUnix(2000)).toBe(500)
+          expect(converter.atomicToUnix(2001)).toBe(500)
+          expect(converter.atomicToUnix(2999)).toBe(500)
+          expect(converter.atomicToUnix(3000)).toBe(500)
+          expect(converter.atomicToUnix(3001)).toBe(501)
+          expect(converter.atomicToUnix(4499)).toBe(1999)
+          expect(converter.atomicToUnix(4500)).toBe(2000)
+        })
       })
     })
   })
@@ -843,54 +924,61 @@ describe('Converter', () => {
       const data = [
         [0, 0, 40_587, -172_800]
       ]
-      const converter = Converter(data)
 
-      it('oneToMany.unixToAtomicPicos', () => {
-        expect(converter.oneToMany.unixToAtomicPicos(-1000)).toEqual([1000n * picosPerMilli])
-        expect(converter.oneToMany.unixToAtomicPicos(-999)).toEqual([999n * picosPerMilli])
-        expect(converter.oneToMany.unixToAtomicPicos(-1)).toEqual([1n * picosPerMilli])
-        expect(converter.oneToMany.unixToAtomicPicos(0)).toEqual([0n])
-        expect(converter.oneToMany.unixToAtomicPicos(1)).toEqual([])
+      describe('ONE_TO_MANY', () => {
+        const converter = Converter(data, ONE_TO_MANY)
+
+        it('unixToAtomicPicos', () => {
+          expect(converter.unixToAtomicPicos(-1000)).toEqual([1000n * picosPerMilli])
+          expect(converter.unixToAtomicPicos(-999)).toEqual([999n * picosPerMilli])
+          expect(converter.unixToAtomicPicos(-1)).toEqual([1n * picosPerMilli])
+          expect(converter.unixToAtomicPicos(0)).toEqual([0n])
+          expect(converter.unixToAtomicPicos(1)).toEqual([])
+        })
+
+        it('unixToAtomic', () => {
+          expect(converter.unixToAtomic(-1000)).toEqual([1000])
+          expect(converter.unixToAtomic(-999)).toEqual([999])
+          expect(converter.unixToAtomic(-1)).toEqual([1])
+          expect(converter.unixToAtomic(0)).toEqual([0])
+          expect(converter.unixToAtomic(1)).toEqual([])
+        })
+
+        it('atomicToUnix', () => {
+          expect(() => converter.atomicToUnix(-1)).toThrowError('No UTC equivalent: -1')
+          expect(converter.atomicToUnix(0)).toBe(0)
+          expect(converter.atomicToUnix(1)).toBe(-1)
+          expect(converter.atomicToUnix(999)).toBe(-999)
+          expect(converter.atomicToUnix(1000)).toBe(-1000)
+        })
       })
 
-      it('oneToMany.unixToAtomic', () => {
-        expect(converter.oneToMany.unixToAtomic(-1000)).toEqual([1000])
-        expect(converter.oneToMany.unixToAtomic(-999)).toEqual([999])
-        expect(converter.oneToMany.unixToAtomic(-1)).toEqual([1])
-        expect(converter.oneToMany.unixToAtomic(0)).toEqual([0])
-        expect(converter.oneToMany.unixToAtomic(1)).toEqual([])
-      })
+      describe('ONE_TO_ONE', () => {
+        const converter = Converter(data, ONE_TO_ONE)
 
-      it('oneToMany.atomicToUnix', () => {
-        expect(() => converter.oneToMany.atomicToUnix(-1)).toThrowError('No UTC equivalent: -1')
-        expect(converter.oneToMany.atomicToUnix(0)).toBe(0)
-        expect(converter.oneToMany.atomicToUnix(1)).toBe(-1)
-        expect(converter.oneToMany.atomicToUnix(999)).toBe(-999)
-        expect(converter.oneToMany.atomicToUnix(1000)).toBe(-1000)
-      })
+        it('unixToAtomicPicos', () => {
+          expect(converter.unixToAtomicPicos(-1000)).toBe(1000n * picosPerMilli)
+          expect(converter.unixToAtomicPicos(-999)).toBe(999n * picosPerMilli)
+          expect(converter.unixToAtomicPicos(-1)).toBe(1n * picosPerMilli)
+          expect(converter.unixToAtomicPicos(0)).toBe(0n)
+          expect(() => converter.unixToAtomicPicos(1)).toThrowError('No TAI equivalent: 1')
+        })
 
-      it('oneToOne.unixToAtomicPicos', () => {
-        expect(converter.oneToOne.unixToAtomicPicos(-1000)).toBe(1000n * picosPerMilli)
-        expect(converter.oneToOne.unixToAtomicPicos(-999)).toBe(999n * picosPerMilli)
-        expect(converter.oneToOne.unixToAtomicPicos(-1)).toBe(1n * picosPerMilli)
-        expect(converter.oneToOne.unixToAtomicPicos(0)).toBe(0n)
-        expect(() => converter.oneToOne.unixToAtomicPicos(1)).toThrowError('No TAI equivalent: 1')
-      })
+        it('unixToAtomic', () => {
+          expect(converter.unixToAtomic(-1000)).toBe(1000)
+          expect(converter.unixToAtomic(-999)).toBe(999)
+          expect(converter.unixToAtomic(-1)).toBe(1)
+          expect(converter.unixToAtomic(0)).toBe(0)
+          expect(() => converter.unixToAtomic(1)).toThrowError('No TAI equivalent: 1')
+        })
 
-      it('oneToOne.unixToAtomic', () => {
-        expect(converter.oneToOne.unixToAtomic(-1000)).toBe(1000)
-        expect(converter.oneToOne.unixToAtomic(-999)).toBe(999)
-        expect(converter.oneToOne.unixToAtomic(-1)).toBe(1)
-        expect(converter.oneToOne.unixToAtomic(0)).toBe(0)
-        expect(() => converter.oneToOne.unixToAtomic(1)).toThrowError('No TAI equivalent: 1')
-      })
-
-      it('oneToOne.atomicToUnix', () => {
-        expect(() => converter.oneToOne.atomicToUnix(-1)).toThrowError('No UTC equivalent: -1')
-        expect(converter.oneToOne.atomicToUnix(0)).toBe(0)
-        expect(converter.oneToOne.atomicToUnix(1)).toBe(-1)
-        expect(converter.oneToOne.atomicToUnix(999)).toBe(-999)
-        expect(converter.oneToOne.atomicToUnix(1000)).toBe(-1000)
+        it('atomicToUnix', () => {
+          expect(() => converter.atomicToUnix(-1)).toThrowError('No UTC equivalent: -1')
+          expect(converter.atomicToUnix(0)).toBe(0)
+          expect(converter.atomicToUnix(1)).toBe(-1)
+          expect(converter.atomicToUnix(999)).toBe(-999)
+          expect(converter.atomicToUnix(1000)).toBe(-1000)
+        })
       })
     })
 

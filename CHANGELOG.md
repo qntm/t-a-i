@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 3.0.x
+
+Rather than `require('t-a-i')` returning a converter object, it now returns an object `tai` whose property `tai.Converter` must be called to create a converter object. It also returns constants `ONE_TO_MANY` and `ONE_TO_ONE` which must be used to select the conversion model.
+
 ## 2.1.x
 
 `tai.oneToOne.atomicToUnix`'s behaviour has been changed to no longer throw exceptions in the event of trying to convert a "non-canonical" TAI millisecond count to Unix milliseconds. Instead, this conversion now behaves as if Unix time was paused during the inserted leap second. This more accurately reflects the assertion in the README that "Unix time ignores leap seconds". Documentation and unit tests have been updated accordingly.

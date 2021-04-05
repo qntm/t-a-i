@@ -36,7 +36,8 @@ npm install t-a-i
 Exactly how long was 1972?
 
 ```javascript
-const tai = require("t-a-i")
+const { Converter, ONE_TO_ONE } = require("t-a-i")
+const converter = Converter(ONE_TO_ONE)
 
 const unixStart = Date.UTC(1972, 0, 1) // 63_072_000_000
 const unixEnd   = Date.UTC(1973, 0, 1) // 94_694_400_000
@@ -44,8 +45,8 @@ const unixEnd   = Date.UTC(1973, 0, 1) // 94_694_400_000
 console.log(unixEnd - unixStart)
 // 31_622_400_000 milliseconds - wrong answer!
 
-const atomicStart = tai.oneToOne.unixToAtomic(unixStart) // 63_072_010_000
-const atomicEnd   = tai.oneToOne.unixToAtomic(unixEnd)   // 94_694_412_000
+const atomicStart = converter.unixToAtomic(unixStart) // 63_072_010_000
+const atomicEnd   = converter.unixToAtomic(unixEnd)   // 94_694_412_000
 
 console.log(atomicEnd - atomicStart)
 // 31_622_402_000 milliseconds - right, including two leap seconds!
@@ -55,7 +56,7 @@ What is the current offset between TAI and Unix time?
 
 ```javascript
 const now = Date.now()
-const offset = tai.oneToOne.unixToAtomic(now) - now
+const offset = converter.unixToAtomic(now) - now
 
 console.log(offset)
 // 37_000 at the time of writing; TAI is 37 seconds ahead of Unix time
@@ -64,7 +65,7 @@ console.log(offset)
 What was TAI, exactly, at the Unix epoch?
 
 ```javascript
-tai.oneToOne.unixToAtomicPicos(0)
+converter.unixToAtomicPicos(0)
 // 8_000_082_000_000n TAI picoseconds, i.e. 1970-01-01 00:00:08.000_082 TAI
 ```
 
@@ -83,11 +84,19 @@ Methods throw exceptions or return empty result sets if called with times before
 
 Note that for times prior to the beginning of 1972, TAI milliseconds and Unix milliseconds were not the same length.
 
-### tai.oneToMany
+### ONE_TO_MANY
 
-These conversions treat the relationship between Unix and TAI as one-to-many. An instant in Unix time may correspond to 0, 1 or 2 instants in TAI. During an inserted leap second, Unix time **overruns, instantaneously backtracks, and repeats itself**.
+This constant indicates that the converter should treat the relationship between Unix and TAI as one-to-many. During an inserted leap second, Unix time **overruns, instantaneously backtracks, and repeats itself**. An instant in Unix time may therefore correspond to 0, 1 or 2 instants in TAI. As a result, the returned value from a Unix to TAI conversion is an array with 0, 1 or 2 entries.
 
-#### tai.oneToMany.unixToAtomicPicos(unix: number): BigInt\[\]
+### ONE_TO_ONE
+
+This constant indicates that the converter should treat the relationship between Unix and TAI as one-to-one. During an inserted leap second, Unix time **stalls for one second**. An instant in Unix time corresponds to 1 instant in TAI.
+
+### Converter(ONE_TO_MANY | ONE_TO_ONE): converter
+
+Returns a TAI/Unix converter object whose conversions obey the specified model.
+
+### Converter(ONE_TO_MANY).unixToAtomicPicos(unix: number): BigInt\[\]
 
 Convert a number of Unix milliseconds to an array of possible TAI picosecond counts. Ordinarily, this array will have a single entry. If the Unix time falls during an inserted leap second, the array will have two entries. If the Unix time falls during a removed leap second, or prior to the beginning of TAI, the array will be empty.
 
@@ -95,20 +104,20 @@ Convert a number of Unix milliseconds to an array of possible TAI picosecond cou
 const unix = -157_766_399_910
 // 1965-01-01 00:00:00.090 UTC
 
-tai.oneToMany.unixToAtomicPicos(unix)
+converter.unixToAtomicPicos(unix)
 // [-157_766_396_469_869_998_650n, -157_766_396_369_869_998_650n]
 // i.e. [1965-01-01 00:00:03.530_130_001_350 TAI, 1965-01-01 00:00:03.630_130_001_350 TAI]
 ```
 
-#### tai.oneToMany.unixToAtomic(unix: number): number\[\]
+### Converter(ONE_TO_MANY).unixToAtomic(unix: number): number\[\]
 
-As `tai.oneToMany.unixToAtomicPicos`, but return value is an array of integer TAI millisecond counts.
+As `Converter(ONE_TO_MANY).unixToAtomicPicos`, but return value is an array of integer TAI millisecond counts.
 
 ```javascript
 const unix = 915_148_800_001
 // 1999-01-01 00:00:00.001 UTC
 
-tai.oneToMany.unixToAtomic(unix)
+converter.unixToAtomic(unix)
 // [915_148_831_001, 915_148_832_001]
 // i.e. [1999-01-01 00:00:31.001 TAI, 1999-01-01 00:00:32.001 TAI]
 ```
@@ -119,17 +128,17 @@ The conversion from picoseconds to milliseconds rounds fractional milliseconds t
 const unix = -283_996_800_000
 // i.e. 1961-01-01 00:00:00.000_000 UTC, the beginning of TAI
 
-const atomicPicos = tai.oneToMany.unixToAtomicPicos(unix)
+const atomicPicos = converter.unixToAtomicPicos(unix)
 // [-283_996_798_577_182_000_000n]
 // i.e. [1961-01-01 00:00:01.422_818 TAI]
 
-const atomicMillis = tai.oneToMany.unixToAtomicMillis(unix)
+const atomicMillis = converter.unixToAtomicMillis(unix)
 // Returns an empty array [].
 // The rounded TAI millisecond count would be -283_996_798_578,
 // i.e. "1961-01-01 00:00:01.422_000 TAI", but that is before TAI began.
 ```
 
-#### tai.oneToMany.atomicToUnix(atomic: number): number
+### Converter(ONE_TO_MANY).atomicToUnix(atomic: number): number
 
 Convert a number of TAI milliseconds to Unix milliseconds. Note that over the course of a leap second, two different instants in TAI may convert back to the same instant in Unix time.
 
@@ -137,19 +146,15 @@ Convert a number of TAI milliseconds to Unix milliseconds. Note that over the co
 const atomic1 = 915_148_831_001 // 1999-01-01 00:00:31.001 TAI
 const atomic2 = 915_148_832_001 // 1999-01-01 00:00:32.001 TAI
 
-tai.oneToMany.atomicToUnix(atomic1)
+converter.atomicToUnix(atomic1)
 // 915_148_800_001
 // i.e. 1999-01-01 00:00:00.001 UTC
 
-tai.oneToMany.atomicToUnix(atomic2)
+converter.atomicToUnix(atomic2)
 // 915_148_800_001, same result
 ```
 
-### tai.oneToOne
-
-These conversions treat the relationship between Unix and TAI as one-to-one. An instant in Unix time corresponds to 1 instant in TAI. During an inserted leap second, Unix time **stalls for one second**.
-
-#### tai.oneToOne.unixToAtomicPicos(unix: number): BigInt
+### Converter(ONE_TO_ONE).unixToAtomicPicos(unix: number): BigInt
 
 Convert a number of Unix milliseconds to a number of TAI picoseconds. If the Unix time falls on a removed leap second, or prior to the beginning of TAI, we throw an exception.
 
@@ -157,20 +162,20 @@ Convert a number of Unix milliseconds to a number of TAI picoseconds. If the Uni
 const unix = -157_766_399_910
 // 1965-01-01 00:00:00.090 UTC
 
-tai.oneToOne.unixToAtomicPicos(unix)
+converter.unixToAtomicPicos(unix)
 // -157_766_396_369_869_998_650n
 // i.e. 1965-01-01 00:00:03.630_130_001_350 TAI
 ```
 
-#### tai.oneToOne.unixToAtomic(unix: number): number
+### Converter(ONE_TO_ONE).unixToAtomic(unix: number): number
 
-As `tai.oneToOne.unixToAtomicPicos`, but converts the picosecond count to milliseconds.
+As `Converter(ONE_TO_ONE).unixToAtomicPicos`, but converts the picosecond count to milliseconds.
 
 ```javascript
 const unix = 915_148_800_001
 // 1999-01-01 00:00:00.001 UTC
 
-tai.oneToOne.unixToAtomic(unix)
+converter.unixToAtomic(unix)
 // 915_148_832_001
 // i.e. 1999-01-01 00:00:32.001 TAI
 ```
@@ -181,17 +186,17 @@ Fractional milliseconds are rounded towards negative infinity. Note that this ro
 const unix = -283_996_800_000
 // i.e. 1961-01-01 00:00:00.000_000 UTC, the beginning of TAI
 
-const atomicPicos = tai.oneToOne.unixToAtomicPicos(unix)
+const atomicPicos = Converter(ONE_TO_ONE).unixToAtomicPicos(unix)
 // -283_996_798_577_182_000_000n
 // i.e. 1961-01-01 00:00:01.422_818 TAI
 
-const atomicMillis = tai.oneToMany.unixToAtomic(unix)
+const atomicMillis = Converter(ONE_TO_MANY).unixToAtomic(unix)
 // Throws an exception.
 // The rounded TAI millisecond count would be -283_996_798_578,
 // i.e. "1961-01-01 00:00:01.422_000 TAI", which is before TAI began.
 ```
 
-#### tai.oneToOne.atomicToUnix(atomic: number): number
+### Converter(ONE_TO_ONE).atomicToUnix(atomic: number): number
 
 Converts a number of TAI milliseconds back to Unix milliseconds. If the TAI time falls during the first part of an inserted leap second, we see that Unix time is stalled here.
 
@@ -201,13 +206,13 @@ const atomic2 = 915_148_831_001 // 1999-01-01 00:00:31.001 TAI
 const atomic3 = 915_148_832_000 // 1999-01-01 00:00:32.000 TAI
 const atomic4 = 915_148_832_001 // 1999-01-01 00:00:32.001 TAI
 
-tai.oneToOne.atomicToUnix(atomic1)
-tai.oneToOne.atomicToUnix(atomic2)
-tai.oneToOne.atomicToUnix(atomic3)
+converter.atomicToUnix(atomic1)
+converter.atomicToUnix(atomic2)
+converter.atomicToUnix(atomic3)
 // 915_148_800_000 in all cases
 // i.e. 1999-01-01 00:00:00.000 UTC
 
-tai.oneToOne.atomicToUnix(atomic4)
+converter.atomicToUnix(atomic4)
 // 915_148_800_001
 // i.e. 1999-01-01 00:00:00.001 UTC
 ```
