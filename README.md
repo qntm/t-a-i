@@ -171,7 +171,7 @@ converter.atomicToUnix(atomic2)
 
 ### Converter(INSERT_MODELS.STALL_LAST).unixToAtomicPicos(unix: number): BigInt
 
-Convert a number of Unix milliseconds to a number of TAI picoseconds. If the Unix time falls on a removed leap second, or prior to the beginning of TAI, we throw an exception.
+Convert a number of Unix milliseconds to a number of TAI picoseconds. If the Unix time falls on a removed leap second, or prior to the beginning of TAI, `NaN` is returned.
 
 ```javascript
 const unix = -157_766_399_910
@@ -195,7 +195,7 @@ converter.unixToAtomic(unix)
 // i.e. 1999-01-01 00:00:32.001 TAI
 ```
 
-Fractional milliseconds are rounded towards negative infinity. Note that this rounding can result in an exception being thrown:
+Fractional milliseconds are rounded towards negative infinity. Note that this rounding can result in `NaN` being returned:
 
 ```javascript
 const unix = -283_996_800_000
@@ -206,7 +206,7 @@ const atomicPicos = Converter(INSERT_MODELS.STALL_LAST).unixToAtomicPicos(unix)
 // i.e. 1961-01-01 00:00:01.422_818 TAI
 
 const atomicMillis = Converter(INSERT_MODELS.OVERRUN_ARRAY).unixToAtomic(unix)
-// Throws an exception.
+// NaN
 // The rounded TAI millisecond count would be -283_996_798_578,
 // i.e. "1961-01-01 00:00:01.422_000 TAI", which is before TAI began.
 ```
