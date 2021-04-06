@@ -72,10 +72,8 @@ module.exports.Converter = (data, insertModel) => {
       return atomicPicosArray
     }
 
-    // All other models throw on removed Unix times
     const i = atomicPicosArray.length - 1
 
-    // Removed leap second; this Unix time never occurred
     return i in atomicPicosArray ? atomicPicosArray[i] : NaN
   }
 
@@ -99,15 +97,9 @@ module.exports.Converter = (data, insertModel) => {
       return atomicMillisArray
     }
 
-    // All other models throw on removed Unix times
     const i = atomicMillisArray.length - 1
 
-    if (!(i in atomicMillisArray)) {
-      // Removed leap second; this Unix time never occurred
-      throw Error(`No TAI equivalent: ${unixMillis}`)
-    }
-
-    return atomicMillisArray[i]
+    return i in atomicMillisArray ? atomicMillisArray[i] : NaN
   }
 
   /// TAI to Unix conversion methods

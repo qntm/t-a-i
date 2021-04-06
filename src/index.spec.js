@@ -470,8 +470,8 @@ describe('Converter', () => {
         // 00:00:01.422818 is in range, but rounds down to 00:00:01.422 which is not
         expect(unixToAtomicPicos(Date.UTC(1961, JAN, 1, 0, 0, 0, 0)))
           .toBe(-283_996_798_577_182_000_000n)
-        expect(() => unixToAtomic(Date.UTC(1961, JAN, 1, 0, 0, 0, 0)))
-          .toThrowError('No TAI equivalent: -283996800000')
+        expect(unixToAtomic(Date.UTC(1961, JAN, 1, 0, 0, 0, 0)))
+          .toBe(NaN)
       })
 
       it('advances 15 TAI picoseconds per Unix millisecond', () => {
@@ -592,8 +592,8 @@ describe('Converter', () => {
 
     describe('Unix->TAI conversions', () => {
       it('The NEW earliest instant in TAI', () => {
-        expect(() => converter.unixToAtomic(Date.UTC(1960, DEC, 31, 23, 59, 59, 999)))
-          .toThrowError('No TAI equivalent: -283996800001')
+        expect(converter.unixToAtomic(Date.UTC(1960, DEC, 31, 23, 59, 59, 999)))
+          .toBe(NaN)
       })
 
       it('icky', () => {
@@ -635,8 +635,8 @@ describe('Converter', () => {
       // TAI picosecond count rounds to -252_460_798_155 which is not in range
       expect(converter.unixToAtomicPicos(Date.UTC(1962, JAN, 1, 0, 0, 0, 0)))
         .toBe(-252_460_798_154_142_000_000n)
-      expect(() => converter.unixToAtomic(Date.UTC(1962, JAN, 1, 0, 0, 0, 0)))
-        .toThrowError('No TAI equivalent: -252460800000')
+      expect(converter.unixToAtomic(Date.UTC(1962, JAN, 1, 0, 0, 0, 0)))
+        .toBe(NaN)
 
       expect(converter.unixToAtomicPicos(Date.UTC(1962, JAN, 1, 0, 0, 0, 1)))
         .toBe(-252_460_798_153_141_999_987n)
@@ -663,12 +663,12 @@ describe('Converter', () => {
       expect(converter.unixToAtomic(Date.UTC(1961, JUL, 31, 23, 59, 59, 950)))
         .toBe(-265_679_998_353)
 
-      expect(() => converter.unixToAtomic(Date.UTC(1961, JUL, 31, 23, 59, 59, 951)))
-        .toThrowError('No TAI equivalent: -265680000049')
-      expect(() => converter.unixToAtomic(Date.UTC(1961, JUL, 31, 23, 59, 59, 999)))
-        .toThrowError('No TAI equivalent: -265680000001')
-      expect(() => converter.unixToAtomic(Date.UTC(1961, AUG, 1, 0, 0, 0, 0)))
-        .toThrowError('No TAI equivalent: -265680000000')
+      expect(converter.unixToAtomic(Date.UTC(1961, JUL, 31, 23, 59, 59, 951)))
+        .toBe(NaN)
+      expect(converter.unixToAtomic(Date.UTC(1961, JUL, 31, 23, 59, 59, 999)))
+        .toBe(NaN)
+      expect(converter.unixToAtomic(Date.UTC(1961, AUG, 1, 0, 0, 0, 0)))
+        .toBe(NaN)
       expect(converter.unixToAtomic(Date.UTC(1961, AUG, 1, 0, 0, 0, 1)))
         .toBe(-265679998352)
       expect(converter.unixToAtomic(Date.UTC(1961, AUG, 1, 0, 0, 0, 2)))
@@ -1017,16 +1017,16 @@ describe('Converter', () => {
     it('Crazy pre-1972 nonsense', () => {
       // TAI picosecond count rounds to -252_460_798_155 which is not in range
       expect(converter.unixToAtomicPicos(Date.UTC(1962, JAN, 1, 0, 0, 0, 0)))
-        .toEqual(-252_460_798_154_142_000_000n)
-      expect(() => converter.unixToAtomic(Date.UTC(1962, JAN, 1, 0, 0, 0, 0)))
-        .toThrowError('No TAI equivalent: -252460800000')
+        .toBe(-252_460_798_154_142_000_000n)
+      expect(converter.unixToAtomic(Date.UTC(1962, JAN, 1, 0, 0, 0, 0)))
+        .toBe(NaN)
 
       expect(converter.unixToAtomicPicos(Date.UTC(1962, JAN, 1, 0, 0, 0, 1)))
-        .toEqual(-252_460_798_153_141_999_987n)
+        .toBe(-252_460_798_153_141_999_987n)
       expect(converter.unixToAtomic(Date.UTC(1962, JAN, 1, 0, 0, 0, 1)))
-        .toEqual(-252_460_798_154)
+        .toBe(-252_460_798_154)
       expect(converter.unixToAtomic(Date.UTC(1962, JAN, 1, 0, 0, 0, 1)))
-        .toEqual(Date.UTC(1962, JAN, 1, 0, 0, 1, 846)) // Same
+        .toBe(Date.UTC(1962, JAN, 1, 0, 0, 1, 846)) // Same
     })
 
     describe('TAI raw data conversion unit tests based on magic numbers', () => {

@@ -18,7 +18,7 @@ The relationship between TAI and UTC is well-defined as far back as 1 January 19
 
 It is **strongly recommended** that you thoroughly unit test the behaviour of your code at leap second boundaries: before, during and after.
 
-The nature of the relationship between Unix time and TAI means that conversions behave consistently for years on end, and then, during leap seconds, suddenly display very different behaviour, **sometimes throwing exceptions**. Not only that, leap seconds are commonly inserted on New Year's Eve, which is a very inopportune time to be dealing with this kind of bug!
+The nature of the relationship between Unix time and TAI means that conversions behave consistently for years on end, and then, during leap seconds, suddenly display very different behaviour, **sometimes returning `NaN`**. Not only that, leap seconds are commonly inserted on New Year's Eve, which is a very inopportune time to be dealing with this kind of bug!
 
 At the time of writing:
 
@@ -75,7 +75,7 @@ Note! Use caution when constructing a `Date` object directly from a TAI millisec
 
 All methods throw exceptions if not passed an integer number of milliseconds.
 
-Methods throw exceptions or return empty result sets if called with times before the beginning of TAI, which was, equivalently:
+Methods generally return `NaN` if called with times before the beginning of TAI, which was, equivalently:
 
 * 1961-01-01 00:00:00.000_000 UTC
 * 1961-01-01 00:00:01.422_818 TAI
@@ -92,19 +92,19 @@ This object contains constants which specify how the converter should handle con
 
 This constant indicates that during inserted time, the converter should behave as if Unix time **overruns, instantaneously backtracks, and repeats itself**. One instant in Unix time may therefore correspond to 0, 1 or 2 instants in TAI.
 
-* Unix-to-TAI conversions return an array with 0, 1 or 2 entries.
+* Unix-to-TAI conversions return an array with 0, 1 or 2 entries. If the input Unix instant was removed, or is before the beginning of TAI, an empty array is returned.
 * TAI-to-Unix conversions always work, but two instants in TAI may convert back to the same instant in Unix time.
 
 #### OVERRUN_LAST
 
-* Unix-to-TAI conversions act like `OVERRUN_ARRAY`, but return the last entry from the array. If the input Unix instant was removed, an exception is thrown.
+* Unix-to-TAI conversions act like `OVERRUN_ARRAY`, but return the last entry from the array. If the input Unix instant was removed, or is before the beginning of TAI, `NaN` is returned.
 * TAI-to-Unix conversions always work, but two instants in TAI may convert back to the same instant in Unix time.
 
 #### STALL_LAST
 
 This constant indicates that during inserted time, the converter should behave as if Unix time **stalls**.
 
-* Unix-to-TAI conversions return the last applicable instant in TAI - the end of the stall.
+* Unix-to-TAI conversions return the last applicable instant in TAI - the end of the stall. If the input Unix instant was removed, or is before the beginning of TAI, `NaN` is returned.
 * TAI-to-Unix conversions convert *any* input TAI instant during the stall to the same instant in Unix time.
 
 ### Converter(insertModel): converter

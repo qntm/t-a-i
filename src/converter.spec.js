@@ -33,7 +33,7 @@ describe('Converter', () => {
 
       it('fails when the Unix count is out of bounds', () => {
         expect(converter.unixToAtomic(0)).toBe(0)
-        expect(() => converter.unixToAtomic(-1)).toThrowError('No TAI equivalent: -1')
+        expect(converter.unixToAtomic(-1)).toBe(NaN)
       })
 
       it('fails when the atomic count is out of bounds', () => {
@@ -526,16 +526,16 @@ describe('Converter', () => {
         it('first instant of the Unix time discontinuity: one Unix time is zero TAI times', () => {
           expect(converter.unixToAtomicPicos(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)))
             .toBe(NaN)
-          expect(() => converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)))
-            .toThrowError('No TAI equivalent: 315532799000')
+          expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)))
+            .toBe(NaN)
           // no atomicToUnix can return the value above
         })
 
         it('final instant of the Unix time discontinuity: one Unix time is zero TAI times', () => {
           expect(converter.unixToAtomicPicos(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
             .toBe(NaN)
-          expect(() => converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
-            .toThrowError('No TAI equivalent: 315532799999')
+          expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
+            .toBe(NaN)
           // no atomicToUnix can return the value above
         })
 
@@ -568,10 +568,10 @@ describe('Converter', () => {
             .toBe(0)
           expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)))
             .toBe(Date.UTC(1979, DEC, 31, 23, 59, 58, 999))
-          expect(() => converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)))
-            .toThrowError('No TAI equivalent: 315532799000')
-          expect(() => converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
-            .toThrowError('No TAI equivalent: 315532799999')
+          expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)))
+            .toBe(NaN)
+          expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
+            .toBe(NaN)
           expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0)))
             .toBe(Date.UTC(1979, DEC, 31, 23, 59, 59, 0))
         })
@@ -609,16 +609,16 @@ describe('Converter', () => {
         it('first instant of the Unix time discontinuity: one Unix time is zero TAI times', () => {
           expect(converter.unixToAtomicPicos(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)))
             .toBe(NaN)
-          expect(() => converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)))
-            .toThrowError('No TAI equivalent: 315532799000')
+          expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)))
+            .toBe(NaN)
           // no atomicToUnix can return the value above
         })
 
         it('final instant of the Unix time discontinuity: one Unix time is zero TAI times', () => {
           expect(converter.unixToAtomicPicos(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
             .toBe(NaN)
-          expect(() => converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
-            .toThrowError('No TAI equivalent: 315532799999')
+          expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
+            .toBe(NaN)
           // no atomicToUnix can return the value above
         })
 
@@ -651,10 +651,10 @@ describe('Converter', () => {
             .toBe(0)
           expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)))
             .toBe(Date.UTC(1979, DEC, 31, 23, 59, 58, 999))
-          expect(() => converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)))
-            .toThrowError('No TAI equivalent: 315532799000')
-          expect(() => converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
-            .toThrowError('No TAI equivalent: 315532799999')
+          expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)))
+            .toBe(NaN)
+          expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
+            .toBe(NaN)
           expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0)))
             .toBe(Date.UTC(1979, DEC, 31, 23, 59, 59, 0))
         })
@@ -1284,7 +1284,7 @@ describe('Converter', () => {
           expect(converter.unixToAtomic(-999)).toBe(999)
           expect(converter.unixToAtomic(-1)).toBe(1)
           expect(converter.unixToAtomic(0)).toBe(0)
-          expect(() => converter.unixToAtomic(1)).toThrowError('No TAI equivalent: 1')
+          expect(converter.unixToAtomic(1)).toBe(NaN)
         })
 
         it('atomicToUnix', () => {
@@ -1312,7 +1312,7 @@ describe('Converter', () => {
           expect(converter.unixToAtomic(-999)).toBe(999)
           expect(converter.unixToAtomic(-1)).toBe(1)
           expect(converter.unixToAtomic(0)).toBe(0)
-          expect(() => converter.unixToAtomic(1)).toThrowError('No TAI equivalent: 1')
+          expect(converter.unixToAtomic(1)).toBe(NaN)
         })
 
         it('atomicToUnix', () => {
