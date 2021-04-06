@@ -95,6 +95,11 @@ This constant indicates that during inserted time, the converter should behave a
 * Unix-to-TAI conversions return an array with 0, 1 or 2 entries.
 * TAI-to-Unix conversions always work, but two instants in TAI may convert back to the same instant in Unix time.
 
+#### OVERRUN_LAST
+
+* Unix-to-TAI conversions act like `OVERRUN_ARRAY`, but return the last entry from the array. If the input Unix instant was removed, an exception is thrown.
+* TAI-to-Unix conversions always work, but two instants in TAI may convert back to the same instant in Unix time.
+
 #### STALL_LAST
 
 This constant indicates that during inserted time, the converter should behave as if Unix time **stalls**.

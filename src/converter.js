@@ -19,7 +19,8 @@ const picosPerMilli = 1000n * 1000n * 1000n
 
 const INSERT_MODELS = {
   OVERRUN_ARRAY: 0,
-  STALL_LAST: 1
+  OVERRUN_LAST: 1,
+  STALL_LAST: 2
 }
 
 module.exports.INSERT_MODELS = INSERT_MODELS
@@ -63,12 +64,27 @@ module.exports.Converter = (data, insertModel) => {
       )
   }
 
-  const unixMillisToAtomicPicosArray = unixMillis =>
-    unixMillisToRaysWithAtomicPicos(unixMillis)
+  const unixToAtomicPicos = unixMillis => {
+    const atomicPicosArray = unixMillisToRaysWithAtomicPicos(unixMillis)
       .map(({ atomicPicos }) => atomicPicos)
 
-  const unixMillisToAtomicMillisArray = unixMillis =>
-    unixMillisToRaysWithAtomicPicos(unixMillis)
+    if (insertModel === INSERT_MODELS.OVERRUN_ARRAY) {
+      return atomicPicosArray
+    }
+
+    // All other models throw on removed Unix times
+    const i = atomicPicosArray.length - 1
+
+    if (!(i in atomicPicosArray)) {
+      // Removed leap second; this Unix time never occurred
+      throw Error(`No TAI equivalent: ${unixMillis}`)
+    }
+
+    return atomicPicosArray[i]
+  }
+
+  const unixToAtomic = unixMillis => {
+    const atomicMillisArray = unixMillisToRaysWithAtomicPicos(unixMillis)
       .map(({ ray, atomicPicos }) => ({
         ray,
 
@@ -83,20 +99,11 @@ module.exports.Converter = (data, insertModel) => {
       )
       .map(({ atomicMillis }) => atomicMillis)
 
-  const unixMillisToCanonicalAtomicPicos = unixMillis => {
-    const atomicPicosArray = unixMillisToAtomicPicosArray(unixMillis)
-    const i = atomicPicosArray.length - 1
-
-    if (!(i in atomicPicosArray)) {
-      // Removed leap second; this Unix time never occurred
-      throw Error(`No TAI equivalent: ${unixMillis}`)
+    if (insertModel === INSERT_MODELS.OVERRUN_ARRAY) {
+      return atomicMillisArray
     }
 
-    return atomicPicosArray[i]
-  }
-
-  const unixMillisToCanonicalAtomicMillis = unixMillis => {
-    const atomicMillisArray = unixMillisToAtomicMillisArray(unixMillis)
+    // All other models throw on removed Unix times
     const i = atomicMillisArray.length - 1
 
     if (!(i in atomicMillisArray)) {
@@ -127,29 +134,26 @@ module.exports.Converter = (data, insertModel) => {
 
     const unixMillis = atomicPicosToUnixMillis(rays[rayId], atomicPicos)
 
-    return {
-      [INSERT_MODELS.OVERRUN_ARRAY]: unixMillis,
-
-      // If a later ray starts at a Unix time before this time, apply stalling behaviour
-      [INSERT_MODELS.STALL_LAST]: Math.min(
+    // If a later ray starts at a Unix time before this time, apply stalling behaviour
+    if (insertModel === INSERT_MODELS.STALL_LAST) {
+      return Math.min(
         unixMillis,
         ...rays.slice(rayId + 1).map(ray => ray.start.unixMillis)
       )
-    }[insertModel]
-  }
-
-  if (insertModel === INSERT_MODELS.OVERRUN_ARRAY) {
-    return {
-      unixToAtomicPicos: unixMillisToAtomicPicosArray,
-      unixToAtomic: unixMillisToAtomicMillisArray,
-      atomicToUnix
     }
+
+    // Otherwise assume overrun
+    return unixMillis
   }
 
-  if (insertModel === INSERT_MODELS.STALL_LAST) {
+  if (
+    insertModel === INSERT_MODELS.OVERRUN_ARRAY ||
+    insertModel === INSERT_MODELS.OVERRUN_LAST ||
+    insertModel === INSERT_MODELS.STALL_LAST
+  ) {
     return {
-      unixToAtomicPicos: unixMillisToCanonicalAtomicPicos,
-      unixToAtomic: unixMillisToCanonicalAtomicMillis,
+      unixToAtomicPicos,
+      unixToAtomic,
       atomicToUnix
     }
   }
