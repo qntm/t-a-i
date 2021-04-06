@@ -1,9 +1,9 @@
 /* eslint-env jest */
 
-const { Converter, INSERT_MODELS } = require('./converter')
+const { Converter, MODELS } = require('./converter')
 const munge = require('./munge')
 
-const { OVERRUN_ARRAY, OVERRUN_LAST, STALL_LAST } = INSERT_MODELS
+const { OVERRUN_ARRAY, OVERRUN_LAST, STALL_LAST } = MODELS
 
 const JAN = 0
 const DEC = 11
@@ -17,7 +17,7 @@ describe('Converter', () => {
 
     describe('bad model', () => {
       it('throws', () => {
-        expect(() => Converter(data)).toThrowError('Unrecognised model for inserted time: undefined')
+        expect(() => Converter(data)).toThrowError('Unrecognised model: undefined')
       })
     })
 
@@ -25,6 +25,8 @@ describe('Converter', () => {
       const converter = Converter(data, STALL_LAST)
 
       it('fails on a non-integer number of milliseconds', () => {
+        expect(() => converter.unixToAtomicPicos(NaN)).toThrowError('Not an integer: NaN')
+        expect(() => converter.unixToAtomicPicos('bop')).toThrowError('Not an integer: bop')
         expect(() => converter.unixToAtomic(89.3)).toThrowError('Not an integer: 89.3')
         expect(() => converter.unixToAtomic('boop')).toThrowError('Not an integer: boop')
         expect(() => converter.atomicToUnix(Infinity)).toThrowError('Not an integer: Infinity')
@@ -38,7 +40,7 @@ describe('Converter', () => {
 
       it('fails when the atomic count is out of bounds', () => {
         expect(converter.atomicToUnix(0)).toBe(0)
-        expect(() => converter.atomicToUnix(-1)).toThrowError('No UTC equivalent: -1')
+        expect(converter.atomicToUnix(-1)).toBe(NaN)
       })
 
       it('manages basic conversions', () => {
@@ -683,6 +685,9 @@ describe('Converter', () => {
             unixMillis: 1,
             atomicPicos: 900_000_000n // ray start intentionally doesn't include TAI epoch
           },
+          stall: {
+            unixMillis: Infinity
+          },
           end: {
             atomicPicos: Infinity
           },
@@ -712,6 +717,9 @@ describe('Converter', () => {
             unixMillis: -1,
             atomicPicos: -900_000_000n
           },
+          stall: {
+            unixMillis: 1
+          },
           end: {
             atomicPicos: -100_000_000n
           },
@@ -725,6 +733,9 @@ describe('Converter', () => {
           start: {
             unixMillis: 1,
             atomicPicos: -100_000_000n
+          },
+          stall: {
+            unixMillis: Infinity
           },
           end: {
             atomicPicos: Infinity
@@ -755,6 +766,9 @@ describe('Converter', () => {
           unixMillis: 0,
           atomicPicos: 0n
         },
+        stall: {
+          unixMillis: 0
+        },
         end: {
           atomicPicos: 0n
         },
@@ -769,6 +783,9 @@ describe('Converter', () => {
           // Same start point as previous ray, so previous ray has length 0 TAI seconds
           unixMillis: 0,
           atomicPicos: 0n
+        },
+        stall: {
+          unixMillis: Infinity
         },
         end: {
           atomicPicos: Infinity
@@ -1260,7 +1277,7 @@ describe('Converter', () => {
         })
 
         it('atomicToUnix', () => {
-          expect(() => converter.atomicToUnix(-1)).toThrowError('No UTC equivalent: -1')
+          expect(converter.atomicToUnix(-1)).toBe(NaN)
           expect(converter.atomicToUnix(0)).toBe(0)
           expect(converter.atomicToUnix(1)).toBe(-1)
           expect(converter.atomicToUnix(999)).toBe(-999)
@@ -1288,7 +1305,7 @@ describe('Converter', () => {
         })
 
         it('atomicToUnix', () => {
-          expect(() => converter.atomicToUnix(-1)).toThrowError('No UTC equivalent: -1')
+          expect(converter.atomicToUnix(-1)).toBe(NaN)
           expect(converter.atomicToUnix(0)).toBe(0)
           expect(converter.atomicToUnix(1)).toBe(-1)
           expect(converter.atomicToUnix(999)).toBe(-999)
@@ -1316,7 +1333,7 @@ describe('Converter', () => {
         })
 
         it('atomicToUnix', () => {
-          expect(() => converter.atomicToUnix(-1)).toThrowError('No UTC equivalent: -1')
+          expect(converter.atomicToUnix(-1)).toBe(NaN)
           expect(converter.atomicToUnix(0)).toBe(0)
           expect(converter.atomicToUnix(1)).toBe(-1)
           expect(converter.atomicToUnix(999)).toBe(-999)

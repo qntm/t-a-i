@@ -1,8 +1,8 @@
 /* eslint-env jest */
 
-const { Converter, INSERT_MODELS } = require('.')
+const { Converter, MODELS } = require('.')
 
-const { OVERRUN_ARRAY, OVERRUN_LAST, STALL_LAST } = INSERT_MODELS
+const { OVERRUN_ARRAY, OVERRUN_LAST, STALL_LAST } = MODELS
 
 const JAN = 0
 const FEB = 1
@@ -74,8 +74,8 @@ describe('Converter', () => {
       const atomicToUnix = converter.atomicToUnix
 
       it('The NEW earliest instant in TAI', () => {
-        expect(() => atomicToUnix(Date.UTC(1961, JAN, 1, 0, 0, 1, 422)))
-          .toThrowError('No UTC equivalent: -283996798578')
+        expect(atomicToUnix(Date.UTC(1961, JAN, 1, 0, 0, 1, 422)))
+          .toBe(NaN)
 
         // Actual start of TAI: 1961-01-01 00:00:01.422818
         expect(atomicToUnix(Date.UTC(1961, JAN, 1, 0, 0, 1, 423)))
@@ -426,7 +426,7 @@ describe('Converter', () => {
       })
 
       it('converter.atomicToUnix', () => {
-        expect(() => converter.atomicToUnix(-283996800000)).toThrow()
+        expect(converter.atomicToUnix(-283996800000)).toBe(NaN)
         expect(converter.atomicToUnix(63072010000)).toBe(63072000000)
         expect(converter.atomicToUnix(78796811000)).toBe(78796800000)
         expect(converter.atomicToUnix(94694412000)).toBe(94694400000)
@@ -517,8 +517,8 @@ describe('Converter', () => {
       const atomicToUnix = converter.atomicToUnix
 
       it('The NEW earliest instant in TAI', () => {
-        expect(() => atomicToUnix(Date.UTC(1961, JAN, 1, 0, 0, 1, 422)))
-          .toThrowError('No UTC equivalent: -283996798578')
+        expect(atomicToUnix(Date.UTC(1961, JAN, 1, 0, 0, 1, 422)))
+          .toBe(NaN)
 
         // Actual start of TAI: 1961-01-01 00:00:01.422818
         expect(atomicToUnix(Date.UTC(1961, JAN, 1, 0, 0, 1, 423)))
@@ -844,7 +844,7 @@ describe('Converter', () => {
       })
 
       it('converter.atomicToUnix', () => {
-        expect(() => converter.atomicToUnix(-283996800000)).toThrow()
+        expect(converter.atomicToUnix(-283996800000)).toBe(NaN)
         expect(converter.atomicToUnix(63072010000)).toBe(63072000000)
         expect(converter.atomicToUnix(78796811000)).toBe(78796800000)
         expect(converter.atomicToUnix(94694412000)).toBe(94694400000)
@@ -884,8 +884,8 @@ describe('Converter', () => {
       const atomicToUnix = converter.atomicToUnix
 
       it('The NEW earliest instant in TAI', () => {
-        expect(() => atomicToUnix(Date.UTC(1961, JAN, 1, 0, 0, 1, 422))).toThrow()
-        expect(() => atomicToUnix(-283996798578)).toThrow() // same
+        expect(atomicToUnix(Date.UTC(1961, JAN, 1, 0, 0, 1, 422))).toBe(NaN)
+        expect(atomicToUnix(-283996798578)).toBe(NaN) // same
 
         // Actual start of TAI: 1961-01-01 00:00:01.422818
         expect(atomicToUnix(Date.UTC(1961, JAN, 1, 0, 0, 1, 423)))
@@ -1062,7 +1062,7 @@ describe('Converter', () => {
       })
 
       it('converter.atomicToUnix', () => {
-        expect(() => converter.atomicToUnix(-283996800000)).toThrow()
+        expect(converter.atomicToUnix(-283996800000)).toBe(NaN)
         expect(converter.atomicToUnix(63072010000)).toBe(63072000000)
         expect(converter.atomicToUnix(78796811000)).toBe(78796800000)
         expect(converter.atomicToUnix(94694412000)).toBe(94694400000)

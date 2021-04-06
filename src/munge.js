@@ -64,16 +64,28 @@ module.exports = data => {
   })
 
   // `end` is the first TAI instant when this ray ceases to be applicable.
-  // `end` can equal or come before `start`, indicating that this ray has no validity at all
-  let end = {
-    atomicPicos: Infinity
+  // `end` can equal `start`, indicating that this ray has no validity at all
+  munged.forEach((ray, rayId, rays) => {
+    ray.end = {
+      atomicPicos: rayId + 1 in rays
+        ? rays[rayId + 1].start.atomicPicos
+        : Infinity
+    }
+
+    if (ray.end.atomicPicos < ray.start.atomicPicos) {
+      throw Error('Disordered data')
+    }
+  })
+
+  // The stall point is the point where this ray's interactions with the next ray start to become
+  // interesting and the possibilities begin to diverge somewhat
+  let stall = {
+    unixMillis: Infinity
   }
   for (let rayId = munged.length - 1; rayId >= 0; rayId--) {
-    munged[rayId].end = end
-    if (munged[rayId].start.atomicPicos < end.atomicPicos) {
-      end = {
-        atomicPicos: munged[rayId].start.atomicPicos
-      }
+    munged[rayId].stall = stall
+    stall = {
+      unixMillis: Math.min(munged[rayId].start.unixMillis, stall.unixMillis)
     }
   }
 

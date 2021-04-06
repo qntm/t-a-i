@@ -10,21 +10,22 @@
 // to multiple TAI times. We can return an array of these, or just the result from the latest ray
 // (according to its numbering).
 // The logic below should work even if these rays proceed horizontally, or UTC runs backwards, or if
-// the rays are supplied in the wrong order or if the period of validity of a ray is 0.
+// the period of validity of a ray is 0.
 
 const div = require('./div')
 const munge = require('./munge')
 
 const picosPerMilli = 1000n * 1000n * 1000n
 
-const INSERT_MODELS = {
+const MODELS = {
   OVERRUN_ARRAY: 0,
   OVERRUN_LAST: 1,
-  STALL_LAST: 2
+  STALL_RANGE: 2,
+  STALL_LAST: 3
 }
 
-module.exports.INSERT_MODELS = INSERT_MODELS
-module.exports.Converter = (data, insertModel) => {
+module.exports.MODELS = MODELS
+module.exports.Converter = (data, model) => {
   const rays = munge(data)
 
   /// Helper methods
@@ -48,27 +49,20 @@ module.exports.Converter = (data, insertModel) => {
 
   /// Unix to TAI conversion methods
 
-  const unixMillisToRaysWithAtomicPicos = unixMillis => {
+  const unixToAtomicPicos = unixMillis => {
     if (!Number.isInteger(unixMillis)) {
       throw Error(`Not an integer: ${unixMillis}`)
     }
 
-    return rays
-      .map(ray => ({
-        ray,
-        atomicPicos: unixMillisToAtomicPicos(ray, unixMillis)
-      }))
-      .filter(({ ray, atomicPicos }) =>
-        // ...however, the result has to still be in the ray!
-        atomicPicosInRay(ray, atomicPicos)
-      )
-  }
+    const atomicPicosArray = []
+    for (const ray of rays) {
+      const atomicPicos = unixMillisToAtomicPicos(ray, unixMillis)
+      if (atomicPicosInRay(ray, atomicPicos)) {
+        atomicPicosArray.push(atomicPicos)
+      }
+    }
 
-  const unixToAtomicPicos = unixMillis => {
-    const atomicPicosArray = unixMillisToRaysWithAtomicPicos(unixMillis)
-      .map(({ atomicPicos }) => atomicPicos)
-
-    if (insertModel === INSERT_MODELS.OVERRUN_ARRAY) {
+    if (model === MODELS.OVERRUN_ARRAY) {
       return atomicPicosArray
     }
 
@@ -78,22 +72,28 @@ module.exports.Converter = (data, insertModel) => {
   }
 
   const unixToAtomic = unixMillis => {
-    const atomicMillisArray = unixMillisToRaysWithAtomicPicos(unixMillis)
-      .map(({ ray, atomicPicos }) => ({
-        ray,
+    if (!Number.isInteger(unixMillis)) {
+      throw Error(`Not an integer: ${unixMillis}`)
+    }
 
+    const atomicMillisArray = []
+    for (const ray of rays) {
+      const atomicPicos = unixMillisToAtomicPicos(ray, unixMillis)
+
+      if (atomicPicosInRay(ray, atomicPicos)) {
         // This rounds towards negative infinity. This is potentially problematic because even if
         // the atomic picosecond count is part of this ray, the rounded millisecond count may not
         // be...
-        atomicMillis: Number(div(atomicPicos, picosPerMilli))
-      }))
-      .filter(({ ray, atomicMillis }) =>
-        // ...hence this additional test
-        atomicPicosInRay(ray, BigInt(atomicMillis) * picosPerMilli)
-      )
-      .map(({ atomicMillis }) => atomicMillis)
+        const atomicMillis = Number(div(atomicPicos, picosPerMilli))
 
-    if (insertModel === INSERT_MODELS.OVERRUN_ARRAY) {
+        // ...hence this additional test
+        if (atomicPicosInRay(ray, BigInt(atomicMillis) * picosPerMilli)) {
+          atomicMillisArray.push(atomicMillis)
+        }
+      }
+    }
+
+    if (model === MODELS.OVERRUN_ARRAY) {
       return atomicMillisArray
     }
 
@@ -117,16 +117,16 @@ module.exports.Converter = (data, insertModel) => {
 
     if (rayId === -1) {
       // Pre-1961
-      throw Error(`No UTC equivalent: ${atomicMillis}`)
+      return NaN
     }
 
     const unixMillis = atomicPicosToUnixMillis(rays[rayId], atomicPicos)
 
-    // If a later ray starts at a Unix time before this time, apply stalling behaviour
-    if (insertModel === INSERT_MODELS.STALL_LAST) {
+    // Apply stalling behaviour
+    if (model === MODELS.STALL_LAST) {
       return Math.min(
         unixMillis,
-        ...rays.slice(rayId + 1).map(ray => ray.start.unixMillis)
+        rays[rayId].stall.unixMillis
       )
     }
 
@@ -135,9 +135,9 @@ module.exports.Converter = (data, insertModel) => {
   }
 
   if (
-    insertModel === INSERT_MODELS.OVERRUN_ARRAY ||
-    insertModel === INSERT_MODELS.OVERRUN_LAST ||
-    insertModel === INSERT_MODELS.STALL_LAST
+    model === MODELS.OVERRUN_ARRAY ||
+    model === MODELS.OVERRUN_LAST ||
+    model === MODELS.STALL_LAST
   ) {
     return {
       unixToAtomicPicos,
@@ -146,5 +146,5 @@ module.exports.Converter = (data, insertModel) => {
     }
   }
 
-  throw Error(`Unrecognised model for inserted time: ${insertModel}`)
+  throw Error(`Unrecognised model: ${model}`)
 }

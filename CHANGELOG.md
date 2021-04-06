@@ -2,9 +2,9 @@
 
 ## 3.0.x
 
-Rather than `require('t-a-i')` returning a converter object, it now returns an object `tai` whose property `tai.Converter` must be called to create a converter object. It also returns an enumeration `INSERT_MODELS` whose properties `OVERRUN_ARRAY`, `OVERRUN_LAST` and `STALL_LAST` which must be used to select the conversion model.
+Rather than `require('t-a-i')` returning a converter object, it now returns an object `tai` whose property `tai.Converter` must be called to create a converter object. It also returns an enumeration `MODELS` whose properties `OVERRUN_ARRAY`, `OVERRUN_LAST` and `STALL_LAST` which must be used to select the conversion model.
 
-In general, `tai.oneToMany` is replaced with `Converter(INSERT_MODELS.OVERRUN_ARRAY)`, and `tai.oneToOne` is replaced with `Converter(INSERT_MODELS.STALL_LAST)` replaces `tai.oneToOne`.
+In general, `tai.oneToMany` is replaced with `Converter(MODELS.OVERRUN_ARRAY)`, and `tai.oneToOne` is replaced with `Converter(MODELS.STALL_LAST)` replaces `tai.oneToOne`.
 
 ## 2.1.x
 

@@ -36,8 +36,8 @@ npm install t-a-i
 Exactly how long was 1972?
 
 ```javascript
-const { Converter, INSERT_MODELS } = require("t-a-i")
-const converter = Converter(INSERT_MODELS.STALL_LAST)
+const { Converter, MODELS } = require("t-a-i")
+const converter = Converter(MODELS.STALL_LAST)
 
 const unixStart = Date.UTC(1972, 0, 1) // 63_072_000_000
 const unixEnd   = Date.UTC(1973, 0, 1) // 94_694_400_000
@@ -75,7 +75,7 @@ Note! Use caution when constructing a `Date` object directly from a TAI millisec
 
 All methods throw exceptions if not passed an integer number of milliseconds.
 
-Methods generally return `NaN` if called with times before the beginning of TAI, which was, equivalently:
+Methods return `NaN` or some other empty result set if called with inputs before the beginning of TAI, which was, equivalently:
 
 * 1961-01-01 00:00:00.000_000 UTC
 * 1961-01-01 00:00:01.422_818 TAI
@@ -84,34 +84,39 @@ Methods generally return `NaN` if called with times before the beginning of TAI,
 
 Note that for times prior to the beginning of 1972, TAI milliseconds and Unix milliseconds were not the same length.
 
-### INSERT_MODELS
+### MODELS
 
-This object contains constants which specify how the converter should handle conversions between Unix time and TAI during inserted time.
+This object contains constants which specify how the converter should handle conversions between Unix time and TAI during inserted and removed time.
 
-#### OVERRUN_ARRAY
+#### MODELS.OVERRUN_ARRAY
 
-This constant indicates that during inserted time, the converter should behave as if Unix time **overruns, instantaneously backtracks, and repeats itself**. One instant in Unix time may therefore correspond to 0, 1 or 2 instants in TAI.
+This constant indicates that during inserted time, the converter should behave as if Unix time **overruns**. At the end of the inserted time, Unix time instantaneously backtracks, and repeats itself. One instant in Unix time may therefore correspond to 0, 1 or 2 instants in TAI.
 
 * Unix-to-TAI conversions return an array with 0, 1 or 2 entries. If the input Unix instant was removed, or is before the beginning of TAI, an empty array is returned.
 * TAI-to-Unix conversions always work, but two instants in TAI may convert back to the same instant in Unix time.
 
-#### OVERRUN_LAST
+#### MODELS.OVERRUN_LAST
 
 * Unix-to-TAI conversions act like `OVERRUN_ARRAY`, but return the last entry from the array. If the input Unix instant was removed, or is before the beginning of TAI, `NaN` is returned.
 * TAI-to-Unix conversions always work, but two instants in TAI may convert back to the same instant in Unix time.
 
-#### STALL_LAST
+#### MODELS.STALL_RANGE
 
 This constant indicates that during inserted time, the converter should behave as if Unix time **stalls**.
 
-* Unix-to-TAI conversions return the last applicable instant in TAI - the end of the stall. If the input Unix instant was removed, or is before the beginning of TAI, `NaN` is returned.
-* TAI-to-Unix conversions convert *any* input TAI instant during the stall to the same instant in Unix time.
+* Unix-to-TAI conversions return a pair `[firstAtomic, lastAtomic]` indicating a *closed* range of instants in TAI. In most cases `firstAtomic` and `lastAtomic` will be equal. If the input Unix instant falls on a stall, `firstAtomic` and `lastAtomic` indicate the beginning and the end of the stall, and are usually separated by 1000 TAI milliseconds. If the input Unix instant was removed, or is before the beginning of TAI, `[NaN, NaN]` is returned.
+* TAI-to-Unix conversions always work, but *every* input TAI instant during a stall converts to the same instant in Unix time.
 
-### Converter(insertModel): converter
+#### MODELS.STALL_LAST
+
+* Unix-to-TAI conversions act like `STALL_RANGE`, but return `lastAtomic` only, the end of the stall. If the input Unix instant was removed, or is before the beginning of TAI, `NaN` is returned.
+* TAI-to-Unix conversions always work, but *every* input TAI instant during a stall converts to the same instant in Unix time.
+
+### Converter(model): converter
 
 Returns a TAI/Unix converter object whose conversions obey the specified model. All `Converter` objects support the same methods: `unixToAtomicPicos`, `unixToAtomic` and `atomicToUnix`.
 
-### Converter(INSERT_MODELS.OVERRUN_ARRAY).unixToAtomicPicos(unix: number): BigInt\[\]
+### Converter(MODELS.OVERRUN_ARRAY).unixToAtomicPicos(unix: number): BigInt\[\]
 
 Convert a number of Unix milliseconds to an array of possible TAI picosecond counts. Ordinarily, this array will have a single entry. If the Unix time falls during an inserted leap second, the array will have two entries. If the Unix time falls during a removed leap second, or prior to the beginning of TAI, the array will be empty.
 
@@ -124,9 +129,9 @@ converter.unixToAtomicPicos(unix)
 // i.e. [1965-01-01 00:00:03.530_130_001_350 TAI, 1965-01-01 00:00:03.630_130_001_350 TAI]
 ```
 
-### Converter(INSERT_MODELS.OVERRUN_ARRAY).unixToAtomic(unix: number): number\[\]
+### Converter(MODELS.OVERRUN_ARRAY).unixToAtomic(unix: number): number\[\]
 
-As `Converter(INSERT_MODELS.OVERRUN_ARRAY).unixToAtomicPicos`, but return value is an array of integer TAI millisecond counts.
+As `Converter(MODELS.OVERRUN_ARRAY).unixToAtomicPicos`, but return value is an array of integer TAI millisecond counts.
 
 ```javascript
 const unix = 915_148_800_001
@@ -153,7 +158,7 @@ const atomicMillis = converter.unixToAtomicMillis(unix)
 // i.e. "1961-01-01 00:00:01.422_000 TAI", but that is before TAI began.
 ```
 
-### Converter(INSERT_MODELS.OVERRUN_ARRAY).atomicToUnix(atomic: number): number
+### Converter(MODELS.OVERRUN_ARRAY).atomicToUnix(atomic: number): number
 
 Convert a number of TAI milliseconds to Unix milliseconds. Note that over the course of a leap second, two different instants in TAI may convert back to the same instant in Unix time.
 
@@ -169,7 +174,7 @@ converter.atomicToUnix(atomic2)
 // 915_148_800_001, same result
 ```
 
-### Converter(INSERT_MODELS.STALL_LAST).unixToAtomicPicos(unix: number): BigInt
+### Converter(MODELS.STALL_LAST).unixToAtomicPicos(unix: number): BigInt
 
 Convert a number of Unix milliseconds to a number of TAI picoseconds. If the Unix time falls on a removed leap second, or prior to the beginning of TAI, `NaN` is returned.
 
@@ -182,9 +187,9 @@ converter.unixToAtomicPicos(unix)
 // i.e. 1965-01-01 00:00:03.630_130_001_350 TAI
 ```
 
-### Converter(INSERT_MODELS.STALL_LAST).unixToAtomic(unix: number): number
+### Converter(MODELS.STALL_LAST).unixToAtomic(unix: number): number
 
-As `Converter(INSERT_MODELS.STALL_LAST).unixToAtomicPicos`, but converts the picosecond count to milliseconds.
+As `Converter(MODELS.STALL_LAST).unixToAtomicPicos`, but converts the picosecond count to milliseconds.
 
 ```javascript
 const unix = 915_148_800_001
@@ -201,17 +206,17 @@ Fractional milliseconds are rounded towards negative infinity. Note that this ro
 const unix = -283_996_800_000
 // i.e. 1961-01-01 00:00:00.000_000 UTC, the beginning of TAI
 
-const atomicPicos = Converter(INSERT_MODELS.STALL_LAST).unixToAtomicPicos(unix)
+const atomicPicos = Converter(MODELS.STALL_LAST).unixToAtomicPicos(unix)
 // -283_996_798_577_182_000_000n
 // i.e. 1961-01-01 00:00:01.422_818 TAI
 
-const atomicMillis = Converter(INSERT_MODELS.OVERRUN_ARRAY).unixToAtomic(unix)
+const atomicMillis = Converter(MODELS.OVERRUN_ARRAY).unixToAtomic(unix)
 // NaN
 // The rounded TAI millisecond count would be -283_996_798_578,
 // i.e. "1961-01-01 00:00:01.422_000 TAI", which is before TAI began.
 ```
 
-### Converter(INSERT_MODELS.STALL_LAST).atomicToUnix(atomic: number): number
+### Converter(MODELS.STALL_LAST).atomicToUnix(atomic: number): number
 
 Converts a number of TAI milliseconds back to Unix milliseconds. If the TAI time falls during the first part of an inserted leap second, we see that Unix time is stalled here.
 
