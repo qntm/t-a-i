@@ -25,19 +25,22 @@ const MODELS = {
 }
 
 module.exports.MODELS = MODELS
+
 module.exports.Converter = (data, model) => {
   const rays = munge(data)
 
   /// Helper methods
-
-  const atomicPicosInRay = (ray, atomicPicos) =>
-    ray.start.atomicPicos <= atomicPicos && atomicPicos < ray.end.atomicPicos
 
   // Depending on its parameters, each ray linearly transforms `unixMillis`
   // into a different `atomicPicos`. This value is always exact
   const unixMillisToAtomicPicos = (ray, unixMillis) =>
     BigInt(unixMillis) * ray.ratio.atomicPicosPerUnixMilli +
       ray.offsetAtUnixEpoch.atomicPicos
+
+  // Each ray has an inclusive-exclusive range of validity. TAI picosecond counts not in this range
+  // are bad and should be ignored
+  const atomicPicosOnRay = (ray, atomicPicos) =>
+    ray.start.atomicPicos <= atomicPicos && atomicPicos < ray.end.atomicPicos
 
   // This result is rounded towards negative infinity. This means that, provided that `atomicPicos`
   // is in the ray, `unixMillis` is also guaranteed to be in the ray.
@@ -57,7 +60,7 @@ module.exports.Converter = (data, model) => {
     const atomicPicosArray = []
     for (const ray of rays) {
       const atomicPicos = unixMillisToAtomicPicos(ray, unixMillis)
-      if (atomicPicosInRay(ray, atomicPicos)) {
+      if (atomicPicosOnRay(ray, atomicPicos)) {
         atomicPicosArray.push(atomicPicos)
       }
     }
@@ -79,17 +82,18 @@ module.exports.Converter = (data, model) => {
     const atomicMillisArray = []
     for (const ray of rays) {
       const atomicPicos = unixMillisToAtomicPicos(ray, unixMillis)
+      const atomicMillis = Number(div(atomicPicos, picosPerMilli)) // rounds to negative infinity
 
-      if (atomicPicosInRay(ray, atomicPicos)) {
-        // This rounds towards negative infinity. This is potentially problematic because even if
-        // the atomic picosecond count is part of this ray, the rounded millisecond count may not
-        // be...
-        const atomicMillis = Number(div(atomicPicos, picosPerMilli))
-
-        // ...hence this additional test
-        if (atomicPicosInRay(ray, BigInt(atomicMillis) * picosPerMilli)) {
-          atomicMillisArray.push(atomicMillis)
-        }
+      if (
+        // It is CRITICALLY IMPORTANT to perform BOTH of these tests.
+        // `unixMillis` and `atomicPicos` may fall at the very start of one ray while
+        // `atomicMillis` rounds towards negative infinity and falls at the very end of the
+        // previous ray instead. When this happens, we must not return `atomicMillis`
+        // - it's not a valid part of EITHER ray.
+        atomicPicosOnRay(ray, atomicPicos) &&
+        atomicPicosOnRay(ray, BigInt(atomicMillis) * picosPerMilli)
+      ) {
+        atomicMillisArray.push(atomicMillis)
       }
     }
 
@@ -112,7 +116,7 @@ module.exports.Converter = (data, model) => {
     const atomicPicos = BigInt(atomicMillis) * picosPerMilli
 
     const rayId = rays.findIndex(ray =>
-      atomicPicosInRay(ray, atomicPicos)
+      atomicPicosOnRay(ray, atomicPicos)
     )
 
     if (rayId === -1) {

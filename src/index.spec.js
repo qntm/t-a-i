@@ -23,8 +23,8 @@ describe('Converter', () => {
       const unixToAtomicPicos = converter.unixToAtomicPicos
       const unixToAtomic = converter.unixToAtomic
 
-      it('starts TAI at 1961-01-01 00:00:01.422818', () => {
-        // 00:00:01.422818 is in range, but rounds down to 00:00:01.422 which is not
+      it('starts TAI at 1961-01-01 00:00:01.422_818', () => {
+        // 00:00:01.422_818 is in range, but rounds down to 00:00:01.422 which is not
         expect(unixToAtomicPicos(Date.UTC(1961, JAN, 1, 0, 0, 0, 0)))
           .toEqual([-283_996_798_577_182_000_000n])
         expect(unixToAtomic(Date.UTC(1961, JAN, 1, 0, 0, 0, 0)))
@@ -47,12 +47,12 @@ describe('Converter', () => {
           .toEqual([Date.UTC(1961, JAN, 1, 0, 0, 1, 425)])
       })
 
-      it('advances 0.001296 TAI seconds per Unix day', () => {
+      it('advances 0.001_296 TAI seconds per Unix day', () => {
         expect(unixToAtomicPicos(Date.UTC(1961, JAN, 2, 0, 0, 0, 0)))
           .toEqual([-283_910_398_575_886_000_000n])
         expect(unixToAtomic(Date.UTC(1961, JAN, 2, 0, 0, 0, 0)))
           .toEqual([Date.UTC(1961, JAN, 2, 0, 0, 1, 424)])
-        // It's 1.424114 but gets rounded down to 1.424000
+        // It's 1.424_114 but gets rounded down to 1.424_000
       })
 
       it('makes certain TAI millisecond counts inaccessible', () => {
@@ -210,16 +210,36 @@ describe('Converter', () => {
     })
 
     it('Crazy pre-1972 nonsense', () => {
-      // TAI picosecond count rounds to -252_460_798_155 which is not in range
+      // At the beginning of 1962, the drift rate changed, with no discontinuity in UTC.
+
+      // Prior ray
+      expect(converter.unixToAtomicPicos(Date.UTC(1961, DEC, 31, 23, 59, 59, 999)))
+        .toEqual([-252_460_798_155_142_000_015n])
+      expect(converter.unixToAtomic(Date.UTC(1961, DEC, 31, 23, 59, 59, 999)))
+        .toEqual([-252_460_798_156])
+      expect(converter.unixToAtomic(Date.UTC(1961, DEC, 31, 23, 59, 59, 999)))
+        .toEqual([Date.UTC(1962, JAN, 1, 0, 0, 1, 844)]) // same
+
+      // The end of the 1961 ray and the start of the 1962 ray coincide at exactly
+      // 1962-01-01 00:00:00.000_000 UTC
+      // 1962-01-01 00:00:01.845_858 TAI
+      // In UTC, this instant falls on the 1962 ray only.
+      // After conversion to TAI picoseconds, the same is true.
+      // However, after rounding to TAI milliseconds, that's:
+      // 1962-01-01 00:00:01.845_000 TAI
+      // which is on the 1961 ray! Which means we CANNOT return it.
       expect(converter.unixToAtomicPicos(Date.UTC(1962, JAN, 1, 0, 0, 0, 0)))
         .toEqual([-252_460_798_154_142_000_000n])
       expect(converter.unixToAtomic(Date.UTC(1962, JAN, 1, 0, 0, 0, 0)))
         .toEqual([])
 
+      // Next ray
       expect(converter.unixToAtomicPicos(Date.UTC(1962, JAN, 1, 0, 0, 0, 1)))
         .toEqual([-252_460_798_153_141_999_987n])
       expect(converter.unixToAtomic(Date.UTC(1962, JAN, 1, 0, 0, 0, 1)))
         .toEqual([-252_460_798_154])
+      expect(converter.unixToAtomic(Date.UTC(1962, JAN, 1, 0, 0, 0, 1)))
+        .toEqual([Date.UTC(1962, JAN, 1, 0, 0, 1, 846)]) // same
     })
 
     it('inserted tenth', () => {
@@ -1015,7 +1035,7 @@ describe('Converter', () => {
     })
 
     it('Crazy pre-1972 nonsense', () => {
-      // TAI picosecond count rounds to -252_460_798_155 which is not in range
+      // TAI picosecond count rounds to -252_460_798_155 which is not on the ray
       expect(converter.unixToAtomicPicos(Date.UTC(1962, JAN, 1, 0, 0, 0, 0)))
         .toBe(-252_460_798_154_142_000_000n)
       expect(converter.unixToAtomic(Date.UTC(1962, JAN, 1, 0, 0, 0, 0)))
