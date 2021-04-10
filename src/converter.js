@@ -32,23 +32,41 @@ module.exports.Converter = (data, model) => {
   /// Helper methods
 
   // Depending on its parameters, each ray linearly transforms `unixMillis`
-  // into a different `atomicPicos`. This value is always exact
+  // into a different `atomicPicos`. This value is always exact, but there is NO BOUNDS CHECKING.
   const unixMillisToAtomicPicos = (ray, unixMillis) =>
     BigInt(unixMillis) * ray.ratio.atomicPicosPerUnixMilli +
       ray.offsetAtUnixEpoch.atomicPicos
 
-  // Each ray has an inclusive-exclusive range of validity. TAI picosecond counts not in this range
-  // are bad and should be ignored
-  const atomicPicosOnRay = (ray, atomicPicos) =>
-    ray.start.atomicPicos <= atomicPicos && atomicPicos < ray.end.atomicPicos
+  // This value is rounded towards negative infinity. Again, there is no bounds checking. The
+  // rounding may round an `atomicPicos` which was in bounds to an `atomicMillis` which is not.
+  const unixMillisToAtomicMillis = (ray, unixMillis) =>
+    Number(div(unixMillisToAtomicPicos(ray, unixMillis), picosPerMilli))
 
-  // This result is rounded towards negative infinity. This means that, provided that `atomicPicos`
-  // is in the ray, `unixMillis` is also guaranteed to be in the ray.
+  // This result is rounded towards negative infinity. Again, there is no bounds checking.
+  // However, because (for now) rays always begin on an exact Unix millisecond count,
+  // if `atomicPicos` is on the ray, `unixMillis` is too.
   const atomicPicosToUnixMillis = (ray, atomicPicos) =>
     Number(div(
       atomicPicos - ray.offsetAtUnixEpoch.atomicPicos,
       ray.ratio.atomicPicosPerUnixMilli
     ))
+
+  // Likewise rounded to negative infinity, but if `atomicMillis` is on the ray, so is `unixMillis`.
+  const atomicMillisToUnixMillis = (ray, atomicMillis) =>
+    atomicPicosToUnixMillis(ray, BigInt(atomicMillis) * picosPerMilli)
+
+  // Bounds checks. Each ray has an inclusive-exclusive range of validity.
+  // Valid TAI instants are from the computed TAI start of the ray to the computed TAI start of the
+  // next ray. Valid Unix instants are the valid TAI instants, transformed linearly from TAI to
+  // Unix by the ray.
+  const atomicPicosOnRay = (ray, atomicPicos) =>
+    ray.start.atomicPicos <= atomicPicos && atomicPicos < ray.end.atomicPicos
+
+  const atomicMillisOnRay = (ray, atomicMillis) =>
+    atomicPicosOnRay(ray, BigInt(atomicMillis) * picosPerMilli)
+
+  const unixMillisOnRay = (ray, unixMillis) =>
+    atomicPicosOnRay(ray, unixMillisToAtomicPicos(ray, unixMillis))
 
   /// Unix to TAI conversion methods
 
@@ -59,10 +77,21 @@ module.exports.Converter = (data, model) => {
 
     const atomicPicosArray = []
     for (const ray of rays) {
-      const atomicPicos = unixMillisToAtomicPicos(ray, unixMillis)
-      if (atomicPicosOnRay(ray, atomicPicos)) {
-        atomicPicosArray.push(atomicPicos)
+      // input bounds check
+      if (!unixMillisOnRay(ray, unixMillis)) {
+        continue
       }
+
+      // transformation
+      const atomicPicos = unixMillisToAtomicPicos(ray, unixMillis)
+
+      // output bounds check
+      /* istanbul ignore if */
+      if (!atomicPicosOnRay(ray, atomicPicos)) {
+        continue
+      }
+
+      atomicPicosArray.push(atomicPicos)
     }
 
     if (model === MODELS.OVERRUN_ARRAY) {
@@ -81,20 +110,20 @@ module.exports.Converter = (data, model) => {
 
     const atomicMillisArray = []
     for (const ray of rays) {
-      const atomicPicos = unixMillisToAtomicPicos(ray, unixMillis)
-      const atomicMillis = Number(div(atomicPicos, picosPerMilli)) // rounds to negative infinity
-
-      if (
-        // It is CRITICALLY IMPORTANT to perform BOTH of these tests.
-        // `unixMillis` and `atomicPicos` may fall at the very start of one ray while
-        // `atomicMillis` rounds towards negative infinity and falls at the very end of the
-        // previous ray instead. When this happens, we must not return `atomicMillis`
-        // - it's not a valid part of EITHER ray.
-        atomicPicosOnRay(ray, atomicPicos) &&
-        atomicPicosOnRay(ray, BigInt(atomicMillis) * picosPerMilli)
-      ) {
-        atomicMillisArray.push(atomicMillis)
+      // input bounds check
+      if (!unixMillisOnRay(ray, unixMillis)) {
+        continue
       }
+
+      // transformation
+      const atomicMillis = unixMillisToAtomicMillis(ray, unixMillis)
+
+      // output bounds check
+      if (!atomicMillisOnRay(ray, atomicMillis)) {
+        continue
+      }
+
+      atomicMillisArray.push(atomicMillis)
     }
 
     if (model === MODELS.OVERRUN_ARRAY) {
@@ -113,29 +142,35 @@ module.exports.Converter = (data, model) => {
       throw Error(`Not an integer: ${atomicMillis}`)
     }
 
-    const atomicPicos = BigInt(atomicMillis) * picosPerMilli
+    for (const ray of rays) {
+      // input bounds check
+      if (!atomicMillisOnRay(ray, atomicMillis)) {
+        continue
+      }
 
-    const rayId = rays.findIndex(ray =>
-      atomicPicosOnRay(ray, atomicPicos)
-    )
+      // transformation
+      const unixMillis = atomicMillisToUnixMillis(ray, atomicMillis)
 
-    if (rayId === -1) {
-      // Pre-1961
-      return NaN
+      // output bounds check
+      /* istanbul ignore if */
+      if (!unixMillisOnRay(ray, unixMillis)) {
+        continue
+      }
+
+      // Apply stalling behaviour
+      if (model === MODELS.STALL_LAST) {
+        return Math.min(
+          unixMillis,
+          ray.stall.unixMillis
+        )
+      }
+
+      // Otherwise assume overrun
+      return unixMillis
     }
 
-    const unixMillis = atomicPicosToUnixMillis(rays[rayId], atomicPicos)
-
-    // Apply stalling behaviour
-    if (model === MODELS.STALL_LAST) {
-      return Math.min(
-        unixMillis,
-        rays[rayId].stall.unixMillis
-      )
-    }
-
-    // Otherwise assume overrun
-    return unixMillis
+    // Pre-1961
+    return NaN
   }
 
   if (
