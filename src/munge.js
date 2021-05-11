@@ -71,36 +71,29 @@ module.exports = (data, model) => {
   })
 
   // `end` is the first TAI instant when this segment ceases to be applicable.
+  if (
+    munged.some((segment, segmentId, segments) =>
+      segmentId + 1 in segments &&
+      segments[segmentId + 1].start.atomicPicos <= segment.start.atomicPicos
+    )
+  ) {
+    throw Error('Disordered data')
+  }
+
+  // `end` is the first TAI instant when this segment ceases to be applicable.
   munged.forEach((segment, segmentId, segments) => {
     segment.end = {
       atomicPicos: segmentId + 1 in segments
         ? segments[segmentId + 1].start.atomicPicos
         : Infinity
     }
-
-    if (segment.end.atomicPicos <= segment.start.atomicPicos) {
-      throw Error('Disordered data')
-    }
   })
-
-  // The stall point is the point where this segment's interactions with the next segment start
-  // to become interesting and the possibilities begin to diverge somewhat
-  let stall = {
-    unixMillis: Infinity
-  }
-  for (let segmentId = munged.length - 1; segmentId >= 0; segmentId--) {
-    munged[segmentId].stall = stall
-    stall = {
-      unixMillis: Math.min(munged[segmentId].start.unixMillis, stall.unixMillis)
-    }
-  }
 
   return munged.map(datum => new segment.Segment(
     datum.start,
     datum.end,
     datum.dy,
-    datum.dx,
-    datum.stall
+    datum.dx
   ))
 }
 

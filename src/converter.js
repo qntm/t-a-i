@@ -110,14 +110,6 @@ module.exports.Converter = (data, model) => {
         continue
       }
 
-      // Apply stalling behaviour
-      if (model === MODELS.STALL_END) {
-        return Math.min(
-          unixMillis,
-          segment.stall.unixMillis
-        )
-      }
-
       // Otherwise assume overrun
       return unixMillis
     }
@@ -128,8 +120,7 @@ module.exports.Converter = (data, model) => {
 
   if (
     model === MODELS.OVERRUN_ARRAY ||
-    model === MODELS.OVERRUN_LAST ||
-    model === MODELS.STALL_END
+    model === MODELS.OVERRUN_LAST
   ) {
     return {
       unixToAtomicPicos,

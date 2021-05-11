@@ -3,49 +3,58 @@ const div = require('./div')
 const picosPerMilli = 1000n * 1000n * 1000n
 
 // A segment is a bounded linear relationship between TAI and Unix time.
+// It should be able to handle arbitrary ratios between the two.
 class Segment {
-  constructor (start, end, dy, dx, stall) {
+  constructor (start, end, dy, dx) {
     this.start = start // unixMillis, atomicPicos
     this.end = end // atomicPicos only (unixMillis is inexact in most cases)
     this.dy = dy // unixMillis
     this.dx = dx // atomicPicos
-    this.stall = stall // temporary
   }
 
   // This segment linearly transforms `unixMillis` into a different `atomicPicos`
-  // This value is always exact FOR NOW, but there is NO BOUNDS CHECKING.
+  // This value is rounded towards negative infinity. There is NO BOUNDS CHECKING.
   // If the line is flat (dy = 0) this throws an exception, currently.
   unixMillisToAtomicPicos (unixMillis) {
-    return this.start.atomicPicos +
-      div(
+    if (this.dy.unixMillis === 0) {
+      if (unixMillis === this.start.unixMillis) {
+        // Nailed it
+        return [this.start.atomicPicos, this.end.atomicPicos]
+      }
+
+      return [NaN, NaN]
+    }
+
+    const atomicPicos = div(
+      this.start.atomicPicos * BigInt(this.dy.unixMillis) +
         BigInt(unixMillis - this.start.unixMillis) * this.dx.atomicPicos,
-        BigInt(this.dy.unixMillis)
-      )
+      BigInt(this.dy.unixMillis)
+    )
+
+    return atomicPicos
   }
 
   // This value is rounded towards negative infinity. Again, there is no bounds checking. The
   // rounding may round an `atomicPicos` which was in bounds to an `atomicMillis` which is not.
   unixMillisToAtomicMillis (unixMillis) {
     return Number(div(
-      this.unixMillisToAtomicPicos(unixMillis),
-      picosPerMilli
+      this.start.atomicPicos * BigInt(this.dy.unixMillis) +
+        BigInt(unixMillis - this.start.unixMillis) * this.dx.atomicPicos,
+      BigInt(this.dy.unixMillis) * picosPerMilli
     ))
   }
 
   // This result is rounded towards negative infinity. Again, there is no bounds checking.
   // However, because (for now) segments always begin on an exact Unix millisecond count,
-  // if `atomicPicos` is on the segment, `unixMillis` is too.
-  atomicPicosToUnixMillis (atomicPicos) {
-    return this.start.unixMillis +
-      Number(div(
-        (atomicPicos - this.start.atomicPicos) * BigInt(this.dy.unixMillis),
-        this.dx.atomicPicos
-      ))
-  }
-
-  // Likewise rounded to negative infinity, but if `atomicMillis` is on the ray, so is `unixMillis`.
+  // if `atomicMillis` is on the segment, `unixMillis` is too.
   atomicMillisToUnixMillis (atomicMillis) {
-    return this.atomicPicosToUnixMillis(BigInt(atomicMillis) * picosPerMilli)
+    const atomicPicos = BigInt(atomicMillis) * picosPerMilli
+
+    return Number(div(
+      BigInt(this.start.unixMillis) * this.dx.atomicPicos +
+        (atomicPicos - this.start.atomicPicos) * BigInt(this.dy.unixMillis),
+      this.dx.atomicPicos
+    ))
   }
 
   // Bounds checks. Each segment has an inclusive-exclusive range of validity.
@@ -61,7 +70,12 @@ class Segment {
   }
 
   unixMillisOnSegment (unixMillis) {
-    return this.atomicPicosOnSegment(this.unixMillisToAtomicPicos(unixMillis))
+    const z = BigInt(unixMillis - this.start.unixMillis) * this.dx.atomicPicos
+
+    return z >= 0n && (
+      this.end.atomicPicos === Infinity ||
+      z < (this.end.atomicPicos - this.start.atomicPicos) * BigInt(this.dy.unixMillis)
+    )
   }
 }
 

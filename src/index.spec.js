@@ -897,7 +897,7 @@ describe('Converter', () => {
     })
   })
 
-  describe('STALL_END', () => {
+  describe.skip('STALL_END', () => {
     const converter = Converter(STALL_END)
 
     describe('atomicToUnix', () => {
