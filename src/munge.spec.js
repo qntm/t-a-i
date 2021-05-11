@@ -28,8 +28,8 @@ describe('munge', () => {
       end: {
         atomicPicos: Infinity
       },
-      dx: 1000_000_000n,
-      dy: 1,
+      dx: { atomicPicos: 1000_000_000n },
+      dy: { unixMillis: 1 },
       offsetAtUnixEpoch: {
         atomicPicos: 0n
       }
@@ -50,8 +50,8 @@ describe('munge', () => {
       end: {
         atomicPicos: Infinity
       },
-      dx: 1_000_000_000n,
-      dy: 1,
+      dx: { atomicPicos: 1000_000_000n },
+      dy: { unixMillis: 1 },
       offsetAtUnixEpoch: {
         atomicPicos: -4_000_000_000_000n
       }
@@ -78,8 +78,8 @@ describe('munge', () => {
       end: {
         atomicPicos: 6_000_000_000_000n
       },
-      dx: 1_000_000_000n,
-      dy: 1,
+      dx: { atomicPicos: 1000_000_000n },
+      dy: { unixMillis: 1 },
       offsetAtUnixEpoch: {
         atomicPicos: -4_000_000_000_000n
       }
@@ -94,8 +94,8 @@ describe('munge', () => {
       end: {
         atomicPicos: 9_000_000_000_000n
       },
-      dx: 1_000_000_000n,
-      dy: 1,
+      dx: { atomicPicos: 1000_000_000n },
+      dy: { unixMillis: 1 },
       offsetAtUnixEpoch: {
         atomicPicos: -3_000_000_000_000n
       }
@@ -110,8 +110,8 @@ describe('munge', () => {
       end: {
         atomicPicos: Infinity
       },
-      dx: 1_000_000_000n,
-      dy: 1,
+      dx: { atomicPicos: 1000_000_000n },
+      dy: { unixMillis: 1 },
       offsetAtUnixEpoch: {
         atomicPicos: -4_000_000_000_000n
       }
@@ -134,8 +134,8 @@ describe('munge', () => {
         unixMillis: Infinity
       },
       end: { atomicPicos: Infinity },
-      dx: 1_000_100_000n,
-      dy: 1,
+      dx: { atomicPicos: 1000_100_000n },
+      dy: { unixMillis: 1 },
       offsetAtUnixEpoch: { atomicPicos: 0n }
     }])
 
@@ -148,8 +148,8 @@ describe('munge', () => {
         unixMillis: Infinity
       },
       end: { atomicPicos: Infinity },
-      dx: 1_000_000_000n,
-      dy: 1,
+      dx: { atomicPicos: 1000_000_000n },
+      dy: { unixMillis: 1 },
       offsetAtUnixEpoch: { atomicPicos: 0n }
     }])
 
@@ -162,8 +162,8 @@ describe('munge', () => {
         unixMillis: Infinity
       },
       end: { atomicPicos: Infinity },
-      dx: 999_900_000n,
-      dy: 1,
+      dx: { atomicPicos: 999_900_000n },
+      dy: { unixMillis: 1 },
       offsetAtUnixEpoch: { atomicPicos: 0n }
     }])
 
@@ -177,8 +177,8 @@ describe('munge', () => {
         unixMillis: Infinity
       },
       end: { atomicPicos: Infinity },
-      dx: 100_000n,
-      dy: 1,
+      dx: { atomicPicos: 100_000n },
+      dy: { unixMillis: 1 },
       offsetAtUnixEpoch: { atomicPicos: 0n }
     }])
 
@@ -194,8 +194,8 @@ describe('munge', () => {
         unixMillis: Infinity
       },
       end: { atomicPicos: Infinity },
-      dx: 0n,
-      dy: 1,
+      dx: { atomicPicos: 0n },
+      dy: { unixMillis: 1 },
       offsetAtUnixEpoch: { atomicPicos: 0n }
     }])
 
@@ -211,8 +211,8 @@ describe('munge', () => {
         unixMillis: Infinity
       },
       end: { atomicPicos: Infinity },
-      dx: -100_000n,
-      dy: 1,
+      dx: { atomicPicos: -100_000n },
+      dy: { unixMillis: 1 },
       offsetAtUnixEpoch: { atomicPicos: 0n }
     }])
   })
@@ -231,8 +231,8 @@ describe('munge', () => {
       end: {
         atomicPicos: Infinity
       },
-      dx: 1_000_000_015n,
-      dy: 1,
+      dx: { atomicPicos: 1000_000_015n },
+      dy: { unixMillis: 1 },
       offsetAtUnixEpoch: {
         atomicPicos: 5_682_770_000_000n
       }
@@ -286,7 +286,7 @@ describe('munge', () => {
   })
 
   it('generates proper drift rates', () => {
-    expect(munge(taiData).map(segment => segment.dx)).toEqual([
+    expect(munge(taiData).map(segment => segment.dx.atomicPicos)).toEqual([
       1_000_000_015n,
       1_000_000_015n,
       1_000_000_013n,
@@ -337,7 +337,7 @@ describe('munge', () => {
       i + 1 in segments
         ? (
             segments[i + 1].start.atomicPicos -
-          BigInt(segments[i + 1].start.unixMillis) * segment.dx / BigInt(segment.dy) -
+          BigInt(segments[i + 1].start.unixMillis) * segment.dx.atomicPicos / BigInt(segment.dy.unixMillis) -
           segment.offsetAtUnixEpoch.atomicPicos
           )
         : NaN

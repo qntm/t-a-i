@@ -691,8 +691,8 @@ describe('Converter', () => {
           end: {
             atomicPicos: Infinity
           },
-          dx: 1_000_000_000n,
-          dy: 1,
+          dx: { atomicPicos: 1000_000_000n },
+          dy: { unixMillis: 1 },
           offsetAtUnixEpoch: {
             atomicPicos: -100_000_000n
           }
@@ -722,8 +722,8 @@ describe('Converter', () => {
           end: {
             atomicPicos: -100_000_000n
           },
-          dx: 1_000_000_000n,
-          dy: 1,
+          dx: { atomicPicos: 1000_000_000n },
+          dy: { unixMillis: 1 },
           offsetAtUnixEpoch: {
             atomicPicos: 100_000_000n
           }
@@ -738,8 +738,8 @@ describe('Converter', () => {
           end: {
             atomicPicos: Infinity
           },
-          dx: 1_000_000_000n,
-          dy: 1,
+          dx: { atomicPicos: 1000_000_000n },
+          dy: { unixMillis: 1 },
           offsetAtUnixEpoch: {
             atomicPicos: -1_100_000_000n
           }

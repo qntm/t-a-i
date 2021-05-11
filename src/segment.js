@@ -10,15 +10,15 @@ class Segment {
     this.offsetAtUnixEpoch = offsetAtUnixEpoch
     this.stall = stall // temporary
 
-    this.dy = 1 // unixMillis
-    this.dx = ratio.atomicPicosPerUnixMilli // atomicPicos
+    this.dy = { unixMillis: 1 }
+    this.dx = { atomicPicos: ratio.atomicPicosPerUnixMilli } // atomicPicos
   }
 
   // This segment linearly transforms `unixMillis` into a different `atomicPicos`
-  // This value is always exact, but there is NO BOUNDS CHECKING.
+  // This value is always exact FOR NOW, but there is NO BOUNDS CHECKING.
   unixMillisToAtomicPicos (unixMillis) {
-    return BigInt(unixMillis) * this.dx / BigInt(this.dy) +
-      this.offsetAtUnixEpoch.atomicPicos
+    return this.start.atomicPicos +
+      BigInt(unixMillis - this.start.unixMillis) * this.dx.atomicPicos / BigInt(this.dy.unixMillis)
   }
 
   // This value is rounded towards negative infinity. Again, there is no bounds checking. The
@@ -35,8 +35,8 @@ class Segment {
   // if `atomicPicos` is on the segment, `unixMillis` is too.
   atomicPicosToUnixMillis (atomicPicos) {
     return Number(div(
-      atomicPicos - this.offsetAtUnixEpoch.atomicPicos,
-      this.dx / BigInt(this.dy)
+      (atomicPicos - this.offsetAtUnixEpoch.atomicPicos) * BigInt(this.dy.unixMillis),
+      this.dx.atomicPicos
     ))
   }
 
