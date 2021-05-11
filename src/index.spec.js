@@ -2,7 +2,7 @@
 
 const { Converter, MODELS } = require('.')
 
-const { OVERRUN_ARRAY, OVERRUN_LAST, STALL_LAST } = MODELS
+const { OVERRUN_ARRAY, OVERRUN_LAST, STALL_END } = MODELS
 
 const JAN = 0
 const FEB = 1
@@ -897,8 +897,8 @@ describe('Converter', () => {
     })
   })
 
-  describe('STALL_LAST', () => {
-    const converter = Converter(STALL_LAST)
+  describe('STALL_END', () => {
+    const converter = Converter(STALL_END)
 
     describe('atomicToUnix', () => {
       const atomicToUnix = converter.atomicToUnix

@@ -1,5 +1,7 @@
 // So what do we ACTUALLY need from our data?
 
+const segment = require('./segment')
+
 const NOV = 10
 
 const picosPerSecond = 1000 * 1000 * 1000 * 1000
@@ -63,31 +65,36 @@ module.exports = data => {
     }
   })
 
-  // `end` is the first TAI instant when this ray ceases to be applicable.
-  // `end` can equal `start`, indicating that this ray has no validity at all
-  munged.forEach((ray, rayId, rays) => {
-    ray.end = {
-      atomicPicos: rayId + 1 in rays
-        ? rays[rayId + 1].start.atomicPicos
+  // `end` is the first TAI instant when this segment ceases to be applicable.
+  munged.forEach((segment, segmentId, segments) => {
+    segment.end = {
+      atomicPicos: segmentId + 1 in segments
+        ? segments[segmentId + 1].start.atomicPicos
         : Infinity
     }
 
-    if (ray.end.atomicPicos < ray.start.atomicPicos) {
+    if (segment.end.atomicPicos <= segment.start.atomicPicos) {
       throw Error('Disordered data')
     }
   })
 
-  // The stall point is the point where this ray's interactions with the next ray start to become
-  // interesting and the possibilities begin to diverge somewhat
+  // The stall point is the point where this segment's interactions with the next segment start
+  // to become interesting and the possibilities begin to diverge somewhat
   let stall = {
     unixMillis: Infinity
   }
-  for (let rayId = munged.length - 1; rayId >= 0; rayId--) {
-    munged[rayId].stall = stall
+  for (let segmentId = munged.length - 1; segmentId >= 0; segmentId--) {
+    munged[segmentId].stall = stall
     stall = {
-      unixMillis: Math.min(munged[rayId].start.unixMillis, stall.unixMillis)
+      unixMillis: Math.min(munged[segmentId].start.unixMillis, stall.unixMillis)
     }
   }
 
-  return munged
+  return munged.map(datum => new segment.Segment(
+    datum.start,
+    datum.end,
+    datum.offsetAtUnixEpoch,
+    datum.ratio,
+    datum.stall
+  ))
 }

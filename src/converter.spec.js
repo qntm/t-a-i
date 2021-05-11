@@ -3,7 +3,7 @@
 const { Converter, MODELS } = require('./converter')
 const munge = require('./munge')
 
-const { OVERRUN_ARRAY, OVERRUN_LAST, STALL_LAST } = MODELS
+const { OVERRUN_ARRAY, OVERRUN_LAST, STALL_END } = MODELS
 
 const JAN = 0
 const DEC = 11
@@ -21,8 +21,8 @@ describe('Converter', () => {
       })
     })
 
-    describe('STALL_LAST', () => {
-      const converter = Converter(data, STALL_LAST)
+    describe('STALL_END', () => {
+      const converter = Converter(data, STALL_END)
 
       it('fails on a non-integer number of milliseconds', () => {
         expect(() => converter.unixToAtomicPicos(NaN)).toThrowError('Not an integer: NaN')
@@ -306,8 +306,8 @@ describe('Converter', () => {
       })
     })
 
-    describe('STALL_LAST', () => {
-      const converter = Converter(data, STALL_LAST)
+    describe('STALL_END', () => {
+      const converter = Converter(data, STALL_END)
 
       describe('conversions grouped by instant', () => {
         it('start of time', () => {
@@ -589,8 +589,8 @@ describe('Converter', () => {
       })
     })
 
-    describe('STALL_LAST', () => {
-      const converter = Converter(data, STALL_LAST)
+    describe('STALL_END', () => {
+      const converter = Converter(data, STALL_END)
 
       describe('conversions grouped by instant', () => {
         it('start of time', () => {
@@ -691,9 +691,8 @@ describe('Converter', () => {
           end: {
             atomicPicos: Infinity
           },
-          ratio: {
-            atomicPicosPerUnixMilli: 1_000_000_000n
-          },
+          dx: 1_000_000_000n,
+          dy: 1,
           offsetAtUnixEpoch: {
             atomicPicos: -100_000_000n
           }
@@ -723,9 +722,8 @@ describe('Converter', () => {
           end: {
             atomicPicos: -100_000_000n
           },
-          ratio: {
-            atomicPicosPerUnixMilli: 1_000_000_000n
-          },
+          dx: 1_000_000_000n,
+          dy: 1,
           offsetAtUnixEpoch: {
             atomicPicos: 100_000_000n
           }
@@ -740,9 +738,8 @@ describe('Converter', () => {
           end: {
             atomicPicos: Infinity
           },
-          ratio: {
-            atomicPicosPerUnixMilli: 1_000_000_000n
-          },
+          dx: 1_000_000_000n,
+          dy: 1,
           offsetAtUnixEpoch: {
             atomicPicos: -1_100_000_000n
           }
@@ -753,56 +750,6 @@ describe('Converter', () => {
         // rounds up to 0, which is not in the ray
         expect(converter.unixToAtomic(-1)).toEqual([])
       })
-    })
-
-    it('when a ray has length 0', () => {
-      const data = [
-        [Date.UTC(1970, JAN, 1), 0, 40_587, 0],
-        [Date.UTC(1970, JAN, 1), 0, 40_587, 0.086_400]
-      ]
-
-      expect(munge(data)).toEqual([{
-        start: {
-          unixMillis: 0,
-          atomicPicos: 0n
-        },
-        stall: {
-          unixMillis: 0
-        },
-        end: {
-          atomicPicos: 0n
-        },
-        ratio: {
-          atomicPicosPerUnixMilli: 1_000_000_000n
-        },
-        offsetAtUnixEpoch: {
-          atomicPicos: 0n
-        }
-      }, {
-        start: {
-          // Same start point as previous ray, so previous ray has length 0 TAI seconds
-          unixMillis: 0,
-          atomicPicos: 0n
-        },
-        stall: {
-          unixMillis: Infinity
-        },
-        end: {
-          atomicPicos: Infinity
-        },
-        ratio: {
-          atomicPicosPerUnixMilli: 1_000_001_000n
-        },
-        offsetAtUnixEpoch: {
-          atomicPicos: 0n
-        }
-      }])
-
-      const converter = Converter(data, OVERRUN_ARRAY)
-      expect(converter.unixToAtomicPicos(0)).toEqual([0n])
-      expect(converter.unixToAtomic(0)).toEqual([0])
-      expect(converter.unixToAtomicPicos(1)).toEqual([1_000_001_000n])
-      expect(converter.unixToAtomic(1)).toEqual([1])
     })
   })
 
@@ -918,8 +865,8 @@ describe('Converter', () => {
         })
       })
 
-      describe('STALL_LAST', () => {
-        const converter = Converter(data, STALL_LAST)
+      describe('STALL_END', () => {
+        const converter = Converter(data, STALL_END)
 
         it('unixToAtomicPicos', () => {
           expect(converter.unixToAtomicPicos(0)).toBe(0n)
@@ -1048,8 +995,8 @@ describe('Converter', () => {
         })
       })
 
-      describe('STALL_LAST', () => {
-        const converter = Converter(data, STALL_LAST)
+      describe('STALL_END', () => {
+        const converter = Converter(data, STALL_END)
 
         it('unixToAtomicPicos', () => {
           expect(converter.unixToAtomicPicos(0)).toBe(0n)
@@ -1206,8 +1153,8 @@ describe('Converter', () => {
         })
       })
 
-      describe('STALL_LAST', () => {
-        const converter = Converter(data, STALL_LAST)
+      describe('STALL_END', () => {
+        const converter = Converter(data, STALL_END)
 
         it('unixToAtomicPicos', () => {
           expect(converter.unixToAtomicPicos(0)).toBe(0n)
@@ -1313,8 +1260,8 @@ describe('Converter', () => {
         })
       })
 
-      describe('STALL_LAST', () => {
-        const converter = Converter(data, STALL_LAST)
+      describe('STALL_END', () => {
+        const converter = Converter(data, STALL_END)
 
         it('unixToAtomicPicos', () => {
           expect(converter.unixToAtomicPicos(-1000)).toBe(1000n * picosPerMilli)

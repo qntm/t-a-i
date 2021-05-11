@@ -14,13 +14,6 @@ describe('munge', () => {
     ])).toThrowError('Disordered data')
   })
 
-  it('allows two rays at the same instant', () => {
-    expect(() => munge([
-      [Date.UTC(1970, JAN, 1), 0],
-      [Date.UTC(1970, JAN, 1), 0]
-    ])).not.toThrow()
-  })
-
   it('works in the simplest possible case', () => {
     expect(munge([
       [Date.UTC(1970, JAN, 1), 0]
@@ -35,9 +28,8 @@ describe('munge', () => {
       end: {
         atomicPicos: Infinity
       },
-      ratio: {
-        atomicPicosPerUnixMilli: 1000_000_000n
-      },
+      dx: 1000_000_000n,
+      dy: 1,
       offsetAtUnixEpoch: {
         atomicPicos: 0n
       }
@@ -58,9 +50,8 @@ describe('munge', () => {
       end: {
         atomicPicos: Infinity
       },
-      ratio: {
-        atomicPicosPerUnixMilli: 1_000_000_000n
-      },
+      dx: 1_000_000_000n,
+      dy: 1,
       offsetAtUnixEpoch: {
         atomicPicos: -4_000_000_000_000n
       }
@@ -87,9 +78,8 @@ describe('munge', () => {
       end: {
         atomicPicos: 6_000_000_000_000n
       },
-      ratio: {
-        atomicPicosPerUnixMilli: 1_000_000_000n
-      },
+      dx: 1_000_000_000n,
+      dy: 1,
       offsetAtUnixEpoch: {
         atomicPicos: -4_000_000_000_000n
       }
@@ -104,9 +94,8 @@ describe('munge', () => {
       end: {
         atomicPicos: 9_000_000_000_000n
       },
-      ratio: {
-        atomicPicosPerUnixMilli: 1_000_000_000n
-      },
+      dx: 1_000_000_000n,
+      dy: 1,
       offsetAtUnixEpoch: {
         atomicPicos: -3_000_000_000_000n
       }
@@ -121,9 +110,8 @@ describe('munge', () => {
       end: {
         atomicPicos: Infinity
       },
-      ratio: {
-        atomicPicosPerUnixMilli: 1_000_000_000n
-      },
+      dx: 1_000_000_000n,
+      dy: 1,
       offsetAtUnixEpoch: {
         atomicPicos: -4_000_000_000_000n
       }
@@ -146,7 +134,8 @@ describe('munge', () => {
         unixMillis: Infinity
       },
       end: { atomicPicos: Infinity },
-      ratio: { atomicPicosPerUnixMilli: 1_000_100_000n },
+      dx: 1_000_100_000n,
+      dy: 1,
       offsetAtUnixEpoch: { atomicPicos: 0n }
     }])
 
@@ -159,7 +148,8 @@ describe('munge', () => {
         unixMillis: Infinity
       },
       end: { atomicPicos: Infinity },
-      ratio: { atomicPicosPerUnixMilli: 1_000_000_000n },
+      dx: 1_000_000_000n,
+      dy: 1,
       offsetAtUnixEpoch: { atomicPicos: 0n }
     }])
 
@@ -172,7 +162,8 @@ describe('munge', () => {
         unixMillis: Infinity
       },
       end: { atomicPicos: Infinity },
-      ratio: { atomicPicosPerUnixMilli: 999_900_000n },
+      dx: 999_900_000n,
+      dy: 1,
       offsetAtUnixEpoch: { atomicPicos: 0n }
     }])
 
@@ -186,7 +177,8 @@ describe('munge', () => {
         unixMillis: Infinity
       },
       end: { atomicPicos: Infinity },
-      ratio: { atomicPicosPerUnixMilli: 100_000n },
+      dx: 100_000n,
+      dy: 1,
       offsetAtUnixEpoch: { atomicPicos: 0n }
     }])
 
@@ -202,7 +194,8 @@ describe('munge', () => {
         unixMillis: Infinity
       },
       end: { atomicPicos: Infinity },
-      ratio: { atomicPicosPerUnixMilli: 0n },
+      dx: 0n,
+      dy: 1,
       offsetAtUnixEpoch: { atomicPicos: 0n }
     }])
 
@@ -218,7 +211,8 @@ describe('munge', () => {
         unixMillis: Infinity
       },
       end: { atomicPicos: Infinity },
-      ratio: { atomicPicosPerUnixMilli: -100_000n },
+      dx: -100_000n,
+      dy: 1,
       offsetAtUnixEpoch: { atomicPicos: 0n }
     }])
   })
@@ -237,9 +231,8 @@ describe('munge', () => {
       end: {
         atomicPicos: Infinity
       },
-      ratio: {
-        atomicPicosPerUnixMilli: 1_000_000_015n
-      },
+      dx: 1_000_000_015n,
+      dy: 1,
       offsetAtUnixEpoch: {
         atomicPicos: 5_682_770_000_000n
       }
@@ -293,7 +286,7 @@ describe('munge', () => {
   })
 
   it('generates proper drift rates', () => {
-    expect(munge(taiData).map(ray => ray.ratio.atomicPicosPerUnixMilli)).toEqual([
+    expect(munge(taiData).map(segment => segment.dx)).toEqual([
       1_000_000_015n,
       1_000_000_015n,
       1_000_000_013n,
@@ -339,13 +332,13 @@ describe('munge', () => {
   })
 
   it('generates proper overlaps', () => {
-    expect(munge(taiData).map((ray, i, rays) =>
+    expect(munge(taiData).map((segment, i, segments) =>
       // ray end minus overlap start
-      i + 1 in rays
+      i + 1 in segments
         ? (
-            rays[i + 1].start.atomicPicos -
-          BigInt(rays[i + 1].start.unixMillis) * ray.ratio.atomicPicosPerUnixMilli -
-          ray.offsetAtUnixEpoch.atomicPicos
+            segments[i + 1].start.atomicPicos -
+          BigInt(segments[i + 1].start.unixMillis) * segment.dx / BigInt(segment.dy) -
+          segment.offsetAtUnixEpoch.atomicPicos
           )
         : NaN
     )).toEqual([
