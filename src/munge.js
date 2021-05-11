@@ -2,6 +2,13 @@
 
 const segment = require('./segment')
 
+const MODELS = {
+  OVERRUN_ARRAY: 0,
+  OVERRUN_LAST: 1,
+  STALL_RANGE: 2,
+  STALL_END: 3
+}
+
 const NOV = 10
 
 const picosPerSecond = 1000 * 1000 * 1000 * 1000
@@ -16,7 +23,7 @@ const mjdEpoch = {
 // purposes: start point is expressed both in Unix milliseconds and TAI picoseconds, ratio between
 // TAI picoseconds and UTC milliseconds is given as a precise BigInt, and the root is moved to the
 // Unix epoch
-module.exports = data => {
+module.exports = (data, model) => {
   const munged = data.map(datum => {
     const start = {}
     const offsetAtRoot = {}
@@ -45,23 +52,21 @@ module.exports = data => {
       throw Error('Could not compute precise drift rate')
     }
 
-    const ratio = {
-      atomicPicosPerUnixMilli: picosPerMilli + driftRate.atomicPicosPerUnixMilli
+    const dy = { unixMillis: 1 }
+
+    const dx = {
+      atomicPicos: picosPerMilli + driftRate.atomicPicosPerUnixMilli
       // Typically 1_000_000_015n
     }
 
-    const offsetAtUnixEpoch = {
-      atomicPicos: offsetAtRoot.atomicPicos -
-        BigInt(root.unixMillis) * driftRate.atomicPicosPerUnixMilli
-    }
-
-    start.atomicPicos = BigInt(start.unixMillis) * ratio.atomicPicosPerUnixMilli +
-      offsetAtUnixEpoch.atomicPicos
+    start.atomicPicos = BigInt(root.unixMillis) * picosPerMilli +
+      offsetAtRoot.atomicPicos +
+      BigInt(start.unixMillis - root.unixMillis) * dx.atomicPicos / BigInt(dy.unixMillis)
 
     return {
       start,
-      ratio,
-      offsetAtUnixEpoch
+      dy,
+      dx
     }
   })
 
@@ -93,8 +98,10 @@ module.exports = data => {
   return munged.map(datum => new segment.Segment(
     datum.start,
     datum.end,
-    datum.offsetAtUnixEpoch,
-    datum.ratio,
+    datum.dy,
+    datum.dx,
     datum.stall
   ))
 }
+
+module.exports.MODELS = MODELS

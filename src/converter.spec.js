@@ -692,10 +692,7 @@ describe('Converter', () => {
             atomicPicos: Infinity
           },
           dx: { atomicPicos: 1000_000_000n },
-          dy: { unixMillis: 1 },
-          offsetAtUnixEpoch: {
-            atomicPicos: -100_000_000n
-          }
+          dy: { unixMillis: 1 }
         }])
 
         const converter = Converter(data, OVERRUN_ARRAY)
@@ -723,10 +720,7 @@ describe('Converter', () => {
             atomicPicos: -100_000_000n
           },
           dx: { atomicPicos: 1000_000_000n },
-          dy: { unixMillis: 1 },
-          offsetAtUnixEpoch: {
-            atomicPicos: 100_000_000n
-          }
+          dy: { unixMillis: 1 }
         }, {
           start: {
             unixMillis: 1,
@@ -739,10 +733,7 @@ describe('Converter', () => {
             atomicPicos: Infinity
           },
           dx: { atomicPicos: 1000_000_000n },
-          dy: { unixMillis: 1 },
-          offsetAtUnixEpoch: {
-            atomicPicos: -1_100_000_000n
-          }
+          dy: { unixMillis: 1 }
         }])
 
         const converter = Converter(data, OVERRUN_ARRAY)

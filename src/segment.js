@@ -4,21 +4,23 @@ const picosPerMilli = 1000n * 1000n * 1000n
 
 // A segment is a bounded linear relationship between TAI and Unix time.
 class Segment {
-  constructor (start, end, offsetAtUnixEpoch, ratio, stall) {
+  constructor (start, end, dy, dx, stall) {
     this.start = start // unixMillis, atomicPicos
     this.end = end // atomicPicos only (unixMillis is inexact in most cases)
-    this.offsetAtUnixEpoch = offsetAtUnixEpoch
+    this.dy = dy // unixMillis
+    this.dx = dx // atomicPicos
     this.stall = stall // temporary
-
-    this.dy = { unixMillis: 1 }
-    this.dx = { atomicPicos: ratio.atomicPicosPerUnixMilli } // atomicPicos
   }
 
   // This segment linearly transforms `unixMillis` into a different `atomicPicos`
   // This value is always exact FOR NOW, but there is NO BOUNDS CHECKING.
+  // If the line is flat (dy = 0) this throws an exception, currently.
   unixMillisToAtomicPicos (unixMillis) {
     return this.start.atomicPicos +
-      BigInt(unixMillis - this.start.unixMillis) * this.dx.atomicPicos / BigInt(this.dy.unixMillis)
+      div(
+        BigInt(unixMillis - this.start.unixMillis) * this.dx.atomicPicos,
+        BigInt(this.dy.unixMillis)
+      )
   }
 
   // This value is rounded towards negative infinity. Again, there is no bounds checking. The
@@ -34,10 +36,11 @@ class Segment {
   // However, because (for now) segments always begin on an exact Unix millisecond count,
   // if `atomicPicos` is on the segment, `unixMillis` is too.
   atomicPicosToUnixMillis (atomicPicos) {
-    return Number(div(
-      (atomicPicos - this.offsetAtUnixEpoch.atomicPicos) * BigInt(this.dy.unixMillis),
-      this.dx.atomicPicos
-    ))
+    return this.start.unixMillis +
+      Number(div(
+        (atomicPicos - this.start.atomicPicos) * BigInt(this.dy.unixMillis),
+        this.dx.atomicPicos
+      ))
   }
 
   // Likewise rounded to negative infinity, but if `atomicMillis` is on the ray, so is `unixMillis`.

@@ -29,10 +29,7 @@ describe('munge', () => {
         atomicPicos: Infinity
       },
       dx: { atomicPicos: 1000_000_000n },
-      dy: { unixMillis: 1 },
-      offsetAtUnixEpoch: {
-        atomicPicos: 0n
-      }
+      dy: { unixMillis: 1 }
     }])
   })
 
@@ -51,10 +48,7 @@ describe('munge', () => {
         atomicPicos: Infinity
       },
       dx: { atomicPicos: 1000_000_000n },
-      dy: { unixMillis: 1 },
-      offsetAtUnixEpoch: {
-        atomicPicos: -4_000_000_000_000n
-      }
+      dy: { unixMillis: 1 }
     }])
   })
 
@@ -79,10 +73,7 @@ describe('munge', () => {
         atomicPicos: 6_000_000_000_000n
       },
       dx: { atomicPicos: 1000_000_000n },
-      dy: { unixMillis: 1 },
-      offsetAtUnixEpoch: {
-        atomicPicos: -4_000_000_000_000n
-      }
+      dy: { unixMillis: 1 }
     }, {
       start: {
         unixMillis: 9000,
@@ -95,10 +86,7 @@ describe('munge', () => {
         atomicPicos: 9_000_000_000_000n
       },
       dx: { atomicPicos: 1000_000_000n },
-      dy: { unixMillis: 1 },
-      offsetAtUnixEpoch: {
-        atomicPicos: -3_000_000_000_000n
-      }
+      dy: { unixMillis: 1 }
     }, {
       start: {
         unixMillis: 13000,
@@ -111,10 +99,7 @@ describe('munge', () => {
         atomicPicos: Infinity
       },
       dx: { atomicPicos: 1000_000_000n },
-      dy: { unixMillis: 1 },
-      offsetAtUnixEpoch: {
-        atomicPicos: -4_000_000_000_000n
-      }
+      dy: { unixMillis: 1 }
     }])
   })
 
@@ -135,8 +120,7 @@ describe('munge', () => {
       },
       end: { atomicPicos: Infinity },
       dx: { atomicPicos: 1000_100_000n },
-      dy: { unixMillis: 1 },
-      offsetAtUnixEpoch: { atomicPicos: 0n }
+      dy: { unixMillis: 1 }
     }])
 
     // UTC and TAI run at identical rates
@@ -149,8 +133,7 @@ describe('munge', () => {
       },
       end: { atomicPicos: Infinity },
       dx: { atomicPicos: 1000_000_000n },
-      dy: { unixMillis: 1 },
-      offsetAtUnixEpoch: { atomicPicos: 0n }
+      dy: { unixMillis: 1 }
     }])
 
     // TAI runs way slower than UTC
@@ -163,8 +146,7 @@ describe('munge', () => {
       },
       end: { atomicPicos: Infinity },
       dx: { atomicPicos: 999_900_000n },
-      dy: { unixMillis: 1 },
-      offsetAtUnixEpoch: { atomicPicos: 0n }
+      dy: { unixMillis: 1 }
     }])
 
     // TAI moves at one ten-thousandth the rate of UTC!
@@ -178,8 +160,7 @@ describe('munge', () => {
       },
       end: { atomicPicos: Infinity },
       dx: { atomicPicos: 100_000n },
-      dy: { unixMillis: 1 },
-      offsetAtUnixEpoch: { atomicPicos: 0n }
+      dy: { unixMillis: 1 }
     }])
 
     // TAI does not move at ALL
@@ -195,8 +176,7 @@ describe('munge', () => {
       },
       end: { atomicPicos: Infinity },
       dx: { atomicPicos: 0n },
-      dy: { unixMillis: 1 },
-      offsetAtUnixEpoch: { atomicPicos: 0n }
+      dy: { unixMillis: 1 }
     }])
 
     // TAI runs backwards: wild and highly untested but sure!
@@ -212,8 +192,7 @@ describe('munge', () => {
       },
       end: { atomicPicos: Infinity },
       dx: { atomicPicos: -100_000n },
-      dy: { unixMillis: 1 },
-      offsetAtUnixEpoch: { atomicPicos: 0n }
+      dy: { unixMillis: 1 }
     }])
   })
 
@@ -232,57 +211,8 @@ describe('munge', () => {
         atomicPicos: Infinity
       },
       dx: { atomicPicos: 1000_000_015n },
-      dy: { unixMillis: 1 },
-      offsetAtUnixEpoch: {
-        atomicPicos: 5_682_770_000_000n
-      }
+      dy: { unixMillis: 1 }
     }])
-  })
-
-  it('generates proper offsets at the Unix epoch', () => {
-    expect(munge(taiData).map(ray => ray.offsetAtUnixEpoch.atomicPicos)).toEqual([
-      5_682_770_000_000n,
-      5_632_770_000_000n,
-      5_127_848_400_000n,
-      5_227_848_400_000n,
-      5_606_626_000_000n,
-      5_706_626_000_000n,
-      5_806_626_000_000n,
-      5_906_626_000_000n,
-      6_006_626_000_000n,
-      6_106_626_000_000n,
-      6_206_626_000_000n,
-      8_100_082_000_000n,
-      8_000_082_000_000n,
-      10_000_000_000_000n,
-      11_000_000_000_000n,
-      12_000_000_000_000n,
-      13_000_000_000_000n,
-      14_000_000_000_000n,
-      15_000_000_000_000n,
-      16_000_000_000_000n,
-      17_000_000_000_000n,
-      18_000_000_000_000n,
-      19_000_000_000_000n,
-      20_000_000_000_000n,
-      21_000_000_000_000n,
-      22_000_000_000_000n,
-      23_000_000_000_000n,
-      24_000_000_000_000n,
-      25_000_000_000_000n,
-      26_000_000_000_000n,
-      27_000_000_000_000n,
-      28_000_000_000_000n,
-      29_000_000_000_000n,
-      30_000_000_000_000n,
-      31_000_000_000_000n,
-      32_000_000_000_000n,
-      33_000_000_000_000n,
-      34_000_000_000_000n,
-      35_000_000_000_000n,
-      36_000_000_000_000n,
-      37_000_000_000_000n
-    ])
   })
 
   it('generates proper drift rates', () => {
@@ -337,8 +267,7 @@ describe('munge', () => {
       i + 1 in segments
         ? (
             segments[i + 1].start.atomicPicos -
-          BigInt(segments[i + 1].start.unixMillis) * segment.dx.atomicPicos / BigInt(segment.dy.unixMillis) -
-          segment.offsetAtUnixEpoch.atomicPicos
+            segment.unixMillisToAtomicPicos(segments[i + 1].start.unixMillis)
           )
         : NaN
     )).toEqual([

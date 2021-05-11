@@ -14,17 +14,12 @@
 
 const munge = require('./munge')
 
-const MODELS = {
-  OVERRUN_ARRAY: 0,
-  OVERRUN_LAST: 1,
-  STALL_RANGE: 2,
-  STALL_END: 3
-}
+const MODELS = munge.MODELS
 
 module.exports.MODELS = MODELS
 
 module.exports.Converter = (data, model) => {
-  const segments = munge(data)
+  const segments = munge(data, model)
 
   /// Unix to TAI conversion methods
 
