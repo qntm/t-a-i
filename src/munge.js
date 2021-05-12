@@ -52,7 +52,9 @@ module.exports = (data, model) => {
       throw Error('Could not compute precise drift rate')
     }
 
-    const dy = { unixMillis: 1 }
+    const dy = {
+      unixMillis: 1
+    }
 
     const dx = {
       atomicPicos: picosPerMilli + driftRate.atomicPicosPerUnixMilli
