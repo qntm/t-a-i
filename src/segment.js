@@ -26,6 +26,16 @@ class Segment {
 
   // Returns two BigInts which when divided give the exact atomic picosecond count.
   _unixMillisRatioToAtomicPicosRatio (unixMillisRatio) {
+    if (this.slope.unixMillisPerAtomicPico.eq(new Rat(0n))) {
+      if (unixMillisRatio.eq(this.start.unixMillisRatio)) {
+        // For now return just the end of the segment.
+        // TODO: return a closed range
+        return this.end.atomicPicosRatio
+      }
+
+      throw Error('This segment is flat, this Unix time never happened')
+    }
+
     return unixMillisRatio
       .minus(this.start.unixMillisRatio)
       .divide(this.slope.unixMillisPerAtomicPico)

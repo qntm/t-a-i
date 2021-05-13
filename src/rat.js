@@ -39,6 +39,10 @@ class Rat {
     return (this.de < 0n) === (other.de < 0n) ? det : -det
   }
 
+  eq (other) {
+    return this._det(other) === 0n
+  }
+
   le (other) {
     return this._det(other) <= 0n
   }
