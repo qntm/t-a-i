@@ -600,4 +600,257 @@ describe('munge', () => {
       ])
     })
   })
+
+  describe('smear model', () => {
+    it('works in the simplest possible case', () => {
+      expect(munge([
+        [Date.UTC(1970, JAN, 1), 0]
+      ], REAL_MODELS.SMEAR)).toEqual([new Segment(
+        { atomicPicos: 0n, unixMillis: 0 },
+        { atomicPicos: Infinity },
+        { unixMillis: 1 },
+        { atomicPicos: 1000_000_000n }
+      )])
+    })
+
+    it('works when one second is inserted', () => {
+      expect(munge([
+        [0, 0],
+        [86_400_000, 1], // inserted leap second after one day
+      ], REAL_MODELS.SMEAR)).toEqual([new Segment(
+        { atomicPicos: 0n, unixMillis: 0 },
+        { atomicPicos: 43_200_000_000_000_000n }, // midday
+
+        // perfectly diagonal
+        { unixMillis: 1 },
+        { atomicPicos: 1000_000_000n }
+      ), new Segment(
+        { atomicPicos: 43_200_000_000_000_000n, unixMillis: 43_200_000 }, // midday
+        { atomicPicos: 129_601_000_000_000_000n }, // midday
+
+        // A full Unix day elapses, but a full TAI day plus one second elapses
+        { unixMillis: 86_400_000 },
+        { atomicPicos: 86_401_000_000_000_000n }
+      ), new Segment(
+        { atomicPicos: 129_601_000_000_000_000n, unixMillis: 129_600_000 }, // midday
+        { atomicPicos: Infinity },
+
+        // perfectly diagonal
+        { unixMillis: 1 },
+        { atomicPicos: 1000_000_000n }
+      )])
+    })
+
+    it('works when one second is removed', () => {
+      expect(munge([
+        [0, 0],
+        [86_400_000, -1], // removed leap second after one day
+      ], REAL_MODELS.SMEAR)).toEqual([new Segment(
+        { atomicPicos: 0n, unixMillis: 0 },
+        { atomicPicos: 43_200_000_000_000_000n }, // midday
+
+        // perfectly diagonal
+        { unixMillis: 1 },
+        { atomicPicos: 1000_000_000n }
+      ), new Segment(
+        { atomicPicos: 43_200_000_000_000_000n, unixMillis: 43_200_000 }, // midday
+        { atomicPicos: 129_599_000_000_000_000n }, // midday
+
+        // A full Unix day elapses, but a full TAI day minus one second elapses
+        { unixMillis: 86_400_000 },
+        { atomicPicos: 86_399_000_000_000_000n }
+      ), new Segment(
+        { atomicPicos: 129_599_000_000_000_000n, unixMillis: 129_600_000 }, // midday
+        { atomicPicos: Infinity },
+
+        // perfectly diagonal
+        { unixMillis: 1 },
+        { atomicPicos: 1000_000_000n }
+      )])
+    })
+
+    it('generates proper drift rates', () => {
+      expect(munge(taiData, REAL_MODELS.SMEAR).map(segment => segment.slope.unixMillisPerAtomicPico))
+        .toEqual([
+          // During Unix-day-long smears, elapsed atomic time is a full day PLUS daily offset
+          // PLUS inserted time
+          new Rat(1n, 1_000_000_015n),
+          new Rat(86_400_000n, 86_400_000_000_000_000n + 1_296_000_000n - 50_000_000_000n),
+          new Rat(1n, 1_000_000_015n),
+          new Rat(86_400_000n, 86_400_000_000_000_000n + 1_209_600_000n + 0n),
+          new Rat(1n, 1_000_000_013n),
+          new Rat(86_400_000n, 86_400_000_000_000_000n + 1_123_200_000n + 100_000_000_000n),
+          new Rat(1n, 1_000_000_013n),
+          new Rat(86_400_000n, 86_400_000_000_000_000n + 1_209_600_000n + 0n),
+          new Rat(1n, 1_000_000_015n),
+          new Rat(86_400_000n, 86_400_000_000_000_000n + 1_296_000_000n + 100_000_000_000n),
+          new Rat(1n, 1_000_000_015n),
+          new Rat(86_400_000n, 86_400_000_000_000_000n + 1_296_000_000n + 100_000_000_000n),
+          new Rat(1n, 1_000_000_015n),
+          new Rat(86_400_000n, 86_400_000_000_000_000n + 1_296_000_000n + 100_000_000_000n),
+          new Rat(1n, 1_000_000_015n),
+          new Rat(86_400_000n, 86_400_000_000_000_000n + 1_296_000_000n + 100_000_000_000n),
+          new Rat(1n, 1_000_000_015n),
+          new Rat(86_400_000n, 86_400_000_000_000_000n + 1_296_000_000n + 100_000_000_000n),
+          new Rat(1n, 1_000_000_015n),
+          new Rat(86_400_000n, 86_400_000_000_000_000n + 1_296_000_000n + 100_000_000_000n),
+          new Rat(1n, 1_000_000_015n),
+          new Rat(86_400_000n, 86_400_000_000_000_000n + 1_944_000_000n + 0n),
+          new Rat(1n, 1_000_000_030n),
+          new Rat(86_400_000n, 86_400_000_000_000_000n + 2_592_000_000n - 100_000_000_000n),
+          new Rat(1n, 1_000_000_030n),
+          new Rat(86_400_000n, 86_400_000_000_000_000n + 0n + 109_054_000_000n),
+          new Rat(1n, 1_000_000_000n),
+          new Rat(86_400_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
+          new Rat(1n, 1_000_000_000n),
+          new Rat(86_400_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
+          new Rat(1n, 1_000_000_000n),
+          new Rat(86_400_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
+          new Rat(1n, 1_000_000_000n),
+          new Rat(86_400_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
+          new Rat(1n, 1_000_000_000n),
+          new Rat(86_400_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
+          new Rat(1n, 1_000_000_000n),
+          new Rat(86_400_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
+          new Rat(1n, 1_000_000_000n),
+          new Rat(86_400_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
+          new Rat(1n, 1_000_000_000n),
+          new Rat(86_400_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
+          new Rat(1n, 1_000_000_000n),
+          new Rat(86_400_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
+          new Rat(1n, 1_000_000_000n),
+          new Rat(86_400_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
+          new Rat(1n, 1_000_000_000n),
+          new Rat(86_400_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
+          new Rat(1n, 1_000_000_000n),
+          new Rat(86_400_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
+          new Rat(1n, 1_000_000_000n),
+          new Rat(86_400_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
+          new Rat(1n, 1_000_000_000n),
+          new Rat(86_400_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
+          new Rat(1n, 1_000_000_000n),
+          new Rat(86_400_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
+          new Rat(1n, 1_000_000_000n),
+          new Rat(86_400_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
+          new Rat(1n, 1_000_000_000n),
+          new Rat(86_400_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
+          new Rat(1n, 1_000_000_000n),
+          new Rat(86_400_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
+          new Rat(1n, 1_000_000_000n),
+          new Rat(86_400_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
+          new Rat(1n, 1_000_000_000n),
+          new Rat(86_400_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
+          new Rat(1n, 1_000_000_000n),
+          new Rat(86_400_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
+          new Rat(1n, 1_000_000_000n),
+          new Rat(86_400_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
+          new Rat(1n, 1_000_000_000n),
+          new Rat(86_400_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
+          new Rat(1n, 1_000_000_000n),
+          new Rat(86_400_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
+          new Rat(1n, 1_000_000_000n),
+          new Rat(86_400_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
+          new Rat(1n, 1_000_000_000n),
+          new Rat(86_400_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
+          new Rat(1n, 1_000_000_000n),
+          new Rat(86_400_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
+          new Rat(1n, 1_000_000_000n)
+        ])
+    })
+
+    it('generates proper overlaps', () => {
+      // Due to smearing, there are NEVER overlaps, no removed or inserted time remains
+      expect(munge(taiData, REAL_MODELS.SMEAR).map((segment, i, segments) =>
+        // ray end minus overlap start
+        i + 1 in segments
+          ? (
+              segments[i + 1].start.atomicPicosRatio.trunc() -
+              segment.unixMillisToAtomicPicos(segments[i + 1].start.unixMillisRatio.trunc())
+            )
+          : NaN
+      )).toEqual([
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        0n,
+        NaN
+      ])
+    })
+  })
 })

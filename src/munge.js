@@ -122,44 +122,80 @@ module.exports.munge = (data, realModel) => {
 
   if (realModel === REAL_MODELS.OVERRUN) {
     // Do nothing, we're good
-  } else if (realModel === REAL_MODELS.BREAK || realModel === REAL_MODELS.STALL) {
+  } else if (
+    realModel === REAL_MODELS.BREAK ||
+    realModel === REAL_MODELS.STALL ||
+    realModel === REAL_MODELS.SMEAR
+  ) {
+    // Handle continuity between segments
     for (let i = 0; i < munged.length; i++) {
       const datum = munged[i]
 
-      if (i + 1 in munged) {
-        // Find the "stall point", which is where Unix time starts to double up
-        const stall = {
-          unixMillis: munged[i + 1].start.unixMillis
-        }
-
-        stall.atomicPicos = datum.start.atomicPicos +
-          BigInt(stall.unixMillis - datum.start.unixMillis) *
-          datum.dx.atomicPicos /
-          BigInt(datum.dy.unixMillis)
-
-        if (stall.atomicPicos < datum.end.atomicPicos) {
-          // Terminate this segment early
-          datum.end = stall // includes unixMillis but we'll ignore that
-
-          if (realModel === REAL_MODELS.STALL) {
-            // Insert a new horizontal segment linking that stall point
-            // to the start of the next segment
-            munged.splice(i + 1, 0, {
-              start: stall,
-              end: munged[i + 1].start, // includes unixMillis but we'll ignore that
-              dy: {
-                unixMillis: 0
-              },
-              dx: {
-                atomicPicos: munged[i + 1].start.atomicPicos - stall.atomicPicos
-              }
-            })
-
-            // Then also skip over it
-            i++
-          }
-        }
+      if (!(i + 1 in munged)) {
+        // Last segment, no continuity to handle
+        continue
       }
+
+      // Find smear start point, which is on THIS segment.
+      // When smearing, this is twelve Unix hours prior to discontinuity.
+      // When breaking/stalling, this is the Unix time when the next segment starts.
+      const smearStart = {
+        unixMillis: realModel === REAL_MODELS.SMEAR
+          ? munged[i + 1].start.unixMillis - millisPerDay / 2
+          : munged[i + 1].start.unixMillis
+      }
+
+      smearStart.atomicPicos = datum.start.atomicPicos +
+        BigInt(smearStart.unixMillis - datum.start.unixMillis) *
+        datum.dx.atomicPicos /
+        BigInt(datum.dy.unixMillis)
+
+      // Find smear end point, which is on the NEXT segment.
+      // When smearing, this is twelve hours after the discontinuity.
+      // When breaking/stalling, this is the start of the segment.
+      const smearEnd = {
+        unixMillis: realModel === REAL_MODELS.SMEAR
+          ? munged[i + 1].start.unixMillis + millisPerDay / 2
+          : munged[i + 1].start.unixMillis
+      }
+
+      smearEnd.atomicPicos = munged[i + 1].start.atomicPicos +
+        BigInt(smearEnd.unixMillis - munged[i + 1].start.unixMillis) *
+        munged[i + 1].dx.atomicPicos /
+        BigInt(munged[i + 1].dy.unixMillis)
+
+      // Do not allow "negative smears".
+      // This happens if we're breaking/stalling and time was removed
+      if (smearEnd.atomicPicos <= smearStart.atomicPicos) {
+        continue
+      }
+
+      // Create the break.
+      // Terminate this segment early
+      // Start the next segment late
+      datum.end = smearStart // includes unixMillis but we'll ignore that
+      munged[i + 1].start = smearEnd
+
+      if (realModel === REAL_MODELS.BREAK) {
+        // Just leave a gap
+        continue
+      }
+
+      // Insert a new smear segment linking the two.
+      // When breaking/stalling, this is perfectly horizontal (dy.unixMillis = 0)
+      munged.splice(i + 1, 0, {
+        start: smearStart,
+        end: smearEnd, // includes unixMillis but we'll ignore that
+        dy: {
+          unixMillis: smearEnd.unixMillis - smearStart.unixMillis
+        },
+        dx: {
+          atomicPicos: smearEnd.atomicPicos - smearStart.atomicPicos
+        }
+      })
+
+      // Then also skip over it
+      i++
     }
   } else {
     throw Error('Unrecognised model')
@@ -171,9 +207,6 @@ module.exports.munge = (data, realModel) => {
     datum.dy,
     datum.dx
   ))
-
-  // TODO:
-  // REAL_MODELS.SMEAR
 }
 
 module.exports.MODELS = MODELS
