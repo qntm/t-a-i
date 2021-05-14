@@ -246,6 +246,37 @@ describe('munge', () => {
         NaN // `Infinity - Infinity`
       ])
     })
+
+    describe('when unixMillis converts to an atomicPicos which fits but an atomicMillis which does not', () => {
+      it('at the start of the ray', () => {
+        expect(munge([
+          [Date.UTC(1970, JAN, 1, 0, 0, 0, 1), -0.0001]
+        ], REAL_MODELS.OVERRUN)).toEqual([new Segment(
+          { unixMillis: 1, atomicPicos: 900_000_000n }, // ray start intentionally doesn't include TAI epoch
+          { atomicPicos: Infinity },
+          { unixMillis: 1 },
+          { atomicPicos: 1000_000_000n }
+        )])
+      })
+
+      it('at the end of the ray', () => {
+        // first ray's end intentionally doesn't include TAI epoch
+        expect(munge([
+          [Date.UTC(1969, DEC, 31, 23, 59, 59, 999), 0.0001],
+          [Date.UTC(1970, JAN, 1, 0, 0, 0, 1), -0.0011]
+        ], REAL_MODELS.OVERRUN)).toEqual([new Segment(
+          { unixMillis: -1, atomicPicos: -900_000_000n },
+          { atomicPicos: -100_000_000n },
+          { unixMillis: 1 },
+          { atomicPicos: 1000_000_000n }
+        ), new Segment(
+          { unixMillis: 1, atomicPicos: -100_000_000n },
+          { atomicPicos: Infinity },
+          { unixMillis: 1 },
+          { atomicPicos: 1000_000_000n }
+        )])
+      })
+    })
   })
 
   describe('break model', () => {

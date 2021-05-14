@@ -12,6 +12,7 @@
 // The logic below should work even if these segments proceed horizontally, or UTC runs backwards, or if
 // the period of validity of a segment is 0.
 
+const { Rat } = require('./rat')
 const { munge, REAL_MODELS } = require('./munge')
 
 const MODELS = {
@@ -19,7 +20,7 @@ const MODELS = {
   OVERRUN_LAST: 1,
   BREAK: 2,
   STALL_RANGE: 3,
-  STALL_LAST: 4,
+  STALL_END: 4,
   SMEAR: 5
 }
 
@@ -28,7 +29,7 @@ const Converter = (data, model) => {
     ? REAL_MODELS.OVERRUN
     : model === MODELS.BREAK
       ? REAL_MODELS.BREAK
-      : model === MODELS.STALL_RANGE || model === MODELS.STALL_LAST
+      : model === MODELS.STALL_RANGE || model === MODELS.STALL_END
         ? REAL_MODELS.STALL
         : model === MODELS.SMEAR
           ? REAL_MODELS.SMEAR
@@ -39,41 +40,6 @@ const Converter = (data, model) => {
   }
 
   const segments = munge(data, realModel)
-
-  /// Unix to TAI conversion methods
-
-  const unixToAtomicPicos = unixMillis => {
-    if (!Number.isInteger(unixMillis)) {
-      throw Error(`Not an integer: ${unixMillis}`)
-    }
-
-    const atomicPicosArray = []
-    for (const segment of segments) {
-      // input bounds check
-      if (!segment.unixMillisOnSegment(unixMillis)) {
-        continue
-      }
-
-      // transformation
-      const atomicPicos = segment.unixMillisToAtomicPicos(unixMillis)
-
-      // output bounds check
-      /* istanbul ignore if */
-      if (!segment.atomicPicosOnSegment(atomicPicos)) {
-        continue
-      }
-
-      atomicPicosArray.push(atomicPicos)
-    }
-
-    if (model === MODELS.OVERRUN_ARRAY) {
-      return atomicPicosArray
-    }
-
-    const i = atomicPicosArray.length - 1
-
-    return i in atomicPicosArray ? atomicPicosArray[i] : NaN
-  }
 
   const unixToAtomic = unixMillis => {
     if (!Number.isInteger(unixMillis)) {
@@ -107,8 +73,8 @@ const Converter = (data, model) => {
     return i in atomicMillisArray ? atomicMillisArray[i] : NaN
   }
 
-  /// TAI to Unix conversion methods
-
+  // This conversion always works (except before 1961)
+  // and there's no work required in handling the output
   const atomicToUnix = atomicMillis => {
     if (!Number.isInteger(atomicMillis)) {
       throw Error(`Not an integer: ${atomicMillis}`)
@@ -126,10 +92,10 @@ const Converter = (data, model) => {
       // output bounds check
       /* istanbul ignore if */
       if (!segment.unixMillisOnSegment(unixMillis)) {
+        console.log(segment, 'not on segment:', unixMillis)
         continue
       }
 
-      // Otherwise assume overrun
       return unixMillis
     }
 
@@ -138,7 +104,6 @@ const Converter = (data, model) => {
   }
 
   return {
-    unixToAtomicPicos,
     unixToAtomic,
     atomicToUnix
   }

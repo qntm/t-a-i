@@ -51,6 +51,10 @@ class Rat {
     return this._det(other) > 0n
   }
 
+  ge (other) {
+    return this._det(other) >= 0n
+  }
+
   trunc () {
     return div(this.nu, this.de)
   }

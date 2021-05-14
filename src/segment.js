@@ -8,6 +8,10 @@ const picosPerMilli = 1000n * 1000n * 1000n
 // TODO: handle case where dy = 0
 class Segment {
   constructor (start, end, dy, dx) {
+    if (end.atomicPicos <= start.atomicPicos) {
+      throw Error('Segment length must be positive')
+    }
+
     this.start = {
       atomicPicosRatio: new Rat(start.atomicPicos),
       unixMillisRatio: new Rat(BigInt(start.unixMillis))
@@ -36,10 +40,12 @@ class Segment {
       throw Error('This segment is flat, this Unix time never happened')
     }
 
-    return unixMillisRatio
+    const atomicPicosRatio = unixMillisRatio
       .minus(this.start.unixMillisRatio)
       .divide(this.slope.unixMillisPerAtomicPico)
       .plus(this.start.atomicPicosRatio)
+
+    return atomicPicosRatio
   }
 
   // Returns two BigInts which when divided give the exact Unix millisecond count.
@@ -53,16 +59,7 @@ class Segment {
   // This segment linearly transforms `unixMillis` into a different `atomicPicos`
   // This value is rounded towards negative infinity. There is NO BOUNDS CHECKING.
   // If the line is flat (dy = 0) this throws an exception, currently.
-  // Method is for testing purposes only
-  unixMillisToAtomicPicos (unixMillis) {
-    const unixMillisRatio = new Rat(BigInt(unixMillis))
-    const atomicPicosRatio = this._unixMillisRatioToAtomicPicosRatio(unixMillisRatio)
-    const atomicPicos = atomicPicosRatio.trunc()
-    return atomicPicos
-  }
-
-  // This value is rounded towards negative infinity. Again, there is no bounds checking. The
-  // rounding may round an `atomicPicos` which was in bounds to an `atomicMillis` which is not.
+  // The rounding may round an `atomicPicos` which was in bounds to an `atomicMillis` which is not.
   unixMillisToAtomicMillis (unixMillis) {
     const unixMillisRatio = new Rat(BigInt(unixMillis))
     const atomicPicosRatio = this._unixMillisRatioToAtomicPicosRatio(unixMillisRatio)
@@ -86,18 +83,15 @@ class Segment {
   // Valid TAI instants are from the computed TAI start of the segment to the computed TAI end of
   // the segment. Valid Unix instants are the valid TAI instants, transformed linearly from TAI to
   // Unix by the segment.
-  atomicPicosOnSegment (atomicPicos) {
+
+  atomicMillisOnSegment (atomicMillis) {
+    const atomicPicos = BigInt(atomicMillis) * picosPerMilli
     const atomicPicosRatio = new Rat(atomicPicos)
     return this.start.atomicPicosRatio.le(atomicPicosRatio) && (
       this.end.atomicPicosRatio === Infinity ||
       this.end.atomicPicosRatio
         .gt(atomicPicosRatio)
     )
-  }
-
-  atomicMillisOnSegment (atomicMillis) {
-    const atomicPicos = BigInt(atomicMillis) * picosPerMilli
-    return this.atomicPicosOnSegment(atomicPicos)
   }
 
   unixMillisOnSegment (unixMillis) {
@@ -108,7 +102,7 @@ class Segment {
         .minus(this.start.atomicPicosRatio)
         .times(this.slope.unixMillisPerAtomicPico)
         .plus(this.start.unixMillisRatio)
-        .gt(unixMillisRatio)
+        .ge(unixMillisRatio)
     )
   }
 }
