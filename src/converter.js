@@ -12,14 +12,33 @@
 // The logic below should work even if these segments proceed horizontally, or UTC runs backwards, or if
 // the period of validity of a segment is 0.
 
-const munge = require('./munge')
+const { munge, REAL_MODELS } = require('./munge')
 
-const MODELS = munge.MODELS
+const MODELS = {
+  OVERRUN_ARRAY: 0,
+  OVERRUN_LAST: 1,
+  BREAK: 2,
+  STALL_RANGE: 3,
+  STALL_LAST: 4,
+  SMEAR: 5
+}
 
-module.exports.MODELS = MODELS
+const Converter = (data, model) => {
+  const realModel = model === MODELS.OVERRUN_ARRAY || model === MODELS.OVERRUN_LAST
+    ? REAL_MODELS.OVERRUN
+    : model === MODELS.BREAK
+      ? REAL_MODELS.BREAK
+      : model === MODELS.STALL_RANGE || model === MODELS.STALL_LAST
+        ? REAL_MODELS.STALL
+        : model === MODELS.SMEAR
+          ? REAL_MODELS.SMEAR
+          : undefined
 
-module.exports.Converter = (data, model) => {
-  const segments = munge(data, model)
+  if (realModel === undefined) {
+    throw Error(`Unrecognised model: ${model}`)
+  }
+
+  const segments = munge(data, realModel)
 
   /// Unix to TAI conversion methods
 
@@ -118,16 +137,12 @@ module.exports.Converter = (data, model) => {
     return NaN
   }
 
-  if (
-    model === MODELS.OVERRUN_ARRAY ||
-    model === MODELS.OVERRUN_LAST
-  ) {
-    return {
-      unixToAtomicPicos,
-      unixToAtomic,
-      atomicToUnix
-    }
+  return {
+    unixToAtomicPicos,
+    unixToAtomic,
+    atomicToUnix
   }
-
-  throw Error(`Unrecognised model: ${model}`)
 }
+
+module.exports.MODELS = MODELS
+module.exports.Converter = Converter

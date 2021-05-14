@@ -616,7 +616,7 @@ describe('munge', () => {
     it('works when one second is inserted', () => {
       expect(munge([
         [0, 0],
-        [86_400_000, 1], // inserted leap second after one day
+        [86_400_000, 1] // inserted leap second after one day
       ], REAL_MODELS.SMEAR)).toEqual([new Segment(
         { atomicPicos: 0n, unixMillis: 0 },
         { atomicPicos: 43_200_000_000_000_000n }, // midday
@@ -644,7 +644,7 @@ describe('munge', () => {
     it('works when one second is removed', () => {
       expect(munge([
         [0, 0],
-        [86_400_000, -1], // removed leap second after one day
+        [86_400_000, -1] // removed leap second after one day
       ], REAL_MODELS.SMEAR)).toEqual([new Segment(
         { atomicPicos: 0n, unixMillis: 0 },
         { atomicPicos: 43_200_000_000_000_000n }, // midday

@@ -8,6 +8,10 @@ const picosPerMilli = 1000n * 1000n * 1000n
 // TODO: handle case where dy = 0
 class Segment {
   constructor (start, end, dy, dx) {
+    if (end.atomicPicos <= start.atomicPicos) {
+      throw Error('Segment length must be positive')
+    }
+
     this.start = {
       atomicPicosRatio: new Rat(start.atomicPicos),
       unixMillisRatio: new Rat(BigInt(start.unixMillis))
