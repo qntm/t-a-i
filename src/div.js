@@ -1,5 +1,5 @@
 // Divide two BigInts and round the result towards negative infinity
-module.exports = (a, b) => {
+const div = (a, b) => {
   const q = a / b
 
   // `b` must be non-zero or we would have thrown an exception by now
@@ -19,3 +19,5 @@ module.exports = (a, b) => {
   // Result was negative, quotient was rounded in the wrong direction, undo this
   return q - 1n
 }
+
+module.exports.div = div

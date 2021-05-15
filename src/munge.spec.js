@@ -1,7 +1,7 @@
 /* eslint-env jest */
 
-const taiData = require('./tai-data')
-const { munge, REAL_MODELS } = require('./munge')
+const { taiData } = require('./tai-data')
+const { munge, SEGMENT_MODELS } = require('./munge')
 const { Rat } = require('./rat')
 const { Segment } = require('./segment')
 
@@ -20,13 +20,13 @@ describe('munge', () => {
       expect(() => munge([
         [Date.UTC(1979, DEC, 9), 0],
         [Date.UTC(1970, JAN, 1), 0]
-      ], REAL_MODELS.OVERRUN)).toThrowError('Disordered data')
+      ], SEGMENT_MODELS.OVERRUN)).toThrowError('Disordered data')
     })
 
     it('works in the simplest possible case', () => {
       expect(munge([
         [Date.UTC(1970, JAN, 1), 0]
-      ], REAL_MODELS.OVERRUN)).toEqual([new Segment(
+      ], SEGMENT_MODELS.OVERRUN)).toEqual([new Segment(
         { atomicPicos: 0n, unixMillis: 0 },
         { atomicPicos: Infinity },
         { unixMillis: 1 },
@@ -37,7 +37,7 @@ describe('munge', () => {
     it('works when there is an initial offset', () => {
       expect(munge([
         [7, -4]
-      ], REAL_MODELS.OVERRUN)).toEqual([new Segment(
+      ], SEGMENT_MODELS.OVERRUN)).toEqual([new Segment(
         { unixMillis: 7, atomicPicos: -3_993_000_000_000n },
         { atomicPicos: Infinity },
         { unixMillis: 1 },
@@ -54,7 +54,7 @@ describe('munge', () => {
         [-1000, -4],
         [9000, -3], // inserted leap second
         [13000, -4] // removed leap second
-      ], REAL_MODELS.OVERRUN)).toEqual([new Segment(
+      ], SEGMENT_MODELS.OVERRUN)).toEqual([new Segment(
         { unixMillis: -1000, atomicPicos: -5_000_000_000_000n },
         { atomicPicos: 6_000_000_000_000n },
         { unixMillis: 1 },
@@ -75,14 +75,14 @@ describe('munge', () => {
     it('fails on a bad drift rate', () => {
       expect(() => munge([
         [Date.UTC(1961, JAN, 1), 1.422_818_0, 37_300, 0.001]
-      ], REAL_MODELS.OVERRUN)).toThrowError('Could not compute precise drift rate')
+      ], SEGMENT_MODELS.OVERRUN)).toThrowError('Could not compute precise drift rate')
     })
 
     it('allows a negative ratio somehow', () => {
       // TAI runs way faster than UTC
       expect(munge([
         [Date.UTC(1970, JAN, 1), 0, 40_587, 8.640_0]
-      ], REAL_MODELS.OVERRUN)).toEqual([new Segment(
+      ], SEGMENT_MODELS.OVERRUN)).toEqual([new Segment(
         { unixMillis: 0, atomicPicos: 0n },
         { atomicPicos: Infinity },
         { unixMillis: 1 },
@@ -92,7 +92,7 @@ describe('munge', () => {
       // UTC and TAI run at identical rates
       expect(munge([
         [Date.UTC(1970, JAN, 1), 0, 40_587, 0]
-      ], REAL_MODELS.OVERRUN)).toEqual([new Segment(
+      ], SEGMENT_MODELS.OVERRUN)).toEqual([new Segment(
         { unixMillis: 0, atomicPicos: 0n },
         { atomicPicos: Infinity },
         { unixMillis: 1 },
@@ -102,7 +102,7 @@ describe('munge', () => {
       // TAI runs way slower than UTC
       expect(munge([
         [Date.UTC(1970, JAN, 1), 0, 40_587, -8.640_0]
-      ], REAL_MODELS.OVERRUN)).toEqual([new Segment(
+      ], SEGMENT_MODELS.OVERRUN)).toEqual([new Segment(
         { unixMillis: 0, atomicPicos: 0n },
         { atomicPicos: Infinity },
         { unixMillis: 1 },
@@ -113,7 +113,7 @@ describe('munge', () => {
       // Equivalently, UTC moves 10,000 times the rate of TAI
       expect(munge([
         [Date.UTC(1970, JAN, 1), 0, 40_587, -86_400 + 8.640_0]
-      ], REAL_MODELS.OVERRUN)).toEqual([new Segment(
+      ], SEGMENT_MODELS.OVERRUN)).toEqual([new Segment(
         { unixMillis: 0, atomicPicos: 0n },
         { atomicPicos: Infinity },
         { unixMillis: 1 },
@@ -127,7 +127,7 @@ describe('munge', () => {
       // TAI runs backwards: wild and highly untested but sure!
       expect(munge([
         [Date.UTC(1970, JAN, 1), 0, 40_587, -86_400 - 8.640_0]
-      ], REAL_MODELS.OVERRUN)).toEqual([new Segment(
+      ], SEGMENT_MODELS.OVERRUN)).toEqual([new Segment(
         { unixMillis: 0, atomicPicos: 0n },
         { atomicPicos: Infinity },
         { unixMillis: 1 },
@@ -138,7 +138,7 @@ describe('munge', () => {
     it('works with the first line of real data', () => {
       expect(munge([
         [Date.UTC(1961, JAN, 1), 1.422_818_0, 37_300, 0.001_296]
-      ], REAL_MODELS.OVERRUN)).toEqual([new Segment(
+      ], SEGMENT_MODELS.OVERRUN)).toEqual([new Segment(
         { unixMillis: -283_996_800_000, atomicPicos: -283_996_798_577_182_000_000n },
         { atomicPicos: Infinity },
         { unixMillis: 1 },
@@ -147,7 +147,7 @@ describe('munge', () => {
     })
 
     it('generates proper drift rates', () => {
-      expect(munge(taiData, REAL_MODELS.OVERRUN).map(segment => segment.slope.unixMillisPerAtomicPico))
+      expect(munge(taiData, SEGMENT_MODELS.OVERRUN).map(segment => segment.slope.unixMillisPerAtomicPico))
         .toEqual([
           new Rat(1n, 1_000_000_015n),
           new Rat(1n, 1_000_000_015n),
@@ -193,16 +193,28 @@ describe('munge', () => {
         ])
     })
 
-    it('generates proper overlaps', () => {
-      expect(munge(taiData, REAL_MODELS.OVERRUN).map((segment, i, segments) =>
-        // ray end minus overlap start
-        i + 1 in segments
-          ? (
-              segments[i + 1].start.atomicPicosRatio.trunc() -
-              segment.unixMillisToAtomicPicos(segments[i + 1].start.unixMillisRatio.trunc())
-            )
-          : NaN
-      )).toEqual([
+    it('generates proper Unix time overlaps', () => {
+      expect(munge(taiData, SEGMENT_MODELS.OVERRUN).map((segment, i, segments) => {
+        if (!(i + 1 in segments)) {
+          return NaN
+        }
+
+        const unixMillisRatio = segments[i + 1].start.unixMillisRatio
+
+        // TAI picoseconds as of this Unix time, at the END of the CURRENT segment
+        const a = unixMillisRatio
+          .minus(segment.start.unixMillisRatio)
+          .divide(segment.slope.unixMillisPerAtomicPico)
+          .plus(segment.start.atomicPicosRatio)
+
+        // TAI picoseconds as of this Unix time, at the START of the NEXT segment
+        const b = unixMillisRatio
+          .minus(segments[i + 1].start.unixMillisRatio)
+          .divide(segments[i + 1].slope.unixMillisPerAtomicPico)
+          .plus(segments[i + 1].start.atomicPicosRatio)
+
+        return b.minus(a).trunc()
+      })).toEqual([
         -50_000_000_000n,
         0n,
         100_000_000_000n,
@@ -251,7 +263,7 @@ describe('munge', () => {
       it('at the start of the ray', () => {
         expect(munge([
           [Date.UTC(1970, JAN, 1, 0, 0, 0, 1), -0.0001]
-        ], REAL_MODELS.OVERRUN)).toEqual([new Segment(
+        ], SEGMENT_MODELS.OVERRUN)).toEqual([new Segment(
           { unixMillis: 1, atomicPicos: 900_000_000n }, // ray start intentionally doesn't include TAI epoch
           { atomicPicos: Infinity },
           { unixMillis: 1 },
@@ -264,7 +276,7 @@ describe('munge', () => {
         expect(munge([
           [Date.UTC(1969, DEC, 31, 23, 59, 59, 999), 0.0001],
           [Date.UTC(1970, JAN, 1, 0, 0, 0, 1), -0.0011]
-        ], REAL_MODELS.OVERRUN)).toEqual([new Segment(
+        ], SEGMENT_MODELS.OVERRUN)).toEqual([new Segment(
           { unixMillis: -1, atomicPicos: -900_000_000n },
           { atomicPicos: -100_000_000n },
           { unixMillis: 1 },
@@ -283,7 +295,7 @@ describe('munge', () => {
     it('works in the simplest possible case', () => {
       expect(munge([
         [Date.UTC(1970, JAN, 1), 0]
-      ], REAL_MODELS.BREAK)).toEqual([new Segment(
+      ], SEGMENT_MODELS.BREAK)).toEqual([new Segment(
         { atomicPicos: 0n, unixMillis: 0 },
         { atomicPicos: Infinity },
         { unixMillis: 1 },
@@ -300,7 +312,7 @@ describe('munge', () => {
         [-1000, -4],
         [9000, -3], // inserted leap second
         [13000, -4] // removed leap second
-      ], REAL_MODELS.BREAK)).toEqual([new Segment(
+      ], SEGMENT_MODELS.BREAK)).toEqual([new Segment(
         { unixMillis: -1000, atomicPicos: -5_000_000_000_000n },
         { atomicPicos: 5_000_000_000_000n },
         { unixMillis: 1 },
@@ -325,13 +337,13 @@ describe('munge', () => {
       expect(() => munge([
         [Date.UTC(1979, DEC, 9), 0],
         [Date.UTC(1970, JAN, 1), 0]
-      ], REAL_MODELS.STALL)).toThrowError('Disordered data')
+      ], SEGMENT_MODELS.STALL)).toThrowError('Disordered data')
     })
 
     it('works in the simplest possible case', () => {
       expect(munge([
         [Date.UTC(1970, JAN, 1), 0]
-      ], REAL_MODELS.STALL)).toEqual([new Segment(
+      ], SEGMENT_MODELS.STALL)).toEqual([new Segment(
         { atomicPicos: 0n, unixMillis: 0 },
         { atomicPicos: Infinity },
         { unixMillis: 1 },
@@ -342,7 +354,7 @@ describe('munge', () => {
     it('works when there is an initial offset', () => {
       expect(munge([
         [7, -4]
-      ], REAL_MODELS.STALL)).toEqual([new Segment(
+      ], SEGMENT_MODELS.STALL)).toEqual([new Segment(
         { unixMillis: 7, atomicPicos: -3_993_000_000_000n },
         { atomicPicos: Infinity },
         { unixMillis: 1 },
@@ -359,7 +371,7 @@ describe('munge', () => {
         [-1000, -4],
         [9000, -3], // inserted leap second
         [13000, -4] // removed leap second
-      ], REAL_MODELS.STALL)).toEqual([new Segment(
+      ], SEGMENT_MODELS.STALL)).toEqual([new Segment(
         { unixMillis: -1000, atomicPicos: -5_000_000_000_000n },
         { atomicPicos: 5_000_000_000_000n },
         { unixMillis: 1 },
@@ -388,7 +400,7 @@ describe('munge', () => {
         [0, 0],
         [1000, 1],
         [500, 2.5]
-      ], REAL_MODELS.STALL)).toEqual([new Segment(
+      ], SEGMENT_MODELS.STALL)).toEqual([new Segment(
         { unixMillis: 0, atomicPicos: 0n },
         { atomicPicos: 1_000_000_000_000n },
         { unixMillis: 1 },
@@ -424,7 +436,7 @@ describe('munge', () => {
         [0, 0],
         [1000, 1],
         [500, 2.5]
-      ], REAL_MODELS.BREAK)).toEqual([new Segment(
+      ], SEGMENT_MODELS.BREAK)).toEqual([new Segment(
         { unixMillis: 0, atomicPicos: 0n },
         { atomicPicos: 1_000_000_000_000n },
         { unixMillis: 1 },
@@ -446,14 +458,14 @@ describe('munge', () => {
     it('fails on a bad drift rate', () => {
       expect(() => munge([
         [Date.UTC(1961, JAN, 1), 1.422_818_0, 37_300, 0.001]
-      ], REAL_MODELS.STALL)).toThrowError('Could not compute precise drift rate')
+      ], SEGMENT_MODELS.STALL)).toThrowError('Could not compute precise drift rate')
     })
 
     it('allows a negative ratio somehow', () => {
       // TAI runs way faster than UTC
       expect(munge([
         [Date.UTC(1970, JAN, 1), 0, 40_587, 8.640_0]
-      ], REAL_MODELS.STALL)).toEqual([new Segment(
+      ], SEGMENT_MODELS.STALL)).toEqual([new Segment(
         { unixMillis: 0, atomicPicos: 0n },
         { atomicPicos: Infinity },
         { unixMillis: 1 },
@@ -463,7 +475,7 @@ describe('munge', () => {
       // UTC and TAI run at identical rates
       expect(munge([
         [Date.UTC(1970, JAN, 1), 0, 40_587, 0]
-      ], REAL_MODELS.STALL)).toEqual([new Segment(
+      ], SEGMENT_MODELS.STALL)).toEqual([new Segment(
         { unixMillis: 0, atomicPicos: 0n },
         { atomicPicos: Infinity },
         { unixMillis: 1 },
@@ -473,7 +485,7 @@ describe('munge', () => {
       // TAI runs way slower than UTC
       expect(munge([
         [Date.UTC(1970, JAN, 1), 0, 40_587, -8.640_0]
-      ], REAL_MODELS.STALL)).toEqual([new Segment(
+      ], SEGMENT_MODELS.STALL)).toEqual([new Segment(
         { unixMillis: 0, atomicPicos: 0n },
         { atomicPicos: Infinity },
         { unixMillis: 1 },
@@ -484,7 +496,7 @@ describe('munge', () => {
       // Equivalently, UTC moves 10,000 times the rate of TAI
       expect(munge([
         [Date.UTC(1970, JAN, 1), 0, 40_587, -86_400 + 8.640_0]
-      ], REAL_MODELS.STALL)).toEqual([new Segment(
+      ], SEGMENT_MODELS.STALL)).toEqual([new Segment(
         { unixMillis: 0, atomicPicos: 0n },
         { atomicPicos: Infinity },
         { unixMillis: 1 },
@@ -498,7 +510,7 @@ describe('munge', () => {
       // TAI runs backwards: wild and highly untested but sure!
       expect(munge([
         [Date.UTC(1970, JAN, 1), 0, 40_587, -86_400 - 8.640_0]
-      ], REAL_MODELS.STALL)).toEqual([new Segment(
+      ], SEGMENT_MODELS.STALL)).toEqual([new Segment(
         { unixMillis: 0, atomicPicos: 0n },
         { atomicPicos: Infinity },
         { unixMillis: 1 },
@@ -509,7 +521,7 @@ describe('munge', () => {
     it('works with the first line of real data', () => {
       expect(munge([
         [Date.UTC(1961, JAN, 1), 1.422_818_0, 37_300, 0.001_296]
-      ], REAL_MODELS.STALL)).toEqual([new Segment(
+      ], SEGMENT_MODELS.STALL)).toEqual([new Segment(
         { unixMillis: -283_996_800_000, atomicPicos: -283_996_798_577_182_000_000n },
         { atomicPicos: Infinity },
         { unixMillis: 1 },
@@ -519,7 +531,7 @@ describe('munge', () => {
 
     it('generates proper drift rates', () => {
       // Note the stalls for the duration of inserted time
-      expect(munge(taiData, REAL_MODELS.STALL).map(segment => segment.slope.unixMillisPerAtomicPico))
+      expect(munge(taiData, SEGMENT_MODELS.STALL).map(segment => segment.slope.unixMillisPerAtomicPico))
         .toEqual([
           new Rat(1n, 1_000_000_015n),
           new Rat(1n, 1_000_000_015n),
@@ -603,15 +615,31 @@ describe('munge', () => {
     it('generates proper overlaps', () => {
       // See how all inserted time discontinuities disappear with this model,
       // but the removed time remains
-      expect(munge(taiData, REAL_MODELS.STALL).map((segment, i, segments) =>
-        // ray end minus overlap start
-        i + 1 in segments
-          ? (
-              segments[i + 1].start.atomicPicosRatio.trunc() -
-              segment.unixMillisToAtomicPicos(segments[i + 1].start.unixMillisRatio.trunc())
-            )
-          : NaN
-      )).toEqual([
+      expect(munge(taiData, SEGMENT_MODELS.STALL).map((segment, i, segments) => {
+        if (!(i + 1 in segments)) {
+          return NaN
+        }
+
+        const unixMillisRatio = segments[i + 1].start.unixMillisRatio
+
+        // TAI picoseconds as of this Unix time, at the END of the CURRENT segment
+        const a = segment.slope.unixMillisPerAtomicPico.nu === 0n
+          ? segment.end.atomicPicosRatio
+          : unixMillisRatio
+            .minus(segment.start.unixMillisRatio)
+            .divide(segment.slope.unixMillisPerAtomicPico)
+            .plus(segment.start.atomicPicosRatio)
+
+        // TAI picoseconds as of this Unix time, at the START of the NEXT segment
+        const b = segments[i + 1].slope.unixMillisPerAtomicPico.nu === 0n
+          ? segments[i + 1].start.atomicPicosRatio
+          : unixMillisRatio
+            .minus(segments[i + 1].start.unixMillisRatio)
+            .divide(segments[i + 1].slope.unixMillisPerAtomicPico)
+            .plus(segments[i + 1].start.atomicPicosRatio)
+
+        return b.minus(a).trunc()
+      })).toEqual([
         -50_000_000_000n, // 0.05 TAI seconds removed from UTC
         0n,
         0n,
@@ -691,12 +719,12 @@ describe('munge', () => {
       ])
     })
 
-    describe.only('two inserted leap seconds', () => {
+    describe('two inserted leap seconds', () => {
       expect(munge([
         [0, 0],
         [1000, 1],
         [1000, 2]
-      ], REAL_MODELS.STALL)).toEqual([new Segment(
+      ], SEGMENT_MODELS.STALL)).toEqual([new Segment(
         { atomicPicos: 0n, unixMillis: 0 },
         { atomicPicos: 1_000_000_000_000n },
         { unixMillis: 1 },
@@ -730,7 +758,7 @@ describe('munge', () => {
     it('works in the simplest possible case', () => {
       expect(munge([
         [Date.UTC(1970, JAN, 1), 0]
-      ], REAL_MODELS.SMEAR)).toEqual([new Segment(
+      ], SEGMENT_MODELS.SMEAR)).toEqual([new Segment(
         { atomicPicos: 0n, unixMillis: 0 },
         { atomicPicos: Infinity },
         { unixMillis: 1 },
@@ -742,7 +770,7 @@ describe('munge', () => {
       expect(munge([
         [0, 0],
         [86_400_000, 1] // inserted leap second after one day
-      ], REAL_MODELS.SMEAR)).toEqual([new Segment(
+      ], SEGMENT_MODELS.SMEAR)).toEqual([new Segment(
         { atomicPicos: 0n, unixMillis: 0 },
         { atomicPicos: 43_200_000_000_000_000n }, // midday
 
@@ -770,7 +798,7 @@ describe('munge', () => {
       expect(munge([
         [0, 0],
         [86_400_000, -1] // removed leap second after one day
-      ], REAL_MODELS.SMEAR)).toEqual([new Segment(
+      ], SEGMENT_MODELS.SMEAR)).toEqual([new Segment(
         { atomicPicos: 0n, unixMillis: 0 },
         { atomicPicos: 43_200_000_000_000_000n }, // midday
 
@@ -795,7 +823,7 @@ describe('munge', () => {
     })
 
     it('generates proper drift rates', () => {
-      expect(munge(taiData, REAL_MODELS.SMEAR).map(segment => segment.slope.unixMillisPerAtomicPico))
+      expect(munge(taiData, SEGMENT_MODELS.SMEAR).map(segment => segment.slope.unixMillisPerAtomicPico))
         .toEqual([
           // During Unix-day-long smears, elapsed atomic time is a full day PLUS daily offset
           // PLUS inserted time
@@ -885,15 +913,27 @@ describe('munge', () => {
 
     it('generates proper overlaps', () => {
       // Due to smearing, there are NEVER overlaps, no removed or inserted time remains
-      expect(munge(taiData, REAL_MODELS.SMEAR).map((segment, i, segments) =>
-        // ray end minus overlap start
-        i + 1 in segments
-          ? (
-              segments[i + 1].start.atomicPicosRatio.trunc() -
-              segment.unixMillisToAtomicPicos(segments[i + 1].start.unixMillisRatio.trunc())
-            )
-          : NaN
-      )).toEqual([
+      expect(munge(taiData, SEGMENT_MODELS.SMEAR).map((segment, i, segments) => {
+        if (!(i + 1 in segments)) {
+          return NaN
+        }
+
+        const unixMillisRatio = segments[i + 1].start.unixMillisRatio
+
+        // TAI picoseconds as of this Unix time, at the END of the CURRENT segment
+        const a = unixMillisRatio
+          .minus(segment.start.unixMillisRatio)
+          .divide(segment.slope.unixMillisPerAtomicPico)
+          .plus(segment.start.atomicPicosRatio)
+
+        // TAI picoseconds as of this Unix time, at the START of the NEXT segment
+        const b = unixMillisRatio
+          .minus(segments[i + 1].start.unixMillisRatio)
+          .divide(segments[i + 1].slope.unixMillisPerAtomicPico)
+          .plus(segments[i + 1].start.atomicPicosRatio)
+
+        return b.minus(a).trunc()
+      })).toEqual([
         0n,
         0n,
         0n,

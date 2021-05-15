@@ -1,6 +1,6 @@
 /* eslint-env jest */
 
-const div = require('./div')
+const { div } = require('./div')
 
 describe('div', () => {
   it('works', () => {

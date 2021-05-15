@@ -10,36 +10,31 @@
 // map to multiple TAI times. We can return an array of these, or just the result from the latest
 // segment (according to its numbering).
 
-const { Rat } = require('./rat')
-const { munge, REAL_MODELS } = require('./munge')
+const { munge, SEGMENT_MODELS } = require('./munge')
 
 const MODELS = {
-  OVERRUN_ARRAY: 0,
-  OVERRUN_LAST: 1,
-  BREAK: 2,
-  STALL_RANGE: 3,
-  STALL_END: 4,
-  SMEAR: 5
+  OVERRUN_ARRAY: {
+    segmentModel: SEGMENT_MODELS.OVERRUN
+  },
+  OVERRUN_LAST: {
+    segmentModel: SEGMENT_MODELS.OVERRUN
+  },
+  BREAK: {
+    segmentModel: SEGMENT_MODELS.BREAK
+  },
+  STALL_RANGE: {
+    segmentModel: SEGMENT_MODELS.STALL
+  },
+  STALL_END: {
+    segmentModel: SEGMENT_MODELS.STALL
+  },
+  SMEAR: {
+    segmentModel: SEGMENT_MODELS.SMEAR
+  }
 }
 
-const picosPerMilli = 1000n * 1000n * 1000n
-
 const Converter = (data, model) => {
-  const realModel = model === MODELS.OVERRUN_ARRAY || model === MODELS.OVERRUN_LAST
-    ? REAL_MODELS.OVERRUN
-    : model === MODELS.BREAK
-      ? REAL_MODELS.BREAK
-      : model === MODELS.STALL_RANGE || model === MODELS.STALL_END
-        ? REAL_MODELS.STALL
-        : model === MODELS.SMEAR
-          ? REAL_MODELS.SMEAR
-          : undefined
-
-  if (realModel === undefined) {
-    throw Error(`Unrecognised model: ${model}`)
-  }
-
-  const segments = munge(data, realModel)
+  const segments = munge(data, model.segmentModel)
 
   // This conversion always has the same behaviour,
   // and there's no work required in handling the output
@@ -48,18 +43,14 @@ const Converter = (data, model) => {
       throw Error(`Not an integer: ${atomicMillis}`)
     }
 
-    const atomicPicos = BigInt(atomicMillis) * picosPerMilli
-    const atomicPicosRatio = new Rat(atomicPicos)
-
     for (const segment of segments) {
       // input bounds check
-      if (!segment.atomicPicosRatioOnSegment(atomicPicosRatio)) {
+      if (!segment.atomicMillisOnSegment(atomicMillis)) {
         continue
       }
 
       // transformation
-      const unixMillisRatio = segment.atomicPicosRatioToUnixMillisRatio(atomicPicosRatio)
-      const unixMillis = Number(unixMillisRatio.trunc())
+      const unixMillis = segment.atomicMillisToUnixMillis(atomicMillis)
 
       // Output bounds check.
       // Because every segment starts on a whole number of Unix milliseconds, and we round down,
@@ -81,14 +72,14 @@ const Converter = (data, model) => {
       throw Error(`Not an integer: ${unixMillis}`)
     }
 
-    const unixMillisRatio = new Rat(BigInt(unixMillis))
-
     const ranges = []
-    for (let i = 0; i < segments.length; i++) {
-      const segment = segments[i]
+    for (const segment of segments) {
+      if (!segment.unixMillisOnSegment(unixMillis)) {
+        continue
+      }
 
       // transformation
-      const range = segment.unixMillisRatioToAtomicMillisRange(unixMillisRatio)
+      const range = segment.unixMillisToAtomicMillisRange(unixMillis)
 
       if (!Number.isFinite(range.start)) {
         // Horizontal segment does not intersect with this Unix time
@@ -107,20 +98,6 @@ const Converter = (data, model) => {
           prev.closed = closed
           continue
         }
-
-        /* istanbul ignore if */
-        if (prev.closed === false) {
-          throw Error('Failed to close open range, this should be impossible')
-        }
-      }
-
-      if (!segment.atomicMillisOnSegment(start)) {
-        // Truncation took us off the start of the segment, try to undo that
-        start++
-        if (start >= end) {
-          // Oop, shrunk the range to nothing
-          continue
-        }
       }
 
       ranges.push({ start, end, closed })
@@ -133,29 +110,32 @@ const Converter = (data, model) => {
 
     if (model === MODELS.OVERRUN_ARRAY) {
       return ranges.map(range => {
-        // This should be impossible if the model is implemented correctly
         /* istanbul ignore if */
         if (range.end !== range.start) {
-          console.warn('Non-0-length range, using the end')
+          throw Error('Non-0-length range, this should be impossible')
         }
 
         return range.end
       })
     }
 
-    if (model !== MODELS.OVERRUN_LAST && ranges.length > 1) {
-      // With the OVERRUN_LAST model this happens frequently and we explicitly opted to take the
-      // last one, with other models this can only happen in pathological cases
-      console.warn('Multiple ranges, using the last one')
+    if (ranges.length > 1) {
+      /* istanbul ignore else */
+      if (model.segmentModel === SEGMENT_MODELS.OVERRUN) {
+        // This happens frequently, user explicitly opted to take the last one
+      } else {
+        throw Error('Multiple ranges, this should be impossible')
+      }
     }
 
     const i = ranges.length - 1
-    const range = i in ranges ? ranges[i] : { start: NaN, end: NaN }
+    const range = i in ranges ? ranges[i] : { start: NaN, end: NaN, closed: true }
 
     if (model === MODELS.STALL_RANGE) {
       return [range.start, range.end]
     }
 
+    // TODO: what if range start and end aren't the same?
     return range.end
   }
 

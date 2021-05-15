@@ -1,6 +1,7 @@
 /* eslint-env jest */
 
 const { Converter, MODELS } = require('.')
+const { Rat } = require('./rat')
 
 const { OVERRUN_ARRAY, OVERRUN_LAST, STALL_END } = MODELS
 
@@ -20,25 +21,15 @@ describe('Converter', () => {
     const converter = Converter(OVERRUN_ARRAY)
 
     describe('unixToAtomic', () => {
-      const unixToAtomicPicos = converter.unixToAtomicPicos
       const unixToAtomic = converter.unixToAtomic
 
       it('starts TAI at 1961-01-01 00:00:01.422_818', () => {
         // 00:00:01.422_818 is in range, but rounds down to 00:00:01.422 which is not
-        expect(unixToAtomicPicos(Date.UTC(1961, JAN, 1, 0, 0, 0, 0)))
-          .toEqual([-283_996_798_577_182_000_000n])
         expect(unixToAtomic(Date.UTC(1961, JAN, 1, 0, 0, 0, 0)))
           .toEqual([])
       })
 
       it('advances 15 TAI picoseconds per Unix millisecond', () => {
-        expect(unixToAtomicPicos(Date.UTC(1961, JAN, 1, 0, 0, 0, 1)))
-          .toEqual([-283_996_798_576_181_999_985n])
-        expect(unixToAtomicPicos(Date.UTC(1961, JAN, 1, 0, 0, 0, 2)))
-          .toEqual([-283_996_798_575_181_999_970n])
-        expect(unixToAtomicPicos(Date.UTC(1961, JAN, 1, 0, 0, 0, 3)))
-          .toEqual([-283_996_798_574_181_999_955n])
-
         expect(unixToAtomic(Date.UTC(1961, JAN, 1, 0, 0, 0, 1)))
           .toEqual([Date.UTC(1961, JAN, 1, 0, 0, 1, 423)])
         expect(unixToAtomic(Date.UTC(1961, JAN, 1, 0, 0, 0, 2)))
@@ -48,8 +39,6 @@ describe('Converter', () => {
       })
 
       it('advances 0.001_296 TAI seconds per Unix day', () => {
-        expect(unixToAtomicPicos(Date.UTC(1961, JAN, 2, 0, 0, 0, 0)))
-          .toEqual([-283_910_398_575_886_000_000n])
         expect(unixToAtomic(Date.UTC(1961, JAN, 2, 0, 0, 0, 0)))
           .toEqual([Date.UTC(1961, JAN, 2, 0, 0, 1, 424)])
         // It's 1.424_114 but gets rounded down to 1.424_000
@@ -213,8 +202,6 @@ describe('Converter', () => {
       // At the beginning of 1962, the drift rate changed, with no discontinuity in UTC.
 
       // Prior ray
-      expect(converter.unixToAtomicPicos(Date.UTC(1961, DEC, 31, 23, 59, 59, 999)))
-        .toEqual([-252_460_798_155_142_000_015n])
       expect(converter.unixToAtomic(Date.UTC(1961, DEC, 31, 23, 59, 59, 999)))
         .toEqual([-252_460_798_156])
       expect(converter.unixToAtomic(Date.UTC(1961, DEC, 31, 23, 59, 59, 999)))
@@ -228,14 +215,10 @@ describe('Converter', () => {
       // However, after rounding to TAI milliseconds, that's:
       // 1962-01-01 00:00:01.845_000 TAI
       // which is on the 1961 ray! Which means we CANNOT return it.
-      expect(converter.unixToAtomicPicos(Date.UTC(1962, JAN, 1, 0, 0, 0, 0)))
-        .toEqual([-252_460_798_154_142_000_000n])
       expect(converter.unixToAtomic(Date.UTC(1962, JAN, 1, 0, 0, 0, 0)))
         .toEqual([])
 
       // Next ray
-      expect(converter.unixToAtomicPicos(Date.UTC(1962, JAN, 1, 0, 0, 0, 1)))
-        .toEqual([-252_460_798_153_141_999_987n])
       expect(converter.unixToAtomic(Date.UTC(1962, JAN, 1, 0, 0, 0, 1)))
         .toEqual([-252_460_798_154])
       expect(converter.unixToAtomic(Date.UTC(1962, JAN, 1, 0, 0, 0, 1)))
@@ -260,8 +243,6 @@ describe('Converter', () => {
       expect(converter.unixToAtomic(Date.UTC(1961, JUL, 31, 23, 59, 59, 949)).length)
         .toBe(1)
 
-      expect(converter.unixToAtomicPicos(Date.UTC(1961, JUL, 31, 23, 59, 59, 950)))
-        .toEqual([-265_679_998_352_430_000_750n])
       expect(converter.unixToAtomic(Date.UTC(1961, JUL, 31, 23, 59, 59, 950)))
         .toEqual([-265_679_998_353])
 
@@ -282,134 +263,124 @@ describe('Converter', () => {
     it('boundaries', () => {
       // Let's check out some boundaries where the relationship between TAI and UTC changed
       // 1 January 1962: Perfect continuity (although the drift rate changed)
-      expect(converter.unixToAtomicPicos(Date.UTC(1961, DEC, 31, 23, 59, 59, 999)).length)
+      expect(converter.unixToAtomic(Date.UTC(1961, DEC, 31, 23, 59, 59, 999)).length)
         .toBe(1)
-      expect(converter.unixToAtomicPicos(Date.UTC(1962, JAN, 1, 0, 0, 0, 0)).length)
+      expect(converter.unixToAtomic(Date.UTC(1962, JAN, 1, 0, 0, 0, 0)).length)
         .toBe(1)
-      expect(converter.unixToAtomicPicos(Date.UTC(1962, JAN, 1, 0, 0, 0, 1)).length)
-        .toBe(1)
-
-      // 1 November 1963: 0.1 TAI seconds inserted
-      expect(converter.unixToAtomicPicos(Date.UTC(1963, OCT, 30, 23, 59, 59, 999)).length)
-        .toBe(1)
-      expect(converter.unixToAtomicPicos(Date.UTC(1963, NOV, 1, 0, 0, 0, 0)).length)
-        .toBe(2)
-      expect(converter.unixToAtomicPicos(Date.UTC(1963, NOV, 1, 0, 0, 0, 99)).length)
-        .toBe(2)
-      expect(converter.unixToAtomicPicos(Date.UTC(1963, NOV, 1, 0, 0, 0, 100)).length)
+      expect(converter.unixToAtomic(Date.UTC(1962, JAN, 1, 0, 0, 0, 1)).length)
         .toBe(1)
 
       // 1 January 1964: Perfect continuity (drift rate changes)
-      expect(converter.unixToAtomicPicos(Date.UTC(1963, DEC, 31, 23, 59, 59, 999)).length)
+      expect(converter.unixToAtomic(Date.UTC(1963, DEC, 31, 23, 59, 59, 999)).length)
         .toBe(1)
-      expect(converter.unixToAtomicPicos(Date.UTC(1964, JAN, 1, 0, 0, 0, 0)).length)
+      expect(converter.unixToAtomic(Date.UTC(1964, JAN, 1, 0, 0, 0, 0)).length)
         .toBe(1)
-      expect(converter.unixToAtomicPicos(Date.UTC(1964, JAN, 1, 0, 0, 0, 1)).length)
+      expect(converter.unixToAtomic(Date.UTC(1964, JAN, 1, 0, 0, 0, 1)).length)
         .toBe(1)
 
       // 1 April 1964: 0.1 TAI seconds inserted
-      expect(converter.unixToAtomicPicos(Date.UTC(1964, MAR, 31, 23, 59, 59, 999)).length)
+      expect(converter.unixToAtomic(Date.UTC(1964, MAR, 31, 23, 59, 59, 999)).length)
         .toBe(1)
-      expect(converter.unixToAtomicPicos(Date.UTC(1964, APR, 1, 0, 0, 0, 0)).length)
+      expect(converter.unixToAtomic(Date.UTC(1964, APR, 1, 0, 0, 0, 0)).length)
         .toBe(2)
-      expect(converter.unixToAtomicPicos(Date.UTC(1964, APR, 1, 0, 0, 0, 99)).length)
+      expect(converter.unixToAtomic(Date.UTC(1964, APR, 1, 0, 0, 0, 99)).length)
         .toBe(2)
-      expect(converter.unixToAtomicPicos(Date.UTC(1964, APR, 1, 0, 0, 0, 100)).length)
+      expect(converter.unixToAtomic(Date.UTC(1964, APR, 1, 0, 0, 0, 100)).length)
         .toBe(1)
 
       // etc. (various occasions when 0.1 TAI seconds were inserted)
-      expect(converter.unixToAtomicPicos(Date.UTC(1964, SEP, 1, 0, 0, 0, 99)).length)
+      expect(converter.unixToAtomic(Date.UTC(1964, SEP, 1, 0, 0, 0, 99)).length)
         .toBe(2)
-      expect(converter.unixToAtomicPicos(Date.UTC(1965, JAN, 1, 0, 0, 0, 99)).length)
+      expect(converter.unixToAtomic(Date.UTC(1965, JAN, 1, 0, 0, 0, 99)).length)
         .toBe(2)
-      expect(converter.unixToAtomicPicos(Date.UTC(1965, MAR, 1, 0, 0, 0, 99)).length)
+      expect(converter.unixToAtomic(Date.UTC(1965, MAR, 1, 0, 0, 0, 99)).length)
         .toBe(2)
-      expect(converter.unixToAtomicPicos(Date.UTC(1965, JUL, 1, 0, 0, 0, 99)).length)
+      expect(converter.unixToAtomic(Date.UTC(1965, JUL, 1, 0, 0, 0, 99)).length)
         .toBe(2)
-      expect(converter.unixToAtomicPicos(Date.UTC(1965, SEP, 1, 0, 0, 0, 99)).length)
+      expect(converter.unixToAtomic(Date.UTC(1965, SEP, 1, 0, 0, 0, 99)).length)
         .toBe(2)
 
       // 1 January 1966: Perfect continuity (drift rate changes)
-      expect(converter.unixToAtomicPicos(Date.UTC(1965, DEC, 31, 23, 59, 59, 999)).length)
+      expect(converter.unixToAtomic(Date.UTC(1965, DEC, 31, 23, 59, 59, 999)).length)
         .toBe(1)
-      expect(converter.unixToAtomicPicos(Date.UTC(1966, JAN, 1, 0, 0, 0, 0)).length)
+      expect(converter.unixToAtomic(Date.UTC(1966, JAN, 1, 0, 0, 0, 0)).length)
         .toBe(1)
-      expect(converter.unixToAtomicPicos(Date.UTC(1966, JAN, 1, 0, 0, 0, 1)).length)
+      expect(converter.unixToAtomic(Date.UTC(1966, JAN, 1, 0, 0, 0, 1)).length)
         .toBe(1)
 
       // 1 February 1968: 0.1 TAI seconds removed
-      expect(converter.unixToAtomicPicos(Date.UTC(1968, JAN, 31, 23, 59, 59, 899)).length)
+      expect(converter.unixToAtomic(Date.UTC(1968, JAN, 31, 23, 59, 59, 899)).length)
         .toBe(1)
-      expect(converter.unixToAtomicPicos(Date.UTC(1968, JAN, 31, 23, 59, 59, 900)))
+      expect(converter.unixToAtomic(Date.UTC(1968, JAN, 31, 23, 59, 59, 900)))
         .toEqual([-60_479_993_814_318_003_000n])
       expect(converter.unixToAtomic(Date.UTC(1968, JAN, 31, 23, 59, 59, 900)))
         .toEqual([-60_479_993_815])
 
-      expect(converter.unixToAtomicPicos(Date.UTC(1968, JAN, 31, 23, 59, 59, 901)).length)
+      expect(converter.unixToAtomic(Date.UTC(1968, JAN, 31, 23, 59, 59, 901)).length)
         .toBe(0)
-      expect(converter.unixToAtomicPicos(Date.UTC(1968, JAN, 31, 23, 59, 59, 999)).length)
+      expect(converter.unixToAtomic(Date.UTC(1968, JAN, 31, 23, 59, 59, 999)).length)
         .toBe(0)
-      expect(converter.unixToAtomicPicos(Date.UTC(1968, FEB, 1, 0, 0, 0, 0)).length)
+      expect(converter.unixToAtomic(Date.UTC(1968, FEB, 1, 0, 0, 0, 0)).length)
         .toBe(1)
 
       // 1 January 1972: 0.107758 TAI seconds inserted
-      expect(converter.unixToAtomicPicos(Date.UTC(1971, DEC, 31, 23, 59, 59, 999)).length)
+      expect(converter.unixToAtomic(Date.UTC(1971, DEC, 31, 23, 59, 59, 999)).length)
         .toBe(1)
-      expect(converter.unixToAtomicPicos(Date.UTC(1972, JAN, 1, 0, 0, 0, 0)).length)
+      expect(converter.unixToAtomic(Date.UTC(1972, JAN, 1, 0, 0, 0, 0)).length)
         .toBe(2)
-      expect(converter.unixToAtomicPicos(Date.UTC(1972, JAN, 1, 0, 0, 0, 107)).length)
+      expect(converter.unixToAtomic(Date.UTC(1972, JAN, 1, 0, 0, 0, 107)).length)
         .toBe(2)
-      expect(converter.unixToAtomicPicos(Date.UTC(1972, JAN, 1, 0, 0, 0, 108)).length)
+      expect(converter.unixToAtomic(Date.UTC(1972, JAN, 1, 0, 0, 0, 108)).length)
         .toBe(1)
 
       // Removed time
-      expect(converter.unixToAtomicPicos(-265680000051).length)
+      expect(converter.unixToAtomic(-265680000051).length)
         .toBe(1)
-      expect(converter.unixToAtomicPicos(-265680000050).length)
+      expect(converter.unixToAtomic(-265680000050).length)
         .toBe(1)
-      expect(converter.unixToAtomicPicos(-265680000049).length)
+      expect(converter.unixToAtomic(-265680000049).length)
         .toBe(0)
-      expect(converter.unixToAtomicPicos(-265680000048).length)
+      expect(converter.unixToAtomic(-265680000048).length)
         .toBe(0)
 
-      expect(converter.unixToAtomicPicos(-252460800000).length)
+      expect(converter.unixToAtomic(-252460800000).length)
         .toBe(1)
-      expect(converter.unixToAtomicPicos(-194659199900).length)
+      expect(converter.unixToAtomic(-194659199900).length)
         .toBe(1)
-      expect(converter.unixToAtomicPicos(-189388800000).length)
+      expect(converter.unixToAtomic(-189388800000).length)
         .toBe(1)
-      expect(converter.unixToAtomicPicos(-181526399900).length)
+      expect(converter.unixToAtomic(-181526399900).length)
         .toBe(1)
-      expect(converter.unixToAtomicPicos(-168307199900).length)
+      expect(converter.unixToAtomic(-168307199900).length)
         .toBe(1)
-      expect(converter.unixToAtomicPicos(-157766399900).length)
+      expect(converter.unixToAtomic(-157766399900).length)
         .toBe(1)
-      expect(converter.unixToAtomicPicos(-152668799900).length)
+      expect(converter.unixToAtomic(-152668799900).length)
         .toBe(1)
-      expect(converter.unixToAtomicPicos(-142127999900).length)
+      expect(converter.unixToAtomic(-142127999900).length)
         .toBe(1)
-      expect(converter.unixToAtomicPicos(-136771199900).length)
+      expect(converter.unixToAtomic(-136771199900).length)
         .toBe(1)
-      expect(converter.unixToAtomicPicos(-126230400000).length)
+      expect(converter.unixToAtomic(-126230400000).length)
         .toBe(1)
 
       // Removed time
-      expect(converter.unixToAtomicPicos(-60480000101).length)
+      expect(converter.unixToAtomic(-60480000101).length)
         .toBe(1)
-      expect(converter.unixToAtomicPicos(-60480000100).length)
+      expect(converter.unixToAtomic(-60480000100).length)
         .toBe(1)
-      expect(converter.unixToAtomicPicos(-60480000099).length)
+      expect(converter.unixToAtomic(-60480000099).length)
         .toBe(0)
-      expect(converter.unixToAtomicPicos(-60480000098).length)
+      expect(converter.unixToAtomic(-60480000098).length)
         .toBe(0)
 
-      expect(converter.unixToAtomicPicos(63072000106).length)
+      expect(converter.unixToAtomic(63072000106).length)
         .toBe(2)
-      expect(converter.unixToAtomicPicos(63072000107).length)
+      expect(converter.unixToAtomic(63072000107).length)
         .toBe(2)
-      expect(converter.unixToAtomicPicos(63072000108).length)
+      expect(converter.unixToAtomic(63072000108).length)
         .toBe(1)
-      expect(converter.unixToAtomicPicos(63072000109).length)
+      expect(converter.unixToAtomic(63072000109).length)
         .toBe(1)
     })
 
@@ -482,26 +453,33 @@ describe('Converter', () => {
   describe('OVERRUN_LAST', () => {
     const converter = Converter(OVERRUN_LAST)
 
-    describe('unixToAtomic', () => {
+    describe.skip('unixToAtomicPicos', () => {
       const unixToAtomicPicos = converter.unixToAtomicPicos
-      const unixToAtomic = converter.unixToAtomic
 
-      it('starts TAI at 1961-01-01 00:00:01.422818', () => {
-        // 00:00:01.422818 is in range, but rounds down to 00:00:01.422 which is not
+      it('aaah', () => {
         expect(unixToAtomicPicos(Date.UTC(1961, JAN, 1, 0, 0, 0, 0)))
           .toBe(-283_996_798_577_182_000_000n)
-        expect(unixToAtomic(Date.UTC(1961, JAN, 1, 0, 0, 0, 0)))
-          .toBe(NaN)
-      })
-
-      it('advances 15 TAI picoseconds per Unix millisecond', () => {
         expect(unixToAtomicPicos(Date.UTC(1961, JAN, 1, 0, 0, 0, 1)))
           .toBe(-283_996_798_576_181_999_985n)
         expect(unixToAtomicPicos(Date.UTC(1961, JAN, 1, 0, 0, 0, 2)))
           .toBe(-283_996_798_575_181_999_970n)
         expect(unixToAtomicPicos(Date.UTC(1961, JAN, 1, 0, 0, 0, 3)))
           .toBe(-283_996_798_574_181_999_955n)
+        expect(unixToAtomicPicos(Date.UTC(1961, JAN, 2, 0, 0, 0, 0)))
+          .toBe(-283_910_398_575_886_000_000n)
+      })
+    })
 
+    describe('unixToAtomic', () => {
+      const unixToAtomic = converter.unixToAtomic
+
+      it('starts TAI at 1961-01-01 00:00:01.422818', () => {
+        // 00:00:01.422818 is in range, but rounds down to 00:00:01.422 which is not
+        expect(unixToAtomic(Date.UTC(1961, JAN, 1, 0, 0, 0, 0)))
+          .toBe(NaN)
+      })
+
+      it('advances 15 TAI picoseconds per Unix millisecond', () => {
         expect(unixToAtomic(Date.UTC(1961, JAN, 1, 0, 0, 0, 1)))
           .toBe(Date.UTC(1961, JAN, 1, 0, 0, 1, 423))
         expect(unixToAtomic(Date.UTC(1961, JAN, 1, 0, 0, 0, 2)))
@@ -511,8 +489,6 @@ describe('Converter', () => {
       })
 
       it('advances 0.001296 TAI seconds per Unix day', () => {
-        expect(unixToAtomicPicos(Date.UTC(1961, JAN, 2, 0, 0, 0, 0)))
-          .toBe(-283_910_398_575_886_000_000n)
         expect(unixToAtomic(Date.UTC(1961, JAN, 2, 0, 0, 0, 0)))
           .toBe(Date.UTC(1961, JAN, 2, 0, 0, 1, 424))
         // It's 1.424114 but gets rounded down to 1.424000
@@ -651,15 +627,19 @@ describe('Converter', () => {
         .toBe(915148800000)
     })
 
-    it('Crazy pre-1972 nonsense', () => {
-      // TAI picosecond count rounds to -252_460_798_155 which is not in range
+    it.skip('Pre-1972 picos', () => {
       expect(converter.unixToAtomicPicos(Date.UTC(1962, JAN, 1, 0, 0, 0, 0)))
         .toBe(-252_460_798_154_142_000_000n)
-      expect(converter.unixToAtomic(Date.UTC(1962, JAN, 1, 0, 0, 0, 0)))
-        .toBe(NaN)
-
       expect(converter.unixToAtomicPicos(Date.UTC(1962, JAN, 1, 0, 0, 0, 1)))
         .toBe(-252_460_798_153_141_999_987n)
+      expect(converter.unixToAtomicPicos(Date.UTC(1961, JUL, 31, 23, 59, 59, 950)))
+        .toBe(-265_679_998_352_430_000_750n)
+    })
+
+    it('Crazy pre-1972 nonsense', () => {
+      // TAI picosecond count rounds to -252_460_798_155 which is not in range
+      expect(converter.unixToAtomic(Date.UTC(1962, JAN, 1, 0, 0, 0, 0)))
+        .toBe(NaN)
       expect(converter.unixToAtomic(Date.UTC(1962, JAN, 1, 0, 0, 0, 1)))
         .toBe(-252_460_798_154)
     })
@@ -678,8 +658,6 @@ describe('Converter', () => {
       expect(converter.unixToAtomic(Date.UTC(1961, JUL, 31, 23, 59, 59, 949)))
         .toBe(-265_679_998_354)
 
-      expect(converter.unixToAtomicPicos(Date.UTC(1961, JUL, 31, 23, 59, 59, 950)))
-        .toBe(-265_679_998_352_430_000_750n)
       expect(converter.unixToAtomic(Date.UTC(1961, JUL, 31, 23, 59, 59, 950)))
         .toBe(-265_679_998_353)
 
@@ -697,7 +675,7 @@ describe('Converter', () => {
         .toBe(Date.UTC(1961, JUL, 31, 23, 59, 59, 949))
     })
 
-    it('boundaries', () => {
+    it.skip('boundaries', () => {
       // Let's check out some boundaries where the relationship between TAI and UTC changed
       // 1 January 1962: Perfect continuity (although the drift rate changed)
       expect(converter.unixToAtomicPicos(Date.UTC(1961, DEC, 31, 23, 59, 59, 999)))
@@ -706,16 +684,6 @@ describe('Converter', () => {
         .toBe(-252_460_798_154_142_000_000n)
       expect(converter.unixToAtomicPicos(Date.UTC(1962, JAN, 1, 0, 0, 0, 1)))
         .toBe(-252_460_798_153_141_999_987n)
-
-      // 1 November 1963: 0.1 TAI seconds inserted
-      expect(converter.unixToAtomicPicos(Date.UTC(1963, OCT, 30, 23, 59, 59, 999)))
-        .toBe(-194_745_597_404_844_400_013n)
-      expect(converter.unixToAtomicPicos(Date.UTC(1963, NOV, 1, 0, 0, 0, 0)))
-        .toBe(-194659197302721200000n)
-      expect(converter.unixToAtomicPicos(Date.UTC(1963, NOV, 1, 0, 0, 0, 99)))
-        .toBe(-194659197203721198713n)
-      expect(converter.unixToAtomicPicos(Date.UTC(1963, NOV, 1, 0, 0, 0, 100)))
-        .toBe(-194659197202721198700n)
 
       // 1 January 1964: Perfect continuity (drift rate changes)
       expect(converter.unixToAtomicPicos(Date.UTC(1963, DEC, 31, 23, 59, 59, 999)))
@@ -897,7 +865,7 @@ describe('Converter', () => {
     })
   })
 
-  describe.skip('STALL_END', () => {
+  describe('STALL_END', () => {
     const converter = Converter(STALL_END)
 
     describe('atomicToUnix', () => {
@@ -1034,15 +1002,18 @@ describe('Converter', () => {
       expect(converter.atomicToUnix(915_148_832_001)).toBe(915_148_800_001)
     })
 
-    it('Crazy pre-1972 nonsense', () => {
-      // TAI picosecond count rounds to -252_460_798_155 which is not on the ray
+    it.skip('Pre-1972 picos', () => {
       expect(converter.unixToAtomicPicos(Date.UTC(1962, JAN, 1, 0, 0, 0, 0)))
         .toBe(-252_460_798_154_142_000_000n)
+      expect(converter.unixToAtomicPicos(Date.UTC(1962, JAN, 1, 0, 0, 0, 1)))
+        .toBe(-252_460_798_153_141_999_987n)
+    })
+
+    it('Crazy pre-1972 nonsense', () => {
+      // TAI picosecond count rounds to -252_460_798_155 which is not on the ray
       expect(converter.unixToAtomic(Date.UTC(1962, JAN, 1, 0, 0, 0, 0)))
         .toBe(NaN)
 
-      expect(converter.unixToAtomicPicos(Date.UTC(1962, JAN, 1, 0, 0, 0, 1)))
-        .toBe(-252_460_798_153_141_999_987n)
       expect(converter.unixToAtomic(Date.UTC(1962, JAN, 1, 0, 0, 0, 1)))
         .toBe(-252_460_798_154)
       expect(converter.unixToAtomic(Date.UTC(1962, JAN, 1, 0, 0, 0, 1)))

@@ -5,8 +5,13 @@ const picosPerMilli = 1000n * 1000n * 1000n
 // A segment is a closed linear relationship between TAI and Unix time.
 // It should be able to handle arbitrary ratios between the two.
 // For precision, we deal with ratios of BigInts.
+// Segment validity ranges are inclusive-exclusive.
 class Segment {
   constructor (start, end, dy, dx) {
+    if (!(start.atomicPicos < end.atomicPicos)) {
+      throw Error('Segment length must be positive')
+    }
+
     this.start = {
       atomicPicosRatio: new Rat(start.atomicPicos),
       unixMillisRatio: new Rat(BigInt(start.unixMillis))
@@ -23,7 +28,9 @@ class Segment {
     }
   }
 
-  unixMillisRatioToAtomicMillisRange (unixMillisRatio) {
+  unixMillisToAtomicMillisRange (unixMillis) {
+    const unixMillisRatio = new Rat(BigInt(unixMillis))
+
     if (this.slope.unixMillisPerAtomicPico.eq(new Rat(0n))) {
       if (unixMillisRatio.eq(this.start.unixMillisRatio)) {
         const start = {}
@@ -61,12 +68,16 @@ class Segment {
     }
   }
 
-  // Returns two BigInts which when divided give the exact Unix millisecond count.
-  atomicPicosRatioToUnixMillisRatio (atomicPicosRatio) {
-    return atomicPicosRatio
-      .minus(this.start.atomicPicosRatio)
-      .times(this.slope.unixMillisPerAtomicPico)
-      .plus(this.start.unixMillisRatio)
+  atomicMillisToUnixMillis (atomicMillis) {
+    const atomicPicos = BigInt(atomicMillis) * picosPerMilli
+    const atomicPicosRatio = new Rat(atomicPicos)
+    return Number(
+      atomicPicosRatio
+        .minus(this.start.atomicPicosRatio)
+        .times(this.slope.unixMillisPerAtomicPico)
+        .plus(this.start.unixMillisRatio)
+        .trunc()
+    )
   }
 
   // Bounds checks. Each segment has an inclusive range of validity.
@@ -74,7 +85,9 @@ class Segment {
   // the segment. Valid Unix instants are the valid TAI instants, transformed linearly from TAI to
   // Unix by the segment.
 
-  atomicPicosRatioOnSegment (atomicPicosRatio) {
+  atomicMillisOnSegment (atomicMillis) {
+    const atomicPicos = BigInt(atomicMillis) * picosPerMilli
+    const atomicPicosRatio = new Rat(atomicPicos)
     return this.start.atomicPicosRatio.le(atomicPicosRatio) && (
       this.end.atomicPicosRatio === Infinity ||
       this.end.atomicPicosRatio
@@ -82,26 +95,19 @@ class Segment {
     )
   }
 
-  atomicMillisOnSegment (atomicMillis) {
-    const atomicPicos = BigInt(atomicMillis) * picosPerMilli
-    const atomicPicosRatio = new Rat(atomicPicos)
-    return this.atomicPicosRatioOnSegment(atomicPicosRatio)
-  }
-
-  unixMillisRatioOnSegment (unixMillisRatio) {
-    return this.start.unixMillisRatio.le(unixMillisRatio) && (
-      this.end.atomicPicosRatio === Infinity ||
-      this.end.atomicPicosRatio
-        .minus(this.start.atomicPicosRatio)
-        .times(this.slope.unixMillisPerAtomicPico)
-        .plus(this.start.unixMillisRatio)
-        .ge(unixMillisRatio)
-    )
-  }
-
   unixMillisOnSegment (unixMillis) {
     const unixMillisRatio = new Rat(BigInt(unixMillis))
-    return this.unixMillisRatioOnSegment(unixMillisRatio)
+
+    return this.slope.unixMillisPerAtomicPico.eq(new Rat(0n))
+      ? this.start.unixMillisRatio.eq(unixMillisRatio)
+      : this.start.unixMillisRatio.le(unixMillisRatio) && (
+        this.end.atomicPicosRatio === Infinity ||
+        this.end.atomicPicosRatio
+          .minus(this.start.atomicPicosRatio)
+          .times(this.slope.unixMillisPerAtomicPico)
+          .plus(this.start.unixMillisRatio)
+          .gt(unixMillisRatio)
+      )
   }
 }
 

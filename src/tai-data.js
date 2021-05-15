@@ -16,7 +16,7 @@ const NOV = 10
 // Third column: "root" point in UTC days since MJD epoch, defaults to 0
 // Fourth column: Drift rate in TAI seconds per UTC day, defaults to 0
 
-module.exports = [
+const taiData = [
   [Date.UTC(1961, JAN, 1), 1.422_818_0, 37_300, 0.001_296],
   [Date.UTC(1961, AUG, 1), 1.372_818_0, 37_300, 0.001_296], // 0.05 TAI seconds removed from UTC
   [Date.UTC(1962, JAN, 1), 1.845_858_0, 37_665, 0.001_123_2], // drift rate reduced, no discontinuity
@@ -59,3 +59,5 @@ module.exports = [
   [Date.UTC(2015, JUL, 1), 36],
   [Date.UTC(2017, JAN, 1), 37]
 ]
+
+module.exports.taiData = taiData

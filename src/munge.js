@@ -4,27 +4,27 @@ const segment = require('./segment')
 
 // In all models, TAI to Unix conversions are one-to-one (or one-to-NaN). At any given instant in
 // TAI, at most one segment applies and at most one Unix time corresponds.
-const REAL_MODELS = {
+const SEGMENT_MODELS = {
   // Each segment continues until it reaches the TAI start of the next segment, even if that start
   // point is in the past (Unix time) due to inserted time and the result is a backtrack. Unix to
   // TAI conversions are potentially one-to-many but the many are discrete instants in time.
   // When time is removed, the result is an empty array.
   OVERRUN: 0,
 
-  // Rather than overrun, Unix time becomes indeterminate. The segment ends early. Unix to TAI
+  // Rather than overrun, the segment ends early and Unix time becomes indeterminate. Unix to TAI
   // conversions are one-to-one, all discrete instants.
   // When Unix time is removed, the result is NaN.
   BREAK: 1,
 
-  // Rather than overrun, Unix time stops. The segment ends early and a new horizontal segment
+  // Rather than overrun, Unix time stalls. The segment ends early and a new horizontal segment
   // (dy = 0) appears, linking this "stall point" to the start of the next segment. Unix to TAI
   // conversions are one-to-many and the many are a closed range of TAI times, normally a single
   // instant but sometimes the full inserted TAI time.
   // When Unix time is removed, the result is NaN.
   STALL: 2,
 
-  // Rather than overrun, a new segment is inserted from 12 hours prior to the discontinuity to
-  // 12 hours after. (This is done for *all* new segments, including historic ones where time
+  // Rather than overrun, a new segment is inserted from 12 Unix hours prior to the discontinuity to
+  // 12 Unix hours after. (This is done for *all* new segments, including historic ones where time
   // was removed or where there was no discontinuity, all that changed was the slope.)
   // Unix to TAI conversions are always one-to-one.
   // When Unix time is removed, you still get a meaningful result.
@@ -45,7 +45,7 @@ const mjdEpoch = {
 // purposes: start point is expressed both in Unix milliseconds and TAI picoseconds, ratio between
 // TAI picoseconds and UTC milliseconds is given as a precise BigInt, and the root is moved to the
 // Unix epoch
-const munge = (data, realModel) => {
+const munge = (data, segmentModel) => {
   const munged = data.map(datum => {
     const start = {}
     const offsetAtRoot = {}
@@ -85,7 +85,9 @@ const munge = (data, realModel) => {
 
     start.atomicPicos = BigInt(root.unixMillis) * picosPerMilli +
       offsetAtRoot.atomicPicos +
-      BigInt(start.unixMillis - root.unixMillis) * dx.atomicPicos / BigInt(dy.unixMillis)
+      BigInt(start.unixMillis - root.unixMillis) *
+      dx.atomicPicos /
+      BigInt(dy.unixMillis)
 
     return {
       start,
@@ -113,12 +115,12 @@ const munge = (data, realModel) => {
     }
   })
 
-  if (realModel === REAL_MODELS.OVERRUN) {
+  if (segmentModel === SEGMENT_MODELS.OVERRUN) {
     // Do nothing, we're good
   } else if (
-    realModel === REAL_MODELS.BREAK ||
-    realModel === REAL_MODELS.STALL ||
-    realModel === REAL_MODELS.SMEAR
+    segmentModel === SEGMENT_MODELS.BREAK ||
+    segmentModel === SEGMENT_MODELS.STALL ||
+    segmentModel === SEGMENT_MODELS.SMEAR
   ) {
     // Handle continuity between segments by altering segment boundaries
     // and possibly introducing new segments
@@ -135,7 +137,7 @@ const munge = (data, realModel) => {
       // When smearing, this is twelve Unix hours prior to discontinuity.
       // When breaking/stalling, this is the Unix time when the next segment starts.
       const smearStart = {
-        unixMillis: realModel === REAL_MODELS.SMEAR
+        unixMillis: segmentModel === SEGMENT_MODELS.SMEAR
           ? b.start.unixMillis - millisPerDay / 2
           : b.start.unixMillis
       }
@@ -149,7 +151,7 @@ const munge = (data, realModel) => {
       // When smearing, this is twelve hours after the discontinuity.
       // When breaking/stalling, this is the start of the segment.
       const smearEnd = {
-        unixMillis: realModel === REAL_MODELS.SMEAR
+        unixMillis: segmentModel === SEGMENT_MODELS.SMEAR
           ? b.start.unixMillis + millisPerDay / 2
           : b.start.unixMillis
       }
@@ -171,7 +173,7 @@ const munge = (data, realModel) => {
       a.end = smearStart // includes unixMillis but we'll ignore that
       b.start = smearEnd
 
-      if (realModel === REAL_MODELS.BREAK) {
+      if (segmentModel === SEGMENT_MODELS.BREAK) {
         // Just leave a gap
         continue
       }
@@ -205,4 +207,4 @@ const munge = (data, realModel) => {
 }
 
 module.exports.munge = munge
-module.exports.REAL_MODELS = REAL_MODELS
+module.exports.SEGMENT_MODELS = SEGMENT_MODELS
