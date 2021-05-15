@@ -3,7 +3,7 @@
 const { Converter, MODELS } = require('./converter')
 const { munge } = require('./munge')
 
-const { OVERRUN_ARRAY, OVERRUN_LAST, STALL_RANGE, STALL_END } = MODELS
+const { OVERRUN_ARRAY, OVERRUN_LAST, BREAK, STALL_RANGE, STALL_END } = MODELS
 
 const JAN = 0
 const DEC = 11
@@ -32,6 +32,15 @@ describe('Converter', () => {
 
     describe('OVERRUN_LAST', () => {
       const converter = Converter(data, OVERRUN_LAST)
+
+      it('manages basic conversions', () => {
+        expect(converter.unixToAtomic(0)).toEqual(0)
+        expect(converter.atomicToUnix(0)).toBe(0)
+      })
+    })
+
+    describe('BREAK', () => {
+      const converter = Converter(data, BREAK)
 
       it('manages basic conversions', () => {
         expect(converter.unixToAtomic(0)).toEqual(0)
@@ -237,6 +246,79 @@ describe('Converter', () => {
             .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0))
           expect(converter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)))
             .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0, 999))
+          expect(converter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 1)))
+            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0))
+          expect(converter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 1, 999)))
+            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0, 999))
+          expect(converter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 2)))
+            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 1))
+        })
+      })
+    })
+
+    describe('BREAK', () => {
+      const converter = Converter(data, BREAK)
+
+      describe('conversions grouped by instant', () => {
+        it('start of time', () => {
+          expect(converter.unixToAtomic(0)).toBe(0)
+          expect(converter.atomicToUnix(0)).toBe(0)
+        })
+
+        it('millisecond before inserted leap second discontinuity begins', () => {
+          expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
+            .toBe(Date.UTC(1979, DEC, 31, 23, 59, 59, 999))
+          expect(converter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
+            .toBe(Date.UTC(1979, DEC, 31, 23, 59, 59, 999))
+        })
+
+        it('first instant of the Unix time discontinuity: one Unix time is two TAI times', () => {
+          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0)))
+            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 1))
+          expect(converter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 0)))
+            .toBe(NaN)
+          expect(converter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 1)))
+            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0))
+        })
+
+        it('final instant of the Unix time discontinuity: one Unix time is two TAI times', () => {
+          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)))
+            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 1, 999))
+          expect(converter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)))
+            .toBe(NaN)
+          expect(converter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 1, 999)))
+            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0, 999))
+        })
+
+        it('millisecond after discontinuity ends', () => {
+          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 1)))
+            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 2))
+          expect(converter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 2)))
+            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 1))
+        })
+      })
+
+      describe('conversions grouped by method', () => {
+        it('unixToAtomic', () => {
+          expect(converter.unixToAtomic(0)).toBe(0)
+          expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
+            .toBe(Date.UTC(1979, DEC, 31, 23, 59, 59, 999))
+          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0)))
+            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 1))
+          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)))
+            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 1, 999))
+          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 1)))
+            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 2))
+        })
+
+        it('atomicToUnix', () => {
+          expect(converter.atomicToUnix(0)).toBe(0)
+          expect(converter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
+            .toBe(Date.UTC(1979, DEC, 31, 23, 59, 59, 999))
+          expect(converter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 0)))
+            .toBe(NaN)
+          expect(converter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)))
+            .toBe(NaN)
           expect(converter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 1)))
             .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0))
           expect(converter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 1, 999)))
@@ -559,6 +641,67 @@ describe('Converter', () => {
       })
     })
 
+    describe('BREAK', () => {
+      const converter = Converter(data, BREAK)
+
+      describe('conversions grouped by instant', () => {
+        it('start of time', () => {
+          expect(converter.unixToAtomic(0)).toEqual(0)
+          expect(converter.atomicToUnix(0)).toBe(0)
+        })
+
+        it('millisecond before removed leap second discontinuity begins', () => {
+          expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)))
+            .toBe(Date.UTC(1979, DEC, 31, 23, 59, 58, 999))
+          expect(converter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)))
+            .toBe(Date.UTC(1979, DEC, 31, 23, 59, 58, 999))
+        })
+
+        it('first instant of the Unix time discontinuity: one Unix time is zero TAI times', () => {
+          expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)))
+            .toBe(NaN)
+          // no atomicToUnix can return the value above
+        })
+
+        it('final instant of the Unix time discontinuity: one Unix time is zero TAI times', () => {
+          expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
+            .toBe(NaN)
+          // no atomicToUnix can return the value above
+        })
+
+        it('millisecond after discontinuity ends', () => {
+          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0)))
+            .toBe(Date.UTC(1979, DEC, 31, 23, 59, 59, 0))
+          expect(converter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)))
+            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0))
+        })
+      })
+
+      describe('conversions grouped by method', () => {
+        it('unixToAtomic', () => {
+          expect(converter.unixToAtomic(0))
+            .toBe(0)
+          expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)))
+            .toBe(Date.UTC(1979, DEC, 31, 23, 59, 58, 999))
+          expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)))
+            .toBe(NaN)
+          expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
+            .toBe(NaN)
+          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0)))
+            .toBe(Date.UTC(1979, DEC, 31, 23, 59, 59, 0))
+        })
+
+        it('atomicToUnix', () => {
+          expect(converter.atomicToUnix(0))
+            .toBe(0)
+          expect(converter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)))
+            .toBe(Date.UTC(1979, DEC, 31, 23, 59, 58, 999))
+          expect(converter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)))
+            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0))
+        })
+      })
+    })
+
     describe('STALL_RANGE', () => {
       const converter = Converter(data, STALL_RANGE)
 
@@ -791,6 +934,34 @@ describe('Converter', () => {
         })
       })
 
+      describe('BREAK', () => {
+        const converter = Converter(data, BREAK)
+
+        it('unixToAtomic', () => {
+          expect(converter.unixToAtomic(0)).toBe(0)
+          expect(converter.unixToAtomic(999))
+            .toBe(999)
+          expect(converter.unixToAtomic(1000))
+            .toBe(3000)
+          expect(converter.unixToAtomic(1999))
+            .toBe(3999)
+          expect(converter.unixToAtomic(2000))
+            .toBe(4000)
+        })
+
+        it('atomicToUnix', () => {
+          expect(converter.atomicToUnix(0)).toBe(0)
+          expect(converter.atomicToUnix(1000)).toBe(NaN)
+          expect(converter.atomicToUnix(1001)).toBe(NaN)
+          expect(converter.atomicToUnix(1999)).toBe(NaN)
+          expect(converter.atomicToUnix(2000)).toBe(NaN)
+          expect(converter.atomicToUnix(2001)).toBe(NaN)
+          expect(converter.atomicToUnix(2999)).toBe(NaN)
+          expect(converter.atomicToUnix(3000)).toBe(1000)
+          expect(converter.atomicToUnix(3001)).toBe(1001)
+        })
+      })
+
       describe('STALL_RANGE', () => {
         const converter = Converter(data, STALL_RANGE)
 
@@ -898,6 +1069,33 @@ describe('Converter', () => {
           expect(converter.atomicToUnix(2499)).toBe(1499)
           expect(converter.atomicToUnix(2500)).toBe(1500)
           expect(converter.atomicToUnix(2999)).toBe(1999)
+          expect(converter.atomicToUnix(3000)).toBe(1500)
+        })
+      })
+
+      describe('BREAK', () => {
+        const converter = Converter(data, BREAK)
+
+        it('unixToAtomic', () => {
+          expect(converter.unixToAtomic(0)).toBe(0)
+          expect(converter.unixToAtomic(999)).toBe(999)
+          expect(converter.unixToAtomic(1000)).toBe(2000)
+          expect(converter.unixToAtomic(1499)).toBe(2499)
+          expect(converter.unixToAtomic(1500)).toBe(3000)
+        })
+
+        it('atomicToUnix', () => {
+          expect(converter.atomicToUnix(0)).toBe(0)
+          expect(converter.atomicToUnix(999)).toBe(999)
+          expect(converter.atomicToUnix(1000)).toBe(NaN)
+          expect(converter.atomicToUnix(1001)).toBe(NaN)
+          expect(converter.atomicToUnix(1999)).toBe(NaN)
+          expect(converter.atomicToUnix(2000)).toBe(1000)
+          expect(converter.atomicToUnix(2001)).toBe(1001)
+          expect(converter.atomicToUnix(2499)).toBe(1499)
+          expect(converter.atomicToUnix(2500)).toBe(NaN)
+          expect(converter.atomicToUnix(2501)).toBe(NaN)
+          expect(converter.atomicToUnix(2999)).toBe(NaN)
           expect(converter.atomicToUnix(3000)).toBe(1500)
         })
       })
@@ -1029,6 +1227,13 @@ describe('Converter', () => {
           expect(converter.atomicToUnix(3001)).toBe(501)
           expect(converter.atomicToUnix(4499)).toBe(1999)
           expect(converter.atomicToUnix(4500)).toBe(2000)
+        })
+      })
+
+      describe('BREAK', () => {
+        it('refuses to model it', () => {
+          expect(() => Converter(data, BREAK))
+            .toThrowError('Segment length must be non-negative')
         })
       })
 
