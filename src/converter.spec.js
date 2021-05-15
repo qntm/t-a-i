@@ -21,6 +21,24 @@ describe('Converter', () => {
       })
     })
 
+    describe('OVERRUN_ARRAY', () => {
+      const converter = Converter(data, OVERRUN_ARRAY)
+
+      it('manages basic conversions', () => {
+        expect(converter.unixToAtomic(0)).toEqual([0])
+        expect(converter.atomicToUnix(0)).toBe(0)
+      })
+    })
+
+    describe('OVERRUN_LAST', () => {
+      const converter = Converter(data, OVERRUN_LAST)
+
+      it('manages basic conversions', () => {
+        expect(converter.unixToAtomic(0)).toEqual(0)
+        expect(converter.atomicToUnix(0)).toBe(0)
+      })
+    })
+
     describe('STALL_END', () => {
       const converter = Converter(data, STALL_END)
 
@@ -43,24 +61,6 @@ describe('Converter', () => {
 
       it('manages basic conversions', () => {
         expect(converter.unixToAtomic(0)).toBe(0)
-        expect(converter.atomicToUnix(0)).toBe(0)
-      })
-    })
-
-    describe('OVERRUN_ARRAY', () => {
-      const converter = Converter(data, OVERRUN_ARRAY)
-
-      it('manages basic conversions', () => {
-        expect(converter.unixToAtomic(0)).toEqual([0])
-        expect(converter.atomicToUnix(0)).toBe(0)
-      })
-    })
-
-    describe('OVERRUN_LAST', () => {
-      const converter = Converter(data, OVERRUN_LAST)
-
-      it('manages basic conversions', () => {
-        expect(converter.unixToAtomic(0)).toEqual(0)
         expect(converter.atomicToUnix(0)).toBe(0)
       })
     })
@@ -608,9 +608,26 @@ describe('Converter', () => {
       })
 
       describe('STALL_END', () => {
-        it('refuses to model it', () => {
-          expect(() => Converter(data, STALL_END))
-            .toThrowError('Segment length must be positive')
+        const converter = Converter(data, STALL_END)
+
+        it('unixToAtomic', () => {
+          expect(converter.unixToAtomic(0)).toBe(0)
+          expect(converter.unixToAtomic(999)).toBe(999)
+          expect(converter.unixToAtomic(1000)).toBe(3000)
+          expect(converter.unixToAtomic(1999)).toBe(3999)
+          expect(converter.unixToAtomic(2000)).toBe(4000)
+        })
+
+        it('atomicToUnix', () => {
+          expect(converter.atomicToUnix(0)).toBe(0)
+          expect(converter.atomicToUnix(1000)).toBe(1000)
+          expect(converter.atomicToUnix(1001)).toBe(1000)
+          expect(converter.atomicToUnix(1999)).toBe(1000)
+          expect(converter.atomicToUnix(2000)).toBe(1000)
+          expect(converter.atomicToUnix(2001)).toBe(1000)
+          expect(converter.atomicToUnix(2999)).toBe(1000)
+          expect(converter.atomicToUnix(3000)).toBe(1000)
+          expect(converter.atomicToUnix(3001)).toBe(1001)
         })
       })
     })
@@ -779,14 +796,9 @@ describe('Converter', () => {
       describe('STALL_END', () => {
         it('refuses to model it', () => {
           expect(() => Converter(data, STALL_END))
-            .toThrowError('Segment length must be positive')
+            .toThrowError('Segment length must be non-negative')
         })
       })
     })
-  })
-
-  describe('directed by Roland Emmerich', () => {
-    // TODO:
-    // Earth just stops spinning forever
   })
 })
