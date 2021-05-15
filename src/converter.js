@@ -41,7 +41,7 @@ const Converter = (data, model) => {
 
   const segments = munge(data, realModel)
 
-  // This conversion always has the same behaviour, and always works (except before 1961)
+  // This conversion always has the same behaviour,
   // and there's no work required in handling the output
   const atomicToUnix = atomicMillis => {
     if (!Number.isInteger(atomicMillis)) {
@@ -72,7 +72,7 @@ const Converter = (data, model) => {
       return unixMillis
     }
 
-    // Pre-1961
+    // Pre-1961 or BREAK model and we hit a break
     return NaN
   }
 
@@ -87,13 +87,14 @@ const Converter = (data, model) => {
     for (let i = 0; i < segments.length; i++) {
       const segment = segments[i]
 
-      // input bounds check
-      if (!segment.unixMillisRatioOnSegment(unixMillisRatio)) {
+      // transformation
+      const range = segment.unixMillisRatioToAtomicMillisRange(unixMillisRatio)
+
+      if (!Number.isFinite(range.start)) {
+        // Horizontal segment does not intersect with this Unix time
         continue
       }
 
-      // transformation
-      const range = segment.unixMillisRatioToAtomicMillisRange(unixMillisRatio)
       let { start, end, closed } = range
 
       if (ranges.length - 1 in ranges) {
@@ -130,27 +131,32 @@ const Converter = (data, model) => {
       throw Error('Failed to close all open ranges, this should be impossible')
     }
 
-    if (model === MODELS.STALL_RANGE) {
-      /* istanbul ignore if */
-      if (1 in ranges) {
-        throw Error('Multiple ranges, this should be impossible')
-      }
-      if (0 in ranges) {
-        const range = ranges[0]
-        return [range.start, range.end]
-      }
-      return [NaN, NaN]
-    }
-
-    const ends = ranges.map(range => range.end)
-
     if (model === MODELS.OVERRUN_ARRAY) {
-      return ends
+      return ranges.map(range => {
+        // This should be impossible if the model is implemented correctly
+        /* istanbul ignore if */
+        if (range.end !== range.start) {
+          console.warn('Non-0-length range, using the end')
+        }
+
+        return range.end
+      })
     }
 
-    const i = ends.length - 1
+    if (model !== MODELS.OVERRUN_LAST && ranges.length > 1) {
+      // With the OVERRUN_LAST model this happens frequently and we explicitly opted to take the
+      // last one, with other models this can only happen in pathological cases
+      console.warn('Multiple ranges, using the last one')
+    }
 
-    return i in ends ? ends[i] : NaN
+    const i = ranges.length - 1
+    const range = i in ranges ? ranges[i] : { start: NaN, end: NaN }
+
+    if (model === MODELS.STALL_RANGE) {
+      return [range.start, range.end]
+    }
+
+    return range.end
   }
 
   return {

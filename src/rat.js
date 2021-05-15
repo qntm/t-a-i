@@ -34,25 +34,25 @@ class Rat {
     return new Rat(this.nu * other.de, this.de * other.nu)
   }
 
-  _det (other) {
+  cmp (other) {
     const det = this.nu * other.de - this.de * other.nu
     return (this.de < 0n) === (other.de < 0n) ? det : -det
   }
 
   eq (other) {
-    return this._det(other) === 0n
+    return this.cmp(other) === 0n
   }
 
   le (other) {
-    return this._det(other) <= 0n
+    return this.cmp(other) <= 0n
   }
 
   gt (other) {
-    return this._det(other) > 0n
+    return this.cmp(other) > 0n
   }
 
   ge (other) {
-    return this._det(other) >= 0n
+    return this.cmp(other) >= 0n
   }
 
   trunc () {

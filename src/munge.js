@@ -160,13 +160,14 @@ const munge = (data, realModel) => {
         BigInt(b.dy.unixMillis)
 
       if (smearEnd.atomicPicos <= smearStart.atomicPicos) {
-        // No negative-length segments
+        // No negative-length smears
         continue
       }
 
       // Create the break.
-      // Terminate this segment early
-      // Start the next segment late
+      // Terminate this segment early, start the next segment late.
+      // In pathological cases this can result in a segment which ends before it begins but this
+      // is not generally a problem
       a.end = smearStart // includes unixMillis but we'll ignore that
       b.start = smearEnd
 

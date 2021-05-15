@@ -30,7 +30,7 @@ describe('munge', () => {
         { atomicPicos: 0n, unixMillis: 0 },
         { atomicPicos: Infinity },
         { unixMillis: 1 },
-        { atomicPicos: 1000_000_000n }
+        { atomicPicos: 1_000_000_000n }
       )])
     })
 
@@ -41,7 +41,7 @@ describe('munge', () => {
         { unixMillis: 7, atomicPicos: -3_993_000_000_000n },
         { atomicPicos: Infinity },
         { unixMillis: 1 },
-        { atomicPicos: 1000_000_000n }
+        { atomicPicos: 1_000_000_000n }
       )])
     })
 
@@ -58,17 +58,17 @@ describe('munge', () => {
         { unixMillis: -1000, atomicPicos: -5_000_000_000_000n },
         { atomicPicos: 6_000_000_000_000n },
         { unixMillis: 1 },
-        { atomicPicos: 1000_000_000n }
+        { atomicPicos: 1_000_000_000n }
       ), new Segment(
         { unixMillis: 9000, atomicPicos: 6_000_000_000_000n },
         { atomicPicos: 9_000_000_000_000n },
         { unixMillis: 1 },
-        { atomicPicos: 1000_000_000n }
+        { atomicPicos: 1_000_000_000n }
       ), new Segment(
         { unixMillis: 13000, atomicPicos: 9_000_000_000_000n },
         { atomicPicos: Infinity },
         { unixMillis: 1 },
-        { atomicPicos: 1000_000_000n }
+        { atomicPicos: 1_000_000_000n }
       )])
     })
 
@@ -96,7 +96,7 @@ describe('munge', () => {
         { unixMillis: 0, atomicPicos: 0n },
         { atomicPicos: Infinity },
         { unixMillis: 1 },
-        { atomicPicos: 1000_000_000n }
+        { atomicPicos: 1_000_000_000n }
       )])
 
       // TAI runs way slower than UTC
@@ -255,7 +255,7 @@ describe('munge', () => {
           { unixMillis: 1, atomicPicos: 900_000_000n }, // ray start intentionally doesn't include TAI epoch
           { atomicPicos: Infinity },
           { unixMillis: 1 },
-          { atomicPicos: 1000_000_000n }
+          { atomicPicos: 1_000_000_000n }
         )])
       })
 
@@ -268,12 +268,12 @@ describe('munge', () => {
           { unixMillis: -1, atomicPicos: -900_000_000n },
           { atomicPicos: -100_000_000n },
           { unixMillis: 1 },
-          { atomicPicos: 1000_000_000n }
+          { atomicPicos: 1_000_000_000n }
         ), new Segment(
           { unixMillis: 1, atomicPicos: -100_000_000n },
           { atomicPicos: Infinity },
           { unixMillis: 1 },
-          { atomicPicos: 1000_000_000n }
+          { atomicPicos: 1_000_000_000n }
         )])
       })
     })
@@ -287,7 +287,7 @@ describe('munge', () => {
         { atomicPicos: 0n, unixMillis: 0 },
         { atomicPicos: Infinity },
         { unixMillis: 1 },
-        { atomicPicos: 1000_000_000n }
+        { atomicPicos: 1_000_000_000n }
       )])
     })
 
@@ -304,18 +304,18 @@ describe('munge', () => {
         { unixMillis: -1000, atomicPicos: -5_000_000_000_000n },
         { atomicPicos: 5_000_000_000_000n },
         { unixMillis: 1 },
-        { atomicPicos: 1000_000_000n }
+        { atomicPicos: 1_000_000_000n }
       ), new Segment(
         // this segment starts a full TAI second after the previous segment ended
         { unixMillis: 9000, atomicPicos: 6_000_000_000_000n },
         { atomicPicos: 9_000_000_000_000n },
         { unixMillis: 1 },
-        { atomicPicos: 1000_000_000n }
+        { atomicPicos: 1_000_000_000n }
       ), new Segment(
         { unixMillis: 13000, atomicPicos: 9_000_000_000_000n },
         { atomicPicos: Infinity },
         { unixMillis: 1 },
-        { atomicPicos: 1000_000_000n }
+        { atomicPicos: 1_000_000_000n }
       )])
     })
   })
@@ -335,7 +335,7 @@ describe('munge', () => {
         { atomicPicos: 0n, unixMillis: 0 },
         { atomicPicos: Infinity },
         { unixMillis: 1 },
-        { atomicPicos: 1000_000_000n }
+        { atomicPicos: 1_000_000_000n }
       )])
     })
 
@@ -346,7 +346,7 @@ describe('munge', () => {
         { unixMillis: 7, atomicPicos: -3_993_000_000_000n },
         { atomicPicos: Infinity },
         { unixMillis: 1 },
-        { atomicPicos: 1000_000_000n }
+        { atomicPicos: 1_000_000_000n }
       )])
     })
 
@@ -363,7 +363,7 @@ describe('munge', () => {
         { unixMillis: -1000, atomicPicos: -5_000_000_000_000n },
         { atomicPicos: 5_000_000_000_000n },
         { unixMillis: 1 },
-        { atomicPicos: 1000_000_000n }
+        { atomicPicos: 1_000_000_000n }
       ), new Segment(
         // Stall segment inserted here
         { unixMillis: 9000, atomicPicos: 5_000_000_000_000n },
@@ -374,12 +374,72 @@ describe('munge', () => {
         { unixMillis: 9000, atomicPicos: 6_000_000_000_000n },
         { atomicPicos: 9_000_000_000_000n },
         { unixMillis: 1 },
-        { atomicPicos: 1000_000_000n }
+        { atomicPicos: 1_000_000_000n }
       ), new Segment(
         { unixMillis: 13000, atomicPicos: 9_000_000_000_000n },
         { atomicPicos: Infinity },
         { unixMillis: 1 },
-        { atomicPicos: 1000_000_000n }
+        { atomicPicos: 1_000_000_000n }
+      )])
+    })
+
+    it('allows retroactive stalls??', () => {
+      expect(munge([
+        [0, 0],
+        [1000, 1],
+        [500, 2.5]
+      ], REAL_MODELS.STALL)).toEqual([new Segment(
+        { unixMillis: 0, atomicPicos: 0n },
+        { atomicPicos: 1_000_000_000_000n },
+        { unixMillis: 1 },
+        { atomicPicos: 1_000_000_000n }
+      ), new Segment(
+        // First stall
+        { unixMillis: 1000, atomicPicos: 1_000_000_000_000n },
+        { atomicPicos: 2_000_000_000_000n },
+        { unixMillis: 0 },
+        { atomicPicos: 1_000_000_000_000n }
+      ), new Segment(
+        // Yes this segment now ends before it begins
+        { unixMillis: 1000, atomicPicos: 2_000_000_000_000n },
+        { atomicPicos: 1_500_000_000_000n },
+        { unixMillis: 1 },
+        { atomicPicos: 1_000_000_000n }
+      ), new Segment(
+        // Second stall
+        { unixMillis: 500, atomicPicos: 1_500_000_000_000n },
+        { atomicPicos: 3_000_000_000_000n },
+        { unixMillis: 0 },
+        { atomicPicos: 1_500_000_000_000n }
+      ), new Segment(
+        { unixMillis: 500, atomicPicos: 3_000_000_000_000n },
+        { atomicPicos: Infinity },
+        { unixMillis: 1 },
+        { atomicPicos: 1_000_000_000n }
+      )])
+    })
+
+    it('allows retroactive breaks??', () => {
+      expect(munge([
+        [0, 0],
+        [1000, 1],
+        [500, 2.5]
+      ], REAL_MODELS.BREAK)).toEqual([new Segment(
+        { unixMillis: 0, atomicPicos: 0n },
+        { atomicPicos: 1_000_000_000_000n },
+        { unixMillis: 1 },
+        { atomicPicos: 1_000_000_000n }
+      ), new Segment(
+        // Yes this segment now ends before it begins
+        { unixMillis: 1000, atomicPicos: 2_000_000_000_000n },
+        { atomicPicos: 1_500_000_000_000n },
+        { unixMillis: 1 },
+        { atomicPicos: 1_000_000_000n }
+      ), new Segment(
+        { unixMillis: 500, atomicPicos: 3_000_000_000_000n },
+        { atomicPicos: Infinity },
+        { unixMillis: 1 },
+        { atomicPicos: 1_000_000_000n }
       )])
     })
 
@@ -407,7 +467,7 @@ describe('munge', () => {
         { unixMillis: 0, atomicPicos: 0n },
         { atomicPicos: Infinity },
         { unixMillis: 1 },
-        { atomicPicos: 1000_000_000n }
+        { atomicPicos: 1_000_000_000n }
       )])
 
       // TAI runs way slower than UTC
@@ -640,7 +700,7 @@ describe('munge', () => {
         { atomicPicos: 0n, unixMillis: 0 },
         { atomicPicos: 1_000_000_000_000n },
         { unixMillis: 1 },
-        { atomicPicos: 1000_000_000n }
+        { atomicPicos: 1_000_000_000n }
       ), new Segment(
         { atomicPicos: 1_000_000_000_000n, unixMillis: 1000 },
         { atomicPicos: 2_000_000_000_000n },
@@ -651,7 +711,7 @@ describe('munge', () => {
         { atomicPicos: 2_000_000_000_000n, unixMillis: 1000 },
         { atomicPicos: 2_000_000_000_000n },
         { unixMillis: 1 },
-        { atomicPicos: 1000_000_000n }
+        { atomicPicos: 1_000_000_000n }
       ), new Segment(
         { atomicPicos: 2_000_000_000_000n, unixMillis: 1000 },
         { atomicPicos: 3_000_000_000_000n },
@@ -661,7 +721,7 @@ describe('munge', () => {
         { atomicPicos: 3_000_000_000_000n, unixMillis: 1000 },
         { atomicPicos: Infinity },
         { unixMillis: 1 },
-        { atomicPicos: 1000_000_000n }
+        { atomicPicos: 1_000_000_000n }
       )])
     })
   })
@@ -674,7 +734,7 @@ describe('munge', () => {
         { atomicPicos: 0n, unixMillis: 0 },
         { atomicPicos: Infinity },
         { unixMillis: 1 },
-        { atomicPicos: 1000_000_000n }
+        { atomicPicos: 1_000_000_000n }
       )])
     })
 
@@ -688,7 +748,7 @@ describe('munge', () => {
 
         // perfectly diagonal
         { unixMillis: 1 },
-        { atomicPicos: 1000_000_000n }
+        { atomicPicos: 1_000_000_000n }
       ), new Segment(
         { atomicPicos: 43_200_000_000_000_000n, unixMillis: 43_200_000 }, // midday
         { atomicPicos: 129_601_000_000_000_000n }, // midday
@@ -702,7 +762,7 @@ describe('munge', () => {
 
         // perfectly diagonal
         { unixMillis: 1 },
-        { atomicPicos: 1000_000_000n }
+        { atomicPicos: 1_000_000_000n }
       )])
     })
 
@@ -716,7 +776,7 @@ describe('munge', () => {
 
         // perfectly diagonal
         { unixMillis: 1 },
-        { atomicPicos: 1000_000_000n }
+        { atomicPicos: 1_000_000_000n }
       ), new Segment(
         { atomicPicos: 43_200_000_000_000_000n, unixMillis: 43_200_000 }, // midday
         { atomicPicos: 129_599_000_000_000_000n }, // midday
@@ -730,7 +790,7 @@ describe('munge', () => {
 
         // perfectly diagonal
         { unixMillis: 1 },
-        { atomicPicos: 1000_000_000n }
+        { atomicPicos: 1_000_000_000n }
       )])
     })
 

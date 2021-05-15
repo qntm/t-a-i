@@ -1,13 +1,11 @@
 /* eslint-env jest */
 
 const { Converter, MODELS } = require('./converter')
-const { munge } = require('./munge')
 
 const { OVERRUN_ARRAY, OVERRUN_LAST, BREAK, STALL_RANGE, STALL_END } = MODELS
 
 const JAN = 0
 const DEC = 11
-const picosPerMilli = 1000n * 1000n * 1000n
 
 describe('Converter', () => {
   describe('one ray', () => {
@@ -1231,23 +1229,122 @@ describe('Converter', () => {
       })
 
       describe('BREAK', () => {
-        it('refuses to model it', () => {
-          expect(() => Converter(data, BREAK))
-            .toThrowError('Segment length must be non-negative')
+        const converter = Converter(data, BREAK)
+
+        it('unixToAtomic', () => {
+          expect(converter.unixToAtomic(0)).toBe(0)
+          expect(converter.unixToAtomic(499)).toBe(499)
+
+          const warn = console.warn
+          console.warn = jest.fn()
+          expect(converter.unixToAtomic(500)).toBe(3000)
+          expect(converter.unixToAtomic(501)).toBe(3001)
+          expect(converter.unixToAtomic(999)).toBe(3499)
+          expect(console.warn).toHaveBeenCalledTimes(3)
+          expect(console.warn).toHaveBeenCalledWith('Multiple ranges, using the last one')
+          console.warn = warn
+
+          expect(converter.unixToAtomic(1000)).toBe(3500)
+          expect(converter.unixToAtomic(1001)).toBe(3501)
+          expect(converter.unixToAtomic(1999)).toBe(4499)
+          expect(converter.unixToAtomic(2000)).toBe(4500)
+        })
+
+        it('atomicToUnix', () => {
+          expect(converter.atomicToUnix(0)).toBe(0)
+          expect(converter.atomicToUnix(499)).toBe(499)
+          expect(converter.atomicToUnix(500)).toBe(500)
+          expect(converter.atomicToUnix(999)).toBe(999)
+          expect(converter.atomicToUnix(1000)).toBe(NaN)
+          expect(converter.atomicToUnix(1001)).toBe(NaN)
+          expect(converter.atomicToUnix(1999)).toBe(NaN)
+          expect(converter.atomicToUnix(2000)).toBe(NaN)
+          expect(converter.atomicToUnix(2001)).toBe(NaN)
+          expect(converter.atomicToUnix(2999)).toBe(NaN)
+          expect(converter.atomicToUnix(3000)).toBe(500)
+          expect(converter.atomicToUnix(3001)).toBe(501)
+          expect(converter.atomicToUnix(4499)).toBe(1999)
+          expect(converter.atomicToUnix(4500)).toBe(2000)
         })
       })
 
       describe('STALL_RANGE', () => {
-        it('refuses to model it', () => {
-          expect(() => Converter(data, STALL_RANGE))
-            .toThrowError('Segment length must be non-negative')
+        const converter = Converter(data, STALL_RANGE)
+
+        it('unixToAtomic', () => {
+          expect(converter.unixToAtomic(0)).toEqual([0, 0])
+          expect(converter.unixToAtomic(499)).toEqual([499, 499])
+
+          const warn = console.warn
+          console.warn = jest.fn()
+          expect(converter.unixToAtomic(500)).toEqual([1500, 3000])
+          expect(converter.unixToAtomic(501)).toEqual([3001, 3001])
+          expect(converter.unixToAtomic(999)).toEqual([3499, 3499])
+          expect(converter.unixToAtomic(1000)).toEqual([3500, 3500])
+          expect(console.warn).toHaveBeenCalledTimes(4)
+          expect(console.warn).toHaveBeenCalledWith('Multiple ranges, using the last one')
+          console.warn = warn
+
+          expect(converter.unixToAtomic(1001)).toEqual([3501, 3501])
+          expect(converter.unixToAtomic(1999)).toEqual([4499, 4499])
+          expect(converter.unixToAtomic(2000)).toEqual([4500, 4500])
+        })
+
+        it('atomicToUnix', () => {
+          expect(converter.atomicToUnix(0)).toBe(0)
+          expect(converter.atomicToUnix(499)).toBe(499)
+          expect(converter.atomicToUnix(500)).toBe(500)
+          expect(converter.atomicToUnix(999)).toBe(999)
+          expect(converter.atomicToUnix(1000)).toBe(1000)
+          expect(converter.atomicToUnix(1001)).toBe(1000)
+          expect(converter.atomicToUnix(1999)).toBe(1000)
+          expect(converter.atomicToUnix(2000)).toBe(500)
+          expect(converter.atomicToUnix(2001)).toBe(500)
+          expect(converter.atomicToUnix(2999)).toBe(500)
+          expect(converter.atomicToUnix(3000)).toBe(500)
+          expect(converter.atomicToUnix(3001)).toBe(501)
+          expect(converter.atomicToUnix(4499)).toBe(1999)
+          expect(converter.atomicToUnix(4500)).toBe(2000)
         })
       })
 
       describe('STALL_END', () => {
-        it('refuses to model it', () => {
-          expect(() => Converter(data, STALL_END))
-            .toThrowError('Segment length must be non-negative')
+        const converter = Converter(data, STALL_END)
+
+        it('unixToAtomic', () => {
+          expect(converter.unixToAtomic(0)).toBe(0)
+          expect(converter.unixToAtomic(499)).toBe(499)
+
+          const warn = console.warn
+          console.warn = jest.fn()
+          expect(converter.unixToAtomic(500)).toBe(3000)
+          expect(converter.unixToAtomic(501)).toBe(3001)
+          expect(converter.unixToAtomic(999)).toBe(3499)
+          expect(converter.unixToAtomic(1000)).toBe(3500)
+          expect(console.warn).toHaveBeenCalledTimes(4)
+          expect(console.warn).toHaveBeenCalledWith('Multiple ranges, using the last one')
+          console.warn = warn
+
+          expect(converter.unixToAtomic(1001)).toBe(3501)
+          expect(converter.unixToAtomic(1999)).toBe(4499)
+          expect(converter.unixToAtomic(2000)).toBe(4500)
+        })
+
+        it('atomicToUnix', () => {
+          expect(converter.atomicToUnix(0)).toBe(0)
+          expect(converter.atomicToUnix(499)).toBe(499)
+          expect(converter.atomicToUnix(500)).toBe(500)
+          expect(converter.atomicToUnix(999)).toBe(999)
+          expect(converter.atomicToUnix(1000)).toBe(1000)
+          expect(converter.atomicToUnix(1001)).toBe(1000)
+          expect(converter.atomicToUnix(1999)).toBe(1000)
+          expect(converter.atomicToUnix(2000)).toBe(500)
+          expect(converter.atomicToUnix(2001)).toBe(500)
+          expect(converter.atomicToUnix(2999)).toBe(500)
+          expect(converter.atomicToUnix(3000)).toBe(500)
+          expect(converter.atomicToUnix(3001)).toBe(501)
+          expect(converter.atomicToUnix(4499)).toBe(1999)
+          expect(converter.atomicToUnix(4500)).toBe(2000)
         })
       })
     })

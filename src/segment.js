@@ -3,14 +3,10 @@ const { Rat } = require('./rat')
 const picosPerMilli = 1000n * 1000n * 1000n
 
 // A segment is a closed linear relationship between TAI and Unix time.
-// It should be able to handle arbitrary ratios between the two. Where possible we deal with ratios
-// of BigInts for precision.
+// It should be able to handle arbitrary ratios between the two.
+// For precision, we deal with ratios of BigInts.
 class Segment {
   constructor (start, end, dy, dx) {
-    if (end.atomicPicos < start.atomicPicos) {
-      throw Error('Segment length must be non-negative')
-    }
-
     this.start = {
       atomicPicosRatio: new Rat(start.atomicPicos),
       unixMillisRatio: new Rat(BigInt(start.unixMillis))
@@ -45,7 +41,10 @@ class Segment {
         }
       }
 
-      throw Error('This segment is flat, this Unix time never happened')
+      return {
+        start: Infinity,
+        end: Infinity
+      }
     }
 
     const atomicPicosRatio = unixMillisRatio
