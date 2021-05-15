@@ -630,6 +630,40 @@ describe('munge', () => {
         NaN
       ])
     })
+
+    describe.only('two inserted leap seconds', () => {
+      expect(munge([
+        [0, 0],
+        [1000, 1],
+        [1000, 2]
+      ], REAL_MODELS.STALL)).toEqual([new Segment(
+        { atomicPicos: 0n, unixMillis: 0 },
+        { atomicPicos: 1_000_000_000_000n },
+        { unixMillis: 1 },
+        { atomicPicos: 1000_000_000n }
+      ), new Segment(
+        { atomicPicos: 1_000_000_000_000n, unixMillis: 1000 },
+        { atomicPicos: 2_000_000_000_000n },
+        { unixMillis: 0 },
+        { atomicPicos: 1_000_000_000_000n }
+      ), new Segment(
+        // Zero-length segment between the two stall
+        { atomicPicos: 2_000_000_000_000n, unixMillis: 1000 },
+        { atomicPicos: 2_000_000_000_000n },
+        { unixMillis: 1 },
+        { atomicPicos: 1000_000_000n }
+      ), new Segment(
+        { atomicPicos: 2_000_000_000_000n, unixMillis: 1000 },
+        { atomicPicos: 3_000_000_000_000n },
+        { unixMillis: 0 },
+        { atomicPicos: 1_000_000_000_000n }
+      ), new Segment(
+        { atomicPicos: 3_000_000_000_000n, unixMillis: 1000 },
+        { atomicPicos: Infinity },
+        { unixMillis: 1 },
+        { atomicPicos: 1000_000_000n }
+      )])
+    })
   })
 
   describe('smear model', () => {

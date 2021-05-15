@@ -93,20 +93,24 @@ const Converter = (data, model) => {
       }
 
       // transformation
-      let { start, end, closed } = segment.unixMillisRatioToAtomicMillisRange(unixMillisRatio)
+      const range = segment.unixMillisRatioToAtomicMillisRange(unixMillisRatio)
+      let { start, end, closed } = range
 
-      if (
-        ranges.length - 1 in ranges &&
-        ranges[ranges.length - 1].closed === false
-      ) {
-        // Previous range is open-ended, so try to combine the two
-        if (ranges[ranges.length - 1].end !== start) {
-          throw Error('Failed to close open range, this should be impossible')
+      if (ranges.length - 1 in ranges) {
+        const prev = ranges[ranges.length - 1]
+
+        // Previous range ends where current one starts, so try to combine the two.
+        // We can do this even if the previous range was already closed.
+        if (prev.end === start) {
+          prev.end = end
+          prev.closed = closed
+          continue
         }
 
-        ranges[ranges.length - 1].end = end
-        ranges[ranges.length - 1].closed = true
-        continue
+        /* istanbul ignore if */
+        if (prev.closed === false) {
+          throw Error('Failed to close open range, this should be impossible')
+        }
       }
 
       if (!segment.atomicMillisOnSegment(start)) {
@@ -121,8 +125,21 @@ const Converter = (data, model) => {
       ranges.push({ start, end, closed })
     }
 
+    /* istanbul ignore if */
     if (ranges.some(range => range.closed !== true)) {
       throw Error('Failed to close all open ranges, this should be impossible')
+    }
+
+    if (model === MODELS.STALL_RANGE) {
+      /* istanbul ignore if */
+      if (1 in ranges) {
+        throw Error('Multiple ranges, this should be impossible')
+      }
+      if (0 in ranges) {
+        const range = ranges[0]
+        return [range.start, range.end]
+      }
+      return [NaN, NaN]
     }
 
     const ends = ranges.map(range => range.end)
