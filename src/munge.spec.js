@@ -395,66 +395,6 @@ describe('munge', () => {
       )])
     })
 
-    it('allows retroactive stalls??', () => {
-      expect(munge([
-        [0, 0],
-        [1000, 1],
-        [500, 2.5]
-      ], SEGMENT_MODELS.STALL)).toEqual([new Segment(
-        { unixMillis: 0, atomicPicos: 0n },
-        { atomicPicos: 1_000_000_000_000n },
-        { unixMillis: 1 },
-        { atomicPicos: 1_000_000_000n }
-      ), new Segment(
-        // First stall
-        { unixMillis: 1000, atomicPicos: 1_000_000_000_000n },
-        { atomicPicos: 2_000_000_000_000n },
-        { unixMillis: 0 },
-        { atomicPicos: 1_000_000_000_000n }
-      ), new Segment(
-        // Yes this segment now ends before it begins
-        { unixMillis: 1000, atomicPicos: 2_000_000_000_000n },
-        { atomicPicos: 1_500_000_000_000n },
-        { unixMillis: 1 },
-        { atomicPicos: 1_000_000_000n }
-      ), new Segment(
-        // Second stall
-        { unixMillis: 500, atomicPicos: 1_500_000_000_000n },
-        { atomicPicos: 3_000_000_000_000n },
-        { unixMillis: 0 },
-        { atomicPicos: 1_500_000_000_000n }
-      ), new Segment(
-        { unixMillis: 500, atomicPicos: 3_000_000_000_000n },
-        { atomicPicos: Infinity },
-        { unixMillis: 1 },
-        { atomicPicos: 1_000_000_000n }
-      )])
-    })
-
-    it('allows retroactive breaks??', () => {
-      expect(munge([
-        [0, 0],
-        [1000, 1],
-        [500, 2.5]
-      ], SEGMENT_MODELS.BREAK)).toEqual([new Segment(
-        { unixMillis: 0, atomicPicos: 0n },
-        { atomicPicos: 1_000_000_000_000n },
-        { unixMillis: 1 },
-        { atomicPicos: 1_000_000_000n }
-      ), new Segment(
-        // Yes this segment now ends before it begins
-        { unixMillis: 1000, atomicPicos: 2_000_000_000_000n },
-        { atomicPicos: 1_500_000_000_000n },
-        { unixMillis: 1 },
-        { atomicPicos: 1_000_000_000n }
-      ), new Segment(
-        { unixMillis: 500, atomicPicos: 3_000_000_000_000n },
-        { atomicPicos: Infinity },
-        { unixMillis: 1 },
-        { atomicPicos: 1_000_000_000n }
-      )])
-    })
-
     it('fails on a bad drift rate', () => {
       expect(() => munge([
         [Date.UTC(1961, JAN, 1), 1.422_818_0, 37_300, 0.001]
@@ -717,40 +657,6 @@ describe('munge', () => {
         0n,
         NaN
       ])
-    })
-
-    describe('two inserted leap seconds', () => {
-      expect(munge([
-        [0, 0],
-        [1000, 1],
-        [1000, 2]
-      ], SEGMENT_MODELS.STALL)).toEqual([new Segment(
-        { atomicPicos: 0n, unixMillis: 0 },
-        { atomicPicos: 1_000_000_000_000n },
-        { unixMillis: 1 },
-        { atomicPicos: 1_000_000_000n }
-      ), new Segment(
-        { atomicPicos: 1_000_000_000_000n, unixMillis: 1000 },
-        { atomicPicos: 2_000_000_000_000n },
-        { unixMillis: 0 },
-        { atomicPicos: 1_000_000_000_000n }
-      ), new Segment(
-        // Zero-length segment between the two stall
-        { atomicPicos: 2_000_000_000_000n, unixMillis: 1000 },
-        { atomicPicos: 2_000_000_000_000n },
-        { unixMillis: 1 },
-        { atomicPicos: 1_000_000_000n }
-      ), new Segment(
-        { atomicPicos: 2_000_000_000_000n, unixMillis: 1000 },
-        { atomicPicos: 3_000_000_000_000n },
-        { unixMillis: 0 },
-        { atomicPicos: 1_000_000_000_000n }
-      ), new Segment(
-        { atomicPicos: 3_000_000_000_000n, unixMillis: 1000 },
-        { atomicPicos: Infinity },
-        { unixMillis: 1 },
-        { atomicPicos: 1_000_000_000n }
-      )])
     })
   })
 

@@ -51,10 +51,6 @@ class Rat {
     return this.cmp(other) > 0n
   }
 
-  ge (other) {
-    return this.cmp(other) >= 0n
-  }
-
   trunc () {
     return div(this.nu, this.de)
   }

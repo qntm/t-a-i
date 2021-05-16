@@ -12,15 +12,28 @@ class Segment {
       throw Error('Segment length must be positive')
     }
 
-    this.start = {
-      atomicPicosRatio: new Rat(start.atomicPicos),
-      unixMillisRatio: new Rat(BigInt(start.unixMillis))
-    }
+    // Start is inclusive.
+    // `atomicPicos` and `unixMillis` are exact.
+    this.start = {}
+    this.start.atomicPicos = start.atomicPicos
+    this.start.atomicPicosRatio = new Rat(this.start.atomicPicos)
+    this.start.atomicMillisRatio = this.start.atomicPicosRatio.divide(new Rat(picosPerMilli))
+    this.start.atomicMillis = Number(this.start.atomicMillisRatio.trunc())
+    this.start.unixMillis = start.unixMillis
+    this.start.unixMillisRatio = new Rat(BigInt(this.start.unixMillis))
 
-    this.end = {
-      atomicPicosRatio: end.atomicPicos === Infinity
-        ? Infinity
-        : new Rat(end.atomicPicos)
+    // End is exclusive.
+    // `atomicPicos` is exact, no exact integer `unixMillis` is possible in most cases.
+    this.end = {}
+    this.end.atomicPicos = end.atomicPicos
+    if (this.end.atomicPicos === Infinity) {
+      this.end.atomicPicosRatio = Infinity
+      this.end.atomicMillisRatio = Infinity
+      this.end.atomicMillis = Infinity
+    } else {
+      this.end.atomicPicosRatio = new Rat(this.end.atomicPicos)
+      this.end.atomicMillisRatio = this.end.atomicPicosRatio.divide(new Rat(picosPerMilli))
+      this.end.atomicMillis = Number(this.end.atomicMillisRatio.trunc())
     }
 
     this.slope = {
@@ -32,25 +45,14 @@ class Segment {
     const unixMillisRatio = new Rat(BigInt(unixMillis))
 
     if (this.slope.unixMillisPerAtomicPico.eq(new Rat(0n))) {
-      if (unixMillisRatio.eq(this.start.unixMillisRatio)) {
-        const start = {}
-        start.atomicMillisRatio = this.start.atomicPicosRatio.divide(new Rat(picosPerMilli))
-        start.atomicMillis = Number(start.atomicMillisRatio.trunc())
-
-        const end = {}
-        end.atomicMillisRatio = this.end.atomicPicosRatio.divide(new Rat(picosPerMilli))
-        end.atomicMillis = Number(end.atomicMillisRatio.trunc())
-
-        return {
-          start: start.atomicMillis,
-          end: end.atomicMillis,
-          closed: false
-        }
+      if (!unixMillisRatio.eq(this.start.unixMillisRatio)) {
+        throw Error('This Unix time never happened')
       }
 
       return {
-        start: Infinity,
-        end: Infinity
+        start: this.start.atomicMillis,
+        end: this.end.atomicMillis,
+        closed: false
       }
     }
 
@@ -80,7 +82,7 @@ class Segment {
     )
   }
 
-  // Bounds checks. Each segment has an inclusive range of validity.
+  // Bounds checks. Each segment has an inclusive-exclusive range of validity.
   // Valid TAI instants are from the computed TAI start of the segment to the computed TAI end of
   // the segment. Valid Unix instants are the valid TAI instants, transformed linearly from TAI to
   // Unix by the segment.
@@ -97,7 +99,6 @@ class Segment {
 
   unixMillisOnSegment (unixMillis) {
     const unixMillisRatio = new Rat(BigInt(unixMillis))
-
     return this.slope.unixMillisPerAtomicPico.eq(new Rat(0n))
       ? this.start.unixMillisRatio.eq(unixMillisRatio)
       : this.start.unixMillisRatio.le(unixMillisRatio) && (

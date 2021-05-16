@@ -919,7 +919,7 @@ describe('Converter', () => {
           [Date.UTC(1970, JAN, 1, 0, 0, 0, 1), -0.0001]
         ], OVERRUN_ARRAY)
         // 900_000_000n TAI picoseconds rounds down to 0 seconds, which is not in the ray
-        expect(converter.unixToAtomic(1)).toEqual([])
+        expect(converter.unixToAtomic(1)).toEqual([0])
       })
 
       it('at the end of the ray', () => {
@@ -927,8 +927,7 @@ describe('Converter', () => {
           [Date.UTC(1969, DEC, 31, 23, 59, 59, 999), 0.0001],
           [Date.UTC(1970, JAN, 1, 0, 0, 0, 1), -0.0011]
         ], OVERRUN_ARRAY)
-        // -900_000_000n TAI picoseconds rounds up to 0, which is not in the ray
-        expect(converter.unixToAtomic(-1)).toEqual([])
+        expect(converter.unixToAtomic(-1)).toEqual([-1])
       })
     })
   })
@@ -1286,16 +1285,10 @@ describe('Converter', () => {
     })
 
     it('exactly at the time', () => {
-      // Second segment starts at TAI =
-      // -194_659_197_302_721_200_000n =
-      // 1963-11-01T00:00:02.697_278_800_000
-      // This truncates to
-      // 1963-11-01T00:00:02.697 =
-      // -194_659_197_303_000_000_000n
-      // which is NO LONGER ON THAT SEGMENT and so gets IGNORED. ONE RESULT ONLY.
       expect(converter.unixToAtomic(Date.UTC(1963, NOV, 1, 0, 0, 0, 0)))
         .toEqual([
-          Date.UTC(1963, NOV, 1, 0, 0, 2, 597)
+          Date.UTC(1963, NOV, 1, 0, 0, 2, 597),
+          Date.UTC(1963, NOV, 1, 0, 0, 2, 697)
         ])
       // expect(converter.unixToAtomicPicos(Date.UTC(1963, NOV, 1, 0, 0, 0, 0)))
     })

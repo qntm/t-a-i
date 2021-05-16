@@ -50,17 +50,7 @@ const Converter = (data, model) => {
       }
 
       // transformation
-      const unixMillis = segment.atomicMillisToUnixMillis(atomicMillis)
-
-      // Output bounds check.
-      // Because every segment starts on a whole number of Unix milliseconds, and we round down,
-      // it's currently impossible for this to fail.
-      /* istanbul ignore if */
-      if (!segment.unixMillisOnSegment(unixMillis)) {
-        continue
-      }
-
-      return unixMillis
+      return segment.atomicMillisToUnixMillis(atomicMillis)
     }
 
     // Pre-1961 or BREAK model and we hit a break
@@ -81,26 +71,22 @@ const Converter = (data, model) => {
       // transformation
       const range = segment.unixMillisToAtomicMillisRange(unixMillis)
 
-      if (!Number.isFinite(range.start)) {
-        // Horizontal segment does not intersect with this Unix time
-        continue
-      }
-
-      let { start, end, closed } = range
-
       if (ranges.length - 1 in ranges) {
         const prev = ranges[ranges.length - 1]
 
         // Previous range ends where current one starts, so try to combine the two.
         // We can do this even if the previous range was already closed.
-        if (prev.end === start) {
-          prev.end = end
-          prev.closed = closed
+        if (prev.end === range.start) {
+          ranges[ranges.length - 1] = {
+            start: prev.start,
+            end: range.end,
+            closed: range.closed
+          }
           continue
         }
       }
 
-      ranges.push({ start, end, closed })
+      ranges.push(range)
     }
 
     /* istanbul ignore if */

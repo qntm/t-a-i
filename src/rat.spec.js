@@ -35,6 +35,12 @@ describe('Rat', () => {
     expect(new Rat(0n).gt(new Rat(1n))).toBe(false)
   })
 
+  it('equal', () => {
+    expect(new Rat(-1n, 3n).eq(new Rat(4n, -12n))).toBe(true)
+    expect(new Rat(0n).eq(new Rat(-1n))).toBe(false)
+    expect(new Rat(0n).eq(new Rat(-0n))).toBe(true)
+  })
+
   it('less than or equal', () => {
     expect(new Rat(-2n, -3n).le(new Rat(-2n, -3n))).toBe(true)
     expect(new Rat(-2n, -3n).le(new Rat(2n, 3n))).toBe(true)
