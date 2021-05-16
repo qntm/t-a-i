@@ -9,26 +9,26 @@ const MODELS = {
   // point is in the past (Unix time) due to inserted time and the result is a backtrack. Unix to
   // TAI conversions are potentially one-to-many but the many are discrete instants in time.
   // When time is removed, the result is an empty array.
-  OVERRUN: 0,
+  OVERRUN: Symbol('OVERRUN'),
 
   // Rather than overrun, the segment ends early and Unix time becomes indeterminate. Unix to TAI
   // conversions are one-to-one, all discrete instants.
   // When Unix time is removed, the result is NaN.
-  BREAK: 1,
+  BREAK: Symbol('BREAK'),
 
   // Rather than overrun, Unix time stalls. The segment ends early and a new horizontal segment
   // (dy = 0) appears, linking this "stall point" to the start of the next segment. Unix to TAI
   // conversions are one-to-many and the many are a closed range of TAI times, normally a single
   // instant but sometimes the full inserted TAI time.
   // When Unix time is removed, the result is NaN.
-  STALL: 2,
+  STALL: Symbol('STALL'),
 
   // Rather than overrun, a new segment is inserted from 12 Unix hours prior to the discontinuity to
   // 12 Unix hours after. (This is done for *all* new segments, including historic ones where time
   // was removed or where there was no discontinuity, all that changed was the slope.)
   // Unix to TAI conversions are always one-to-one.
   // When Unix time is removed, you still get a meaningful result.
-  SMEAR: 3
+  SMEAR: Symbol('SMEAR')
 }
 
 const NOV = 10
@@ -45,7 +45,7 @@ const mjdEpoch = {
 // purposes: start point is expressed both in Unix milliseconds and TAI picoseconds, ratio between
 // TAI picoseconds and UTC milliseconds is given as a precise BigInt, and the root is moved to the
 // Unix epoch
-const munge = (data, segmentModel) => {
+const munge = (data, model) => {
   const munged = data.map(datum => {
     const start = {}
     const offsetAtRoot = {}
@@ -115,12 +115,12 @@ const munge = (data, segmentModel) => {
     }
   })
 
-  if (segmentModel === MODELS.OVERRUN) {
+  if (model === MODELS.OVERRUN) {
     // Do nothing, we're good
   } else if (
-    segmentModel === MODELS.BREAK ||
-    segmentModel === MODELS.STALL ||
-    segmentModel === MODELS.SMEAR
+    model === MODELS.BREAK ||
+    model === MODELS.STALL ||
+    model === MODELS.SMEAR
   ) {
     // Handle continuity between segments by altering segment boundaries
     // and possibly introducing new segments between them.
@@ -137,7 +137,7 @@ const munge = (data, segmentModel) => {
       // When breaking/stalling, this is the Unix time when the next segment starts.
       // When smearing, this is twelve Unix hours prior to discontinuity.
       const smearStart = {
-        unixMillis: segmentModel === MODELS.SMEAR
+        unixMillis: model === MODELS.SMEAR
           ? b.start.unixMillis - millisPerDay / 2
           : b.start.unixMillis
       }
@@ -151,7 +151,7 @@ const munge = (data, segmentModel) => {
       // When breaking/stalling, this is the start of the next segment.
       // When smearing, this is twelve hours after the discontinuity.
       const smearEnd = {
-        unixMillis: segmentModel === MODELS.SMEAR
+        unixMillis: model === MODELS.SMEAR
           ? b.start.unixMillis + millisPerDay / 2
           : b.start.unixMillis
       }
@@ -171,7 +171,7 @@ const munge = (data, segmentModel) => {
       a.end = smearStart // includes unixMillis but we'll ignore that
       b.start = smearEnd
 
-      if (segmentModel === MODELS.BREAK) {
+      if (model === MODELS.BREAK) {
         // Just leave a gap
         continue
       }

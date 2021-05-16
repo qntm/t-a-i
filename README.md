@@ -6,7 +6,7 @@ Introduces [International Atomic Time (TAI)](https://en.wikipedia.org/wiki/Inter
 
 Because Unix time ignores leap seconds, it is not generally possible to determine the *true* amount of elapsed time between any two Unix timestamps by simply subtracting one from the other. Equally, it is not safe to add a time interval to a Unix timestamp and expect to receive a new Unix timestamp which is separated from the first Unix timestamp by that interval. Results will be wrong by the number of leap seconds in the interval, which depends on when the interval started and ended.
 
-**TAI milliseconds** tracks the number of elapsed TAI milliseconds since 1970-01-01 00:00:00 TAI. TAI does not have leap seconds. Using TAI, all of the above problems are easily solved as follows:
+**TAI milliseconds** track the number of elapsed TAI milliseconds since 1970-01-01 00:00:00 TAI. TAI does not have leap seconds. Using TAI, all of the above problems are easily solved as follows:
 
 1. Convert your Unix milliseconds to TAI milliseconds.
 2. Perform your arithmetic.
@@ -150,19 +150,19 @@ When time is removed, Unix time jumps forward discontinuously between one TAI in
 
 Under this model, both inserted time and removed time are handled by **smearing** the discontinuity out over 24 Unix hours, starting 12 hours prior to the discontinuity and ending 12 hours after the discontinuity. For a typical leap second, this means Unix time runs very slightly slower than normal from midday to midday, so that 84,600,000 Unix milliseconds take 84,601,000 TAI milliseconds to elapse.
 
-### TaiConverter(model): taiConverter
+### TaiConverter(model)
 
 Returns a TAI/Unix converter object whose conversions obey the specified model. All `TaiConverter` objects provide the same methods, `unixToAtomic` and `atomicToUnix`, but they differ in what they return depending on the model used.
 
-### taiConverter.atomicToUnix(atomic: number): number
+### taiConverter.atomicToUnix(atomic)
 
-Converts the input TAI millisecond count to a Unix millisecond count. Under normal circumstances this conversion returns a single integer. If the input is prior to the beginning of TAI, `NaN` is returned.
+Throws unless `atomic` is an integer. Converts the input TAI millisecond count to a Unix millisecond count. Under normal circumstances this conversion returns a single integer. If the input is prior to the beginning of TAI, `NaN` is returned.
 
 When Unix time is inserted,
 
 * with the `OVERRUN` model, Unix time overruns and then backtracks. This means that sometimes two TAI millisecond counts convert to the same Unix millisecond count.
 * with the `BREAK` model,  Unix time is indeterminate; `NaN` is returned.
-* with the `STALL` model, Unix time stalls. This means that a whole range of TAI millisecond counts all conver to the same Unix millisecond count.
+* with the `STALL` model, Unix time stalls. This means that a whole range of TAI millisecond counts all convert to the same Unix millisecond count.
 * with the `SMEAR` model, the discontinuity is smeared out from midday to midday across the discontinuity.
 
 When Unix time is removed,
@@ -170,9 +170,9 @@ When Unix time is removed,
 * with the `OVERRUN`, `BREAK` and `STALL` models, the returned Unix millisecond count jumps up discontinuously between input one TAI millisecond count and the next.
 * with the `SMEAR` model, the discontinuity is smeared out from midday to midday across the discontinuity.
 
-### taiConverter.unixToAtomic(unix: number[, options]): number
+### taiConverter.unixToAtomic(unix[, options])
 
-Converts the input Unix millisecond count to a TAI millisecond count. Under normal circumstances this conversion returns a single integer. If the input is prior to the beginning of TAI, `NaN` is returned.
+Throws unless `unix` is an integer. Converts the input Unix millisecond count to a TAI millisecond count. Under normal circumstances this conversion returns a single integer. If the input is prior to the beginning of TAI, `NaN` is returned.
 
 When Unix time is inserted,
 

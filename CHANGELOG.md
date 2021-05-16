@@ -2,7 +2,7 @@
 
 ## 3.0.x
 
-The API has been completely overhauled. Code like:
+`t-a-i`'s API has been completely overhauled. Code like:
 
 ```js
 const tai = require('t-a-i')
@@ -17,16 +17,16 @@ console.log(tai.oneToOne.atomicToUnix(3000))
 should be replaced with something like:
 
 ```js
-const { Converter, MODELS } = require('t-a-i')
+const { TaiConverter, MODELS } = require('t-a-i')
 
-const oneToManyConverter = Converter(MODELS.OVERRUN)
-const oneToOneConverter = Converter(MODELS.STALL)
+const oneToMany = TaiConverter(MODELS.OVERRUN)
+const oneToOne = TaiConverter(MODELS.STALL)
 
-console.log(oneToManyConverter.unixToAtomic(0, { array: true }))
-console.log(oneToManyConverter.atomicToUnix(1000))
+console.log(oneToMany.unixToAtomic(0, { array: true }))
+console.log(oneToMany.atomicToUnix(1000))
 
-console.log(oneToOneConverter.unixToAtomic(2000))
-console.log(oneToOneConverter.atomicToUnix(3000))
+console.log(oneToOne.unixToAtomic(2000))
+console.log(oneToOne.atomicToUnix(3000))
 ```
 
 Other, more flexible models are now also provided. Check the new README for more information.

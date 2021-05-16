@@ -62,9 +62,10 @@ const taiData = [
 ]
 
 module.exports.taiData = taiData
-module.exports.UNIX_START = Date.UTC(1961, JAN, 1, 0, 0, 0, 0)
+module.exports.UNIX_START = taiData[0][0]
 
 // Because we don't know whether or not a leap second will be inserted or removed at this time,
 // the relationship between Unix time and TAI is unpredictable at or beyond this point.
 // (This is the start of a possible smear.)
+// Updating this value? Don't forget to update the README too!
 module.exports.UNIX_END = Date.UTC(2021, DEC, 31, 23, 12, 0, 0)

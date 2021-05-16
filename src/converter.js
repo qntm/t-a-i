@@ -23,12 +23,10 @@ const Converter = (data, model) => {
     }
 
     for (const segment of segments) {
-      // input bounds check
       if (!segment.atomicMillisOnSegment(atomicMillis)) {
         continue
       }
 
-      // transformation
       return segment.atomicMillisToUnixMillis(atomicMillis)
     }
 
@@ -47,7 +45,6 @@ const Converter = (data, model) => {
         continue
       }
 
-      // transformation
       const range = segment.unixMillisToAtomicMillisRange(unixMillis)
 
       if (ranges.length - 1 in ranges) {
@@ -87,7 +84,7 @@ const Converter = (data, model) => {
     if (ranges.length > 1) {
       /* istanbul ignore else */
       if (model === MODELS.OVERRUN && options.array !== true) {
-        // This happens frequently, user explicitly opted to discard the earlier ranges
+        // This happens frequently, user implicitly opted to discard the earlier ranges
         // and take only the last one
       } else {
         throw Error('Multiple ranges, this should be impossible')
@@ -104,7 +101,7 @@ const Converter = (data, model) => {
     if (!Object.is(range.end, range.start)) {
       /* istanbul ignore else */
       if (model === MODELS.STALL && options.range !== true) {
-        // This happens frequently, user explicitly opted to take the stall's end point only,
+        // This happens frequently, user implicitly opted to take the stall's end point only,
         // discarding the start point
       } else {
         throw Error('Non-0-length range, this should be impossible')
