@@ -1,153 +1,121 @@
 // The way to think about this is a 2D graph with TAI on the X axis, UTC on the Y, and a collection
-// of numbered *rays*. Each ray starts at a well defined position in both TAI and UTC and proceeds
-// diagonally up and to the right, expressing *one* relationship between the two.
-// Typically each new ray is either (1) the previous ray translated up or down a little or (2) a
-// discrete change in direction/slope of the previous ray with no discontinuity.
-// A ray becomes invalid once we reach the TAI start point of the next (numerical) ray. So, every
-// TAI time (vertical line) intersects exactly one ray, and maps to exactly 1 UTC time, unless it
-// precedes the beginning of TAI.
-// A UTC time (horizontal line) can intersect 0, 1, 2 or theoretically many more rays, and hence map
-// to multiple TAI times. We can return an array of these, or just the result from the latest ray
-// (according to its numbering).
-// The logic below should work even if these rays proceed horizontally, or UTC runs backwards, or if
-// the rays are supplied in the wrong order or if the period of validity of a ray is 0.
+// of numbered *segments*. Each segment starts at a well defined position in both TAI and UTC and
+// proceeds diagonally up and to the right, expressing *one* relationship between the two.
+// Typically each new segment is either (1) the previous segment translated up or down a little or
+// (2) a discrete change in direction/slope of the previous segment with no discontinuity.
+// A segment becomes invalid once we reach the TAI start point of the next (numerical) segment. So,
+// every TAI time (vertical line) intersects exactly one segment, and maps to exactly 1 UTC time,
+// unless it precedes the beginning of TAI.
+// A UTC time (horizontal line) can intersect 0, 1, 2 or theoretically many more segments, and hence
+// map to multiple TAI times. We can return an array of these, or just the result from the latest
+// segment (according to its numbering).
 
-const div = require('./div')
-const munge = require('./munge')
+const { munge, MODELS } = require('./munge')
 
-const picosPerMilli = 1000n * 1000n * 1000n
+const Converter = (data, model) => {
+  const segments = munge(data, model)
 
-module.exports = data => {
-  const rays = munge(data)
-
-  /// Helper methods
-
-  const atomicPicosInRay = (ray, atomicPicos) =>
-    ray.start.atomicPicos <= atomicPicos && atomicPicos < ray.end.atomicPicos
-
-  // Depending on its parameters, each ray linearly transforms `unixMillis`
-  // into a different `atomicPicos`. This value is always exact
-  const unixMillisToAtomicPicos = (ray, unixMillis) =>
-    BigInt(unixMillis) * ray.ratio.atomicPicosPerUnixMilli +
-      ray.offsetAtUnixEpoch.atomicPicos
-
-  // This result is rounded towards negative infinity. This means that, provided that `atomicPicos`
-  // is in the ray, `unixMillis` is also guaranteed to be in the ray.
-  const atomicPicosToUnixMillis = (ray, atomicPicos) =>
-    Number(div(
-      atomicPicos - ray.offsetAtUnixEpoch.atomicPicos,
-      ray.ratio.atomicPicosPerUnixMilli
-    ))
-
-  /// Unix to TAI conversion methods
-
-  const unixMillisToRaysWithAtomicPicos = unixMillis => {
-    if (!Number.isInteger(unixMillis)) {
-      throw Error(`Not an integer: ${unixMillis}`)
-    }
-
-    return rays
-      .map(ray => ({
-        ray,
-        atomicPicos: unixMillisToAtomicPicos(ray, unixMillis)
-      }))
-      .filter(({ ray, atomicPicos }) =>
-        // ...however, the result has to still be in the ray!
-        atomicPicosInRay(ray, atomicPicos)
-      )
-  }
-
-  const unixMillisToAtomicPicosArray = unixMillis =>
-    unixMillisToRaysWithAtomicPicos(unixMillis)
-      .map(({ atomicPicos }) => atomicPicos)
-
-  const unixMillisToAtomicMillisArray = unixMillis =>
-    unixMillisToRaysWithAtomicPicos(unixMillis)
-      .map(({ ray, atomicPicos }) => ({
-        ray,
-
-        // This rounds towards negative infinity. This is potentially problematic because even if
-        // the atomic picosecond count is part of this ray, the rounded millisecond count may not
-        // be...
-        atomicMillis: Number(div(atomicPicos, picosPerMilli))
-      }))
-      .filter(({ ray, atomicMillis }) =>
-        // ...hence this additional test
-        atomicPicosInRay(ray, BigInt(atomicMillis) * picosPerMilli)
-      )
-      .map(({ atomicMillis }) => atomicMillis)
-
-  const unixMillisToCanonicalAtomicPicos = unixMillis => {
-    const atomicPicosArray = unixMillisToAtomicPicosArray(unixMillis)
-    const i = atomicPicosArray.length - 1
-
-    if (!(i in atomicPicosArray)) {
-      // Removed leap second; this Unix time never occurred
-      throw Error(`No TAI equivalent: ${unixMillis}`)
-    }
-
-    return atomicPicosArray[i]
-  }
-
-  const unixMillisToCanonicalAtomicMillis = unixMillis => {
-    const atomicMillisArray = unixMillisToAtomicMillisArray(unixMillis)
-    const i = atomicMillisArray.length - 1
-
-    if (!(i in atomicMillisArray)) {
-      // Removed leap second; this Unix time never occurred
-      throw Error(`No TAI equivalent: ${unixMillis}`)
-    }
-
-    return atomicMillisArray[i]
-  }
-
-  /// TAI to Unix conversion methods
-
-  const atomicMillisToUnixMillis = (atomicMillis, overrun) => {
+  // This conversion always has the same behaviour,
+  // and there's no work required in handling the output
+  const atomicToUnix = atomicMillis => {
     if (!Number.isInteger(atomicMillis)) {
       throw Error(`Not an integer: ${atomicMillis}`)
     }
 
-    const atomicPicos = BigInt(atomicMillis) * picosPerMilli
+    for (const segment of segments) {
+      if (!segment.atomicMillisOnSegment(atomicMillis)) {
+        continue
+      }
 
-    const rayId = rays.findIndex(ray =>
-      atomicPicosInRay(ray, atomicPicos)
-    )
-
-    if (rayId === -1) {
-      // Pre-1961
-      throw Error(`No UTC equivalent: ${atomicMillis}`)
+      return segment.atomicMillisToUnixMillis(atomicMillis)
     }
 
-    const unixMillis = atomicPicosToUnixMillis(rays[rayId], atomicPicos)
-
-    if (overrun) {
-      return unixMillis
-    }
-
-    // If a later ray starts at a Unix time before this one, apply stalling behaviour
-    return Math.min(
-      unixMillis,
-      ...rays.slice(rayId + 1).map(ray => ray.start.unixMillis)
-    )
+    // Pre-1961, or BREAK model and we hit a break
+    return NaN
   }
 
-  const atomicMillisToUnixMillisOverrun = atomicMillis =>
-    atomicMillisToUnixMillis(atomicMillis, true)
+  const unixToAtomic = (unixMillis, options = {}) => {
+    if (!Number.isInteger(unixMillis)) {
+      throw Error(`Not an integer: ${unixMillis}`)
+    }
 
-  const atomicMillisToUnixMillisStall = atomicMillis =>
-    atomicMillisToUnixMillis(atomicMillis, false)
+    const ranges = []
+    for (const segment of segments) {
+      if (!segment.unixMillisOnSegment(unixMillis)) {
+        continue
+      }
+
+      const range = segment.unixMillisToAtomicMillisRange(unixMillis)
+
+      if (ranges.length - 1 in ranges) {
+        const prev = ranges[ranges.length - 1]
+
+        // Previous range ends where current one starts, so try to combine the two.
+        // The previous range should be open but it doesn't actually make a difference.
+        if (prev.end === range.start) {
+          ranges[ranges.length - 1] = {
+            start: prev.start,
+            end: range.end,
+            closed: range.closed
+          }
+          continue
+        }
+      }
+
+      ranges.push(range)
+    }
+
+    /* istanbul ignore if */
+    if (ranges.some(range => range.closed !== true)) {
+      throw Error('Failed to close all open ranges, this should be impossible')
+    }
+
+    if (model === MODELS.OVERRUN && options.array === true) {
+      return ranges.map(range => {
+        /* istanbul ignore if */
+        if (range.end !== range.start) {
+          throw Error('Non-0-length range, this should be impossible')
+        }
+
+        return range.end
+      })
+    }
+
+    if (ranges.length > 1) {
+      /* istanbul ignore else */
+      if (model === MODELS.OVERRUN && options.array !== true) {
+        // This happens frequently, user implicitly opted to discard the earlier ranges
+        // and take only the last one
+      } else {
+        throw Error('Multiple ranges, this should be impossible')
+      }
+    }
+
+    const i = ranges.length - 1
+    const range = i in ranges ? ranges[i] : { start: NaN, end: NaN }
+
+    if (model === MODELS.STALL && options.range === true) {
+      return [range.start, range.end]
+    }
+
+    if (!Object.is(range.end, range.start)) {
+      /* istanbul ignore else */
+      if (model === MODELS.STALL && options.range !== true) {
+        // This happens frequently, user implicitly opted to take the stall's end point only,
+        // discarding the start point
+      } else {
+        throw Error('Non-0-length range, this should be impossible')
+      }
+    }
+
+    return range.end
+  }
 
   return {
-    oneToMany: {
-      unixToAtomicPicos: unixMillisToAtomicPicosArray,
-      unixToAtomic: unixMillisToAtomicMillisArray,
-      atomicToUnix: atomicMillisToUnixMillisOverrun
-    },
-    oneToOne: {
-      unixToAtomicPicos: unixMillisToCanonicalAtomicPicos,
-      unixToAtomic: unixMillisToCanonicalAtomicMillis,
-      atomicToUnix: atomicMillisToUnixMillisStall
-    }
+    unixToAtomic,
+    atomicToUnix
   }
 }
+
+module.exports.MODELS = MODELS
+module.exports.Converter = Converter

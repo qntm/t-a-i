@@ -1,5 +1,36 @@
 // So what do we ACTUALLY need from our data?
 
+const segment = require('./segment')
+
+// In all models, TAI to Unix conversions are one-to-one (or one-to-NaN). At any given instant in
+// TAI, at most one segment applies and at most one Unix time corresponds.
+const MODELS = {
+  // Each segment continues until it reaches the TAI start of the next segment, even if that start
+  // point is in the past (Unix time) due to inserted time and the result is a backtrack. Unix to
+  // TAI conversions are potentially one-to-many but the many are discrete instants in time.
+  // When time is removed, the result is an empty array.
+  OVERRUN: Symbol('OVERRUN'),
+
+  // Rather than overrun, the segment ends early and Unix time becomes indeterminate. Unix to TAI
+  // conversions are one-to-one, all discrete instants.
+  // When Unix time is removed, the result is NaN.
+  BREAK: Symbol('BREAK'),
+
+  // Rather than overrun, Unix time stalls. The segment ends early and a new horizontal segment
+  // (dy = 0) appears, linking this "stall point" to the start of the next segment. Unix to TAI
+  // conversions are one-to-many and the many are a closed range of TAI times, normally a single
+  // instant but sometimes the full inserted TAI time.
+  // When Unix time is removed, the result is NaN.
+  STALL: Symbol('STALL'),
+
+  // Rather than overrun, a new segment is inserted from 12 Unix hours prior to the discontinuity to
+  // 12 Unix hours after. (This is done for *all* new segments, including historic ones where time
+  // was removed or where there was no discontinuity, all that changed was the slope.)
+  // Unix to TAI conversions are always one-to-one.
+  // When Unix time is removed, you still get a meaningful result.
+  SMEAR: Symbol('SMEAR')
+}
+
 const NOV = 10
 
 const picosPerSecond = 1000 * 1000 * 1000 * 1000
@@ -14,7 +45,7 @@ const mjdEpoch = {
 // purposes: start point is expressed both in Unix milliseconds and TAI picoseconds, ratio between
 // TAI picoseconds and UTC milliseconds is given as a precise BigInt, and the root is moved to the
 // Unix epoch
-module.exports = data => {
+const munge = (data, model) => {
   const munged = data.map(datum => {
     const start = {}
     const offsetAtRoot = {}
@@ -43,39 +74,135 @@ module.exports = data => {
       throw Error('Could not compute precise drift rate')
     }
 
-    const ratio = {
-      atomicPicosPerUnixMilli: picosPerMilli + driftRate.atomicPicosPerUnixMilli
+    const dy = {
+      unixMillis: 1
+    }
+
+    const dx = {
+      atomicPicos: picosPerMilli + driftRate.atomicPicosPerUnixMilli
       // Typically 1_000_000_015n
     }
 
-    const offsetAtUnixEpoch = {
-      atomicPicos: offsetAtRoot.atomicPicos -
-        BigInt(root.unixMillis) * driftRate.atomicPicosPerUnixMilli
-    }
-
-    start.atomicPicos = BigInt(start.unixMillis) * ratio.atomicPicosPerUnixMilli +
-      offsetAtUnixEpoch.atomicPicos
+    start.atomicPicos = BigInt(root.unixMillis) * picosPerMilli +
+      offsetAtRoot.atomicPicos +
+      BigInt(start.unixMillis - root.unixMillis) *
+      dx.atomicPicos /
+      BigInt(dy.unixMillis)
 
     return {
       start,
-      ratio,
-      offsetAtUnixEpoch
+      dy,
+      dx
     }
   })
 
-  // `end` is the first TAI instant when this ray ceases to be applicable.
-  // `end` can equal or come before `start`, indicating that this ray has no validity at all
-  let end = {
-    atomicPicos: Infinity
-  }
-  for (let rayId = munged.length - 1; rayId >= 0; rayId--) {
-    munged[rayId].end = end
-    if (munged[rayId].start.atomicPicos < end.atomicPicos) {
-      end = {
-        atomicPicos: munged[rayId].start.atomicPicos
-      }
-    }
+  // Check ordering of the data, no funny business please
+  if (
+    munged.some((datum, i, munged) =>
+      i + 1 in munged &&
+      munged[i + 1].start.atomicPicos <= datum.start.atomicPicos
+    )
+  ) {
+    throw Error('Disordered data')
   }
 
-  return munged
+  // `end` is the first TAI instant when this segment ceases to be applicable.
+  munged.forEach((datum, i, munged) => {
+    datum.end = {
+      atomicPicos: i + 1 in munged
+        ? munged[i + 1].start.atomicPicos
+        : Infinity
+    }
+  })
+
+  if (model === MODELS.OVERRUN) {
+    // Do nothing, we're good
+  } else if (
+    model === MODELS.BREAK ||
+    model === MODELS.STALL ||
+    model === MODELS.SMEAR
+  ) {
+    // Handle continuity between segments by altering segment boundaries
+    // and possibly introducing new segments between them.
+    for (let i = 0; i < munged.length; i++) {
+      if (!(i + 1 in munged)) {
+        // Last segment, no continuity to handle
+        continue
+      }
+
+      const a = munged[i]
+      const b = munged[i + 1]
+
+      // Find smear start point, which is on THIS segment.
+      // When breaking/stalling, this is the Unix time when the next segment starts.
+      // When smearing, this is twelve Unix hours prior to discontinuity.
+      const smearStart = {
+        unixMillis: model === MODELS.SMEAR
+          ? b.start.unixMillis - millisPerDay / 2
+          : b.start.unixMillis
+      }
+
+      smearStart.atomicPicos = a.start.atomicPicos +
+        BigInt(smearStart.unixMillis - a.start.unixMillis) *
+        a.dx.atomicPicos /
+        BigInt(a.dy.unixMillis)
+
+      // Find smear end point, which is on the NEXT segment.
+      // When breaking/stalling, this is the start of the next segment.
+      // When smearing, this is twelve hours after the discontinuity.
+      const smearEnd = {
+        unixMillis: model === MODELS.SMEAR
+          ? b.start.unixMillis + millisPerDay / 2
+          : b.start.unixMillis
+      }
+
+      smearEnd.atomicPicos = b.start.atomicPicos +
+        BigInt(smearEnd.unixMillis - b.start.unixMillis) *
+        b.dx.atomicPicos /
+        BigInt(b.dy.unixMillis)
+
+      if (smearEnd.atomicPicos <= smearStart.atomicPicos) {
+        // No negative-length smears
+        continue
+      }
+
+      // Create the break.
+      // Terminate this segment early, start the next segment late.
+      a.end = smearStart // includes unixMillis but we'll ignore that
+      b.start = smearEnd
+
+      if (model === MODELS.BREAK) {
+        // Just leave a gap
+        continue
+      }
+
+      // Insert a new smear segment linking the two.
+      // When breaking/stalling, this is perfectly horizontal (dy.unixMillis = 0)
+      munged.splice(i + 1, 0, {
+        start: smearStart,
+        end: smearEnd, // includes unixMillis but we'll ignore that
+        dy: {
+          unixMillis: smearEnd.unixMillis - smearStart.unixMillis
+        },
+        dx: {
+          atomicPicos: smearEnd.atomicPicos - smearStart.atomicPicos
+        }
+      })
+
+      // Then also skip over it
+      i++
+    }
+  } else {
+    throw Error('Unrecognised model')
+  }
+
+  return munged.map((datum, i, munged) => new segment.Segment(
+    datum.start,
+    datum.end,
+    datum.dy,
+    datum.dx
+  ))
 }
+
+module.exports.munge = munge
+module.exports.MODELS = MODELS

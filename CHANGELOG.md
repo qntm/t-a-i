@@ -1,5 +1,36 @@
 # CHANGELOG
 
+## 3.0.x
+
+`t-a-i`'s API has been completely overhauled. Code like:
+
+```js
+const tai = require('t-a-i')
+
+console.log(tai.oneToMany.unixToAtomic(0))
+console.log(tai.oneToMany.atomicToUnix(1000))
+
+console.log(tai.oneToOne.unixToAtomic(2000))
+console.log(tai.oneToOne.atomicToUnix(3000))
+```
+
+should be replaced with something like:
+
+```js
+const { TaiConverter, MODELS } = require('t-a-i')
+
+const oneToMany = TaiConverter(MODELS.OVERRUN)
+const oneToOne = TaiConverter(MODELS.STALL)
+
+console.log(oneToMany.unixToAtomic(0, { array: true }))
+console.log(oneToMany.atomicToUnix(1000))
+
+console.log(oneToOne.unixToAtomic(2000))
+console.log(oneToOne.atomicToUnix(3000))
+```
+
+Other, more flexible models are now also provided. Check the new README for more information.
+
 ## 2.1.x
 
 `tai.oneToOne.atomicToUnix`'s behaviour has been changed to no longer throw exceptions in the event of trying to convert a "non-canonical" TAI millisecond count to Unix milliseconds. Instead, this conversion now behaves as if Unix time was paused during the inserted leap second. This more accurately reflects the assertion in the README that "Unix time ignores leap seconds". Documentation and unit tests have been updated accordingly.

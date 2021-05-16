@@ -6,37 +6,29 @@ Introduces [International Atomic Time (TAI)](https://en.wikipedia.org/wiki/Inter
 
 Because Unix time ignores leap seconds, it is not generally possible to determine the *true* amount of elapsed time between any two Unix timestamps by simply subtracting one from the other. Equally, it is not safe to add a time interval to a Unix timestamp and expect to receive a new Unix timestamp which is separated from the first Unix timestamp by that interval. Results will be wrong by the number of leap seconds in the interval, which depends on when the interval started and ended.
 
-**TAI milliseconds** tracks the number of elapsed TAI milliseconds since 1970-01-01 00:00:00 TAI. TAI does not have leap seconds. Using TAI, all of the above problems are easily solved as follows:
+**TAI milliseconds** track the number of elapsed TAI milliseconds since 1970-01-01 00:00:00 TAI. TAI does not have leap seconds. Using TAI, all of the above problems are easily solved as follows:
 
 1. Convert your Unix milliseconds to TAI milliseconds.
 2. Perform your arithmetic.
 3. Convert the TAI results back to Unix time.
 
-The relationship between TAI and UTC is well-defined as far back as 1 January 1961. Prior to 1 January 1972, the relationship was quite complex: TAI seconds were not the same length as UTC seconds; time was inserted in fractions of TAI seconds; time was sometimes removed; time was modified at the beginning of any month, not just January or July. `t-a-i` handles all of these conversions correctly and returns results accurate to the millisecond. `t-a-i` also provides methods for returning exact TAI picosecond counts, for cases where the TAI millisecond count would be inexact.
+The relationship between TAI and UTC is well-defined as far back as 1 January 1961. Prior to 1 January 1972, the relationship was quite complex:
 
-## Important note!
+* TAI seconds were not the same length as UTC seconds
+* time was inserted in fractions of TAI seconds
+* time was sometimes removed
+* time was modified at the beginning of any month, not just January or July
 
-It is **strongly recommended** that you thoroughly unit test the behaviour of your code at leap second boundaries: before, during and after.
+`t-a-i` handles all of these conversions correctly and returns results truncated to the millisecond.
 
-The nature of the relationship between Unix time and TAI means that conversions behave consistently for years on end, and then, during leap seconds, suddenly display very different behaviour, **sometimes throwing exceptions**. Not only that, leap seconds are commonly inserted on New Year's Eve, which is a very inopportune time to be dealing with this kind of bug!
-
-At the time of writing:
-
-* The most recent inserted leap second was added at the end of 31 December 2016.
-* The most recent removed time was 0.1 TAI seconds, removed at the end of 31 January 1968.
-
-## Installation
-
-```
-npm install t-a-i
-```
+`t-a-i` also provides multiple models for leap second discontinuities - you can have Unix time overrun and backtrack, stall, smear, or simply be indeterminate.
 
 ## Examples
 
 Exactly how long was 1972?
 
 ```javascript
-const tai = require("t-a-i")
+const { TaiConverter, MODELS } = require('t-a-i')
 
 const unixStart = Date.UTC(1972, 0, 1) // 63_072_000_000
 const unixEnd   = Date.UTC(1973, 0, 1) // 94_694_400_000
@@ -44,8 +36,9 @@ const unixEnd   = Date.UTC(1973, 0, 1) // 94_694_400_000
 console.log(unixEnd - unixStart)
 // 31_622_400_000 milliseconds - wrong answer!
 
-const atomicStart = tai.oneToOne.unixToAtomic(unixStart) // 63_072_010_000
-const atomicEnd   = tai.oneToOne.unixToAtomic(unixEnd)   // 94_694_412_000
+const taiConverter = TaiConverter(MODELS.STALL)
+const atomicStart = taiConverter.unixToAtomic(unixStart) // 63_072_010_000
+const atomicEnd   = taiConverter.unixToAtomic(unixEnd)   // 94_694_412_000
 
 console.log(atomicEnd - atomicStart)
 // 31_622_402_000 milliseconds - right, including two leap seconds!
@@ -55,161 +48,182 @@ What is the current offset between TAI and Unix time?
 
 ```javascript
 const now = Date.now()
-const offset = tai.oneToOne.unixToAtomic(now) - now
+const offset = taiConverter.unixToAtomic(now) - now
 
 console.log(offset)
 // 37_000 at the time of writing; TAI is 37 seconds ahead of Unix time
 ```
 
-What was TAI, exactly, at the Unix epoch?
+What was TAI at the Unix epoch?
 
 ```javascript
-tai.oneToOne.unixToAtomicPicos(0)
-// 8_000_082_000_000n TAI picoseconds, i.e. 1970-01-01 00:00:08.000_082 TAI
+taiConverter.unixToAtomicPicos(0)
+// 8_000, i.e. 1970-01-01 00:00:08.000_082 TAI, truncated to the millisecond
 ```
 
-Note! Use caution when constructing a `Date` object directly from a TAI millisecond count. A `Date` represents an instant in Unix time, not an instant in TAI, and the object's method names and method behaviours reflect this. Instead, consider using a [`TaiDate`](https://github.com/ferno/tai-date)!
+## Important notes!
+
+### Unit test your code
+
+It is **strongly recommended** that you thoroughly unit test the behaviour of your code at leap second boundaries: before, during and after.
+
+The nature of the relationship between Unix time and TAI - no matter how it is modelled - means that conversions behave consistently for years on end, and then, during leap seconds, suddenly display very different behaviour, **sometimes returning `NaN`**. Not only that, leap seconds are commonly inserted on New Year's Eve, which is a very inopportune time to be dealing with this kind of bug!
+
+For your reference, at the time of writing:
+
+* The most recent inserted leap second was added at the very end of 31 December 2016.
+* The most recent removed time was 0.1 TAI seconds, removed from the very end of 31 January 1968.
+
+### Validity for the future
+
+Leap seconds (or the lack thereof) are announced in the International Earth Rotation and Reference Systems Service (IERS)'s six-monthly Bulletin C. For example, at the time of writing, [the latest such bulletin](https://datacenter.iers.org/data/latestVersion/16_BULLETIN_C16.txt) was published on 7 January 2021 and announced that there will be no leap second at the very end of 30 June 2021. This means that `t-a-i`'s calculations are guaranteed to be correct up to, but not including, the *next* potential leap second, which in this case is at the very end of 31 December 2021. At or beyond this point, the introduction of leap seconds cannot be predicted in advance, and the correctness of `t-a-i`'s behaviour cannot be guaranteed.
+
+As a result, `t-a-i`'s behaviour beyond the next-but-one (possible) leap second is considered to be undefined. Updates to the source data when new leap seconds are announced will not be considered breaking changes, and will not incur a major version bump.
+
+### JavaScript `Date`s should not be used to represent instants in TAI
+
+It's not recommended to construct a `Date` object directly from a TAI millisecond count.
+
+```js
+// bad code, don't do this
+const taiDate = new Date(taiConverter.unixToAtomic(unixDate.getTime()))
+```
+
+This is because `Date` represents an instant in Unix time, not an instant in TAI. The `Date` object's [method names and method behaviours](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) reflect this.
+
+Instead, consider using a [`TaiDate`](https://github.com/ferno/tai-date)!
+
+```js
+// do this instead
+const TaiDate = require('tai-date')
+const taiDate = new TaiDate(taiConverter.unixToAtomic(unixDate.getTime())
+```
+
+## Installation
+
+```
+npm install t-a-i
+```
 
 ## API
 
-All methods throw exceptions if not passed an integer number of milliseconds.
+### UNIX_START
 
-Methods throw exceptions or return empty result sets if called with times before the beginning of TAI, which was, equivalently:
+This constant is the Unix millisecond count at the beginning of TAI, which was, equivalently:
 
 * 1961-01-01 00:00:00.000_000 UTC
 * 1961-01-01 00:00:01.422_818 TAI
 * -283_996_800_000.000 Unix time
 * -283_996_798_577.182 TAI milliseconds
 
-Note that for times prior to the beginning of 1972, TAI milliseconds and Unix milliseconds were not the same length.
+Conversions generally return `NaN` when the input Unix or TAI instant is before this.
 
-### tai.oneToMany
+### UNIX_END
 
-These conversions treat the relationship between Unix and TAI as one-to-many. An instant in Unix time may correspond to 0, 1 or 2 instants in TAI. During an inserted leap second, Unix time **overruns, instantaneously backtracks, and repeats itself**.
+This constant is the Unix millisecond count when the next possible leap second may or may not occur. `t-a-i`'s behaviour at or beyond this point in time is considered to be undefined.
 
-#### tai.oneToMany.unixToAtomicPicos(unix: number): BigInt\[\]
+### MODELS
 
-Convert a number of Unix milliseconds to an array of possible TAI picosecond counts. Ordinarily, this array will have a single entry. If the Unix time falls during an inserted leap second, the array will have two entries. If the Unix time falls during a removed leap second, or prior to the beginning of TAI, the array will be empty.
+Official sources are generally inconsistent and unclear about exactly how the relationship between TAI and Unix time should be modelled during leap seconds and other discontinuities. Additionally, no model is perfect; each has its own advantages and disadvantages.
+
+Rather than state that one single model is correct, `t-a-i` provides access to a variety of different models. Pass one of these constants to the `TaiConverter` constructor:
+
+#### MODELS.OVERRUN
+
+Under this model, during inserted time, Unix time **overruns**. At the end of the inserted time, Unix time instantaneously backtracks, and then repeats itself. One instant in Unix time may therefore correspond to 0, 1 or 2 instants in TAI.
+
+When time is removed, Unix time jumps forward discontinuously between one TAI instant and the next.
+
+#### MODELS.BREAK
+
+Under this model, during inserted time, Unix time is **indeterminate**.
+
+When time is removed, Unix time jumps forward discontinuously between one TAI instant and the next.
+
+#### MODELS.STALL
+
+Under this model, during inserted time, Unix time **stalls**. One instant in Unix time may therefore correspond either to a single instant or a closed *range* of instants in TAI.
+
+When time is removed, Unix time jumps forward discontinuously between one TAI instant and the next.
+
+#### MODELS.SMEAR
+
+Under this model, both inserted time and removed time are handled by **smearing** the discontinuity out over 24 Unix hours, starting 12 hours prior to the discontinuity and ending 12 hours after the discontinuity. For a typical leap second, this means Unix time runs very slightly slower than normal from midday to midday, so that 84,600,000 Unix milliseconds take 84,601,000 TAI milliseconds to elapse.
+
+### TaiConverter(model)
+
+Returns a TAI/Unix converter object whose conversions obey the specified model. All `TaiConverter` objects provide the same methods, `unixToAtomic` and `atomicToUnix`, but they differ in what they return depending on the model used.
+
+### taiConverter.atomicToUnix(atomic)
+
+Throws unless `atomic` is an integer. Converts the input TAI millisecond count to a Unix millisecond count. Under normal circumstances this conversion returns a single integer. If the input is prior to the beginning of TAI, `NaN` is returned.
+
+When Unix time is inserted,
+
+* with the `OVERRUN` model, Unix time overruns and then backtracks. This means that sometimes two TAI millisecond counts convert to the same Unix millisecond count.
+* with the `BREAK` model,  Unix time is indeterminate; `NaN` is returned.
+* with the `STALL` model, Unix time stalls. This means that a whole range of TAI millisecond counts all convert to the same Unix millisecond count.
+* with the `SMEAR` model, the discontinuity is smeared out from midday to midday across the discontinuity.
+
+When Unix time is removed,
+
+* with the `OVERRUN`, `BREAK` and `STALL` models, the returned Unix millisecond count jumps up discontinuously between input one TAI millisecond count and the next.
+* with the `SMEAR` model, the discontinuity is smeared out from midday to midday across the discontinuity.
+
+### taiConverter.unixToAtomic(unix[, options])
+
+Throws unless `unix` is an integer. Converts the input Unix millisecond count to a TAI millisecond count. Under normal circumstances this conversion returns a single integer. If the input is prior to the beginning of TAI, `NaN` is returned.
+
+When Unix time is inserted,
+
+* with the `OVERRUN` model, one Unix millisecond count corresponds to two TAI millisecond counts. The latter of the two, after the inserted time, is returned.
+* with the `BREAK` model, the input Unix millisecond count corresponds unambiguously to a TAI millisecond count time after the inserted time.
+* with the `STALL` model, one particular input Unix millisecond count corresponds to a closed range of TAI millisecond counts. The last TAI millisecond count in the range, at the end of the inserted time, is returned.
+* with the `SMEAR` model, the discontinuity is smeared out from midday to midday across the discontinuity.
+
+When Unix time is removed,
+
+* with the `OVERRUN`, `BREAK` and `STALL` models, some Unix millisecond counts never happened; `NaN` is returned.
+* with the `SMEAR` model, the discontinuity is smeared out from midday to midday across the discontinuity.
+
+#### Special options
+
+With the `OVERRUN` model, you can do `taiConverter.unixToAtomic(unix, { array: true })` to receive an array of TAI millisecond counts. Normally this array has a single entry. If the input Unix millisecond count is prior to the beginning of TAI, or was removed, an empty array `[]` is returned. During inserted time, an array containing two entries is returned.
 
 ```javascript
-const unix = -157_766_399_910
-// 1965-01-01 00:00:00.090 UTC
+const { TaiConverter, MODELS } = require('t-a-i')
 
-tai.oneToMany.unixToAtomicPicos(unix)
-// [-157_766_396_469_869_998_650n, -157_766_396_369_869_998_650n]
-// i.e. [1965-01-01 00:00:03.530_130_001_350 TAI, 1965-01-01 00:00:03.630_130_001_350 TAI]
+const taiConverter = TaiConverter(MODELS.OVERRUN)
+
+const unix = 915_148_800_500
+// 1999-01-01 00:00:00.500 UTC
+
+taiConverter.unixToAtomic(unix)
+// 915_148_832_500
+// i.e. 1999-01-01 00:00:32.500 TAI
+
+taiConverter.unixToAtomic(unix, { array: true })
+// [915_148_831_500, 915_148_832_500]
+// i.e. [1999-01-01 00:00:31.500 TAI, 1999-01-01 00:00:32.500 TAI]
 ```
 
-#### tai.oneToMany.unixToAtomic(unix: number): number\[\]
-
-As `tai.oneToMany.unixToAtomicPicos`, but return value is an array of integer TAI millisecond counts.
+With the `STALL` model, you can do `taiConverter.unixToAtomic(unix, { range: true })` to receive a closed range `[first, last]` of TAI millisecond counts. Normally `first` and `last` will be equal. If the input Unix millisecond count is prior to the beginning of TAI, or was removed, `[NaN, NaN]` is returned. During inserted time, Unix time stalls; if the input Unix millisecond count is precisely the value at which Unix time stalled, the array's entries indicate the first and last TAI millisecond counts in the stall.
 
 ```javascript
-const unix = 915_148_800_001
-// 1999-01-01 00:00:00.001 UTC
+const { TaiConverter, MODELS } = require('t-a-i')
 
-tai.oneToMany.unixToAtomic(unix)
-// [915_148_831_001, 915_148_832_001]
-// i.e. [1999-01-01 00:00:31.001 TAI, 1999-01-01 00:00:32.001 TAI]
-```
+const taiConverter = TaiConverter(MODELS.STALL)
 
-The conversion from picoseconds to milliseconds rounds fractional milliseconds towards negative infinity. Note that this rounding can result in values being omitted from the resulting array:
+const unix = 915_148_800_000
+// 1999-01-01 00:00:00.000 UTC
 
-```javascript
-const unix = -283_996_800_000
-// i.e. 1961-01-01 00:00:00.000_000 UTC, the beginning of TAI
+taiConverter.unixToAtomic(unix)
+// 915_148_832_000
+// i.e. 1999-01-01 00:00:32.000 TAI
 
-const atomicPicos = tai.oneToMany.unixToAtomicPicos(unix)
-// [-283_996_798_577_182_000_000n]
-// i.e. [1961-01-01 00:00:01.422_818 TAI]
-
-const atomicMillis = tai.oneToMany.unixToAtomicMillis(unix)
-// Returns an empty array [].
-// The rounded TAI millisecond count would be -283_996_798_578,
-// i.e. "1961-01-01 00:00:01.422_000 TAI", but that is before TAI began.
-```
-
-#### tai.oneToMany.atomicToUnix(atomic: number): number
-
-Convert a number of TAI milliseconds to Unix milliseconds. Note that over the course of a leap second, two different instants in TAI may convert back to the same instant in Unix time.
-
-```javascript
-const atomic1 = 915_148_831_001 // 1999-01-01 00:00:31.001 TAI
-const atomic2 = 915_148_832_001 // 1999-01-01 00:00:32.001 TAI
-
-tai.oneToMany.atomicToUnix(atomic1)
-// 915_148_800_001
-// i.e. 1999-01-01 00:00:00.001 UTC
-
-tai.oneToMany.atomicToUnix(atomic2)
-// 915_148_800_001, same result
-```
-
-### tai.oneToOne
-
-These conversions treat the relationship between Unix and TAI as one-to-one. An instant in Unix time corresponds to 1 instant in TAI. During an inserted leap second, Unix time **stalls for one second**.
-
-#### tai.oneToOne.unixToAtomicPicos(unix: number): BigInt
-
-Convert a number of Unix milliseconds to a number of TAI picoseconds. If the Unix time falls on a removed leap second, or prior to the beginning of TAI, we throw an exception.
-
-```javascript
-const unix = -157_766_399_910
-// 1965-01-01 00:00:00.090 UTC
-
-tai.oneToOne.unixToAtomicPicos(unix)
-// -157_766_396_369_869_998_650n
-// i.e. 1965-01-01 00:00:03.630_130_001_350 TAI
-```
-
-#### tai.oneToOne.unixToAtomic(unix: number): number
-
-As `tai.oneToOne.unixToAtomicPicos`, but converts the picosecond count to milliseconds.
-
-```javascript
-const unix = 915_148_800_001
-// 1999-01-01 00:00:00.001 UTC
-
-tai.oneToOne.unixToAtomic(unix)
-// 915_148_832_001
-// i.e. 1999-01-01 00:00:32.001 TAI
-```
-
-Fractional milliseconds are rounded towards negative infinity. Note that this rounding can result in an exception being thrown:
-
-```javascript
-const unix = -283_996_800_000
-// i.e. 1961-01-01 00:00:00.000_000 UTC, the beginning of TAI
-
-const atomicPicos = tai.oneToOne.unixToAtomicPicos(unix)
-// -283_996_798_577_182_000_000n
-// i.e. 1961-01-01 00:00:01.422_818 TAI
-
-const atomicMillis = tai.oneToMany.unixToAtomic(unix)
-// Throws an exception.
-// The rounded TAI millisecond count would be -283_996_798_578,
-// i.e. "1961-01-01 00:00:01.422_000 TAI", which is before TAI began.
-```
-
-#### tai.oneToOne.atomicToUnix(atomic: number): number
-
-Converts a number of TAI milliseconds back to Unix milliseconds. If the TAI time falls during the first part of an inserted leap second, we see that Unix time is stalled here.
-
-```javascript
-const atomic1 = 915_148_831_000 // 1999-01-01 00:00:31.000 TAI
-const atomic2 = 915_148_831_001 // 1999-01-01 00:00:31.001 TAI
-const atomic3 = 915_148_832_000 // 1999-01-01 00:00:32.000 TAI
-const atomic4 = 915_148_832_001 // 1999-01-01 00:00:32.001 TAI
-
-tai.oneToOne.atomicToUnix(atomic1)
-tai.oneToOne.atomicToUnix(atomic2)
-tai.oneToOne.atomicToUnix(atomic3)
-// 915_148_800_000 in all cases
-// i.e. 1999-01-01 00:00:00.000 UTC
-
-tai.oneToOne.atomicToUnix(atomic4)
-// 915_148_800_001
-// i.e. 1999-01-01 00:00:00.001 UTC
+taiConverter.unixToAtomic(unix, { range: true })
+// [915_148_831_000, 915_148_832_000]
+// i.e. [1999-01-01 00:00:31.000 TAI, 1999-01-01 00:00:32.000 TAI]
 ```
 
 ## Background: TAI vs UTC vs Unix
@@ -220,7 +234,7 @@ Raw data is provided by USNO (ftp://maia.usno.navy.mil/ser7/tai-utc.dat) or <a h
 
 ### 1961 to 1971 inclusive
 
-When TAI was first defined:
+When TAI was first defined, it had the following relationship with UTC:
 
 ```
 1961 JAN  1 =JD 2437300.5  TAI-UTC=   1.4228180 S + (MJD - 37300.) X 0.001296 S
@@ -246,13 +260,13 @@ More often than not, changing the parameters of the linear relationship introduc
 
 #### Example of inserted time
 
-At 1965-01-01 00:00:03.540_130 TAI, the offset between TAI and UTC was increased by 0.1 TAI seconds, leaving all other parameters identical. At this instant, UTC jumped back 0.1 TAI seconds = 0.099_999_998_5... UTC seconds, from 1965-01-01 00:00:00.099_999_998_5... to 1965-01-01 00:00:00.000, and repeated that time. This means that e.g. 1965-01-01 00:00:00.05 UTC is ambiguous, and has two meanings in TAI.
+At 1965-01-01 00:00:03.540_130 TAI, the offset between TAI and UTC was increased by 0.1 TAI seconds, leaving all other parameters identical. At this instant, UTC jumped back 0.1 TAI seconds = 0.099_999_998_5... UTC seconds, from 1965-01-01 00:00:00.099_999_998_5... to 1965-01-01 00:00:00.000, and repeated that time. This means that a time like *e.g.* 1965-01-01 00:00:00.05 UTC is ambiguous, and has two meanings in TAI.
 
 Equivalently, we could say that the last minute of 1964 was 0.1 TAI seconds longer than normal, so UTC counted up as far as 1964-12-31 23:59:60.099_999_998_5... before advancing to 1965-01-01 00:00:00.000.
 
 #### Example of removed time
 
-At 1968-02-01 00:00:06.185_682 TAI, the offset between TAI and UTC was decreased by 0.1 TAI seconds, leaving all other parameters identical. At this instant, UTC jumped forward 0.1 TAI seconds = 0.099_999_997... UTC seconds, from 1968-01-31 23:59:59.900_000_002_9... to 1968-02-01 00:00:00.000, skipping the intervening time. This means that e.g. 1968-01-31 23:59:59:95 UTC never happened, and has no interpretation in TAI.
+At 1968-02-01 00:00:06.185_682 TAI, the offset between TAI and UTC was decreased by 0.1 TAI seconds, leaving all other parameters identical. At this instant, UTC jumped forward 0.1 TAI seconds = 0.099_999_997... UTC seconds, from 1968-01-31 23:59:59.900_000_002_9... to 1968-02-01 00:00:00.000, skipping the intervening time. This means that a time like *e.g.* 1968-01-31 23:59:59:95 UTC never happened, and has no interpretation in TAI.
 
 ### 1972 onwards
 
@@ -272,7 +286,7 @@ This indicates that 1972-01-01 00:00:00 UTC was 1972-01-01 00:00:10 TAI.
 
 #### Example of inserted time
 
-At 2015-07-01 00:00:36 TAI, the offset between TAI and UTC was increased by 1 second. At this instant, UTC jumped back 1 second from 2015-07-01 00:00:01 to 2015-07-01 00:00:00 and repeated that time. This means that e.g. 2015-07-01 00:00:00.5 UTC is ambiguous, and has two meanings in TAI: 2015-07-01 00:00:35.5 or 2015-07-01 00:00:36.5.
+At 2015-07-01 00:00:36 TAI, the offset between TAI and UTC was increased by 1 second. At this instant, UTC jumped back 1 second from 2015-07-01 00:00:01 to 2015-07-01 00:00:00 and repeated that time. This means that a time like *e.g.* 2015-07-01 00:00:00.5 UTC is ambiguous, and has two meanings in TAI: 2015-07-01 00:00:35.5 or 2015-07-01 00:00:36.5.
 
 In fact, what we more normally say is that the last minute of June 2015 was 1 second longer than normal, so UTC counted up as far as 2015-06-30 23:59:60 before advancing to 2015-07-01 00:00:00.
 
@@ -293,12 +307,6 @@ Unix time seems to be built around an assumption that UTC follows an idealised G
 
 Unix time can be computed from any Gregorian calendar date and time using a relatively simple piece of arithmetic, and the reverse calculation is also simple. Unix time can be extended backwards to negative numbers.
 
-Unix time therefore has the same issues as UTC when it comes to removed time; certain millisecond counts literally never happened. During inserted time, since Unix time is a simple real number, it can't express a time like "23:59:60", so it must overrun, then backtrack and repeat itself.
+Unix time therefore has the same issues as UTC when it comes to removed time; certain millisecond counts literally never happened. And during inserted time, since Unix time is a simple real number, it can't express a time like "23:59:60", so *something else must happen*.
 
 Ironically, TAI fits the description of an idealised Gregorian calendar much better. Applying the same arithmetic to a TAI date yields TAI time, which is the number of TAI milliseconds since 1970-01-01 00:00:00 TAI.
-
-## Validity for the future
-
-Leap seconds (or the lack thereof) are announced in the International Earth Rotation and Reference Systems Service (IERS)'s six-monthly Bulletin C. For example, at the time of writing, [the latest such bulletin](https://datacenter.iers.org/data/latestVersion/16_BULLETIN_C16.txt) was published on 7 January 2021 and announced that there will be no leap second at the end of 30 June 2021. This means that `t-a-i`'s calculations are guaranteed to be correct up to, but not including, the *next* potential leap second, which in this case is at the end of 31 December 2021. At or beyond this point, the introduction of leap seconds cannot be predicted in advance, and the correctness of `t-a-i`'s behaviour cannot be guaranteed.
-
-As a result, `t-a-i`'s behaviour beyond the next-but-one (possible) leap second is considered to be in flux. Updates to the source data when new leap seconds are announced will not be considered breaking changes, and will not incur a major version bump.
