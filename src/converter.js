@@ -53,7 +53,7 @@ const Converter = (data, model) => {
       return segment.atomicMillisToUnixMillis(atomicMillis)
     }
 
-    // Pre-1961 or BREAK model and we hit a break
+    // Pre-1961, or BREAK model and we hit a break
     return NaN
   }
 
@@ -75,7 +75,7 @@ const Converter = (data, model) => {
         const prev = ranges[ranges.length - 1]
 
         // Previous range ends where current one starts, so try to combine the two.
-        // We can do this even if the previous range was already closed.
+        // The previous range should be open but it doesn't actually make a difference.
         if (prev.end === range.start) {
           ranges[ranges.length - 1] = {
             start: prev.start,
@@ -108,20 +108,30 @@ const Converter = (data, model) => {
     if (ranges.length > 1) {
       /* istanbul ignore else */
       if (model.segmentModel === SEGMENT_MODELS.OVERRUN) {
-        // This happens frequently, user explicitly opted to take the last one
+        // This happens frequently, user explicitly opted to discard the earlier ranges
+        // and take only the last one
       } else {
         throw Error('Multiple ranges, this should be impossible')
       }
     }
 
     const i = ranges.length - 1
-    const range = i in ranges ? ranges[i] : { start: NaN, end: NaN, closed: true }
+    const range = i in ranges ? ranges[i] : { start: NaN, end: NaN }
 
     if (model === MODELS.STALL_RANGE) {
       return [range.start, range.end]
     }
 
-    // TODO: what if range start and end aren't the same?
+    if (!Object.is(range.end, range.start)) {
+      /* istanbul ignore else */
+      if (model === MODELS.STALL_END) {
+        // This happens frequently, user explicitly opted to take the stall's end point only,
+        // discarding the start point
+      } else {
+        throw Error('Non-0-length range, this should be impossible')
+      }
+    }
+
     return range.end
   }
 

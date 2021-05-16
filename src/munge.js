@@ -123,7 +123,7 @@ const munge = (data, segmentModel) => {
     segmentModel === SEGMENT_MODELS.SMEAR
   ) {
     // Handle continuity between segments by altering segment boundaries
-    // and possibly introducing new segments
+    // and possibly introducing new segments between them.
     for (let i = 0; i < munged.length; i++) {
       if (!(i + 1 in munged)) {
         // Last segment, no continuity to handle
@@ -134,8 +134,8 @@ const munge = (data, segmentModel) => {
       const b = munged[i + 1]
 
       // Find smear start point, which is on THIS segment.
-      // When smearing, this is twelve Unix hours prior to discontinuity.
       // When breaking/stalling, this is the Unix time when the next segment starts.
+      // When smearing, this is twelve Unix hours prior to discontinuity.
       const smearStart = {
         unixMillis: segmentModel === SEGMENT_MODELS.SMEAR
           ? b.start.unixMillis - millisPerDay / 2
@@ -148,8 +148,8 @@ const munge = (data, segmentModel) => {
         BigInt(a.dy.unixMillis)
 
       // Find smear end point, which is on the NEXT segment.
+      // When breaking/stalling, this is the start of the next segment.
       // When smearing, this is twelve hours after the discontinuity.
-      // When breaking/stalling, this is the start of the segment.
       const smearEnd = {
         unixMillis: segmentModel === SEGMENT_MODELS.SMEAR
           ? b.start.unixMillis + millisPerDay / 2
@@ -168,8 +168,6 @@ const munge = (data, segmentModel) => {
 
       // Create the break.
       // Terminate this segment early, start the next segment late.
-      // In pathological cases this can result in a segment which ends before it begins but this
-      // is not generally a problem
       a.end = smearStart // includes unixMillis but we'll ignore that
       b.start = smearEnd
 

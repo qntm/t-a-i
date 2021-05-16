@@ -1,6 +1,3 @@
-// This class expresses a finite ratio. `nu` and `de` must be BigInts, `de` can't be 0.
-// Otherwise, all bets are off.
-
 const { div } = require('./div')
 
 class Rat {
