@@ -2,8 +2,6 @@
 
 const { Converter, MODELS } = require('./converter')
 
-const { OVERRUN_ARRAY, OVERRUN_LAST, BREAK, STALL_RANGE, STALL_END, SMEAR } = MODELS
-
 const JAN = 0
 const OCT = 9
 const NOV = 10
@@ -15,26 +13,18 @@ describe('Converter', () => {
       [Date.UTC(1970, JAN, 1), 0]
     ]
 
-    describe('OVERRUN_ARRAY', () => {
-      const converter = Converter(data, OVERRUN_ARRAY)
+    describe('OVERRUN', () => {
+      const converter = Converter(data, MODELS.OVERRUN)
 
       it('manages basic conversions', () => {
-        expect(converter.unixToAtomic(0)).toEqual([0])
-        expect(converter.atomicToUnix(0)).toBe(0)
-      })
-    })
-
-    describe('OVERRUN_LAST', () => {
-      const converter = Converter(data, OVERRUN_LAST)
-
-      it('manages basic conversions', () => {
+        expect(converter.unixToAtomic(0, { array: true })).toEqual([0])
         expect(converter.unixToAtomic(0)).toEqual(0)
         expect(converter.atomicToUnix(0)).toBe(0)
       })
     })
 
     describe('BREAK', () => {
-      const converter = Converter(data, BREAK)
+      const converter = Converter(data, MODELS.BREAK)
 
       it('manages basic conversions', () => {
         expect(converter.unixToAtomic(0)).toEqual(0)
@@ -42,17 +32,8 @@ describe('Converter', () => {
       })
     })
 
-    describe('STALL_RANGE', () => {
-      const converter = Converter(data, STALL_RANGE)
-
-      it('manages basic conversions', () => {
-        expect(converter.unixToAtomic(0)).toEqual([0, 0])
-        expect(converter.atomicToUnix(0)).toBe(0)
-      })
-    })
-
-    describe('STALL_END', () => {
-      const converter = Converter(data, STALL_END)
+    describe('STALL', () => {
+      const converter = Converter(data, MODELS.STALL)
 
       it('fails on a non-integer number of milliseconds', () => {
         expect(() => converter.unixToAtomic(89.3)).toThrowError('Not an integer: 89.3')
@@ -72,13 +53,14 @@ describe('Converter', () => {
       })
 
       it('manages basic conversions', () => {
+        expect(converter.unixToAtomic(0, { range: true })).toEqual([0, 0])
         expect(converter.unixToAtomic(0)).toBe(0)
         expect(converter.atomicToUnix(0)).toBe(0)
       })
     })
 
     describe('SMEAR', () => {
-      const converter = Converter(data, SMEAR)
+      const converter = Converter(data, MODELS.SMEAR)
 
       it('manages basic conversions', () => {
         expect(converter.unixToAtomic(0)).toEqual(0)
@@ -93,109 +75,21 @@ describe('Converter', () => {
       [Date.UTC(1980, JAN, 1), 1]
     ]
 
-    describe('OVERRUN_ARRAY', () => {
-      const converter = Converter(data, OVERRUN_ARRAY)
+    describe('OVERRUN', () => {
+      const converter = Converter(data, MODELS.OVERRUN)
 
       describe('conversions grouped by instant', () => {
         it('start of time', () => {
-          expect(converter.unixToAtomic(0)).toEqual([0])
-          expect(converter.atomicToUnix(0)).toBe(0)
-        })
-
-        it('millisecond before inserted leap second discontinuity begins', () => {
-          expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
-            .toEqual([
-              Date.UTC(1979, DEC, 31, 23, 59, 59, 999)
-            ])
-          expect(converter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
-            .toBe(Date.UTC(1979, DEC, 31, 23, 59, 59, 999))
-        })
-
-        it('first instant of the Unix time discontinuity: one Unix time is two TAI times', () => {
-          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0)))
-            .toEqual([
-              Date.UTC(1980, JAN, 1, 0, 0, 0),
-              Date.UTC(1980, JAN, 1, 0, 0, 1)
-            ])
-          expect(converter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 0)))
-            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0))
-          expect(converter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 1)))
-            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0))
-        })
-
-        it('final instant of the Unix time discontinuity: one Unix time is two TAI times', () => {
-          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)))
-            .toEqual([
-              Date.UTC(1980, JAN, 1, 0, 0, 0, 999),
-              Date.UTC(1980, JAN, 1, 0, 0, 1, 999)
-            ])
-          expect(converter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)))
-            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0, 999))
-          expect(converter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 1, 999)))
-            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0, 999))
-        })
-
-        it('millisecond after discontinuity ends', () => {
-          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 1)))
-            .toEqual([
-              Date.UTC(1980, JAN, 1, 0, 0, 2)
-            ])
-          expect(converter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 2)))
-            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 1))
-        })
-      })
-
-      describe('conversions grouped by method', () => {
-        it('unixToAtomic', () => {
-          expect(converter.unixToAtomic(0)).toEqual([0])
-          expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
-            .toEqual([
-              Date.UTC(1979, DEC, 31, 23, 59, 59, 999)
-            ])
-          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0)))
-            .toEqual([
-              Date.UTC(1980, JAN, 1, 0, 0, 0),
-              Date.UTC(1980, JAN, 1, 0, 0, 1)
-            ])
-          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)))
-            .toEqual([
-              Date.UTC(1980, JAN, 1, 0, 0, 0, 999),
-              Date.UTC(1980, JAN, 1, 0, 0, 1, 999)
-            ])
-          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 1)))
-            .toEqual([
-              Date.UTC(1980, JAN, 1, 0, 0, 2)
-            ])
-        })
-
-        it('atomicToUnix', () => {
-          expect(converter.atomicToUnix(0)).toBe(0)
-          expect(converter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
-            .toBe(Date.UTC(1979, DEC, 31, 23, 59, 59, 999))
-          expect(converter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 0)))
-            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0))
-          expect(converter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)))
-            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0, 999))
-          expect(converter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 1)))
-            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0))
-          expect(converter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 1, 999)))
-            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0, 999))
-          expect(converter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 2)))
-            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 1))
-        })
-      })
-    })
-
-    describe('OVERRUN_LAST', () => {
-      const converter = Converter(data, OVERRUN_LAST)
-
-      describe('conversions grouped by instant', () => {
-        it('start of time', () => {
+          expect(converter.unixToAtomic(0, { array: true })).toEqual([0])
           expect(converter.unixToAtomic(0)).toBe(0)
           expect(converter.atomicToUnix(0)).toBe(0)
         })
 
         it('millisecond before inserted leap second discontinuity begins', () => {
+          expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999), { array: true }))
+            .toEqual([
+              Date.UTC(1979, DEC, 31, 23, 59, 59, 999)
+            ])
           expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
             .toBe(Date.UTC(1979, DEC, 31, 23, 59, 59, 999))
           expect(converter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
@@ -203,6 +97,11 @@ describe('Converter', () => {
         })
 
         it('first instant of the Unix time discontinuity: one Unix time is two TAI times', () => {
+          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0), { array: true }))
+            .toEqual([
+              Date.UTC(1980, JAN, 1, 0, 0, 0),
+              Date.UTC(1980, JAN, 1, 0, 0, 1)
+            ])
           expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0)))
             .toBe(Date.UTC(1980, JAN, 1, 0, 0, 1))
           expect(converter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 0)))
@@ -212,6 +111,11 @@ describe('Converter', () => {
         })
 
         it('final instant of the Unix time discontinuity: one Unix time is two TAI times', () => {
+          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 999), { array: true }))
+            .toEqual([
+              Date.UTC(1980, JAN, 1, 0, 0, 0, 999),
+              Date.UTC(1980, JAN, 1, 0, 0, 1, 999)
+            ])
           expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)))
             .toBe(Date.UTC(1980, JAN, 1, 0, 0, 1, 999))
           expect(converter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)))
@@ -221,6 +125,10 @@ describe('Converter', () => {
         })
 
         it('millisecond after discontinuity ends', () => {
+          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 1), { array: true }))
+            .toEqual([
+              Date.UTC(1980, JAN, 1, 0, 0, 2)
+            ])
           expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 1)))
             .toBe(Date.UTC(1980, JAN, 1, 0, 0, 2))
           expect(converter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 2)))
@@ -229,6 +137,28 @@ describe('Converter', () => {
       })
 
       describe('conversions grouped by method', () => {
+        it('unixToAtomic (array mode)', () => {
+          expect(converter.unixToAtomic(0, { array: true })).toEqual([0])
+          expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999), { array: true }))
+            .toEqual([
+              Date.UTC(1979, DEC, 31, 23, 59, 59, 999)
+            ])
+          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0), { array: true }))
+            .toEqual([
+              Date.UTC(1980, JAN, 1, 0, 0, 0),
+              Date.UTC(1980, JAN, 1, 0, 0, 1)
+            ])
+          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 999), { array: true }))
+            .toEqual([
+              Date.UTC(1980, JAN, 1, 0, 0, 0, 999),
+              Date.UTC(1980, JAN, 1, 0, 0, 1, 999)
+            ])
+          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 1), { array: true }))
+            .toEqual([
+              Date.UTC(1980, JAN, 1, 0, 0, 2)
+            ])
+        })
+
         it('unixToAtomic', () => {
           expect(converter.unixToAtomic(0)).toBe(0)
           expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
@@ -260,7 +190,7 @@ describe('Converter', () => {
     })
 
     describe('BREAK', () => {
-      const converter = Converter(data, BREAK)
+      const converter = Converter(data, MODELS.BREAK)
 
       describe('conversions grouped by instant', () => {
         it('start of time', () => {
@@ -332,104 +262,36 @@ describe('Converter', () => {
       })
     })
 
-    describe('STALL_END', () => {
-      const converter = Converter(data, STALL_END)
+    describe('STALL', () => {
+      const converter = Converter(data, MODELS.STALL)
 
       describe('conversions grouped by instant', () => {
         it('start of time', () => {
+          expect(converter.unixToAtomic(0, { range: true })).toEqual([0, 0])
           expect(converter.unixToAtomic(0)).toBe(0)
           expect(converter.atomicToUnix(0)).toBe(0)
         })
 
         it('millisecond before inserted leap second discontinuity begins', () => {
-          expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
-            .toBe(Date.UTC(1979, DEC, 31, 23, 59, 59, 999))
-          expect(converter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
-            .toBe(Date.UTC(1979, DEC, 31, 23, 59, 59, 999))
-        })
-
-        it('first instant of the Unix time discontinuity: one Unix time is two TAI times', () => {
-          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0)))
-            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 1))
-          expect(converter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 0)))
-            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0)) // stalled
-          expect(converter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 1)))
-            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0))
-        })
-
-        it('final instant of the Unix time discontinuity: one Unix time is two TAI times', () => {
-          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)))
-            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 1, 999))
-          expect(converter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)))
-            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0)) // stalled
-          expect(converter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 1, 999)))
-            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0, 999))
-        })
-
-        it('millisecond after discontinuity ends', () => {
-          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 1)))
-            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 2))
-          expect(converter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 2)))
-            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 1))
-        })
-      })
-
-      describe('conversions grouped by method', () => {
-        it('unixToAtomic', () => {
-          expect(converter.unixToAtomic(0)).toBe(0)
-          expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
-            .toBe(Date.UTC(1979, DEC, 31, 23, 59, 59, 999))
-          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0)))
-            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 1))
-          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)))
-            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 1, 999))
-          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 1)))
-            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 2))
-        })
-
-        it('atomicToUnix', () => {
-          expect(converter.atomicToUnix(0)).toBe(0)
-          expect(converter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
-            .toBe(Date.UTC(1979, DEC, 31, 23, 59, 59, 999))
-          expect(converter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 0)))
-            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0)) // stalled
-          expect(converter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)))
-            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0)) // stalled
-          expect(converter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 1)))
-            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0))
-          expect(converter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 1, 999)))
-            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0, 999))
-          expect(converter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 2)))
-            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 1))
-        })
-      })
-    })
-
-    describe('STALL_RANGE', () => {
-      const converter = Converter(data, STALL_RANGE)
-
-      describe('conversions grouped by instant', () => {
-        it('start of time', () => {
-          expect(converter.unixToAtomic(0)).toEqual([0, 0])
-          expect(converter.atomicToUnix(0)).toBe(0)
-        })
-
-        it('millisecond before inserted leap second discontinuity begins', () => {
-          expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
+          expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999), { range: true }))
             .toEqual([
               Date.UTC(1979, DEC, 31, 23, 59, 59, 999),
               Date.UTC(1979, DEC, 31, 23, 59, 59, 999)
             ])
+          expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
+            .toBe(Date.UTC(1979, DEC, 31, 23, 59, 59, 999))
           expect(converter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
             .toBe(Date.UTC(1979, DEC, 31, 23, 59, 59, 999))
         })
 
         it('first instant of the Unix time discontinuity: one Unix time is two TAI times', () => {
-          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0)))
+          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0), { range: true }))
             .toEqual([
               Date.UTC(1980, JAN, 1, 0, 0, 0, 0),
               Date.UTC(1980, JAN, 1, 0, 0, 1, 0) // stalled
             ])
+          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0)))
+            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 1))
           expect(converter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 0)))
             .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0))
           expect(converter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 1)))
@@ -437,11 +299,13 @@ describe('Converter', () => {
         })
 
         it('final instant of the Unix time discontinuity: one Unix time is two TAI times', () => {
-          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)))
+          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 999), { range: true }))
             .toEqual([
               Date.UTC(1980, JAN, 1, 0, 0, 1, 999),
               Date.UTC(1980, JAN, 1, 0, 0, 1, 999)
             ])
+          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)))
+            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 1, 999))
           expect(converter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)))
             .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0)) // stalled
           expect(converter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 1, 999)))
@@ -449,44 +313,58 @@ describe('Converter', () => {
         })
 
         it('millisecond after discontinuity ends', () => {
-          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 1, 0)))
+          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 1, 0), { range: true }))
             .toEqual([
               Date.UTC(1980, JAN, 1, 0, 0, 2, 0),
               Date.UTC(1980, JAN, 1, 0, 0, 2, 0)
             ])
+          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 1)))
+            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 2, 0))
           expect(converter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 2, 0)))
             .toBe(Date.UTC(1980, JAN, 1, 0, 0, 1, 0))
         })
       })
 
       describe('conversions grouped by method', () => {
-        it('unixToAtomic', () => {
-          expect(converter.unixToAtomic(0)).toEqual([0, 0])
-          expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
+        it('unixToAtomic (range mode)', () => {
+          expect(converter.unixToAtomic(0, { range: true })).toEqual([0, 0])
+          expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999), { range: true }))
             .toEqual([
               Date.UTC(1979, DEC, 31, 23, 59, 59, 999),
               Date.UTC(1979, DEC, 31, 23, 59, 59, 999)
             ])
-          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)))
+          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 0), { range: true }))
             .toEqual([
               Date.UTC(1980, JAN, 1, 0, 0, 0, 0),
               Date.UTC(1980, JAN, 1, 0, 0, 1, 0)
             ])
-          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 1)))
+          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 1), { range: true }))
             .toEqual([
               Date.UTC(1980, JAN, 1, 0, 0, 1, 1),
               Date.UTC(1980, JAN, 1, 0, 0, 1, 1)
             ])
-          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)))
+          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 999), { range: true }))
             .toEqual([
               Date.UTC(1980, JAN, 1, 0, 0, 1, 999),
               Date.UTC(1980, JAN, 1, 0, 0, 1, 999)
             ])
-          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 1, 0)))
+          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 1, 0), { range: true }))
             .toEqual([
               Date.UTC(1980, JAN, 1, 0, 0, 2, 0),
               Date.UTC(1980, JAN, 1, 0, 0, 2, 0)
             ])
+        })
+
+        it('unixToAtomic', () => {
+          expect(converter.unixToAtomic(0)).toBe(0)
+          expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
+            .toBe(Date.UTC(1979, DEC, 31, 23, 59, 59, 999))
+          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0)))
+            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 1))
+          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)))
+            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 1, 999))
+          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 1)))
+            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 2))
         })
 
         it('atomicToUnix', () => {
@@ -508,7 +386,7 @@ describe('Converter', () => {
     })
 
     describe('SMEAR', () => {
-      const converter = Converter(data, SMEAR)
+      const converter = Converter(data, MODELS.SMEAR)
 
       it('unixToAtomic', () => {
         expect(converter.unixToAtomic(0)).toBe(0)
@@ -550,85 +428,21 @@ describe('Converter', () => {
       [Date.UTC(1980, JAN, 1), -1]
     ]
 
-    describe('OVERRUN_ARRAY', () => {
-      const converter = Converter(data, OVERRUN_ARRAY)
+    describe('OVERRUN', () => {
+      const converter = Converter(data, MODELS.OVERRUN)
 
       describe('conversions grouped by instant', () => {
         it('start of time', () => {
-          expect(converter.unixToAtomic(0)).toEqual([0])
-          expect(converter.atomicToUnix(0)).toBe(0)
-        })
-
-        it('millisecond before removed leap second discontinuity begins', () => {
-          expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)))
-            .toEqual([
-              Date.UTC(1979, DEC, 31, 23, 59, 58, 999)
-            ])
-          expect(converter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)))
-            .toBe(Date.UTC(1979, DEC, 31, 23, 59, 58, 999))
-        })
-
-        it('first instant of the Unix time discontinuity: one Unix time is zero TAI times', () => {
-          expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)))
-            .toEqual([])
-          // no atomicToUnix can return the value above
-        })
-
-        it('final instant of the Unix time discontinuity: one Unix time is zero TAI times', () => {
-          expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
-            .toEqual([])
-          // no atomicToUnix can return the value above
-        })
-
-        it('millisecond after discontinuity ends', () => {
-          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0)))
-            .toEqual([
-              Date.UTC(1979, DEC, 31, 23, 59, 59, 0)
-            ])
-          expect(converter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)))
-            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0))
-        })
-      })
-
-      describe('conversions grouped by method', () => {
-        it('unixToAtomic', () => {
-          expect(converter.unixToAtomic(0))
-            .toEqual([0])
-          expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)))
-            .toEqual([
-              Date.UTC(1979, DEC, 31, 23, 59, 58, 999)
-            ])
-          expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)))
-            .toEqual([])
-          expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
-            .toEqual([])
-          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0)))
-            .toEqual([
-              Date.UTC(1979, DEC, 31, 23, 59, 59, 0)
-            ])
-        })
-
-        it('atomicToUnix', () => {
-          expect(converter.atomicToUnix(0))
-            .toBe(0)
-          expect(converter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)))
-            .toBe(Date.UTC(1979, DEC, 31, 23, 59, 58, 999))
-          expect(converter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)))
-            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0))
-        })
-      })
-    })
-
-    describe('OVERRUN_LAST', () => {
-      const converter = Converter(data, OVERRUN_LAST)
-
-      describe('conversions grouped by instant', () => {
-        it('start of time', () => {
+          expect(converter.unixToAtomic(0, { array: true })).toEqual([0])
           expect(converter.unixToAtomic(0)).toEqual(0)
           expect(converter.atomicToUnix(0)).toBe(0)
         })
 
         it('millisecond before removed leap second discontinuity begins', () => {
+          expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 58, 999), { array: true }))
+            .toEqual([
+              Date.UTC(1979, DEC, 31, 23, 59, 58, 999)
+            ])
           expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)))
             .toBe(Date.UTC(1979, DEC, 31, 23, 59, 58, 999))
           expect(converter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)))
@@ -636,26 +450,51 @@ describe('Converter', () => {
         })
 
         it('first instant of the Unix time discontinuity: one Unix time is zero TAI times', () => {
+          expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 0), { array: true }))
+            .toEqual([])
           expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)))
             .toBe(NaN)
           // no atomicToUnix can return the value above
         })
 
         it('final instant of the Unix time discontinuity: one Unix time is zero TAI times', () => {
+          expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999), { array: true }))
+            .toEqual([])
           expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
             .toBe(NaN)
           // no atomicToUnix can return the value above
         })
 
         it('millisecond after discontinuity ends', () => {
+          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0), { array: true }))
+            .toEqual([
+              Date.UTC(1979, DEC, 31, 23, 59, 59, 0)
+            ])
           expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0)))
             .toBe(Date.UTC(1979, DEC, 31, 23, 59, 59, 0))
-          expect(converter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)))
+          expect(converter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 59, 0), { array: true }))
             .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0))
         })
       })
 
       describe('conversions grouped by method', () => {
+        it('unixToAtomic (array mode)', () => {
+          expect(converter.unixToAtomic(0, { array: true }))
+            .toEqual([0])
+          expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 58, 999), { array: true }))
+            .toEqual([
+              Date.UTC(1979, DEC, 31, 23, 59, 58, 999)
+            ])
+          expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 0), { array: true }))
+            .toEqual([])
+          expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999), { array: true }))
+            .toEqual([])
+          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0), { array: true }))
+            .toEqual([
+              Date.UTC(1979, DEC, 31, 23, 59, 59, 0)
+            ])
+        })
+
         it('unixToAtomic', () => {
           expect(converter.unixToAtomic(0))
             .toBe(0)
@@ -681,7 +520,7 @@ describe('Converter', () => {
     })
 
     describe('BREAK', () => {
-      const converter = Converter(data, BREAK)
+      const converter = Converter(data, MODELS.BREAK)
 
       describe('conversions grouped by instant', () => {
         it('start of time', () => {
@@ -741,89 +580,22 @@ describe('Converter', () => {
       })
     })
 
-    describe('STALL_RANGE', () => {
-      const converter = Converter(data, STALL_RANGE)
+    describe('STALL', () => {
+      const converter = Converter(data, MODELS.STALL)
 
       describe('conversions grouped by instant', () => {
         it('start of time', () => {
-          expect(converter.unixToAtomic(0)).toEqual([0, 0])
-          expect(converter.atomicToUnix(0)).toBe(0)
-        })
-
-        it('millisecond before removed leap second discontinuity begins', () => {
-          expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)))
-            .toEqual([
-              Date.UTC(1979, DEC, 31, 23, 59, 58, 999),
-              Date.UTC(1979, DEC, 31, 23, 59, 58, 999)
-            ])
-          expect(converter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)))
-            .toBe(Date.UTC(1979, DEC, 31, 23, 59, 58, 999))
-        })
-
-        it('first instant of the Unix time discontinuity: one Unix time is zero TAI times', () => {
-          expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)))
-            .toEqual([NaN, NaN])
-          // no atomicToUnix can return the value above
-        })
-
-        it('final instant of the Unix time discontinuity: one Unix time is zero TAI times', () => {
-          expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
-            .toEqual([NaN, NaN])
-          // no atomicToUnix can return the value above
-        })
-
-        it('millisecond after discontinuity ends', () => {
-          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0)))
-            .toEqual([
-              Date.UTC(1979, DEC, 31, 23, 59, 59, 0),
-              Date.UTC(1979, DEC, 31, 23, 59, 59, 0)
-            ])
-          expect(converter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)))
-            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0))
-        })
-      })
-
-      describe('conversions grouped by method', () => {
-        it('unixToAtomic', () => {
-          expect(converter.unixToAtomic(0))
-            .toEqual([0, 0])
-          expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)))
-            .toEqual([
-              Date.UTC(1979, DEC, 31, 23, 59, 58, 999),
-              Date.UTC(1979, DEC, 31, 23, 59, 58, 999)
-            ])
-          expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)))
-            .toEqual([NaN, NaN])
-          expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
-            .toEqual([NaN, NaN])
-          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0)))
-            .toEqual([
-              Date.UTC(1979, DEC, 31, 23, 59, 59, 0),
-              Date.UTC(1979, DEC, 31, 23, 59, 59, 0)
-            ])
-        })
-
-        it('atomicToUnix', () => {
-          expect(converter.atomicToUnix(0))
-            .toBe(0)
-          expect(converter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)))
-            .toBe(Date.UTC(1979, DEC, 31, 23, 59, 58, 999))
-          expect(converter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)))
-            .toBe(Date.UTC(1980, JAN, 1, 0, 0, 0))
-        })
-      })
-    })
-
-    describe('STALL_END', () => {
-      const converter = Converter(data, STALL_END)
-
-      describe('conversions grouped by instant', () => {
-        it('start of time', () => {
+          expect(converter.unixToAtomic(0, { range: true })).toEqual([0, 0])
           expect(converter.unixToAtomic(0)).toBe(0)
           expect(converter.atomicToUnix(0)).toBe(0)
         })
 
         it('millisecond before removed leap second discontinuity begins', () => {
+          expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 58, 999), { range: true }))
+            .toEqual([
+              Date.UTC(1979, DEC, 31, 23, 59, 58, 999),
+              Date.UTC(1979, DEC, 31, 23, 59, 58, 999)
+            ])
           expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)))
             .toBe(Date.UTC(1979, DEC, 31, 23, 59, 58, 999))
           expect(converter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)))
@@ -831,18 +603,27 @@ describe('Converter', () => {
         })
 
         it('first instant of the Unix time discontinuity: one Unix time is zero TAI times', () => {
+          expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 0), { range: true }))
+            .toEqual([NaN, NaN])
           expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)))
             .toBe(NaN)
           // no atomicToUnix can return the value above
         })
 
         it('final instant of the Unix time discontinuity: one Unix time is zero TAI times', () => {
+          expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999), { range: true }))
+            .toEqual([NaN, NaN])
           expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
             .toBe(NaN)
           // no atomicToUnix can return the value above
         })
 
         it('millisecond after discontinuity ends', () => {
+          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0), { range: true }))
+            .toEqual([
+              Date.UTC(1979, DEC, 31, 23, 59, 59, 0),
+              Date.UTC(1979, DEC, 31, 23, 59, 59, 0)
+            ])
           expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0)))
             .toBe(Date.UTC(1979, DEC, 31, 23, 59, 59, 0))
           expect(converter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)))
@@ -851,6 +632,25 @@ describe('Converter', () => {
       })
 
       describe('conversions grouped by method', () => {
+        it('unixToAtomic (range mode)', () => {
+          expect(converter.unixToAtomic(0, { range: true }))
+            .toEqual([0, 0])
+          expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 58, 999), { range: true }))
+            .toEqual([
+              Date.UTC(1979, DEC, 31, 23, 59, 58, 999),
+              Date.UTC(1979, DEC, 31, 23, 59, 58, 999)
+            ])
+          expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 0), { range: true }))
+            .toEqual([NaN, NaN])
+          expect(converter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999), { range: true }))
+            .toEqual([NaN, NaN])
+          expect(converter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0), { range: true }))
+            .toEqual([
+              Date.UTC(1979, DEC, 31, 23, 59, 59, 0),
+              Date.UTC(1979, DEC, 31, 23, 59, 59, 0)
+            ])
+        })
+
         it('unixToAtomic', () => {
           expect(converter.unixToAtomic(0))
             .toBe(0)
@@ -876,7 +676,7 @@ describe('Converter', () => {
     })
 
     describe('SMEAR', () => {
-      const converter = Converter(data, SMEAR)
+      const converter = Converter(data, MODELS.SMEAR)
 
       it('unixToAtomic', () => {
         expect(converter.unixToAtomic(0)).toBe(0)
@@ -915,19 +715,21 @@ describe('Converter', () => {
   describe('insane edge cases', () => {
     describe('when unixMillis converts to an atomicPicos which fits but an atomicMillis which does not', () => {
       it('at the start of the ray', () => {
-        const converter = Converter([
+        const data = [
           [Date.UTC(1970, JAN, 1, 0, 0, 0, 1), -0.0001]
-        ], OVERRUN_ARRAY)
+        ]
+        const converter = Converter(data, MODELS.OVERRUN)
         // 900_000_000n TAI picoseconds rounds down to 0 seconds, which is not in the ray
-        expect(converter.unixToAtomic(1)).toEqual([0])
+        expect(converter.unixToAtomic(1, { array: true })).toEqual([0])
       })
 
       it('at the end of the ray', () => {
-        const converter = Converter([
+        const data = [
           [Date.UTC(1969, DEC, 31, 23, 59, 59, 999), 0.0001],
           [Date.UTC(1970, JAN, 1, 0, 0, 0, 1), -0.0011]
-        ], OVERRUN_ARRAY)
-        expect(converter.unixToAtomic(-1)).toEqual([-1])
+        ]
+        const converter = Converter(data, MODELS.OVERRUN)
+        expect(converter.unixToAtomic(-1, { array: true })).toEqual([-1])
       })
     })
   })
@@ -940,48 +742,32 @@ describe('Converter', () => {
         [1000, 2]
       ]
 
-      describe('OVERRUN_ARRAY', () => {
-        const converter = Converter(data, OVERRUN_ARRAY)
+      describe('OVERRUN', () => {
+        const converter = Converter(data, MODELS.OVERRUN)
 
-        it('unixToAtomic', () => {
-          expect(converter.unixToAtomic(0)).toEqual([0])
-          expect(converter.unixToAtomic(999))
+        it('unixToAtomic (array mode)', () => {
+          expect(converter.unixToAtomic(0, { array: true })).toEqual([0])
+          expect(converter.unixToAtomic(999, { array: true }))
             .toEqual([
               999
             ])
-          expect(converter.unixToAtomic(1000))
+          expect(converter.unixToAtomic(1000, { array: true }))
             .toEqual([
               1000,
               2000,
               3000
             ])
-          expect(converter.unixToAtomic(1999))
+          expect(converter.unixToAtomic(1999, { array: true }))
             .toEqual([
               1999,
               2999,
               3999
             ])
-          expect(converter.unixToAtomic(2000))
+          expect(converter.unixToAtomic(2000, { array: true }))
             .toEqual([
               4000
             ])
         })
-
-        it('atomicToUnix', () => {
-          expect(converter.atomicToUnix(0)).toBe(0)
-          expect(converter.atomicToUnix(1000)).toBe(1000)
-          expect(converter.atomicToUnix(1001)).toBe(1001)
-          expect(converter.atomicToUnix(1999)).toBe(1999)
-          expect(converter.atomicToUnix(2000)).toBe(1000)
-          expect(converter.atomicToUnix(2001)).toBe(1001)
-          expect(converter.atomicToUnix(2999)).toBe(1999)
-          expect(converter.atomicToUnix(3000)).toBe(1000)
-          expect(converter.atomicToUnix(3001)).toBe(1001)
-        })
-      })
-
-      describe('OVERRUN_LAST', () => {
-        const converter = Converter(data, OVERRUN_LAST)
 
         it('unixToAtomic', () => {
           expect(converter.unixToAtomic(0)).toBe(0)
@@ -1010,21 +796,14 @@ describe('Converter', () => {
 
       describe('BREAK', () => {
         it('disallows a zero-length segment between breaks', () => {
-          expect(() => Converter(data, BREAK))
+          expect(() => Converter(data, MODELS.BREAK))
             .toThrowError('Segment length must be positive')
         })
       })
 
-      describe('STALL_RANGE', () => {
+      describe('STALL', () => {
         it('disallows a zero-length segment between stalls', () => {
-          expect(() => Converter(data, STALL_RANGE))
-            .toThrowError('Segment length must be positive')
-        })
-      })
-
-      describe('STALL_END', () => {
-        it('disallows a zero-length segment between stalls', () => {
-          expect(() => Converter(data, STALL_END))
+          expect(() => Converter(data, MODELS.STALL))
             .toThrowError('Segment length must be positive')
         })
       })
@@ -1039,34 +818,16 @@ describe('Converter', () => {
         [1500, 1.5]
       ]
 
-      describe('OVERRUN_ARRAY', () => {
-        const converter = Converter(data, OVERRUN_ARRAY)
+      describe('OVERRUN', () => {
+        const converter = Converter(data, MODELS.OVERRUN)
 
-        it('unixToAtomic', () => {
-          expect(converter.unixToAtomic(0)).toEqual([0])
-          expect(converter.unixToAtomic(999)).toEqual([999])
-          expect(converter.unixToAtomic(1000)).toEqual([1000, 2000])
-          expect(converter.unixToAtomic(1499)).toEqual([1499, 2499])
-          expect(converter.unixToAtomic(1500)).toEqual([1500, 2500, 3000])
+        it('unixToAtomic (array mode)', () => {
+          expect(converter.unixToAtomic(0, { array: true })).toEqual([0])
+          expect(converter.unixToAtomic(999, { array: true })).toEqual([999])
+          expect(converter.unixToAtomic(1000, { array: true })).toEqual([1000, 2000])
+          expect(converter.unixToAtomic(1499, { array: true })).toEqual([1499, 2499])
+          expect(converter.unixToAtomic(1500, { array: true })).toEqual([1500, 2500, 3000])
         })
-
-        it('atomicToUnix', () => {
-          expect(converter.atomicToUnix(0)).toBe(0)
-          expect(converter.atomicToUnix(999)).toBe(999)
-          expect(converter.atomicToUnix(1000)).toBe(1000)
-          expect(converter.atomicToUnix(1001)).toBe(1001)
-          expect(converter.atomicToUnix(1999)).toBe(1999)
-          expect(converter.atomicToUnix(2000)).toBe(1000)
-          expect(converter.atomicToUnix(2001)).toBe(1001)
-          expect(converter.atomicToUnix(2499)).toBe(1499)
-          expect(converter.atomicToUnix(2500)).toBe(1500)
-          expect(converter.atomicToUnix(2999)).toBe(1999)
-          expect(converter.atomicToUnix(3000)).toBe(1500)
-        })
-      })
-
-      describe('OVERRUN_LAST', () => {
-        const converter = Converter(data, OVERRUN_LAST)
 
         it('unixToAtomic', () => {
           expect(converter.unixToAtomic(0)).toBe(0)
@@ -1092,7 +853,7 @@ describe('Converter', () => {
       })
 
       describe('BREAK', () => {
-        const converter = Converter(data, BREAK)
+        const converter = Converter(data, MODELS.BREAK)
 
         it('unixToAtomic', () => {
           expect(converter.unixToAtomic(0)).toBe(0)
@@ -1118,45 +879,27 @@ describe('Converter', () => {
         })
       })
 
-      describe('STALL_RANGE', () => {
-        const converter = Converter(data, STALL_RANGE)
+      describe('STALL', () => {
+        const converter = Converter(data, MODELS.STALL)
 
-        it('unixToAtomic', () => {
-          expect(converter.unixToAtomic(0)).toEqual([0, 0])
-          expect(converter.unixToAtomic(999)).toEqual([999, 999])
-          expect(converter.unixToAtomic(1000)).toEqual([1000, 2000])
-          expect(converter.unixToAtomic(1001)).toEqual([2001, 2001])
-          expect(converter.unixToAtomic(1499)).toEqual([2499, 2499])
-          expect(converter.unixToAtomic(1500)).toEqual([2500, 3000])
-          expect(converter.unixToAtomic(1501)).toEqual([3001, 3001])
+        it('unixToAtomic (range mode)', () => {
+          expect(converter.unixToAtomic(0, { range: true })).toEqual([0, 0])
+          expect(converter.unixToAtomic(999, { range: true })).toEqual([999, 999])
+          expect(converter.unixToAtomic(1000, { range: true })).toEqual([1000, 2000])
+          expect(converter.unixToAtomic(1001, { range: true })).toEqual([2001, 2001])
+          expect(converter.unixToAtomic(1499, { range: true })).toEqual([2499, 2499])
+          expect(converter.unixToAtomic(1500, { range: true })).toEqual([2500, 3000])
+          expect(converter.unixToAtomic(1501, { range: true })).toEqual([3001, 3001])
         })
-
-        it('atomicToUnix', () => {
-          expect(converter.atomicToUnix(0)).toBe(0)
-          expect(converter.atomicToUnix(999)).toBe(999)
-          expect(converter.atomicToUnix(1000)).toBe(1000)
-          expect(converter.atomicToUnix(1001)).toBe(1000)
-          expect(converter.atomicToUnix(1999)).toBe(1000)
-          expect(converter.atomicToUnix(2000)).toBe(1000)
-          expect(converter.atomicToUnix(2001)).toBe(1001)
-          expect(converter.atomicToUnix(2499)).toBe(1499)
-          expect(converter.atomicToUnix(2500)).toBe(1500)
-          expect(converter.atomicToUnix(2501)).toBe(1500)
-          expect(converter.atomicToUnix(2999)).toBe(1500)
-          expect(converter.atomicToUnix(3000)).toBe(1500)
-          expect(converter.atomicToUnix(3001)).toBe(1501)
-        })
-      })
-
-      describe('STALL_END', () => {
-        const converter = Converter(data, STALL_END)
 
         it('unixToAtomic', () => {
           expect(converter.unixToAtomic(0)).toBe(0)
           expect(converter.unixToAtomic(999)).toBe(999)
           expect(converter.unixToAtomic(1000)).toBe(2000)
+          expect(converter.unixToAtomic(1001)).toBe(2001)
           expect(converter.unixToAtomic(1499)).toBe(2499)
           expect(converter.unixToAtomic(1500)).toBe(3000)
+          expect(converter.unixToAtomic(1501)).toBe(3001)
         })
 
         it('atomicToUnix', () => {
@@ -1185,39 +928,18 @@ describe('Converter', () => {
         [500, 2.5]
       ]
 
-      describe('OVERRUN_ARRAY', () => {
-        const converter = Converter(data, OVERRUN_ARRAY)
+      describe('OVERRUN', () => {
+        const converter = Converter(data, MODELS.OVERRUN)
 
-        it('unixToAtomic', () => {
-          expect(converter.unixToAtomic(0)).toEqual([0])
-          expect(converter.unixToAtomic(499)).toEqual([499])
-          expect(converter.unixToAtomic(500)).toEqual([500, 3000])
-          expect(converter.unixToAtomic(999)).toEqual([999, 3499])
-          expect(converter.unixToAtomic(1000)).toEqual([1000, 2000, 3500])
-          expect(converter.unixToAtomic(1999)).toEqual([1999, 2999, 4499])
-          expect(converter.unixToAtomic(2000)).toEqual([4500])
+        it('unixToAtomic (array mode)', () => {
+          expect(converter.unixToAtomic(0, { array: true })).toEqual([0])
+          expect(converter.unixToAtomic(499, { array: true })).toEqual([499])
+          expect(converter.unixToAtomic(500, { array: true })).toEqual([500, 3000])
+          expect(converter.unixToAtomic(999, { array: true })).toEqual([999, 3499])
+          expect(converter.unixToAtomic(1000, { array: true })).toEqual([1000, 2000, 3500])
+          expect(converter.unixToAtomic(1999, { array: true })).toEqual([1999, 2999, 4499])
+          expect(converter.unixToAtomic(2000, { array: true })).toEqual([4500])
         })
-
-        it('atomicToUnix', () => {
-          expect(converter.atomicToUnix(0)).toBe(0)
-          expect(converter.atomicToUnix(499)).toBe(499)
-          expect(converter.atomicToUnix(500)).toBe(500)
-          expect(converter.atomicToUnix(999)).toBe(999)
-          expect(converter.atomicToUnix(1000)).toBe(1000)
-          expect(converter.atomicToUnix(1001)).toBe(1001)
-          expect(converter.atomicToUnix(1999)).toBe(1999)
-          expect(converter.atomicToUnix(2000)).toBe(1000)
-          expect(converter.atomicToUnix(2001)).toBe(1001)
-          expect(converter.atomicToUnix(2999)).toBe(1999)
-          expect(converter.atomicToUnix(3000)).toBe(500)
-          expect(converter.atomicToUnix(3001)).toBe(501)
-          expect(converter.atomicToUnix(4499)).toBe(1999)
-          expect(converter.atomicToUnix(4500)).toBe(2000)
-        })
-      })
-
-      describe('OVERRUN_LAST', () => {
-        const converter = Converter(data, OVERRUN_LAST)
 
         it('unixToAtomic', () => {
           expect(converter.unixToAtomic(0)).toBe(0)
@@ -1249,21 +971,14 @@ describe('Converter', () => {
 
       describe('BREAK', () => {
         it('says no', () => {
-          expect(() => Converter(data, BREAK))
+          expect(() => Converter(data, MODELS.BREAK))
             .toThrowError('Segment length must be positive')
         })
       })
 
-      describe('STALL_RANGE', () => {
+      describe('STALL', () => {
         it('says no', () => {
-          expect(() => Converter(data, STALL_RANGE))
-            .toThrowError('Segment length must be positive')
-        })
-      })
-
-      describe('STALL_END', () => {
-        it('says no', () => {
-          expect(() => Converter(data, STALL_END))
+          expect(() => Converter(data, MODELS.STALL))
             .toThrowError('Segment length must be positive')
         })
       })
@@ -1271,13 +986,14 @@ describe('Converter', () => {
   })
 
   describe('1 November 1963: 0.1 TAI seconds inserted', () => {
-    const converter = Converter([
+    const data = [
       [Date.UTC(1962, JAN, 1), 1.845_858_0, 37_665, 0.001_123_2],
       [Date.UTC(1963, NOV, 1), 1.945_858_0, 37_665, 0.001_123_2] // 0.1 TAI seconds added to UTC
-    ], MODELS.OVERRUN_ARRAY)
+    ]
+    const converter = Converter(data, MODELS.OVERRUN)
 
     it('before anything clever occurs', () => {
-      expect(converter.unixToAtomic(Date.UTC(1963, OCT, 31, 23, 59, 59, 999)))
+      expect(converter.unixToAtomic(Date.UTC(1963, OCT, 31, 23, 59, 59, 999), { array: true }))
         .toEqual([
           Date.UTC(1963, NOV, 1, 0, 0, 2, 596)
         ])
@@ -1285,7 +1001,7 @@ describe('Converter', () => {
     })
 
     it('exactly at the time', () => {
-      expect(converter.unixToAtomic(Date.UTC(1963, NOV, 1, 0, 0, 0, 0)))
+      expect(converter.unixToAtomic(Date.UTC(1963, NOV, 1, 0, 0, 0, 0), { array: true }))
         .toEqual([
           Date.UTC(1963, NOV, 1, 0, 0, 2, 597),
           Date.UTC(1963, NOV, 1, 0, 0, 2, 697)
@@ -1294,24 +1010,24 @@ describe('Converter', () => {
     })
 
     it('then', () => {
-      expect(converter.unixToAtomic(Date.UTC(1963, NOV, 1, 0, 0, 0, 1)))
+      expect(converter.unixToAtomic(Date.UTC(1963, NOV, 1, 0, 0, 0, 1), { array: true }))
         .toEqual([
           Date.UTC(1963, NOV, 1, 0, 0, 2, 598),
           Date.UTC(1963, NOV, 1, 0, 0, 2, 698)
         ])
 
-      expect(converter.unixToAtomic(Date.UTC(1963, NOV, 1, 0, 0, 0, 99)))
+      expect(converter.unixToAtomic(Date.UTC(1963, NOV, 1, 0, 0, 0, 99), { array: true }))
         .toEqual([
           Date.UTC(1963, NOV, 1, 0, 0, 2, 696),
           Date.UTC(1963, NOV, 1, 0, 0, 2, 796) // -194_659_197_203_721_198_713n TAI
         ])
 
-      expect(converter.unixToAtomic(Date.UTC(1963, NOV, 1, 0, 0, 0, 100)))
+      expect(converter.unixToAtomic(Date.UTC(1963, NOV, 1, 0, 0, 0, 100), { array: true }))
         .toEqual([
           Date.UTC(1963, NOV, 1, 0, 0, 2, 797)
         ])
 
-      expect(converter.unixToAtomic(Date.UTC(1963, NOV, 1, 0, 0, 0, 101)))
+      expect(converter.unixToAtomic(Date.UTC(1963, NOV, 1, 0, 0, 0, 101), { array: true }))
         .toEqual([
           Date.UTC(1963, NOV, 1, 0, 0, 2, 798)
         ])

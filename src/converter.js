@@ -10,31 +10,10 @@
 // map to multiple TAI times. We can return an array of these, or just the result from the latest
 // segment (according to its numbering).
 
-const { munge, SEGMENT_MODELS } = require('./munge')
-
-const MODELS = {
-  OVERRUN_ARRAY: {
-    segmentModel: SEGMENT_MODELS.OVERRUN
-  },
-  OVERRUN_LAST: {
-    segmentModel: SEGMENT_MODELS.OVERRUN
-  },
-  BREAK: {
-    segmentModel: SEGMENT_MODELS.BREAK
-  },
-  STALL_RANGE: {
-    segmentModel: SEGMENT_MODELS.STALL
-  },
-  STALL_END: {
-    segmentModel: SEGMENT_MODELS.STALL
-  },
-  SMEAR: {
-    segmentModel: SEGMENT_MODELS.SMEAR
-  }
-}
+const { munge, MODELS } = require('./munge')
 
 const Converter = (data, model) => {
-  const segments = munge(data, model.segmentModel)
+  const segments = munge(data, model)
 
   // This conversion always has the same behaviour,
   // and there's no work required in handling the output
@@ -57,7 +36,7 @@ const Converter = (data, model) => {
     return NaN
   }
 
-  const unixToAtomic = unixMillis => {
+  const unixToAtomic = (unixMillis, options = {}) => {
     if (!Number.isInteger(unixMillis)) {
       throw Error(`Not an integer: ${unixMillis}`)
     }
@@ -94,7 +73,7 @@ const Converter = (data, model) => {
       throw Error('Failed to close all open ranges, this should be impossible')
     }
 
-    if (model === MODELS.OVERRUN_ARRAY) {
+    if (model === MODELS.OVERRUN && options.array === true) {
       return ranges.map(range => {
         /* istanbul ignore if */
         if (range.end !== range.start) {
@@ -107,7 +86,7 @@ const Converter = (data, model) => {
 
     if (ranges.length > 1) {
       /* istanbul ignore else */
-      if (model.segmentModel === SEGMENT_MODELS.OVERRUN) {
+      if (model === MODELS.OVERRUN && options.array !== true) {
         // This happens frequently, user explicitly opted to discard the earlier ranges
         // and take only the last one
       } else {
@@ -118,13 +97,13 @@ const Converter = (data, model) => {
     const i = ranges.length - 1
     const range = i in ranges ? ranges[i] : { start: NaN, end: NaN }
 
-    if (model === MODELS.STALL_RANGE) {
+    if (model === MODELS.STALL && options.range === true) {
       return [range.start, range.end]
     }
 
     if (!Object.is(range.end, range.start)) {
       /* istanbul ignore else */
-      if (model === MODELS.STALL_END) {
+      if (model === MODELS.STALL && options.range !== true) {
         // This happens frequently, user explicitly opted to take the stall's end point only,
         // discarding the start point
       } else {

@@ -2,9 +2,34 @@
 
 ## 3.0.x
 
-Rather than `require('t-a-i')` returning a converter object, it now returns an object `tai` whose property `tai.Converter` must be called to create a converter object. It also returns an enumeration `MODELS` whose properties `OVERRUN_ARRAY`, `OVERRUN_LAST` and `STALL_LAST` which must be used to select the conversion model.
+The API has been completely overhauled. Code like:
 
-In general, `tai.oneToMany` is replaced with `Converter(MODELS.OVERRUN_ARRAY)`, and `tai.oneToOne` is replaced with `Converter(MODELS.STALL_LAST)` replaces `tai.oneToOne`.
+```js
+const tai = require('t-a-i')
+
+console.log(tai.oneToMany.unixToAtomic(0))
+console.log(tai.oneToMany.atomicToUnix(1000))
+
+console.log(tai.oneToOne.unixToAtomic(2000))
+console.log(tai.oneToOne.atomicToUnix(3000))
+```
+
+should be replaced with something like:
+
+```js
+const { Converter, MODELS } = require('t-a-i')
+
+const oneToManyConverter = Converter(MODELS.OVERRUN)
+const oneToOneConverter = Converter(MODELS.STALL)
+
+console.log(oneToManyConverter.unixToAtomic(0, { array: true }))
+console.log(oneToManyConverter.atomicToUnix(1000))
+
+console.log(oneToOneConverter.unixToAtomic(2000))
+console.log(oneToOneConverter.atomicToUnix(3000))
+```
+
+Other, more flexible models are now also provided. Check the new README for more information.
 
 ## 2.1.x
 

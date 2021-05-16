@@ -10,6 +10,7 @@ const JUL = 6
 const AUG = 7
 const SEP = 8
 const NOV = 10
+const DEC = 11
 
 // First column: Unix millisecond count when this relationship became effective
 // Second column: TAI minus UTC in TAI seconds as of the root point
@@ -61,3 +62,9 @@ const taiData = [
 ]
 
 module.exports.taiData = taiData
+module.exports.UNIX_START = Date.UTC(1961, JAN, 1, 0, 0, 0, 0)
+
+// Because we don't know whether or not a leap second will be inserted or removed at this time,
+// the relationship between Unix time and TAI is unpredictable at or beyond this point.
+// (This is the start of a possible smear.)
+module.exports.UNIX_END = Date.UTC(2021, DEC, 31, 23, 12, 0, 0)

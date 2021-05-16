@@ -4,7 +4,7 @@ const segment = require('./segment')
 
 // In all models, TAI to Unix conversions are one-to-one (or one-to-NaN). At any given instant in
 // TAI, at most one segment applies and at most one Unix time corresponds.
-const SEGMENT_MODELS = {
+const MODELS = {
   // Each segment continues until it reaches the TAI start of the next segment, even if that start
   // point is in the past (Unix time) due to inserted time and the result is a backtrack. Unix to
   // TAI conversions are potentially one-to-many but the many are discrete instants in time.
@@ -115,12 +115,12 @@ const munge = (data, segmentModel) => {
     }
   })
 
-  if (segmentModel === SEGMENT_MODELS.OVERRUN) {
+  if (segmentModel === MODELS.OVERRUN) {
     // Do nothing, we're good
   } else if (
-    segmentModel === SEGMENT_MODELS.BREAK ||
-    segmentModel === SEGMENT_MODELS.STALL ||
-    segmentModel === SEGMENT_MODELS.SMEAR
+    segmentModel === MODELS.BREAK ||
+    segmentModel === MODELS.STALL ||
+    segmentModel === MODELS.SMEAR
   ) {
     // Handle continuity between segments by altering segment boundaries
     // and possibly introducing new segments between them.
@@ -137,7 +137,7 @@ const munge = (data, segmentModel) => {
       // When breaking/stalling, this is the Unix time when the next segment starts.
       // When smearing, this is twelve Unix hours prior to discontinuity.
       const smearStart = {
-        unixMillis: segmentModel === SEGMENT_MODELS.SMEAR
+        unixMillis: segmentModel === MODELS.SMEAR
           ? b.start.unixMillis - millisPerDay / 2
           : b.start.unixMillis
       }
@@ -151,7 +151,7 @@ const munge = (data, segmentModel) => {
       // When breaking/stalling, this is the start of the next segment.
       // When smearing, this is twelve hours after the discontinuity.
       const smearEnd = {
-        unixMillis: segmentModel === SEGMENT_MODELS.SMEAR
+        unixMillis: segmentModel === MODELS.SMEAR
           ? b.start.unixMillis + millisPerDay / 2
           : b.start.unixMillis
       }
@@ -171,7 +171,7 @@ const munge = (data, segmentModel) => {
       a.end = smearStart // includes unixMillis but we'll ignore that
       b.start = smearEnd
 
-      if (segmentModel === SEGMENT_MODELS.BREAK) {
+      if (segmentModel === MODELS.BREAK) {
         // Just leave a gap
         continue
       }
@@ -205,4 +205,4 @@ const munge = (data, segmentModel) => {
 }
 
 module.exports.munge = munge
-module.exports.SEGMENT_MODELS = SEGMENT_MODELS
+module.exports.MODELS = MODELS
