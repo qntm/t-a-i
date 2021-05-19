@@ -124,9 +124,18 @@ This constant is the Unix millisecond count when the next possible leap second m
 
 ### MODELS
 
-Official sources are generally inconsistent and unclear about exactly how the relationship between TAI and Unix time should be modelled during leap seconds and other discontinuities. Additionally, no model is perfect; each has its own advantages and disadvantages.
+Official sources are generally inconsistent and unclear about exactly how the relationship between TAI and Unix time should be modelled during leap seconds and other discontinuities. Additionally, none of the proposed/implied models are perfect; each has its own disadvantages, marked with ❌:
 
-Rather than state that one single model is correct, `t-a-i` provides access to a variety of different models. Pass one of these constants to the `TaiConverter` constructor:
+| Disadvantage | "Overrun" model | "Break" model | "Stall" model | ["Smear" model](https://developers.google.com/time/smear) |
+| :--- | --- | --- | --- | --- |
+| Unix seconds aren't always the same length | ❌ | ❌ | ❌ | ❌ |
+| Unix seconds aren't always the same length even post-1972 |  |  |  | ❌ |
+| TAI time converts to `NaN` in Unix sometimes |  | ❌ |  |  |
+| Unix time converts to `NaN` in TAI sometimes | ❌ | ❌ | ❌ |  |
+| Unix time is ambiguous sometimes (two TAI times map to the same Unix time) | ❌ |  | ❌ |  |
+| Unix time runs backwards sometimes | ❌ |  |  |  |
+
+Rather than nominate any model as authoritative, `t-a-i` provides access to all of them. Pass one of these constants to the `TaiConverter` constructor:
 
 #### MODELS.OVERRUN
 
@@ -148,7 +157,7 @@ When time is removed, Unix time jumps forward discontinuously between one TAI in
 
 #### MODELS.SMEAR
 
-Under this model, both inserted time and removed time are handled by **smearing** the discontinuity out over 24 Unix hours, starting 12 hours prior to the discontinuity and ending 12 hours after the discontinuity. For a typical leap second, this means Unix time runs very slightly slower than normal from midday to midday, so that 84,600,000 Unix milliseconds take 84,601,000 TAI milliseconds to elapse.
+Under [this model](https://developers.google.com/time/smear), both inserted time and removed time are handled by **smearing** the discontinuity out over 24 Unix hours, starting 12 hours prior to the discontinuity and ending 12 hours after the discontinuity. For a typical leap second, this means Unix time runs very slightly slower than normal from midday to midday, so that 84,600,000 Unix milliseconds take 84,601,000 TAI milliseconds to elapse.
 
 ### TaiConverter(model)
 
