@@ -8,6 +8,15 @@ const { Segment } = require('./segment')
 const JAN = 0
 const DEC = 11
 
+describe('MODELS', () => {
+  it('pointless symbol string tests', () => {
+    expect(MODELS.OVERRUN.description).toBe('OVERRUN')
+    expect(MODELS.BREAK.description).toBe('BREAK')
+    expect(MODELS.STALL.description).toBe('STALL')
+    expect(MODELS.SMEAR.description).toBe('SMEAR')
+  })
+})
+
 describe('munge', () => {
   it('fails on a bad model', () => {
     expect(() => munge([
@@ -19,6 +28,13 @@ describe('munge', () => {
     it('disallows disordered rays', () => {
       expect(() => munge([
         [Date.UTC(1979, DEC, 9), 0],
+        [Date.UTC(1970, JAN, 1), 0]
+      ], MODELS.OVERRUN)).toThrowError('Disordered data')
+    })
+
+    it('disallows zero-length rays', () => {
+      expect(() => munge([
+        [Date.UTC(1970, JAN, 1), 0],
         [Date.UTC(1970, JAN, 1), 0]
       ], MODELS.OVERRUN)).toThrowError('Disordered data')
     })

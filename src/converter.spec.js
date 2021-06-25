@@ -17,6 +17,8 @@ describe('Converter', () => {
       const converter = Converter(data, MODELS.OVERRUN)
 
       it('manages basic conversions', () => {
+        expect(converter.unixToAtomic(0, { range: true, array: true })).toEqual([[0, 0]])
+        expect(converter.unixToAtomic(0, { range: true })).toEqual([0, 0])
         expect(converter.unixToAtomic(0, { array: true })).toEqual([0])
         expect(converter.unixToAtomic(0)).toEqual(0)
         expect(converter.atomicToUnix(0)).toBe(0)
@@ -53,7 +55,9 @@ describe('Converter', () => {
       })
 
       it('manages basic conversions', () => {
+        expect(converter.unixToAtomic(0, { range: true, array: true })).toEqual([[0, 0]])
         expect(converter.unixToAtomic(0, { range: true })).toEqual([0, 0])
+        expect(converter.unixToAtomic(0, { array: true })).toEqual([0])
         expect(converter.unixToAtomic(0)).toBe(0)
         expect(converter.atomicToUnix(0)).toBe(0)
       })

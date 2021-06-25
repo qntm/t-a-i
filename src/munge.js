@@ -124,7 +124,7 @@ const munge = (data, model) => {
   ) {
     // Handle continuity between segments by altering segment boundaries
     // and possibly introducing new segments between them.
-    for (let i = 0; i < munged.length; i++) {
+    for (let i = 0; i in munged; i++) {
       if (!(i + 1 in munged)) {
         // Last segment, no continuity to handle
         continue
@@ -162,7 +162,7 @@ const munge = (data, model) => {
         BigInt(b.dy.unixMillis)
 
       if (smearEnd.atomicPicos <= smearStart.atomicPicos) {
-        // No negative-length smears
+        // No negative-length or zero-length smears
         continue
       }
 
@@ -196,7 +196,7 @@ const munge = (data, model) => {
     throw Error('Unrecognised model')
   }
 
-  return munged.map((datum, i, munged) => new segment.Segment(
+  return munged.map(datum => new segment.Segment(
     datum.start,
     datum.end,
     datum.dy,

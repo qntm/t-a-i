@@ -51,7 +51,7 @@ const Converter = (data, model) => {
         const prev = ranges[ranges.length - 1]
 
         // Previous range ends where current one starts, so try to combine the two.
-        // The previous range should be open but it doesn't actually make a difference.
+        // The previous range should have `closed: false` but it doesn't actually make a difference.
         if (prev.end === range.start) {
           ranges[ranges.length - 1] = {
             start: prev.start,
@@ -70,45 +70,22 @@ const Converter = (data, model) => {
       throw Error('Failed to close all open ranges, this should be impossible')
     }
 
-    if (model === MODELS.OVERRUN && options.array === true) {
-      return ranges.map(range => {
-        /* istanbul ignore if */
-        if (range.end !== range.start) {
-          throw Error('Non-0-length range, this should be impossible')
-        }
-
-        return range.end
-      })
-    }
-
-    if (ranges.length > 1) {
-      /* istanbul ignore else */
-      if (model === MODELS.OVERRUN && options.array !== true) {
-        // This happens frequently, user implicitly opted to discard the earlier ranges
-        // and take only the last one
-      } else {
-        throw Error('Multiple ranges, this should be impossible')
-      }
+    if (options.array === true) {
+      return ranges.map(range =>
+        options.range === true
+          ? [range.start, range.end]
+          : range.end
+      )
     }
 
     const i = ranges.length - 1
-    const range = i in ranges ? ranges[i] : { start: NaN, end: NaN }
+    const range = i in ranges
+      ? ranges[i]
+      : { start: NaN, end: NaN }
 
-    if (model === MODELS.STALL && options.range === true) {
-      return [range.start, range.end]
-    }
-
-    if (!Object.is(range.end, range.start)) {
-      /* istanbul ignore else */
-      if (model === MODELS.STALL && options.range !== true) {
-        // This happens frequently, user implicitly opted to take the stall's end point only,
-        // discarding the start point
-      } else {
-        throw Error('Non-0-length range, this should be impossible')
-      }
-    }
-
-    return range.end
+    return options.range === true
+      ? [range.start, range.end]
+      : range.end
   }
 
   return {

@@ -1,4 +1,4 @@
-const { div } = require('./div')
+const { sign, div } = require('./div')
 
 class Rat {
   constructor (nu, de = 1n) {
@@ -33,7 +33,7 @@ class Rat {
 
   cmp (other) {
     const det = this.nu * other.de - this.de * other.nu
-    return (this.de < 0n) === (other.de < 0n) ? det : -det
+    return sign(this.de) === sign(other.de) ? det : -det
   }
 
   eq (other) {
