@@ -21,7 +21,44 @@ The relationship between TAI and UTC is well-defined as far back as 1 January 19
 
 `t-a-i` handles all of these conversions correctly and returns results truncated to the millisecond.
 
-`t-a-i` also provides multiple models for leap second discontinuities - you can have Unix time overrun and backtrack, stall, smear, or simply be indeterminate.
+### Modelling discontinuities
+
+Official sources are generally inconsistent and unclear about exactly how the relationship between TAI and Unix time should be modelled during leap seconds and other discontinuities. Rather than nominate any specific model as authoritative, `t-a-i` provides access to all of them:
+
+#### "Overrun" model
+
+With this model, during inserted time, Unix time **overruns**. At the end of the inserted time, Unix time instantaneously backtracks, and then repeats itself. One instant in Unix time may therefore correspond to 0, 1 or 2 instants in TAI.
+
+When time is removed, Unix time jumps forward discontinuously between one TAI instant and the next.
+
+#### "Break" model
+
+With this model, during inserted time, Unix time is **indeterminate**.
+
+When time is removed, Unix time jumps forward discontinuously between one TAI instant and the next.
+
+#### "Stall" model
+
+With this model, during inserted time, Unix time **stalls**. One instant in Unix time may therefore correspond either to a single instant or a closed *range* of instants in TAI.
+
+When time is removed, Unix time jumps forward discontinuously between one TAI instant and the next.
+
+#### "Smear" model
+
+With [this model](https://developers.google.com/time/smear), both inserted time and removed time are handled by **smearing** the discontinuity out over 24 Unix hours, starting 12 hours prior to the discontinuity and ending 12 hours after the discontinuity. For a typical leap second, this means Unix time runs very slightly slower than normal from midday to midday, so that 84,600,000 Unix milliseconds take 84,601,000 TAI milliseconds to elapse.
+
+#### Comparison of models
+
+None these proposed/implied models are perfect; each has its own disadvantages, marked with ❌:
+
+| Disadvantage | "Overrun" model | "Break" model | "Stall" model | ["Smear" model](https://developers.google.com/time/smear) |
+| :--- | --- | --- | --- | --- |
+| Unix seconds aren't always the same length | ❌ | ❌ | ❌ | ❌ |
+| Unix seconds aren't always the same length even post-1972 |  |  |  | ❌ |
+| TAI time converts to `NaN` in Unix sometimes |  | ❌ |  |  |
+| Unix time converts to `NaN` in TAI sometimes | ❌ | ❌ | ❌ |  |
+| Unix time is ambiguous sometimes (two TAI times map to the same Unix time) | ❌ |  | ❌ |  |
+| Unix time runs backwards sometimes | ❌ |  |  |  |
 
 ## Examples
 
@@ -124,40 +161,12 @@ This constant is the Unix millisecond count when the next possible leap second m
 
 ### MODELS
 
-Official sources are generally inconsistent and unclear about exactly how the relationship between TAI and Unix time should be modelled during leap seconds and other discontinuities. Additionally, none of the proposed/implied models are perfect; each has its own disadvantages, marked with ❌:
-
-| Disadvantage | "Overrun" model | "Break" model | "Stall" model | ["Smear" model](https://developers.google.com/time/smear) |
-| :--- | --- | --- | --- | --- |
-| Unix seconds aren't always the same length | ❌ | ❌ | ❌ | ❌ |
-| Unix seconds aren't always the same length even post-1972 |  |  |  | ❌ |
-| TAI time converts to `NaN` in Unix sometimes |  | ❌ |  |  |
-| Unix time converts to `NaN` in TAI sometimes | ❌ | ❌ | ❌ |  |
-| Unix time is ambiguous sometimes (two TAI times map to the same Unix time) | ❌ |  | ❌ |  |
-| Unix time runs backwards sometimes | ❌ |  |  |  |
-
-Rather than nominate any model as authoritative, `t-a-i` provides access to all of them. Pass one of these constants to the `TaiConverter` constructor:
+This object contains constants corresponding to different possible models of the relationship between TAI and Unix time (see above). Pass one of these constants to the TaiConverter constructor:
 
 #### MODELS.OVERRUN
-
-Under this model, during inserted time, Unix time **overruns**. At the end of the inserted time, Unix time instantaneously backtracks, and then repeats itself. One instant in Unix time may therefore correspond to 0, 1 or 2 instants in TAI.
-
-When time is removed, Unix time jumps forward discontinuously between one TAI instant and the next.
-
 #### MODELS.BREAK
-
-Under this model, during inserted time, Unix time is **indeterminate**.
-
-When time is removed, Unix time jumps forward discontinuously between one TAI instant and the next.
-
 #### MODELS.STALL
-
-Under this model, during inserted time, Unix time **stalls**. One instant in Unix time may therefore correspond either to a single instant or a closed *range* of instants in TAI.
-
-When time is removed, Unix time jumps forward discontinuously between one TAI instant and the next.
-
 #### MODELS.SMEAR
-
-Under [this model](https://developers.google.com/time/smear), both inserted time and removed time are handled by **smearing** the discontinuity out over 24 Unix hours, starting 12 hours prior to the discontinuity and ending 12 hours after the discontinuity. For a typical leap second, this means Unix time runs very slightly slower than normal from midday to midday, so that 84,600,000 Unix milliseconds take 84,601,000 TAI milliseconds to elapse.
 
 ### TaiConverter(model)
 
