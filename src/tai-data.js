@@ -6,6 +6,7 @@ const JAN = 0
 const FEB = 1
 const MAR = 2
 const APR = 3
+const JUN = 5
 const JUL = 6
 const AUG = 7
 const SEP = 8
@@ -68,4 +69,4 @@ module.exports.UNIX_START = taiData[0][0]
 // the relationship between Unix time and TAI is unpredictable at or beyond this point.
 // (This is the start of a possible smear.)
 // Updating this value? Don't forget to update the README too!
-module.exports.UNIX_END = Date.UTC(2021, DEC, 31, 23, 12, 0, 0)
+module.exports.UNIX_END = Date.UTC(2022, JUN, 30, 12, 0, 0, 0)
