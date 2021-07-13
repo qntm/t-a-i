@@ -11,7 +11,6 @@ const JUL = 6
 const AUG = 7
 const SEP = 8
 const NOV = 10
-const DEC = 11
 
 // First column: Unix millisecond count when this relationship became effective
 // Second column: TAI minus UTC in TAI seconds as of the root point
