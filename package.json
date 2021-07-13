@@ -1,6 +1,6 @@
 {
   "name": "t-a-i",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "description": "Converts Unix milliseconds to and from International Atomic Time (TAI) milliseconds",
   "homepage": "https://github.com/qntm/t-a-i",
   "repository": {
@@ -17,7 +17,7 @@
   "devDependencies": {
     "@stryker-mutator/core": "^5.1.1",
     "@stryker-mutator/jest-runner": "^5.1.1",
-    "jest": "^26.6.3",
+    "jest": "^27.0.3",
     "standard": "^16.0.3"
   },
   "files": [
