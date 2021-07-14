@@ -45,7 +45,7 @@ When time is removed, Unix time jumps forward discontinuously between one TAI in
 
 #### "Smear" model
 
-With [this model](https://developers.google.com/time/smear), both inserted time and removed time are handled by **smearing** the discontinuity out over 24 Unix hours, starting 12 hours prior to the discontinuity and ending 12 hours after the discontinuity. For a typical leap second, this means Unix time runs very slightly slower than normal from midday to midday, so that 84,600,000 Unix milliseconds take 84,601,000 TAI milliseconds to elapse.
+With [this model](https://developers.google.com/time/smear), both inserted time and removed time are handled by **smearing** the discontinuity out over 24 Unix hours, starting 12 hours prior to the discontinuity and ending 12 hours after the discontinuity. For a typical leap second, this means Unix time runs very slightly slower than normal from midday to midday, so that 86,400,000 Unix milliseconds take 86,401,000 TAI milliseconds to elapse.
 
 #### Comparison of models
 
