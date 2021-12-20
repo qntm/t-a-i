@@ -53,12 +53,14 @@ None these proposed/implied models are perfect; each has its own disadvantages, 
 
 | Disadvantage | "Overrun" model | "Break" model | "Stall" model | ["Smear" model](https://developers.google.com/time/smear) |
 | :--- | --- | --- | --- | --- |
-| Unix seconds aren't always the same length | ❌ | ❌ | ❌ | ❌ |
-| Unix seconds aren't always the same length even post-1972 |  |  |  | ❌ |
-| TAI time converts to `NaN` in Unix sometimes |  | ❌ |  |  |
-| Unix time converts to `NaN` in TAI sometimes | ❌ | ❌ | ❌ |  |
-| Unix time is ambiguous sometimes (two TAI times map to the same Unix time) | ❌ |  | ❌ |  |
-| Unix time runs backwards sometimes | ❌ |  |  |  |
+| TAI time can convert to `NaN` in Unix |  | ❌ |  |  |
+| Unix time can convert to `NaN` in TAI | ❌ | ❌ | ❌ |  |
+| Unix time can be ambiguous (two TAI times map to the same Unix time) | ❌ |  | ❌ |  |
+| Unix time can run backwards | ❌ |  |  |  |
+| Unix seconds vary in length\* |  |  |  | ❌ |
+| Fractions of seconds can disagree between Unix and TAI\* |  |  |  | ❌ |
+
+\* From 1972 onwards. All models have this disadvantage prior to 1972.
 
 ## Examples
 
