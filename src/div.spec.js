@@ -1,8 +1,21 @@
 /* eslint-env jest */
 
-const { div } = require('./div')
+const { sign, div } = require('./div')
+
+describe('sign', () => {
+  it('works', () => {
+    expect(sign(-6n)).toBe(-1n)
+    expect(sign(0n)).toBe(0n)
+    expect(sign(7901n)).toBe(1n)
+  })
+})
 
 describe('div', () => {
+  it('throws', () => {
+    expect(() => div(18n, 0n)).toThrowError('Division by zero')
+    expect(() => div(0n, 0n)).toThrowError('Division by zero')
+  })
+
   it('works', () => {
     expect(div(18n, 10n)).toBe(1n)
     expect(div(15n, 10n)).toBe(1n)

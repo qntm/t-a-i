@@ -1,4 +1,7 @@
 // Divide two BigInts and round the result towards negative infinity
+
+const sign = a => a > 0n ? 1n : a === 0n ? 0n : -1n
+
 const div = (a, b) => {
   const q = a / b
 
@@ -11,7 +14,7 @@ const div = (a, b) => {
 
   // `a` must be non-zero
 
-  if ((a > 0n) === (b > 0n)) {
+  if (sign(a) === sign(b)) {
     // Result was positive, quotient was rounded in the correct direction already
     return q
   }
@@ -20,4 +23,5 @@ const div = (a, b) => {
   return q - 1n
 }
 
+module.exports.sign = sign
 module.exports.div = div

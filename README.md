@@ -96,7 +96,7 @@ console.log(offset)
 What was TAI at the Unix epoch?
 
 ```javascript
-taiConverter.unixToAtomicPicos(0)
+taiConverter.unixToAtomic(0)
 // 8_000, i.e. 1970-01-01 00:00:08.000_082 TAI, truncated to the millisecond
 ```
 
@@ -115,7 +115,7 @@ For your reference, at the time of writing:
 
 ### Validity for the future
 
-Leap seconds (or the lack thereof) are announced in the International Earth Rotation and Reference Systems Service (IERS)'s six-monthly Bulletin C. For example, at the time of writing, [the latest such bulletin](https://datacenter.iers.org/data/latestVersion/16_BULLETIN_C16.txt) was published on 5 July 2021 and announced that there will be no leap second at the very end of December 2021. This means that `t-a-i`'s calculations are guaranteed to be correct up to, but not including, the *next* potential leap second, which in this case is at the very end of June 2022. At or beyond this point, the introduction of leap seconds cannot be predicted in advance, and the correctness of `t-a-i`'s behaviour cannot be guaranteed.
+Leap seconds (or the lack thereof) are announced in the International Earth Rotation and Reference Systems Service (IERS)'s six-monthly Bulletin C. For example, at the time of writing, [the latest such bulletin](https://datacenter.iers.org/data/latestVersion/16_BULLETIN_C16.txt) was published on 5 January 2022 and announced that there will be no leap second at the very end of June 2022. This means that `t-a-i`'s calculations are guaranteed to be correct up to, but not including, the *next* potential leap second, which in this case is at the very end of December 2022. At or beyond this point, the introduction of leap seconds cannot be predicted in advance, and the correctness of `t-a-i`'s behaviour cannot be guaranteed.
 
 As a result, `t-a-i`'s behaviour beyond the next-but-one (possible) leap second is considered to be undefined. Updates to the source data when new leap seconds are announced will not be considered breaking changes, and will not incur a major version bump.
 
@@ -248,7 +248,7 @@ taiConverter.unixToAtomic(unix, { range: true })
 
 ## Background: TAI vs UTC vs Unix
 
-The relationship between UTC and TAI starts at 00:00:00 UTC on 1 January 1961. The relationship has always been **[linear](https://en.wikipedia.org/wiki/Linear_function_(calculus))**, but the nature of the linear relationship has changed on various discrete occasions.
+The relationship between UTC and TAI starts at 00:00:00 UTC on 1 January 1961. The relationship has always been [linear](https://en.wikipedia.org/wiki/Linear_function_(calculus)), but the nature of the linear relationship has changed on various discrete occasions.
 
 Raw data is provided by USNO (ftp://maia.usno.navy.mil/ser7/tai-utc.dat) or <a href="http://hpiers.obspm.fr/eop-pc/earthor/utc/TAI-UTC_tab.html">IERS</a>.
 
