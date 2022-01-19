@@ -10,6 +10,7 @@
   "main": "./src",
   "scripts": {
     "postpublish": "npm version patch && git push",
+    "stryker": "stryker run",
     "test": "standard && jest"
   },
   "author": "qntm",
