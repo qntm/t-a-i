@@ -1,4 +1,4 @@
-const { sign, div } = require('./div')
+const { sign, div, gcd } = require('./div')
 
 class Rat {
   constructor (nu, de = 1n) {
@@ -8,11 +8,22 @@ class Rat {
     if (typeof de !== 'bigint') {
       throw Error('Denominator must be a BigInt')
     }
+
     if (de === 0n) {
-      throw Error('Denominator must be non-zero')
+      // Positive and negative infinity and NaN
+      // become 1/0, -1/0, 0/0 respectively
+      this.nu = sign(nu)
+      this.de = 0n
+    } else if (nu === 0n) {
+      // Positive and negative zero
+      // become 0/1 and 0/-1 respectively
+      this.nu = 0n
+      this.de = sign(de)
+    } else {
+      const g = gcd(nu, de)
+      this.nu = nu / g
+      this.de = de / g
     }
-    this.nu = nu
-    this.de = de
   }
 
   plus (other) {
@@ -20,20 +31,22 @@ class Rat {
   }
 
   minus (other) {
-    return new Rat(this.nu * other.de - this.de * other.nu, this.de * other.de)
+    return this.plus(new Rat(-other.nu, other.de))
   }
 
   times (other) {
-    return new Rat(this.nu * other.nu, this.de * other.de)
+    return new Rat(
+      this.nu * other.nu,
+      sign(other.nu) * sign(this.nu) * this.de * other.de
+    )
   }
 
   divide (other) {
-    return new Rat(this.nu * other.de, this.de * other.nu)
+    return this.times(new Rat(other.de, other.nu))
   }
 
   cmp (other) {
-    const det = this.nu * other.de - this.de * other.nu
-    return sign(this.de) === sign(other.de) ? det : -det
+    return sign(this.de) * sign(other.de) * (this.nu * other.de - this.de * other.nu)
   }
 
   eq (other) {
