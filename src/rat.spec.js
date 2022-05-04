@@ -16,18 +16,25 @@ describe('Rat', () => {
 
   it('adds', () => {
     expect(new Rat(1n, 2n).plus(new Rat(1n, 3n))).toEqual(new Rat(5n, 6n))
+    expect(new Rat(1n, 2n).plus(new Rat(0n, 3n))).toEqual(new Rat(1n, 2n))
+    expect(new Rat(0n, 2n).plus(new Rat(1n, 3n))).toEqual(new Rat(1n, 3n))
   })
 
   it('subtracts', () => {
     expect(new Rat(1n, 2n).minus(new Rat(1n, 3n))).toEqual(new Rat(1n, 6n))
+    expect(new Rat(1n, 2n).minus(new Rat(0n, 3n))).toEqual(new Rat(1n, 2n))
+    expect(new Rat(0n, 2n).minus(new Rat(1n, 3n))).toEqual(new Rat(-1n, 3n))
   })
 
   it('multiplies', () => {
     expect(new Rat(6n, 5n).times(new Rat(4n, 5n))).toEqual(new Rat(24n, 25n))
+    expect(new Rat(6n, 5n).times(new Rat(0n, 5n))).toEqual(new Rat(0n, 25n))
+    expect(new Rat(0n, 5n).times(new Rat(4n, 5n))).toEqual(new Rat(0n, 25n))
   })
 
   it('divides', () => {
     expect(new Rat(6n, 5n).divide(new Rat(4n, 5n))).toEqual(new Rat(30n, 20n))
+    expect(new Rat(0n, 5n).divide(new Rat(4n, 5n))).toEqual(new Rat(0n, 20n))
   })
 
   it('greater than', () => {
