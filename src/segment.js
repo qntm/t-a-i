@@ -94,8 +94,7 @@ class Segment {
   // the segment. Valid Unix instants are the valid TAI instants, transformed linearly from TAI to
   // Unix by the segment.
 
-  atomicMillisOnSegment (atomicMillis) {
-    const atomicPicos = BigInt(atomicMillis) * picosPerMilli
+  atomicPicosOnSegment (atomicPicos) {
     const atomicPicosRatio = new Rat(atomicPicos)
     return this.start.atomicPicosRatio.le(atomicPicosRatio) && (
       this.end.atomicPicosRatio === Infinity ||
