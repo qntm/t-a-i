@@ -30,8 +30,8 @@ const Converter = (data, model) => {
         continue
       }
 
-      const atomicPicos = BigInt(atomicMillis) * 1_000_000_000n
-      return segment.atomicPicosToUnixMillis(atomicPicos)
+      const atomicPicosRatio = new Rat(BigInt(atomicMillis) * 1_000_000_000n)
+      return segment.atomicPicosRatioToUnixMillis(atomicPicosRatio)
     }
 
     // Pre-1961, or BREAK model and we hit a break

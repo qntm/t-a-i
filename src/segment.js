@@ -74,8 +74,7 @@ class Segment {
     }
   }
 
-  atomicPicosToUnixMillis (atomicPicos) {
-    const atomicPicosRatio = new Rat(atomicPicos)
+  atomicPicosRatioToUnixMillis (atomicPicosRatio) {
     const unixMillisRatio = atomicPicosRatio
       .minus(this.start.atomicPicosRatio)
       .times(this.slope.unixMillisPerAtomicPico)
