@@ -104,7 +104,8 @@ class Segment {
     )
   }
 
-  unixMillisRatioOnSegment (unixMillisRatio) {
+  unixRatioOnSegment (unixRatio) {
+    const unixMillisRatio = unixRatio.times(new Rat(1000n))
     return this.slope.unixMillisPerAtomicPico.eq(new Rat(0n))
       ? this.start.unixMillisRatio.eq(unixMillisRatio)
       : this.start.unixMillisRatio.le(unixMillisRatio) && (

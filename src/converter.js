@@ -40,11 +40,11 @@ const Converter = (data, model) => {
       throw Error(`Not an integer: ${unixMillis}`)
     }
 
-    const unixMillisRatio = new Rat(BigInt(unixMillis))
+    const unixRatio = new Rat(BigInt(unixMillis), 1000n)
 
     const ranges = []
     for (const segment of segments) {
-      if (!segment.unixMillisRatioOnSegment(unixMillisRatio)) {
+      if (!segment.unixRatioOnSegment(unixRatio)) {
         continue
       }
 
