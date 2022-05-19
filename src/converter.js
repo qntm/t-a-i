@@ -13,8 +13,6 @@
 const { munge, MODELS } = require('./munge')
 const { Rat } = require('./rat')
 
-const picosPerMilli = 1000n * 1000n * 1000n
-
 const Converter = (data, model) => {
   const segments = munge(data, model)
 
@@ -25,10 +23,10 @@ const Converter = (data, model) => {
       throw Error(`Not an integer: ${atomicMillis}`)
     }
 
-    const atomicPicosRatio = new Rat(BigInt(atomicMillis) * picosPerMilli)
+    const atomicRatio = new Rat(BigInt(atomicMillis), 1000n)
 
     for (const segment of segments) {
-      if (!segment.atomicPicosRatioOnSegment(atomicPicosRatio)) {
+      if (!segment.atomicRatioOnSegment(atomicRatio)) {
         continue
       }
 
