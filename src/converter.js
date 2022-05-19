@@ -11,6 +11,7 @@
 // segment (according to its numbering).
 
 const { munge, MODELS } = require('./munge')
+const { Rat } = require('./rat')
 
 const Converter = (data, model) => {
   const segments = munge(data, model)
@@ -39,9 +40,11 @@ const Converter = (data, model) => {
       throw Error(`Not an integer: ${unixMillis}`)
     }
 
+    const unixMillisRatio = new Rat(BigInt(unixMillis))
+
     const ranges = []
     for (const segment of segments) {
-      if (!segment.unixMillisOnSegment(unixMillis)) {
+      if (!segment.unixMillisRatioOnSegment(unixMillisRatio)) {
         continue
       }
 
