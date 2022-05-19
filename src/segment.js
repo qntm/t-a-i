@@ -74,8 +74,7 @@ class Segment {
     }
   }
 
-  atomicMillisToUnixMillis (atomicMillis) {
-    const atomicPicos = BigInt(atomicMillis) * picosPerMilli
+  atomicPicosToUnixMillis (atomicPicos) {
     const atomicPicosRatio = new Rat(atomicPicos)
     const unixMillisRatio = atomicPicosRatio
       .minus(this.start.atomicPicosRatio)

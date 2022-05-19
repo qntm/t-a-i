@@ -38,7 +38,7 @@ describe('Segment', () => {
       expect(segment.unixMillisToAtomicMillisRange(0))
         .toEqual({ start: 0, end: 0, closed: true })
       expect(segment.atomicRatioOnSegment(new Rat(0n))).toBe(true)
-      expect(segment.atomicMillisToUnixMillis(0)).toBe(0)
+      expect(segment.atomicPicosToUnixMillis(0n)).toBe(0)
     })
 
     it('modern day', () => {
@@ -49,8 +49,8 @@ describe('Segment', () => {
           end: Date.UTC(2021, MAY, 16, 12, 11, 10, 9),
           closed: true
         })
-     expect(segment.atomicRatioOnSegment(new Rat(BigInt(Date.UTC(2021, MAY, 16, 12, 11, 10, 9)), 1000n))).toBe(true)
-      expect(segment.atomicMillisToUnixMillis(Date.UTC(2021, MAY, 16, 12, 11, 10, 9)))
+      expect(segment.atomicRatioOnSegment(new Rat(BigInt(Date.UTC(2021, MAY, 16, 12, 11, 10, 9)), 1000n))).toBe(true)
+      expect(segment.atomicPicosToUnixMillis(BigInt(Date.UTC(2021, MAY, 16, 12, 11, 10, 9)) * picosPerMilli))
         .toBe(Date.UTC(2021, MAY, 16, 12, 11, 10, 9))
     })
 
@@ -59,7 +59,7 @@ describe('Segment', () => {
       expect(segment.unixMillisToAtomicMillisRange(-1))
         .toEqual({ start: -1, end: -1, closed: true })
       expect(segment.atomicRatioOnSegment(new Rat(-1n, 1000n))).toBe(false)
-      expect(segment.atomicMillisToUnixMillis(-1)).toBe(-1)
+      expect(segment.atomicPicosToUnixMillis(-1_000_000_000n)).toBe(-1)
     })
   })
 
@@ -76,7 +76,7 @@ describe('Segment', () => {
       expect(segment.unixMillisToAtomicMillisRange(0))
         .toEqual({ start: 0, end: 0, closed: true })
       expect(segment.atomicRatioOnSegment(new Rat(0n))).toBe(true)
-      expect(segment.atomicMillisToUnixMillis(0)).toBe(0)
+      expect(segment.atomicPicosToUnixMillis(0n)).toBe(0)
     })
 
     it('a little later', () => {
@@ -84,7 +84,7 @@ describe('Segment', () => {
       expect(segment.unixMillisToAtomicMillisRange(501))
         .toEqual({ start: 1002, end: 1002, closed: true })
       expect(segment.atomicRatioOnSegment(new Rat(1_002n, 1000n))).toBe(true)
-      expect(segment.atomicMillisToUnixMillis(1002)).toBe(501)
+      expect(segment.atomicPicosToUnixMillis(1_002_000_000_000n)).toBe(501)
     })
 
     it('right before end point', () => {
@@ -93,9 +93,9 @@ describe('Segment', () => {
         .toEqual({ start: 1998, end: 1998, closed: true })
 
       expect(segment.atomicRatioOnSegment(new Rat(1_998n, 1000n))).toBe(true)
-      expect(segment.atomicMillisToUnixMillis(1998)).toBe(999)
+      expect(segment.atomicPicosToUnixMillis(1_998_000_000_000n)).toBe(999)
       expect(segment.atomicRatioOnSegment(new Rat(1_999n, 1000n))).toBe(true)
-      expect(segment.atomicMillisToUnixMillis(1999)).toBe(999) // truncated
+      expect(segment.atomicPicosToUnixMillis(1_999_000_000_000n)).toBe(999) // truncated
     })
 
     it('end point', () => {
@@ -103,7 +103,7 @@ describe('Segment', () => {
       expect(segment.unixMillisToAtomicMillisRange(1000))
         .toEqual({ start: 2000, end: 2000, closed: true })
       expect(segment.atomicRatioOnSegment(new Rat(2n))).toBe(false)
-      expect(segment.atomicMillisToUnixMillis(2000)).toBe(1000)
+      expect(segment.atomicPicosToUnixMillis(2_000_000_000_000n)).toBe(1000)
     })
   })
 
@@ -120,14 +120,14 @@ describe('Segment', () => {
       expect(segment.unixMillisToAtomicMillisRange(0))
         .toEqual({ start: 0, end: 2000, closed: false })
       expect(segment.atomicRatioOnSegment(new Rat(0n))).toBe(true)
-      expect(segment.atomicMillisToUnixMillis(0)).toBe(0)
+      expect(segment.atomicPicosToUnixMillis(0n)).toBe(0)
     })
 
     it('later in TAI', () => {
       expect(segment.atomicRatioOnSegment(new Rat(1_999n, 1000n))).toBe(true)
-      expect(segment.atomicMillisToUnixMillis(1999)).toBe(0)
+      expect(segment.atomicPicosToUnixMillis(1_999_000_000_000n)).toBe(0)
       expect(segment.atomicRatioOnSegment(new Rat(2_000n, 1000n))).toBe(false)
-      expect(segment.atomicMillisToUnixMillis(2000)).toBe(0)
+      expect(segment.atomicPicosToUnixMillis(2_000_000_000_000n)).toBe(0)
     })
 
     it('later in Unix time', () => {
