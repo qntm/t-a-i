@@ -1,4 +1,4 @@
-const { sign, div } = require('./div')
+const { div, gcd } = require('./div')
 
 class Rat {
   constructor (nu, de = 1n) {
@@ -11,8 +11,10 @@ class Rat {
     if (de === 0n) {
       throw Error('Denominator must be non-zero')
     }
-    this.nu = nu
-    this.de = de
+
+    const g = gcd(nu, de)
+    this.nu = nu / g
+    this.de = de / g // `this.de` is always positive
   }
 
   plus (other) {
@@ -20,7 +22,7 @@ class Rat {
   }
 
   minus (other) {
-    return new Rat(this.nu * other.de - this.de * other.nu, this.de * other.de)
+    return this.plus(new Rat(-other.nu, other.de))
   }
 
   times (other) {
@@ -28,12 +30,11 @@ class Rat {
   }
 
   divide (other) {
-    return new Rat(this.nu * other.de, this.de * other.nu)
+    return this.times(new Rat(other.de, other.nu))
   }
 
   cmp (other) {
-    const det = this.nu * other.de - this.de * other.nu
-    return sign(this.de) === sign(other.de) ? det : -det
+    return this.nu * other.de - this.de * other.nu
   }
 
   eq (other) {

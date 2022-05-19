@@ -9,9 +9,11 @@
   },
   "main": "./src",
   "scripts": {
+    "jest": "jest",
     "postpublish": "npm version patch && git push",
+    "standard": "standard",
     "stryker": "stryker run",
-    "test": "standard && jest"
+    "test": "npm run standard && npm run jest"
   },
   "author": "qntm",
   "license": "MIT",

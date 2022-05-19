@@ -1,6 +1,6 @@
 /* eslint-env jest */
 
-const { sign, div } = require('./div')
+const { sign, div, gcd } = require('./div')
 
 describe('sign', () => {
   it('works', () => {
@@ -50,5 +50,21 @@ describe('div', () => {
     expect(div(12n, -10n)).toBe(-2n)
     expect(div(15n, -10n)).toBe(-2n)
     expect(div(18n, -10n)).toBe(-2n)
+  })
+})
+
+describe('gcd', () => {
+  it('works', () => {
+    expect(gcd(252n, 105n)).toBe(21n)
+    expect(gcd(105n, 252n)).toBe(21n)
+    expect(gcd(-105n, 252n)).toBe(21n)
+    expect(gcd(105n, -252n)).toBe(-21n)
+    expect(gcd(-105n, -252n)).toBe(-21n)
+    expect(gcd(6n, 35n)).toBe(1n)
+    expect(gcd(35n, 6n)).toBe(1n)
+    expect(gcd(35n, -6n)).toBe(-1n)
+    expect(gcd(-35n, 6n)).toBe(1n)
+    expect(gcd(-35n, -6n)).toBe(-1n)
+    expect(gcd(1071n, 462n)).toBe(21n)
   })
 })
