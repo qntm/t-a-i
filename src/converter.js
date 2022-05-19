@@ -25,10 +25,10 @@ const Converter = (data, model) => {
       throw Error(`Not an integer: ${atomicMillis}`)
     }
 
-    const atomicPicos = BigInt(atomicMillis) * picosPerMilli
+    const atomicPicosRatio = new Rat(BigInt(atomicMillis) * picosPerMilli)
 
     for (const segment of segments) {
-      if (!segment.atomicPicosOnSegment(atomicPicos)) {
+      if (!segment.atomicPicosRatioOnSegment(atomicPicosRatio)) {
         continue
       }
 
