@@ -33,7 +33,7 @@ const MODELS = {
 }
 
 const NOV = 10
-
+const secondsPerDay = new Rat(86_400n)
 const mjdEpoch = {
   unix: new Rat(BigInt(Date.UTC(1858, NOV, 17)), 1_000n)
 }
@@ -64,19 +64,19 @@ const munge = (data, model) => {
     // So we have to do some rounding
     offsetAtRoot.atomic = new Rat(
       BigInt(Math.round(offsetAtRoot.atomicFloat * 10_000_000)),
-      10_000_000n
+      BigInt(10_000_000)
     )
 
-    root.unix = mjdEpoch.unix.plus(new Rat(BigInt(root.mjds) * 86_400n))
+    root.unix = mjdEpoch.unix.plus(new Rat(BigInt(root.mjds)).times(secondsPerDay))
 
     // Convert from a floating point number to a precise ratio
     // Drift rates are given in TAI seconds to seven decimal places, e.g. `0.001_123_2`
     // So we have to do some rounding
     driftRate.atomicPerUnixDay = new Rat(
       BigInt(Math.round(driftRate.atomicPerUnixDayFloat * 10_000_000)),
-      10_000_000n
+      BigInt(10_000_000)
     )
-    driftRate.atomicPerUnix = driftRate.atomicPerUnixDay.divide(new Rat(86_400n))
+    driftRate.atomicPerUnix = driftRate.atomicPerUnixDay.divide(secondsPerDay)
 
     const slope = {}
     slope.atomicPerUnix = new Rat(1n).plus(driftRate.atomicPerUnix)
@@ -137,7 +137,7 @@ const munge = (data, model) => {
       const smearStart = {}
 
       smearStart.unix = model === MODELS.SMEAR
-        ? b.start.unix.minus(new Rat(86_400n, 2n))
+        ? b.start.unix.minus(secondsPerDay.divide(new Rat(2n)))
         : b.start.unix
 
       smearStart.atomic = smearStart.unix
@@ -151,7 +151,7 @@ const munge = (data, model) => {
       const smearEnd = {}
 
       smearEnd.unix = model === MODELS.SMEAR
-        ? b.start.unix.plus(new Rat(86_400n, 2n))
+        ? b.start.unix.plus(secondsPerDay.divide(new Rat(2n)))
         : b.start.unix
 
       smearEnd.atomic = smearEnd.unix

@@ -30,7 +30,9 @@ const Converter = (data, model) => {
         continue
       }
 
-      return Number(segment.atomicToUnix(atomic).times(new Rat(1000n)).trunc())
+      const unix = segment.atomicToUnix(atomic)
+
+      return Number(unix.times(new Rat(1000n)).trunc())
     }
 
     // Pre-1961, or BREAK model and we hit a break
