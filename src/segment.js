@@ -27,13 +27,14 @@ class Segment {
     this.end.atomicPicos = end.atomicPicos
     if (this.end.atomicPicos === Infinity) {
       this.end.atomicPicosRatio = Infinity
-      this.end.unixMillisRatio = Infinity
+      this.end.unixRatio = Infinity
     } else {
       this.end.atomicPicosRatio = new Rat(this.end.atomicPicos)
-      this.end.unixMillisRatio = this.end.atomicPicosRatio
+      this.end.unixRatio = this.end.atomicPicosRatio
         .minus(this.start.atomicPicosRatio)
         .times(this.slope.unixMillisPerAtomicPico)
         .plus(this.start.unixRatio.times(new Rat(1000n)))
+        .divide(new Rat(1000n))
     }
   }
 
@@ -91,8 +92,8 @@ class Segment {
     return this.slope.unixMillisPerAtomicPico.eq(new Rat(0n))
       ? this.start.unixRatio.times(new Rat(1000n)).eq(unixMillisRatio)
       : this.start.unixRatio.times(new Rat(1000n)).le(unixMillisRatio) && (
-        this.end.unixMillisRatio === Infinity ||
-        this.end.unixMillisRatio
+        this.end.unixRatio === Infinity ||
+        this.end.unixRatio.times(new Rat(1000n))
           .gt(unixMillisRatio)
       )
   }
