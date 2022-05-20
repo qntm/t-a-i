@@ -88,13 +88,11 @@ class Segment {
   }
 
   unixRatioOnSegment (unixRatio) {
-    const unixMillisRatio = unixRatio.times(new Rat(1000n))
     return this.slope.unixMillisPerAtomicPico.eq(new Rat(0n))
-      ? this.start.unixRatio.times(new Rat(1000n)).eq(unixMillisRatio)
-      : this.start.unixRatio.times(new Rat(1000n)).le(unixMillisRatio) && (
+      ? this.start.unixRatio.eq(unixRatio)
+      : this.start.unixRatio.le(unixRatio) && (
         this.end.unixRatio === Infinity ||
-        this.end.unixRatio.times(new Rat(1000n))
-          .gt(unixMillisRatio)
+        this.end.unixRatio.gt(unixRatio)
       )
   }
 }

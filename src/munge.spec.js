@@ -218,14 +218,16 @@ describe('munge', () => {
         const unixRatio = segments[i + 1].start.unixRatio
 
         // TAI picoseconds as of this Unix time, at the END of the CURRENT segment
-        const a = unixRatio.times(new Rat(1000n))
-          .minus(segment.start.unixRatio.times(new Rat(1000n)))
+        const a = unixRatio
+          .minus(segment.start.unixRatio)
+          .times(new Rat(1000n))
           .divide(segment.slope.unixMillisPerAtomicPico)
           .plus(segment.start.atomicPicosRatio)
 
         // TAI picoseconds as of this Unix time, at the START of the NEXT segment
-        const b = unixRatio.times(new Rat(1000n))
-          .minus(segments[i + 1].start.unixRatio.times(new Rat(1000n)))
+        const b = unixRatio
+          .minus(segments[i + 1].start.unixRatio)
+          .times(new Rat(1000n))
           .divide(segments[i + 1].slope.unixMillisPerAtomicPico)
           .plus(segments[i + 1].start.atomicPicosRatio)
 
@@ -581,16 +583,18 @@ describe('munge', () => {
         // TAI picoseconds as of this Unix time, at the END of the CURRENT segment
         const a = segment.slope.unixMillisPerAtomicPico.nu === 0n
           ? segment.end.atomicPicosRatio
-          : unixRatio.times(new Rat(1000n))
-            .minus(segment.start.unixRatio.times(new Rat(1000n)))
+          : unixRatio
+            .minus(segment.start.unixRatio)
+            .times(new Rat(1000n))
             .divide(segment.slope.unixMillisPerAtomicPico)
             .plus(segment.start.atomicPicosRatio)
 
         // TAI picoseconds as of this Unix time, at the START of the NEXT segment
         const b = segments[i + 1].slope.unixMillisPerAtomicPico.nu === 0n
           ? segments[i + 1].start.atomicPicosRatio
-          : unixRatio.times(new Rat(1000n))
-            .minus(segments[i + 1].start.unixRatio.times(new Rat(1000n)))
+          : unixRatio
+            .minus(segments[i + 1].start.unixRatio)
+            .times(new Rat(1000n))
             .divide(segments[i + 1].slope.unixMillisPerAtomicPico)
             .plus(segments[i + 1].start.atomicPicosRatio)
 
@@ -843,14 +847,16 @@ describe('munge', () => {
         const unixRatio = segments[i + 1].start.unixRatio
 
         // TAI picoseconds as of this Unix time, at the END of the CURRENT segment
-        const a = unixRatio.times(new Rat(1000n))
-          .minus(segment.start.unixRatio.times(new Rat(1000n)))
+        const a = unixRatio
+          .minus(segment.start.unixRatio)
+          .times(new Rat(1000n))
           .divide(segment.slope.unixMillisPerAtomicPico)
           .plus(segment.start.atomicPicosRatio)
 
         // TAI picoseconds as of this Unix time, at the START of the NEXT segment
-        const b = unixRatio.times(new Rat(1000n))
-          .minus(segments[i + 1].start.unixRatio.times(new Rat(1000n)))
+        const b = unixRatio
+          .minus(segments[i + 1].start.unixRatio)
+          .times(new Rat(1000n))
           .divide(segments[i + 1].slope.unixMillisPerAtomicPico)
           .plus(segments[i + 1].start.atomicPicosRatio)
 
