@@ -8,7 +8,7 @@ const MAY = 4
 describe('Segment', () => {
   it('disallows rays which run backwards', () => {
     expect(() => new Segment(
-      { atomicPicos: 0n, unixRatio: new Rat(0n) },
+      { atomicRatio: new Rat(0n), unixRatio: new Rat(0n) },
       { atomicRatio: new Rat(-1n, 1_000_000_000_000n) },
       new Rat(1n)
     )).toThrowError('Segment length must be positive')
@@ -16,7 +16,7 @@ describe('Segment', () => {
 
   it('disallows zero-length rays which run backwards', () => {
     expect(() => new Segment(
-      { atomicPicos: 0n, unixRatio: new Rat(0n) },
+      { atomicRatio: new Rat(0n), unixRatio: new Rat(0n) },
       { atomicRatio: new Rat(0n) },
       new Rat(1n)
     )).toThrowError('Segment length must be positive')
@@ -24,7 +24,7 @@ describe('Segment', () => {
 
   describe('basic infinite ray', () => {
     const segment = new Segment(
-      { atomicPicos: 0n, unixRatio: new Rat(0n) },
+      { atomicRatio: new Rat(0n), unixRatio: new Rat(0n) },
       { atomicRatio: Infinity },
       new Rat(1n)
     )
@@ -61,7 +61,7 @@ describe('Segment', () => {
 
   describe('sloped, finite ray', () => {
     const segment = new Segment(
-      { atomicPicos: 0n, unixRatio: new Rat(0n) },
+      { atomicRatio: new Rat(0n), unixRatio: new Rat(0n) },
       { atomicRatio: new Rat(2n) }, // 2 TAI seconds
       new Rat(1n, 2n) // TAI runs twice as fast as Unix time
     )
@@ -104,7 +104,7 @@ describe('Segment', () => {
 
   describe('horizontal ray', () => {
     const segment = new Segment(
-      { atomicPicos: 0n, unixRatio: new Rat(0n) },
+      { atomicRatio: new Rat(0n), unixRatio: new Rat(0n) },
       { atomicRatio: new Rat(2n) }, // 2 TAI seconds
       new Rat(0n)
     )

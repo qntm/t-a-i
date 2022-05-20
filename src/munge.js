@@ -199,7 +199,7 @@ const munge = (data, model) => {
 
   return munged.map(datum => new Segment(
     {
-      ...datum.start,
+      atomicRatio: new Rat(datum.start.atomicPicos, 1_000_000_000_000n),
       unixRatio: new Rat(BigInt(datum.start.unixMillis), 1000n)
     },
     {
