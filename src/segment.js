@@ -74,11 +74,12 @@ class Segment {
     }
   }
 
-  atomicRatioToUnixMillisRatio (atomicRatio) {
+  atomicRatioToUnixRatio (atomicRatio) {
     return atomicRatio.times(new Rat(1_000_000_000_000n))
       .minus(this.start.atomicPicosRatio)
       .times(this.slope.unixMillisPerAtomicPico)
       .plus(this.start.unixMillisRatio)
+      .divide(new Rat(1000n))
   }
 
   // Bounds checks. Each segment has an inclusive-exclusive range of validity.
