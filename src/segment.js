@@ -15,13 +15,11 @@ class Segment {
     }
 
     // Start is inclusive.
-    // `atomicPicos` and `unixMillis` are exact.
     this.start = {}
     this.start.atomicRatio = new Rat(start.atomicPicos, 1_000_000_000_000n)
     this.start.unixRatio = new Rat(BigInt(start.unixMillis), 1000n)
 
     // End is exclusive.
-    // `atomicPicos` is exact, no exact integer `unixMillis` is possible in most cases
     this.end = {}
     if (end.atomicPicos === Infinity) {
       this.end.atomicRatio = Infinity
