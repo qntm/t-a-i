@@ -35,7 +35,7 @@ describe('Segment', () => {
 
     it('zero point', () => {
       expect(segment.unixRatioOnSegment(new Rat(0n))).toBe(true)
-      expect(segment.unixMillisToAtomicMillisRange(0))
+      expect(segment.unixMillisRatioToAtomicMillisRange(new Rat(0n)))
         .toEqual({ start: 0, end: 0, closed: true })
       expect(segment.atomicRatioOnSegment(new Rat(0n))).toBe(true)
       expect(segment.atomicRatioToUnixRatio(new Rat(0n))).toEqual(new Rat(0n))
@@ -43,7 +43,7 @@ describe('Segment', () => {
 
     it('modern day', () => {
       expect(segment.unixRatioOnSegment(new Rat(BigInt(Date.UTC(2021, MAY, 16, 12, 11, 10, 9)), 1000n))).toBe(true)
-      expect(segment.unixMillisToAtomicMillisRange(Date.UTC(2021, MAY, 16, 12, 11, 10, 9)))
+      expect(segment.unixMillisRatioToAtomicMillisRange(new Rat(BigInt(Date.UTC(2021, MAY, 16, 12, 11, 10, 9)))))
         .toEqual({
           start: Date.UTC(2021, MAY, 16, 12, 11, 10, 9),
           end: Date.UTC(2021, MAY, 16, 12, 11, 10, 9),
@@ -56,7 +56,7 @@ describe('Segment', () => {
 
     it('before start point', () => {
       expect(segment.unixRatioOnSegment(new Rat(-1n, 1000n))).toBe(false)
-      expect(segment.unixMillisToAtomicMillisRange(-1))
+      expect(segment.unixMillisRatioToAtomicMillisRange(new Rat(-1n)))
         .toEqual({ start: -1, end: -1, closed: true })
       expect(segment.atomicRatioOnSegment(new Rat(-1n, 1000n))).toBe(false)
       expect(segment.atomicRatioToUnixRatio(new Rat(-1n, 1000n))).toEqual(new Rat(-1n, 1000n))
@@ -73,7 +73,7 @@ describe('Segment', () => {
 
     it('zero point', () => {
       expect(segment.unixRatioOnSegment(new Rat(0n))).toBe(true)
-      expect(segment.unixMillisToAtomicMillisRange(0))
+      expect(segment.unixMillisRatioToAtomicMillisRange(new Rat(0n)))
         .toEqual({ start: 0, end: 0, closed: true })
       expect(segment.atomicRatioOnSegment(new Rat(0n))).toBe(true)
       expect(segment.atomicRatioToUnixRatio(new Rat(0n))).toEqual(new Rat(0n))
@@ -81,7 +81,7 @@ describe('Segment', () => {
 
     it('a little later', () => {
       expect(segment.unixRatioOnSegment(new Rat(501n, 1000n))).toBe(true)
-      expect(segment.unixMillisToAtomicMillisRange(501))
+      expect(segment.unixMillisRatioToAtomicMillisRange(new Rat(501n)))
         .toEqual({ start: 1002, end: 1002, closed: true })
       expect(segment.atomicRatioOnSegment(new Rat(1_002n, 1000n))).toBe(true)
       expect(segment.atomicRatioToUnixRatio(new Rat(1_002n, 1000n))).toEqual(new Rat(501n, 1000n))
@@ -89,7 +89,7 @@ describe('Segment', () => {
 
     it('right before end point', () => {
       expect(segment.unixRatioOnSegment(new Rat(999n, 1000n))).toBe(true)
-      expect(segment.unixMillisToAtomicMillisRange(999))
+      expect(segment.unixMillisRatioToAtomicMillisRange(new Rat(999n)))
         .toEqual({ start: 1998, end: 1998, closed: true })
 
       expect(segment.atomicRatioOnSegment(new Rat(1_998n, 1000n))).toBe(true)
@@ -100,7 +100,7 @@ describe('Segment', () => {
 
     it('end point', () => {
       expect(segment.unixRatioOnSegment(new Rat(1n))).toBe(false)
-      expect(segment.unixMillisToAtomicMillisRange(1000))
+      expect(segment.unixMillisRatioToAtomicMillisRange(new Rat(1000n)))
         .toEqual({ start: 2000, end: 2000, closed: true })
       expect(segment.atomicRatioOnSegment(new Rat(2n))).toBe(false)
       expect(segment.atomicRatioToUnixRatio(new Rat(2n))).toEqual(new Rat(1n))
@@ -117,7 +117,7 @@ describe('Segment', () => {
 
     it('zero point', () => {
       expect(segment.unixRatioOnSegment(new Rat(0n))).toBe(true)
-      expect(segment.unixMillisToAtomicMillisRange(0))
+      expect(segment.unixMillisRatioToAtomicMillisRange(new Rat(0n)))
         .toEqual({ start: 0, end: 2000, closed: false })
       expect(segment.atomicRatioOnSegment(new Rat(0n))).toBe(true)
       expect(segment.atomicRatioToUnixRatio(new Rat(0n))).toEqual(new Rat(0n))
@@ -132,7 +132,7 @@ describe('Segment', () => {
 
     it('later in Unix time', () => {
       expect(segment.unixRatioOnSegment(new Rat(1n))).toBe(false)
-      expect(() => segment.unixMillisToAtomicMillisRange(-1))
+      expect(() => segment.unixMillisRatioToAtomicMillisRange(new Rat(-1n)))
         .toThrowError('This Unix time never happened')
     })
   })

@@ -45,9 +45,7 @@ class Segment {
     }
   }
 
-  unixMillisToAtomicMillisRange (unixMillis) {
-    const unixMillisRatio = new Rat(BigInt(unixMillis))
-
+  unixMillisRatioToAtomicMillisRange (unixMillisRatio) {
     if (this.slope.unixMillisPerAtomicPico.eq(new Rat(0n))) {
       if (!unixMillisRatio.eq(this.start.unixMillisRatio)) {
         throw Error('This Unix time never happened')

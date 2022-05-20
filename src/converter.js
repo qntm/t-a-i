@@ -43,6 +43,7 @@ const Converter = (data, model) => {
     }
 
     const unixRatio = new Rat(BigInt(unixMillis), 1000n)
+    const unixMillisRatio = new Rat(BigInt(unixMillis))
 
     const ranges = []
     for (const segment of segments) {
@@ -50,7 +51,7 @@ const Converter = (data, model) => {
         continue
       }
 
-      const range = segment.unixMillisToAtomicMillisRange(unixMillis)
+      const range = segment.unixMillisRatioToAtomicMillisRange(unixMillisRatio)
 
       if (ranges.length - 1 in ranges) {
         const prev = ranges[ranges.length - 1]
