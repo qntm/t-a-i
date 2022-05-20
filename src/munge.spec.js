@@ -163,7 +163,7 @@ describe('munge', () => {
     })
 
     it('generates proper drift rates', () => {
-      expect(munge(taiData, MODELS.OVERRUN).map(segment => segment.slope.unixMillisPerAtomic))
+      expect(munge(taiData, MODELS.OVERRUN).map(segment => segment.slope.unixPerAtomic))
         .toEqual([
           new Rat(1_000_000_000n, 1_000_000_015n),
           new Rat(1_000_000_000n, 1_000_000_015n),
@@ -217,23 +217,20 @@ describe('munge', () => {
 
         const unixRatio = segments[i + 1].start.unixRatio
 
-        // TAI picoseconds as of this Unix time, at the END of the CURRENT segment
+        // TAI as of this Unix time, at the END of the CURRENT segment
         const a = unixRatio
           .minus(segment.start.unixRatio)
-          .times(new Rat(1000n))
-          .times(new Rat(1000_000_000n))
-          .divide(segment.slope.unixMillisPerAtomic)
-          .plus(segment.start.atomicRatio.times(new Rat(1_000_000_000_000n)))
+          .divide(segment.slope.unixPerAtomic)
+          .plus(segment.start.atomicRatio)
 
-        // TAI picoseconds as of this Unix time, at the START of the NEXT segment
+        // TAI as of this Unix time, at the START of the NEXT segment
         const b = unixRatio
           .minus(segments[i + 1].start.unixRatio)
-          .times(new Rat(1000n))
-          .times(new Rat(1000_000_000n))
-          .divide(segments[i + 1].slope.unixMillisPerAtomic)
-          .plus(segments[i + 1].start.atomicRatio.times(new Rat(1_000_000_000_000n)))
+          .divide(segments[i + 1].slope.unixPerAtomic)
+          .plus(segments[i + 1].start.atomicRatio)
 
-        return b.minus(a).trunc()
+        // Convert to picoseconds
+        return b.minus(a).times(new Rat(1_000_000_000_000n)).trunc()
       })).toEqual([
         -50_000_000_000n,
         0n,
@@ -491,7 +488,7 @@ describe('munge', () => {
 
     it('generates proper drift rates', () => {
       // Note the stalls for the duration of inserted time
-      expect(munge(taiData, MODELS.STALL).map(segment => segment.slope.unixMillisPerAtomic))
+      expect(munge(taiData, MODELS.STALL).map(segment => segment.slope.unixPerAtomic))
         .toEqual([
           new Rat(1_000_000_000n, 1_000_000_015n),
           new Rat(1_000_000_000n, 1_000_000_015n),
@@ -582,27 +579,24 @@ describe('munge', () => {
 
         const unixRatio = segments[i + 1].start.unixRatio
 
-        // TAI picoseconds as of this Unix time, at the END of the CURRENT segment
-        const a = segment.slope.unixMillisPerAtomic.nu === 0n
-          ? segment.end.atomicRatio.times(new Rat(1_000_000_000_000n))
+        // TAI as of this Unix time, at the END of the CURRENT segment
+        const a = segment.slope.unixPerAtomic.nu === 0n
+          ? segment.end.atomicRatio
           : unixRatio
             .minus(segment.start.unixRatio)
-            .times(new Rat(1000n))
-            .times(new Rat(1_000_000_000n))
-            .divide(segment.slope.unixMillisPerAtomic)
-            .plus(segment.start.atomicRatio.times(new Rat(1_000_000_000_000n)))
+            .divide(segment.slope.unixPerAtomic)
+            .plus(segment.start.atomicRatio)
 
-        // TAI picoseconds as of this Unix time, at the START of the NEXT segment
-        const b = segments[i + 1].slope.unixMillisPerAtomic.nu === 0n
-          ? segments[i + 1].start.atomicRatio.times(new Rat(1_000_000_000_000n))
+        // TAI  of this Unix time, at the START of the NEXT segment
+        const b = segments[i + 1].slope.unixPerAtomic.nu === 0n
+          ? segments[i + 1].start.atomicRatio
           : unixRatio
             .minus(segments[i + 1].start.unixRatio)
-            .times(new Rat(1000n))
-            .times(new Rat(1_000_000_000n))
-            .divide(segments[i + 1].slope.unixMillisPerAtomic)
-            .plus(segments[i + 1].start.atomicRatio.times(new Rat(1_000_000_000_000n)))
+            .divide(segments[i + 1].slope.unixPerAtomic)
+            .plus(segments[i + 1].start.atomicRatio)
 
-        return b.minus(a).trunc()
+        // Convert to picoseconds
+        return b.minus(a).times(new Rat(1_000_000_000_000n)).trunc()
       })).toEqual([
         -50_000_000_000n, // 0.05 TAI seconds removed from UTC
         0n,
@@ -753,7 +747,7 @@ describe('munge', () => {
     })
 
     it('generates proper drift rates', () => {
-      expect(munge(taiData, MODELS.SMEAR).map(segment => segment.slope.unixMillisPerAtomic))
+      expect(munge(taiData, MODELS.SMEAR).map(segment => segment.slope.unixPerAtomic))
         .toEqual([
           // During Unix-day-long smears, elapsed atomic time is a full day PLUS daily offset
           // PLUS inserted time
@@ -853,18 +847,16 @@ describe('munge', () => {
         // TAI picoseconds as of this Unix time, at the END of the CURRENT segment
         const a = unixRatio
           .minus(segment.start.unixRatio)
-          .times(new Rat(1000n))
-          .times(new Rat(1000_000_000n))
-          .divide(segment.slope.unixMillisPerAtomic)
-          .plus(segment.start.atomicRatio.times(new Rat(1_000_000_000_000n)))
+          .divide(segment.slope.unixPerAtomic)
+          .plus(segment.start.atomicRatio)
+          .times(new Rat(1_000_000_000_000n))
 
         // TAI picoseconds as of this Unix time, at the START of the NEXT segment
         const b = unixRatio
           .minus(segments[i + 1].start.unixRatio)
-          .times(new Rat(1000n))
-          .times(new Rat(1000_000_000n))
-          .divide(segments[i + 1].slope.unixMillisPerAtomic)
-          .plus(segments[i + 1].start.atomicRatio.times(new Rat(1_000_000_000_000n)))
+          .divide(segments[i + 1].slope.unixPerAtomic)
+          .plus(segments[i + 1].start.atomicRatio)
+          .times(new Rat(1_000_000_000_000n))
 
         return b.minus(a).trunc()
       })).toEqual([

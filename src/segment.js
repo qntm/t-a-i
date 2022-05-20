@@ -11,7 +11,7 @@ class Segment {
     }
 
     this.slope = {
-      unixMillisPerAtomic: new Rat(BigInt(dy.unixMillis) * 1_000_000_000n, dx.atomicPicos)
+      unixPerAtomic: new Rat(BigInt(dy.unixMillis) * 1_000_000_000n, dx.atomicPicos)
     }
 
     // Start is inclusive.
@@ -30,17 +30,14 @@ class Segment {
       this.end.atomicRatio = new Rat(end.atomicPicos, 1_000_000_000_000n)
       this.end.unixRatio = this.end.atomicRatio
         .minus(this.start.atomicRatio)
-        .times(new Rat(1_000n))
-        .times(this.slope.unixMillisPerAtomic)
-        .plus(this.start.unixRatio.times(new Rat(1000n)))
-        .divide(new Rat(1000n))
+        .times(this.slope.unixPerAtomic)
+        .plus(this.start.unixRatio)
     }
   }
 
   unixRatioToAtomicRatioRange (unixRatio) {
-    const unixMillisRatio = unixRatio.times(new Rat(1000n))
-    if (this.slope.unixMillisPerAtomic.eq(new Rat(0n))) {
-      if (!unixMillisRatio.eq(this.start.unixRatio.times(new Rat(1000n)))) {
+    if (this.slope.unixPerAtomic.eq(new Rat(0n))) {
+      if (!unixRatio.eq(this.start.unixRatio)) {
         throw Error('This Unix time never happened')
       }
 
@@ -51,10 +48,9 @@ class Segment {
       }
     }
 
-    const atomicRatio = unixMillisRatio
-      .minus(this.start.unixRatio.times(new Rat(1000n)))
-      .divide(this.slope.unixMillisPerAtomic)
-      .divide(new Rat(1_000n))
+    const atomicRatio = unixRatio
+      .minus(this.start.unixRatio)
+      .divide(this.slope.unixPerAtomic)
       .plus(this.start.atomicRatio)
 
     return {
@@ -67,10 +63,8 @@ class Segment {
   atomicRatioToUnixRatio (atomicRatio) {
     return atomicRatio
       .minus(this.start.atomicRatio)
-      .times(new Rat(1_000n))
-      .times(this.slope.unixMillisPerAtomic)
-      .plus(this.start.unixRatio.times(new Rat(1000n)))
-      .divide(new Rat(1000n))
+      .times(this.slope.unixPerAtomic)
+      .plus(this.start.unixRatio)
   }
 
   // Bounds checks. Each segment has an inclusive-exclusive range of validity.
@@ -87,7 +81,7 @@ class Segment {
   }
 
   unixRatioOnSegment (unixRatio) {
-    return this.slope.unixMillisPerAtomic.eq(new Rat(0n))
+    return this.slope.unixPerAtomic.eq(new Rat(0n))
       ? this.start.unixRatio.eq(unixRatio)
       : this.start.unixRatio.le(unixRatio) && (
         this.end.unixRatio === Infinity ||
