@@ -76,7 +76,7 @@ const munge = (data, model) => {
     }
 
     const dy = {
-      unixMillis: 1
+      unixPicos: 1_000_000_000n
     }
 
     const dx = {
@@ -87,8 +87,9 @@ const munge = (data, model) => {
     start.atomicPicos = BigInt(root.unixMillis) * picosPerMilli +
       offsetAtRoot.atomicPicos +
       BigInt(start.unixMillis - root.unixMillis) *
+      picosPerMilli *
       dx.atomicPicos /
-      BigInt(dy.unixMillis)
+      BigInt(dy.unixPicos)
 
     return {
       start,
@@ -145,8 +146,9 @@ const munge = (data, model) => {
 
       smearStart.atomicPicos = a.start.atomicPicos +
         BigInt(smearStart.unixMillis - a.start.unixMillis) *
+        picosPerMilli *
         a.dx.atomicPicos /
-        BigInt(a.dy.unixMillis)
+        BigInt(a.dy.unixPicos)
 
       // Find smear end point, which is on the NEXT segment.
       // When breaking/stalling, this is the start of the next segment.
@@ -159,8 +161,9 @@ const munge = (data, model) => {
 
       smearEnd.atomicPicos = b.start.atomicPicos +
         BigInt(smearEnd.unixMillis - b.start.unixMillis) *
+        picosPerMilli *
         b.dx.atomicPicos /
-        BigInt(b.dy.unixMillis)
+        BigInt(b.dy.unixPicos)
 
       if (smearEnd.atomicPicos <= smearStart.atomicPicos) {
         // No negative-length or zero-length smears
@@ -178,12 +181,12 @@ const munge = (data, model) => {
       }
 
       // Insert a new smear segment linking the two.
-      // When breaking/stalling, this is perfectly horizontal (dy.unixMillis = 0)
+      // When breaking/stalling, this is perfectly horizontal (dy.unixPicos = 0)
       munged.splice(i + 1, 0, {
         start: smearStart,
         end: smearEnd, // includes unixMillis but we'll ignore that
         dy: {
-          unixMillis: smearEnd.unixMillis - smearStart.unixMillis
+          unixPicos: BigInt(smearEnd.unixMillis - smearStart.unixMillis) * picosPerMilli
         },
         dx: {
           atomicPicos: smearEnd.atomicPicos - smearStart.atomicPicos
@@ -207,7 +210,7 @@ const munge = (data, model) => {
         ? Infinity
         : new Rat(datum.end.atomicPicos, 1_000_000_000_000n)
     },
-    new Rat(BigInt(datum.dy.unixMillis) * 1_000_000_000n, datum.dx.atomicPicos)
+    new Rat(datum.dy.unixPicos, datum.dx.atomicPicos)
   ))
 }
 

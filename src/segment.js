@@ -9,21 +9,17 @@ class Segment {
     this.slope = { unixPerAtomic }
 
     // Start is inclusive.
-    this.start = {}
-    this.start.atomicRatio = start.atomicRatio
-    this.start.unixRatio = start.unixRatio
+    this.start = start
 
     // End is exclusive.
-    this.end = {}
+    this.end = { ...end }
     if (end.atomicRatio === Infinity) {
-      this.end.atomicRatio = Infinity
       this.end.unixRatio = Infinity
     } else {
       if (!this.start.atomicRatio.lt(end.atomicRatio)) {
         throw Error('Segment length must be positive')
       }
 
-      this.end.atomicRatio = end.atomicRatio
       this.end.unixRatio = end.atomicRatio
         .minus(this.start.atomicRatio)
         .times(this.slope.unixPerAtomic)
