@@ -37,7 +37,7 @@ class Segment {
     }
   }
 
-  unixRatioToAtomicPicosRatioRange (unixRatio) {
+  unixRatioToAtomicRatioRange (unixRatio) {
     const unixMillisRatio = unixRatio.times(new Rat(1000n))
     if (this.slope.unixMillisPerAtomicPico.eq(new Rat(0n))) {
       if (!unixMillisRatio.eq(this.start.unixMillisRatio)) {
@@ -45,8 +45,8 @@ class Segment {
       }
 
       return {
-        start: this.start.atomicPicosRatio,
-        end: this.end.atomicPicosRatio,
+        start: this.start.atomicPicosRatio.divide(new Rat(1_000_000_000_000n)),
+        end: this.end.atomicPicosRatio.divide(new Rat(1_000_000_000_000n)),
         closed: false
       }
     }
@@ -55,6 +55,7 @@ class Segment {
       .minus(this.start.unixMillisRatio)
       .divide(this.slope.unixMillisPerAtomicPico)
       .plus(this.start.atomicPicosRatio)
+      .divide(new Rat(1_000_000_000_000n))
 
     return {
       start: atomicPicosRatio,

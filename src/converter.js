@@ -50,9 +50,9 @@ const Converter = (data, model) => {
         continue
       }
 
-      const range = segment.unixRatioToAtomicPicosRatioRange(unixRatio)
-      range.start = Number(range.start.divide(new Rat(1_000_000_000n)).trunc())
-      range.end = Number(range.end.divide(new Rat(1_000_000_000n)).trunc())
+      const range = segment.unixRatioToAtomicRatioRange(unixRatio)
+      range.start = Number(range.start.times(new Rat(1_000n)).trunc())
+      range.end = Number(range.end.times(new Rat(1_000n)).trunc())
 
       if (ranges.length - 1 in ranges) {
         const prev = ranges[ranges.length - 1]
