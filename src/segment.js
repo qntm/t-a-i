@@ -19,7 +19,7 @@ class Segment {
     this.start = {}
     this.start.atomicPicos = start.atomicPicos
     this.start.atomicPicosRatio = new Rat(this.start.atomicPicos)
-    this.start.unixMillisRatio = new Rat(BigInt(start.unixMillis))
+    this.start.unixRatio = new Rat(BigInt(start.unixMillis), 1000n)
 
     // End is exclusive.
     // `atomicPicos` is exact, no exact integer `unixMillis` is possible in most cases
@@ -33,14 +33,14 @@ class Segment {
       this.end.unixMillisRatio = this.end.atomicPicosRatio
         .minus(this.start.atomicPicosRatio)
         .times(this.slope.unixMillisPerAtomicPico)
-        .plus(this.start.unixMillisRatio)
+        .plus(this.start.unixRatio.times(new Rat(1000n)))
     }
   }
 
   unixRatioToAtomicRatioRange (unixRatio) {
     const unixMillisRatio = unixRatio.times(new Rat(1000n))
     if (this.slope.unixMillisPerAtomicPico.eq(new Rat(0n))) {
-      if (!unixMillisRatio.eq(this.start.unixMillisRatio)) {
+      if (!unixMillisRatio.eq(this.start.unixRatio.times(new Rat(1000n)))) {
         throw Error('This Unix time never happened')
       }
 
@@ -51,15 +51,15 @@ class Segment {
       }
     }
 
-    const atomicPicosRatio = unixMillisRatio
-      .minus(this.start.unixMillisRatio)
+    const atomicRatio = unixMillisRatio
+      .minus(this.start.unixRatio.times(new Rat(1000n)))
       .divide(this.slope.unixMillisPerAtomicPico)
       .plus(this.start.atomicPicosRatio)
       .divide(new Rat(1_000_000_000_000n))
 
     return {
-      start: atomicPicosRatio,
-      end: atomicPicosRatio,
+      start: atomicRatio,
+      end: atomicRatio,
       closed: true
     }
   }
@@ -68,7 +68,7 @@ class Segment {
     return atomicRatio.times(new Rat(1_000_000_000_000n))
       .minus(this.start.atomicPicosRatio)
       .times(this.slope.unixMillisPerAtomicPico)
-      .plus(this.start.unixMillisRatio)
+      .plus(this.start.unixRatio.times(new Rat(1000n)))
       .divide(new Rat(1000n))
   }
 
@@ -89,8 +89,8 @@ class Segment {
   unixRatioOnSegment (unixRatio) {
     const unixMillisRatio = unixRatio.times(new Rat(1000n))
     return this.slope.unixMillisPerAtomicPico.eq(new Rat(0n))
-      ? this.start.unixMillisRatio.eq(unixMillisRatio)
-      : this.start.unixMillisRatio.le(unixMillisRatio) && (
+      ? this.start.unixRatio.times(new Rat(1000n)).eq(unixMillisRatio)
+      : this.start.unixRatio.times(new Rat(1000n)).le(unixMillisRatio) && (
         this.end.unixMillisRatio === Infinity ||
         this.end.unixMillisRatio
           .gt(unixMillisRatio)
