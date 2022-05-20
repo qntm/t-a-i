@@ -11,7 +11,7 @@ class Segment {
     // Start is inclusive.
     this.start = {}
     this.start.atomicRatio = new Rat(start.atomicPicos, 1_000_000_000_000n)
-    this.start.unixRatio = new Rat(BigInt(start.unixMillis), 1000n)
+    this.start.unixRatio = start.unixRatio
 
     // End is exclusive.
     this.end = {}

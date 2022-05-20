@@ -198,7 +198,10 @@ const munge = (data, model) => {
   }
 
   return munged.map(datum => new Segment(
-    datum.start,
+    {
+      ...datum.start,
+      unixRatio: new Rat(BigInt(datum.start.unixMillis), 1000n)
+    },
     {
       atomicRatio: datum.end.atomicPicos === Infinity
         ? Infinity
