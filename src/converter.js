@@ -11,6 +11,7 @@
 // segment (according to its numbering).
 
 const { munge, MODELS } = require('./munge')
+const { Rat } = require('./rat')
 
 const Converter = (data, model) => {
   const segments = munge(data, model)
@@ -22,12 +23,14 @@ const Converter = (data, model) => {
       throw Error(`Not an integer: ${atomicMillis}`)
     }
 
+    const atomicRatio = new Rat(BigInt(atomicMillis), 1000n)
+
     for (const segment of segments) {
-      if (!segment.atomicMillisOnSegment(atomicMillis)) {
+      if (!segment.atomicRatioOnSegment(atomicRatio)) {
         continue
       }
 
-      return segment.atomicMillisToUnixMillis(atomicMillis)
+      return Number(segment.atomicRatioToUnixRatio(atomicRatio).times(new Rat(1000n)).trunc())
     }
 
     // Pre-1961, or BREAK model and we hit a break
@@ -39,13 +42,17 @@ const Converter = (data, model) => {
       throw Error(`Not an integer: ${unixMillis}`)
     }
 
+    const unixRatio = new Rat(BigInt(unixMillis), 1000n)
+
     const ranges = []
     for (const segment of segments) {
-      if (!segment.unixMillisOnSegment(unixMillis)) {
+      if (!segment.unixRatioOnSegment(unixRatio)) {
         continue
       }
 
-      const range = segment.unixMillisToAtomicMillisRange(unixMillis)
+      const range = segment.unixRatioToAtomicRatioRange(unixRatio)
+      range.start = Number(range.start.times(new Rat(1_000n)).trunc())
+      range.end = Number(range.end.times(new Rat(1_000n)).trunc())
 
       if (ranges.length - 1 in ranges) {
         const prev = ranges[ranges.length - 1]
