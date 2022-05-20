@@ -24,12 +24,13 @@ class Segment {
     // `atomicPicos` is exact, no exact integer `unixMillis` is possible in most cases
     this.end = {}
     if (end.atomicPicos === Infinity) {
-      this.end.atomicPicosRatio = Infinity
+      this.end.atomicRatio = Infinity
       this.end.unixRatio = Infinity
     } else {
-      this.end.atomicPicosRatio = new Rat(end.atomicPicos)
-      this.end.unixRatio = this.end.atomicPicosRatio
-        .minus(this.start.atomicRatio.times(new Rat(1_000_000_000_000n)))
+      this.end.atomicRatio = new Rat(end.atomicPicos, 1_000_000_000_000n)
+      this.end.unixRatio = this.end.atomicRatio
+        .minus(this.start.atomicRatio)
+        .times(new Rat(1_000_000_000_000n))
         .times(this.slope.unixMillisPerAtomicPico)
         .plus(this.start.unixRatio.times(new Rat(1000n)))
         .divide(new Rat(1000n))
@@ -45,7 +46,7 @@ class Segment {
 
       return {
         start: this.start.atomicRatio,
-        end: this.end.atomicPicosRatio.divide(new Rat(1_000_000_000_000n)),
+        end: this.end.atomicRatio,
         closed: false
       }
     }
@@ -78,11 +79,10 @@ class Segment {
   // Unix by the segment.
 
   atomicRatioOnSegment (atomicRatio) {
-    const atomicPicosRatio = atomicRatio.times(new Rat(1_000_000_000_000n))
     return this.start.atomicRatio.le(atomicRatio) && (
-      this.end.atomicPicosRatio === Infinity ||
-      this.end.atomicPicosRatio
-        .gt(atomicPicosRatio)
+      this.end.atomicRatio === Infinity ||
+      this.end.atomicRatio
+        .gt(atomicRatio)
     )
   }
 

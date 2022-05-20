@@ -582,7 +582,7 @@ describe('munge', () => {
 
         // TAI picoseconds as of this Unix time, at the END of the CURRENT segment
         const a = segment.slope.unixMillisPerAtomicPico.nu === 0n
-          ? segment.end.atomicPicosRatio
+          ? segment.end.atomicRatio.times(new Rat(1_000_000_000_000n))
           : unixRatio
             .minus(segment.start.unixRatio)
             .times(new Rat(1000n))
