@@ -43,8 +43,8 @@ describe('munge', () => {
       expect(munge([
         [Date.UTC(1970, JAN, 1), 0]
       ], MODELS.OVERRUN)).toEqual([new Segment(
-        { atomicRatio: new Rat(0n), unixRatio: new Rat(0n) },
-        { atomicRatio: Infinity },
+        { atomic: new Rat(0n), unix: new Rat(0n) },
+        { atomic: Infinity },
         new Rat(1n)
       )])
     })
@@ -53,8 +53,8 @@ describe('munge', () => {
       expect(munge([
         [7, -4]
       ], MODELS.OVERRUN)).toEqual([new Segment(
-        { atomicRatio: new Rat(-3_993n, 1_000n), unixRatio: new Rat(7n, 1000n) },
-        { atomicRatio: Infinity },
+        { atomic: new Rat(-3_993n, 1_000n), unix: new Rat(7n, 1000n) },
+        { atomic: Infinity },
         new Rat(1n)
       )])
     })
@@ -69,24 +69,18 @@ describe('munge', () => {
         [9000, -3], // inserted leap second
         [13000, -4] // removed leap second
       ], MODELS.OVERRUN)).toEqual([new Segment(
-        { atomicRatio: new Rat(-5n), unixRatio: new Rat(-1n) },
-        { atomicRatio: new Rat(6n) },
+        { atomic: new Rat(-5n), unix: new Rat(-1n) },
+        { atomic: new Rat(6n) },
         new Rat(1n)
       ), new Segment(
-        { atomicRatio: new Rat(6n), unixRatio: new Rat(9n) },
-        { atomicRatio: new Rat(9n) },
+        { atomic: new Rat(6n), unix: new Rat(9n) },
+        { atomic: new Rat(9n) },
         new Rat(1n)
       ), new Segment(
-        { atomicRatio: new Rat(9n), unixRatio: new Rat(13n) },
-        { atomicRatio: Infinity },
+        { atomic: new Rat(9n), unix: new Rat(13n) },
+        { atomic: Infinity },
         new Rat(1n)
       )])
-    })
-
-    it('fails on a bad drift rate', () => {
-      expect(() => munge([
-        [Date.UTC(1961, JAN, 1), 1.422_818_0, 37_300, 0.001]
-      ], MODELS.OVERRUN)).toThrowError('Could not compute precise drift rate')
     })
 
     it('allows a negative ratio somehow', () => {
@@ -94,8 +88,8 @@ describe('munge', () => {
       expect(munge([
         [Date.UTC(1970, JAN, 1), 0, 40_587, 8.640_0]
       ], MODELS.OVERRUN)).toEqual([new Segment(
-        { atomicRatio: new Rat(0n), unixRatio: new Rat(0n) },
-        { atomicRatio: Infinity },
+        { atomic: new Rat(0n), unix: new Rat(0n) },
+        { atomic: Infinity },
         new Rat(10000n, 10001n)
       )])
 
@@ -103,8 +97,8 @@ describe('munge', () => {
       expect(munge([
         [Date.UTC(1970, JAN, 1), 0, 40_587, 0]
       ], MODELS.OVERRUN)).toEqual([new Segment(
-        { atomicRatio: new Rat(0n), unixRatio: new Rat(0n) },
-        { atomicRatio: Infinity },
+        { atomic: new Rat(0n), unix: new Rat(0n) },
+        { atomic: Infinity },
         new Rat(1n)
       )])
 
@@ -112,8 +106,8 @@ describe('munge', () => {
       expect(munge([
         [Date.UTC(1970, JAN, 1), 0, 40_587, -8.640_0]
       ], MODELS.OVERRUN)).toEqual([new Segment(
-        { atomicRatio: new Rat(0n), unixRatio: new Rat(0n) },
-        { atomicRatio: Infinity },
+        { atomic: new Rat(0n), unix: new Rat(0n) },
+        { atomic: Infinity },
         new Rat(10000n, 9999n)
       )])
 
@@ -122,8 +116,8 @@ describe('munge', () => {
       expect(munge([
         [Date.UTC(1970, JAN, 1), 0, 40_587, -86_400 + 8.640_0]
       ], MODELS.OVERRUN)).toEqual([new Segment(
-        { atomicRatio: new Rat(0n), unixRatio: new Rat(0n) },
-        { atomicRatio: Infinity },
+        { atomic: new Rat(0n), unix: new Rat(0n) },
+        { atomic: Infinity },
         new Rat(10_000n)
       )])
 
@@ -135,8 +129,8 @@ describe('munge', () => {
       expect(munge([
         [Date.UTC(1970, JAN, 1), 0, 40_587, -86_400 - 8.640_0]
       ], MODELS.OVERRUN)).toEqual([new Segment(
-        { atomicRatio: new Rat(0n), unixRatio: new Rat(0n) },
-        { atomicRatio: Infinity },
+        { atomic: new Rat(0n), unix: new Rat(0n) },
+        { atomic: Infinity },
         new Rat(-10_000n)
       )])
     })
@@ -145,8 +139,8 @@ describe('munge', () => {
       expect(munge([
         [Date.UTC(1961, JAN, 1), 1.422_818_0, 37_300, 0.001_296]
       ], MODELS.OVERRUN)).toEqual([new Segment(
-        { atomicRatio: new Rat(-283_996_798_577_182n, 1_000_000n), unixRatio: new Rat(-283_996_800n) },
-        { atomicRatio: Infinity },
+        { atomic: new Rat(-283_996_798_577_182n, 1_000_000n), unix: new Rat(-283_996_800n) },
+        { atomic: Infinity },
         new Rat(1_000_000_000n, 1_000_000_015n)
       )])
     })
@@ -204,19 +198,19 @@ describe('munge', () => {
           return NaN
         }
 
-        const unixRatio = segments[i + 1].start.unixRatio
+        const unix = segments[i + 1].start.unix
 
         // TAI as of this Unix time, at the END of the CURRENT segment
-        const a = unixRatio
-          .minus(segment.start.unixRatio)
+        const a = unix
+          .minus(segment.start.unix)
           .divide(segment.slope.unixPerAtomic)
-          .plus(segment.start.atomicRatio)
+          .plus(segment.start.atomic)
 
         // TAI as of this Unix time, at the START of the NEXT segment
-        const b = unixRatio
-          .minus(segments[i + 1].start.unixRatio)
+        const b = unix
+          .minus(segments[i + 1].start.unix)
           .divide(segments[i + 1].slope.unixPerAtomic)
-          .plus(segments[i + 1].start.atomicRatio)
+          .plus(segments[i + 1].start.atomic)
 
         return b.minus(a)
       })).toEqual([
@@ -269,8 +263,8 @@ describe('munge', () => {
         expect(munge([
           [Date.UTC(1970, JAN, 1, 0, 0, 0, 1), -0.0001]
         ], MODELS.OVERRUN)).toEqual([new Segment(
-          { atomicRatio: new Rat(900n, 1_000_000n), unixRatio: new Rat(1n, 1000n) }, // ray start intentionally doesn't include TAI epoch
-          { atomicRatio: Infinity },
+          { atomic: new Rat(900n, 1_000_000n), unix: new Rat(1n, 1000n) }, // ray start intentionally doesn't include TAI epoch
+          { atomic: Infinity },
           new Rat(1n)
         )])
       })
@@ -281,12 +275,12 @@ describe('munge', () => {
           [Date.UTC(1969, DEC, 31, 23, 59, 59, 999), 0.0001],
           [Date.UTC(1970, JAN, 1, 0, 0, 0, 1), -0.0011]
         ], MODELS.OVERRUN)).toEqual([new Segment(
-          { atomicRatio: new Rat(-900n, 1_000_000n), unixRatio: new Rat(-1n, 1000n) },
-          { atomicRatio: new Rat(-100n, 1_000_000n) },
+          { atomic: new Rat(-900n, 1_000_000n), unix: new Rat(-1n, 1000n) },
+          { atomic: new Rat(-100n, 1_000_000n) },
           new Rat(1n)
         ), new Segment(
-          { atomicRatio: new Rat(-100n, 1_000_000n), unixRatio: new Rat(1n, 1000n) },
-          { atomicRatio: Infinity },
+          { atomic: new Rat(-100n, 1_000_000n), unix: new Rat(1n, 1000n) },
+          { atomic: Infinity },
           new Rat(1n)
         )])
       })
@@ -298,8 +292,8 @@ describe('munge', () => {
       expect(munge([
         [Date.UTC(1970, JAN, 1), 0]
       ], MODELS.BREAK)).toEqual([new Segment(
-        { atomicRatio: new Rat(0n), unixRatio: new Rat(0n) },
-        { atomicRatio: Infinity },
+        { atomic: new Rat(0n), unix: new Rat(0n) },
+        { atomic: Infinity },
         new Rat(1n)
       )])
     })
@@ -314,17 +308,17 @@ describe('munge', () => {
         [9000, -3], // inserted leap second
         [13000, -4] // removed leap second
       ], MODELS.BREAK)).toEqual([new Segment(
-        { atomicRatio: new Rat(-5n), unixRatio: new Rat(-1n) },
-        { atomicRatio: new Rat(5n) },
+        { atomic: new Rat(-5n), unix: new Rat(-1n) },
+        { atomic: new Rat(5n) },
         new Rat(1n)
       ), new Segment(
         // this segment starts a full TAI second after the previous segment ended
-        { atomicRatio: new Rat(6n), unixRatio: new Rat(9n) },
-        { atomicRatio: new Rat(9n) },
+        { atomic: new Rat(6n), unix: new Rat(9n) },
+        { atomic: new Rat(9n) },
         new Rat(1n)
       ), new Segment(
-        { atomicRatio: new Rat(9n), unixRatio: new Rat(13n) },
-        { atomicRatio: Infinity },
+        { atomic: new Rat(9n), unix: new Rat(13n) },
+        { atomic: Infinity },
         new Rat(1n)
       )])
     })
@@ -342,8 +336,8 @@ describe('munge', () => {
       expect(munge([
         [Date.UTC(1970, JAN, 1), 0]
       ], MODELS.STALL)).toEqual([new Segment(
-        { atomicRatio: new Rat(0n), unixRatio: new Rat(0n) },
-        { atomicRatio: Infinity },
+        { atomic: new Rat(0n), unix: new Rat(0n) },
+        { atomic: Infinity },
         new Rat(1n)
       )])
     })
@@ -352,8 +346,8 @@ describe('munge', () => {
       expect(munge([
         [7, -4]
       ], MODELS.STALL)).toEqual([new Segment(
-        { atomicRatio: new Rat(-3_993n, 1000n), unixRatio: new Rat(7n, 1000n) },
-        { atomicRatio: Infinity },
+        { atomic: new Rat(-3_993n, 1000n), unix: new Rat(7n, 1000n) },
+        { atomic: Infinity },
         new Rat(1n)
       )])
     })
@@ -368,29 +362,23 @@ describe('munge', () => {
         [9000, -3], // inserted leap second
         [13000, -4] // removed leap second
       ], MODELS.STALL)).toEqual([new Segment(
-        { atomicRatio: new Rat(-5n), unixRatio: new Rat(-1n) },
-        { atomicRatio: new Rat(5n) },
+        { atomic: new Rat(-5n), unix: new Rat(-1n) },
+        { atomic: new Rat(5n) },
         new Rat(1n)
       ), new Segment(
         // Stall segment inserted here
-        { atomicRatio: new Rat(5n), unixRatio: new Rat(9n) },
-        { atomicRatio: new Rat(6n) },
+        { atomic: new Rat(5n), unix: new Rat(9n) },
+        { atomic: new Rat(6n) },
         new Rat(0n)
       ), new Segment(
-        { atomicRatio: new Rat(6n), unixRatio: new Rat(9n) },
-        { atomicRatio: new Rat(9n) },
+        { atomic: new Rat(6n), unix: new Rat(9n) },
+        { atomic: new Rat(9n) },
         new Rat(1n)
       ), new Segment(
-        { atomicRatio: new Rat(9n), unixRatio: new Rat(13n) },
-        { atomicRatio: Infinity },
+        { atomic: new Rat(9n), unix: new Rat(13n) },
+        { atomic: Infinity },
         new Rat(1n)
       )])
-    })
-
-    it('fails on a bad drift rate', () => {
-      expect(() => munge([
-        [Date.UTC(1961, JAN, 1), 1.422_818_0, 37_300, 0.001]
-      ], MODELS.STALL)).toThrowError('Could not compute precise drift rate')
     })
 
     it('allows a negative ratio somehow', () => {
@@ -398,8 +386,8 @@ describe('munge', () => {
       expect(munge([
         [Date.UTC(1970, JAN, 1), 0, 40_587, 8.640_0]
       ], MODELS.STALL)).toEqual([new Segment(
-        { atomicRatio: new Rat(0n), unixRatio: new Rat(0n) },
-        { atomicRatio: Infinity },
+        { atomic: new Rat(0n), unix: new Rat(0n) },
+        { atomic: Infinity },
         new Rat(10_000n, 10_001n)
       )])
 
@@ -407,8 +395,8 @@ describe('munge', () => {
       expect(munge([
         [Date.UTC(1970, JAN, 1), 0, 40_587, 0]
       ], MODELS.STALL)).toEqual([new Segment(
-        { atomicRatio: new Rat(0n), unixRatio: new Rat(0n) },
-        { atomicRatio: Infinity },
+        { atomic: new Rat(0n), unix: new Rat(0n) },
+        { atomic: Infinity },
         new Rat(1n)
       )])
 
@@ -416,8 +404,8 @@ describe('munge', () => {
       expect(munge([
         [Date.UTC(1970, JAN, 1), 0, 40_587, -8.640_0]
       ], MODELS.STALL)).toEqual([new Segment(
-        { atomicRatio: new Rat(0n), unixRatio: new Rat(0n) },
-        { atomicRatio: Infinity },
+        { atomic: new Rat(0n), unix: new Rat(0n) },
+        { atomic: Infinity },
         new Rat(10_000n, 9_999n)
       )])
 
@@ -426,8 +414,8 @@ describe('munge', () => {
       expect(munge([
         [Date.UTC(1970, JAN, 1), 0, 40_587, -86_400 + 8.640_0]
       ], MODELS.STALL)).toEqual([new Segment(
-        { atomicRatio: new Rat(0n), unixRatio: new Rat(0n) },
-        { atomicRatio: Infinity },
+        { atomic: new Rat(0n), unix: new Rat(0n) },
+        { atomic: Infinity },
         new Rat(10_000n)
       )])
 
@@ -439,8 +427,8 @@ describe('munge', () => {
       expect(munge([
         [Date.UTC(1970, JAN, 1), 0, 40_587, -86_400 - 8.640_0]
       ], MODELS.STALL)).toEqual([new Segment(
-        { atomicRatio: new Rat(0n), unixRatio: new Rat(0n) },
-        { atomicRatio: Infinity },
+        { atomic: new Rat(0n), unix: new Rat(0n) },
+        { atomic: Infinity },
         new Rat(-10_000n)
       )])
     })
@@ -449,8 +437,8 @@ describe('munge', () => {
       expect(munge([
         [Date.UTC(1961, JAN, 1), 1.422_818_0, 37_300, 0.001_296]
       ], MODELS.STALL)).toEqual([new Segment(
-        { atomicRatio: new Rat(-283_996_798_577_182n, 1_000_000n), unixRatio: new Rat(-283_996_800n) },
-        { atomicRatio: Infinity },
+        { atomic: new Rat(-283_996_798_577_182n, 1_000_000n), unix: new Rat(-283_996_800n) },
+        { atomic: Infinity },
         new Rat(1_000_000_000n, 1_000_000_015n)
       )])
     })
@@ -546,23 +534,23 @@ describe('munge', () => {
           return NaN
         }
 
-        const unixRatio = segments[i + 1].start.unixRatio
+        const unix = segments[i + 1].start.unix
 
         // TAI as of this Unix time, at the END of the CURRENT segment
         const a = segment.slope.unixPerAtomic.nu === 0n
-          ? segment.end.atomicRatio
-          : unixRatio
-            .minus(segment.start.unixRatio)
+          ? segment.end.atomic
+          : unix
+            .minus(segment.start.unix)
             .divide(segment.slope.unixPerAtomic)
-            .plus(segment.start.atomicRatio)
+            .plus(segment.start.atomic)
 
         // TAI  of this Unix time, at the START of the NEXT segment
         const b = segments[i + 1].slope.unixPerAtomic.nu === 0n
-          ? segments[i + 1].start.atomicRatio
-          : unixRatio
-            .minus(segments[i + 1].start.unixRatio)
+          ? segments[i + 1].start.atomic
+          : unix
+            .minus(segments[i + 1].start.unix)
             .divide(segments[i + 1].slope.unixPerAtomic)
-            .plus(segments[i + 1].start.atomicRatio)
+            .plus(segments[i + 1].start.atomic)
 
         return b.minus(a)
       })).toEqual([
@@ -651,8 +639,8 @@ describe('munge', () => {
       expect(munge([
         [Date.UTC(1970, JAN, 1), 0]
       ], MODELS.SMEAR)).toEqual([new Segment(
-        { atomicRatio: new Rat(0n), unixRatio: new Rat(0n) },
-        { atomicRatio: Infinity },
+        { atomic: new Rat(0n), unix: new Rat(0n) },
+        { atomic: Infinity },
         new Rat(1n)
       )])
     })
@@ -662,16 +650,16 @@ describe('munge', () => {
         [0, 0],
         [86_400_000, 1] // inserted leap second after one day
       ], MODELS.SMEAR)).toEqual([new Segment(
-        { atomicRatio: new Rat(0n), unixRatio: new Rat(0n) },
-        { atomicRatio: new Rat(43_200n) }, // midday
+        { atomic: new Rat(0n), unix: new Rat(0n) },
+        { atomic: new Rat(43_200n) }, // midday
         new Rat(1n) // perfectly diagonal
       ), new Segment(
-        { atomicRatio: new Rat(43_200n), unixRatio: new Rat(43_200n) }, // midday
-        { atomicRatio: new Rat(129_601n) }, // midday
+        { atomic: new Rat(43_200n), unix: new Rat(43_200n) }, // midday
+        { atomic: new Rat(129_601n) }, // midday
         new Rat(86_400n, 86_401n) // A full Unix day elapses, but a full TAI day plus one second elapses
       ), new Segment(
-        { atomicRatio: new Rat(129_601n), unixRatio: new Rat(129_600n) }, // midday
-        { atomicRatio: Infinity },
+        { atomic: new Rat(129_601n), unix: new Rat(129_600n) }, // midday
+        { atomic: Infinity },
         new Rat(1n) // perfectly diagonal
       )])
     })
@@ -681,16 +669,16 @@ describe('munge', () => {
         [0, 0],
         [86_400_000, -1] // removed leap second after one day
       ], MODELS.SMEAR)).toEqual([new Segment(
-        { atomicRatio: new Rat(0n), unixRatio: new Rat(0n) },
-        { atomicRatio: new Rat(43_200n) }, // midday
+        { atomic: new Rat(0n), unix: new Rat(0n) },
+        { atomic: new Rat(43_200n) }, // midday
         new Rat(1n) // perfectly diagonal
       ), new Segment(
-        { atomicRatio: new Rat(43_200n), unixRatio: new Rat(43_200n) }, // midday
-        { atomicRatio: new Rat(129_599n) }, // midday
+        { atomic: new Rat(43_200n), unix: new Rat(43_200n) }, // midday
+        { atomic: new Rat(129_599n) }, // midday
         new Rat(86_400n, 86_399n) // A full Unix day elapses, but a full TAI day minus one second elapses
       ), new Segment(
-        { atomicRatio: new Rat(129_599n), unixRatio: new Rat(129_600n) }, // midday
-        { atomicRatio: Infinity },
+        { atomic: new Rat(129_599n), unix: new Rat(129_600n) }, // midday
+        { atomic: Infinity },
         new Rat(1n) // perfectly diagonal
       )])
     })
@@ -791,19 +779,19 @@ describe('munge', () => {
           return NaN
         }
 
-        const unixRatio = segments[i + 1].start.unixRatio
+        const unix = segments[i + 1].start.unix
 
         // TAI as of this Unix time, at the END of the CURRENT segment
-        const a = unixRatio
-          .minus(segment.start.unixRatio)
+        const a = unix
+          .minus(segment.start.unix)
           .divide(segment.slope.unixPerAtomic)
-          .plus(segment.start.atomicRatio)
+          .plus(segment.start.atomic)
 
         // TAI as of this Unix time, at the START of the NEXT segment
-        const b = unixRatio
-          .minus(segments[i + 1].start.unixRatio)
+        const b = unix
+          .minus(segments[i + 1].start.unix)
           .divide(segments[i + 1].slope.unixPerAtomic)
-          .plus(segments[i + 1].start.atomicRatio)
+          .plus(segments[i + 1].start.atomic)
 
         return b.minus(a)
       })).toEqual([

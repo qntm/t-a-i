@@ -13,50 +13,50 @@ class Segment {
 
     // End is exclusive.
     this.end = { ...end }
-    if (end.atomicRatio === Infinity) {
-      this.end.unixRatio = Infinity
+    if (end.atomic === Infinity) {
+      this.end.unix = Infinity
     } else {
-      if (!this.start.atomicRatio.lt(end.atomicRatio)) {
+      if (!this.start.atomic.lt(end.atomic)) {
         throw Error('Segment length must be positive')
       }
 
-      this.end.unixRatio = end.atomicRatio
-        .minus(this.start.atomicRatio)
+      this.end.unix = end.atomic
+        .minus(this.start.atomic)
         .times(this.slope.unixPerAtomic)
-        .plus(this.start.unixRatio)
+        .plus(this.start.unix)
     }
   }
 
-  unixRatioToAtomicRatioRange (unixRatio) {
+  unixToAtomicRange (unix) {
     if (this.slope.unixPerAtomic.eq(new Rat(0n))) {
-      if (!unixRatio.eq(this.start.unixRatio)) {
+      if (!unix.eq(this.start.unix)) {
         throw Error('This Unix time never happened')
       }
 
       return {
-        start: this.start.atomicRatio,
-        end: this.end.atomicRatio,
+        start: this.start.atomic,
+        end: this.end.atomic,
         closed: false
       }
     }
 
-    const atomicRatio = unixRatio
-      .minus(this.start.unixRatio)
+    const atomic = unix
+      .minus(this.start.unix)
       .divide(this.slope.unixPerAtomic)
-      .plus(this.start.atomicRatio)
+      .plus(this.start.atomic)
 
     return {
-      start: atomicRatio,
-      end: atomicRatio,
+      start: atomic,
+      end: atomic,
       closed: true
     }
   }
 
-  atomicRatioToUnixRatio (atomicRatio) {
-    return atomicRatio
-      .minus(this.start.atomicRatio)
+  atomicToUnix (atomic) {
+    return atomic
+      .minus(this.start.atomic)
       .times(this.slope.unixPerAtomic)
-      .plus(this.start.unixRatio)
+      .plus(this.start.unix)
   }
 
   // Bounds checks. Each segment has an inclusive-exclusive range of validity.
@@ -64,20 +64,20 @@ class Segment {
   // the segment. Valid Unix instants are the valid TAI instants, transformed linearly from TAI to
   // Unix by the segment.
 
-  atomicRatioOnSegment (atomicRatio) {
-    return this.start.atomicRatio.le(atomicRatio) && (
-      this.end.atomicRatio === Infinity ||
-      this.end.atomicRatio
-        .gt(atomicRatio)
+  atomicOnSegment (atomic) {
+    return this.start.atomic.le(atomic) && (
+      this.end.atomic === Infinity ||
+      this.end.atomic
+        .gt(atomic)
     )
   }
 
-  unixRatioOnSegment (unixRatio) {
+  unixOnSegment (unix) {
     return this.slope.unixPerAtomic.eq(new Rat(0n))
-      ? this.start.unixRatio.eq(unixRatio)
-      : this.start.unixRatio.le(unixRatio) && (
-        this.end.unixRatio === Infinity ||
-        this.end.unixRatio.gt(unixRatio)
+      ? this.start.unix.eq(unix)
+      : this.start.unix.le(unix) && (
+        this.end.unix === Infinity ||
+        this.end.unix.gt(unix)
       )
   }
 }
