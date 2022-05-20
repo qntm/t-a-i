@@ -23,12 +23,11 @@ class Segment {
     // End is exclusive.
     // `atomicPicos` is exact, no exact integer `unixMillis` is possible in most cases
     this.end = {}
-    this.end.atomicPicos = end.atomicPicos
-    if (this.end.atomicPicos === Infinity) {
+    if (end.atomicPicos === Infinity) {
       this.end.atomicPicosRatio = Infinity
       this.end.unixRatio = Infinity
     } else {
-      this.end.atomicPicosRatio = new Rat(this.end.atomicPicos)
+      this.end.atomicPicosRatio = new Rat(end.atomicPicos)
       this.end.unixRatio = this.end.atomicPicosRatio
         .minus(this.start.atomicPicosRatio)
         .times(this.slope.unixMillisPerAtomicPico)
