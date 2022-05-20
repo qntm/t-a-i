@@ -222,14 +222,14 @@ describe('munge', () => {
           .minus(segment.start.unixRatio)
           .times(new Rat(1000n))
           .divide(segment.slope.unixMillisPerAtomicPico)
-          .plus(segment.start.atomicPicosRatio)
+          .plus(segment.start.atomicRatio.times(new Rat(1_000_000_000_000n)))
 
         // TAI picoseconds as of this Unix time, at the START of the NEXT segment
         const b = unixRatio
           .minus(segments[i + 1].start.unixRatio)
           .times(new Rat(1000n))
           .divide(segments[i + 1].slope.unixMillisPerAtomicPico)
-          .plus(segments[i + 1].start.atomicPicosRatio)
+          .plus(segments[i + 1].start.atomicRatio.times(new Rat(1_000_000_000_000n)))
 
         return b.minus(a).trunc()
       })).toEqual([
@@ -587,16 +587,16 @@ describe('munge', () => {
             .minus(segment.start.unixRatio)
             .times(new Rat(1000n))
             .divide(segment.slope.unixMillisPerAtomicPico)
-            .plus(segment.start.atomicPicosRatio)
+            .plus(segment.start.atomicRatio.times(new Rat(1_000_000_000_000n)))
 
         // TAI picoseconds as of this Unix time, at the START of the NEXT segment
         const b = segments[i + 1].slope.unixMillisPerAtomicPico.nu === 0n
-          ? segments[i + 1].start.atomicPicosRatio
+          ? segments[i + 1].start.atomicRatio.times(new Rat(1_000_000_000_000n))
           : unixRatio
             .minus(segments[i + 1].start.unixRatio)
             .times(new Rat(1000n))
             .divide(segments[i + 1].slope.unixMillisPerAtomicPico)
-            .plus(segments[i + 1].start.atomicPicosRatio)
+            .plus(segments[i + 1].start.atomicRatio.times(new Rat(1_000_000_000_000n)))
 
         return b.minus(a).trunc()
       })).toEqual([
@@ -851,14 +851,14 @@ describe('munge', () => {
           .minus(segment.start.unixRatio)
           .times(new Rat(1000n))
           .divide(segment.slope.unixMillisPerAtomicPico)
-          .plus(segment.start.atomicPicosRatio)
+          .plus(segment.start.atomicRatio.times(new Rat(1_000_000_000_000n)))
 
         // TAI picoseconds as of this Unix time, at the START of the NEXT segment
         const b = unixRatio
           .minus(segments[i + 1].start.unixRatio)
           .times(new Rat(1000n))
           .divide(segments[i + 1].slope.unixMillisPerAtomicPico)
-          .plus(segments[i + 1].start.atomicPicosRatio)
+          .plus(segments[i + 1].start.atomicRatio.times(new Rat(1_000_000_000_000n)))
 
         return b.minus(a).trunc()
       })).toEqual([

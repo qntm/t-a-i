@@ -17,7 +17,7 @@ class Segment {
     // Start is inclusive.
     // `atomicPicos` and `unixMillis` are exact.
     this.start = {}
-    this.start.atomicPicosRatio = new Rat(start.atomicPicos)
+    this.start.atomicRatio = new Rat(start.atomicPicos, 1_000_000_000_000n)
     this.start.unixRatio = new Rat(BigInt(start.unixMillis), 1000n)
 
     // End is exclusive.
@@ -29,7 +29,7 @@ class Segment {
     } else {
       this.end.atomicPicosRatio = new Rat(end.atomicPicos)
       this.end.unixRatio = this.end.atomicPicosRatio
-        .minus(this.start.atomicPicosRatio)
+        .minus(this.start.atomicRatio.times(new Rat(1_000_000_000_000n)))
         .times(this.slope.unixMillisPerAtomicPico)
         .plus(this.start.unixRatio.times(new Rat(1000n)))
         .divide(new Rat(1000n))
@@ -44,7 +44,7 @@ class Segment {
       }
 
       return {
-        start: this.start.atomicPicosRatio.divide(new Rat(1_000_000_000_000n)),
+        start: this.start.atomicRatio,
         end: this.end.atomicPicosRatio.divide(new Rat(1_000_000_000_000n)),
         closed: false
       }
@@ -53,8 +53,8 @@ class Segment {
     const atomicRatio = unixMillisRatio
       .minus(this.start.unixRatio.times(new Rat(1000n)))
       .divide(this.slope.unixMillisPerAtomicPico)
-      .plus(this.start.atomicPicosRatio)
       .divide(new Rat(1_000_000_000_000n))
+      .plus(this.start.atomicRatio)
 
     return {
       start: atomicRatio,
@@ -64,8 +64,9 @@ class Segment {
   }
 
   atomicRatioToUnixRatio (atomicRatio) {
-    return atomicRatio.times(new Rat(1_000_000_000_000n))
-      .minus(this.start.atomicPicosRatio)
+    return atomicRatio
+      .minus(this.start.atomicRatio)
+      .times(new Rat(1_000_000_000_000n))
       .times(this.slope.unixMillisPerAtomicPico)
       .plus(this.start.unixRatio.times(new Rat(1000n)))
       .divide(new Rat(1000n))
@@ -78,7 +79,7 @@ class Segment {
 
   atomicRatioOnSegment (atomicRatio) {
     const atomicPicosRatio = atomicRatio.times(new Rat(1_000_000_000_000n))
-    return this.start.atomicPicosRatio.le(atomicPicosRatio) && (
+    return this.start.atomicRatio.le(atomicRatio) && (
       this.end.atomicPicosRatio === Infinity ||
       this.end.atomicPicosRatio
         .gt(atomicPicosRatio)
