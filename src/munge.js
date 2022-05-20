@@ -1,6 +1,7 @@
 // So what do we ACTUALLY need from our data?
 
-const segment = require('./segment')
+const { Segment } = require('./segment')
+const { Rat } = require('./rat')
 
 // In all models, TAI to Unix conversions are one-to-one (or one-to-NaN). At any given instant in
 // TAI, at most one segment applies and at most one Unix time corresponds.
@@ -196,11 +197,10 @@ const munge = (data, model) => {
     throw Error('Unrecognised model')
   }
 
-  return munged.map(datum => new segment.Segment(
+  return munged.map(datum => new Segment(
     datum.start,
     datum.end,
-    { unixPicos: BigInt(datum.dy.unixMillis) * 1_000_000_000n },
-    datum.dx
+    new Rat(BigInt(datum.dy.unixMillis) * 1_000_000_000n, datum.dx.atomicPicos)
   ))
 }
 

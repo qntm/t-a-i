@@ -10,8 +10,7 @@ describe('Segment', () => {
     expect(() => new Segment(
       { atomicPicos: 0n, unixMillis: 0 },
       { atomicPicos: -1n },
-      { unixPicos: 1_000_000_000n },
-      { atomicPicos: 1_000_000_000n }
+      new Rat(1n)
     )).toThrowError('Segment length must be positive')
   })
 
@@ -19,8 +18,7 @@ describe('Segment', () => {
     expect(() => new Segment(
       { atomicPicos: 0n, unixMillis: 0 },
       { atomicPicos: 0n },
-      { unixPicos: 1_000_000_000n },
-      { atomicPicos: 1_000_000_000n }
+      new Rat(1n)
     )).toThrowError('Segment length must be positive')
   })
 
@@ -28,8 +26,7 @@ describe('Segment', () => {
     const segment = new Segment(
       { atomicPicos: 0n, unixMillis: 0 },
       { atomicPicos: Infinity },
-      { unixPicos: 1_000_000_000n },
-      { atomicPicos: 1_000_000_000n }
+      new Rat(1n)
     )
 
     it('zero point', () => {
@@ -66,8 +63,7 @@ describe('Segment', () => {
     const segment = new Segment(
       { atomicPicos: 0n, unixMillis: 0 },
       { atomicPicos: 2_000_000_000_000n }, // 2 TAI seconds
-      { unixPicos: 1_000_000_000n },
-      { atomicPicos: 2_000_000_000n } // TAI runs twice as fast as Unix time
+      new Rat(1n, 2n) // TAI runs twice as fast as Unix time
     )
 
     it('zero point', () => {
@@ -110,8 +106,7 @@ describe('Segment', () => {
     const segment = new Segment(
       { atomicPicos: 0n, unixMillis: 0 },
       { atomicPicos: 2_000_000_000_000n }, // 2 TAI seconds
-      { unixPicos: 0n },
-      { atomicPicos: 2_000_000_000_000n }
+      new Rat(0n)
     )
 
     it('zero point', () => {

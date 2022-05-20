@@ -5,14 +5,12 @@ const { Rat } = require('./rat')
 // For precision, we deal with ratios of BigInts.
 // Segment validity ranges are inclusive-exclusive.
 class Segment {
-  constructor (start, end, dy, dx) {
+  constructor (start, end, unixPerAtomic) {
     if (!(start.atomicPicos < end.atomicPicos)) {
       throw Error('Segment length must be positive')
     }
 
-    this.slope = {
-      unixPerAtomic: new Rat(dy.unixPicos, dx.atomicPicos)
-    }
+    this.slope = { unixPerAtomic }
 
     // Start is inclusive.
     this.start = {}
