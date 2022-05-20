@@ -39,7 +39,7 @@ const picosPerMilli = 1000n * 1000n * 1000n
 const millisPerDay = 24 * 60 * 60 * 1000
 
 const mjdEpoch = {
-  unixMillis: Date.UTC(1858, NOV, 17)
+  unixPicos: BigInt(Date.UTC(1858, NOV, 17)) * picosPerMilli
 }
 
 // Input some raw TAI-UTC data, output the same data but altered to be more consumable for our
@@ -60,7 +60,9 @@ const munge = (data, model) => {
       driftRate.atomicSecondsPerUnixDay = 0
     ] = datum
 
-    root.unixMillis = mjdEpoch.unixMillis + root.mjds * millisPerDay
+    start.unixPicos = BigInt(start.unixMillis) * picosPerMilli
+
+    root.unixPicos = mjdEpoch.unixPicos + BigInt(root.mjds) * BigInt(millisPerDay) * picosPerMilli
 
     // `4.313_170_0 * 1000_000_000_000` evaluates to `4_313_170_000_000.000_5` so we must round
     offsetAtRoot.atomicPicos = BigInt(Math.round(offsetAtRoot.atomicSeconds * picosPerSecond))
@@ -84,12 +86,11 @@ const munge = (data, model) => {
       // Typically 1_000_000_015n
     }
 
-    start.atomicPicos = BigInt(root.unixMillis) * picosPerMilli +
+    start.atomicPicos = root.unixPicos +
       offsetAtRoot.atomicPicos +
-      BigInt(start.unixMillis - root.unixMillis) *
-      picosPerMilli *
+      (start.unixPicos - root.unixPicos) *
       dx.atomicPicos /
-      BigInt(dy.unixPicos)
+      dy.unixPicos
 
     return {
       start,
@@ -139,31 +140,29 @@ const munge = (data, model) => {
       // When breaking/stalling, this is the Unix time when the next segment starts.
       // When smearing, this is twelve Unix hours prior to discontinuity.
       const smearStart = {
-        unixMillis: model === MODELS.SMEAR
-          ? b.start.unixMillis - millisPerDay / 2
-          : b.start.unixMillis
+        unixPicos: model === MODELS.SMEAR
+          ? b.start.unixPicos - BigInt(millisPerDay) * picosPerMilli / 2n
+          : b.start.unixPicos
       }
 
       smearStart.atomicPicos = a.start.atomicPicos +
-        BigInt(smearStart.unixMillis - a.start.unixMillis) *
-        picosPerMilli *
+        (smearStart.unixPicos - a.start.unixPicos) *
         a.dx.atomicPicos /
-        BigInt(a.dy.unixPicos)
+        a.dy.unixPicos
 
       // Find smear end point, which is on the NEXT segment.
       // When breaking/stalling, this is the start of the next segment.
       // When smearing, this is twelve hours after the discontinuity.
       const smearEnd = {
-        unixMillis: model === MODELS.SMEAR
-          ? b.start.unixMillis + millisPerDay / 2
-          : b.start.unixMillis
+        unixPicos: model === MODELS.SMEAR
+          ? b.start.unixPicos + BigInt(millisPerDay) * picosPerMilli / 2n
+          : b.start.unixPicos
       }
 
       smearEnd.atomicPicos = b.start.atomicPicos +
-        BigInt(smearEnd.unixMillis - b.start.unixMillis) *
-        picosPerMilli *
+        (smearEnd.unixPicos - b.start.unixPicos) *
         b.dx.atomicPicos /
-        BigInt(b.dy.unixPicos)
+        b.dy.unixPicos
 
       if (smearEnd.atomicPicos <= smearStart.atomicPicos) {
         // No negative-length or zero-length smears
@@ -172,7 +171,7 @@ const munge = (data, model) => {
 
       // Create the break.
       // Terminate this segment early, start the next segment late.
-      a.end = smearStart // includes unixMillis but we'll ignore that
+      a.end = smearStart // includes unixPicos but we'll ignore that
       b.start = smearEnd
 
       if (model === MODELS.BREAK) {
@@ -184,9 +183,9 @@ const munge = (data, model) => {
       // When breaking/stalling, this is perfectly horizontal (dy.unixPicos = 0)
       munged.splice(i + 1, 0, {
         start: smearStart,
-        end: smearEnd, // includes unixMillis but we'll ignore that
+        end: smearEnd, // includes unixPicos but we'll ignore that
         dy: {
-          unixPicos: BigInt(smearEnd.unixMillis - smearStart.unixMillis) * picosPerMilli
+          unixPicos: smearEnd.unixPicos - smearStart.unixPicos
         },
         dx: {
           atomicPicos: smearEnd.atomicPicos - smearStart.atomicPicos
@@ -203,7 +202,7 @@ const munge = (data, model) => {
   return munged.map(datum => new Segment(
     {
       atomicRatio: new Rat(datum.start.atomicPicos, 1_000_000_000_000n),
-      unixRatio: new Rat(BigInt(datum.start.unixMillis), 1000n)
+      unixRatio: new Rat(BigInt(datum.start.unixPicos), 1_000_000_000_000n)
     },
     {
       atomicRatio: datum.end.atomicPicos === Infinity
