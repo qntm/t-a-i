@@ -50,7 +50,9 @@ const Converter = (data, model) => {
         continue
       }
 
-      const range = segment.unixRatioToAtomicMillisRange(unixRatio)
+      const range = segment.unixRatioToAtomicMillisRatioRange(unixRatio)
+      range.start = Number(range.start.trunc())
+      range.end = Number(range.end.trunc())
 
       if (ranges.length - 1 in ranges) {
         const prev = ranges[ranges.length - 1]
