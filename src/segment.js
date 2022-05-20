@@ -22,7 +22,6 @@ class Segment {
     this.start.atomicPicos = start.atomicPicos
     this.start.atomicPicosRatio = new Rat(this.start.atomicPicos)
     this.start.atomicMillisRatio = this.start.atomicPicosRatio.divide(new Rat(picosPerMilli))
-    this.start.atomicMillis = Number(this.start.atomicMillisRatio.trunc()) // inexact
     this.start.unixMillisRatio = new Rat(BigInt(start.unixMillis))
 
     // End is exclusive.
@@ -32,12 +31,10 @@ class Segment {
     if (this.end.atomicPicos === Infinity) {
       this.end.atomicPicosRatio = Infinity
       this.end.atomicMillisRatio = Infinity
-      this.end.atomicMillis = Infinity
       this.end.unixMillisRatio = Infinity
     } else {
       this.end.atomicPicosRatio = new Rat(this.end.atomicPicos)
       this.end.atomicMillisRatio = this.end.atomicPicosRatio.divide(new Rat(picosPerMilli))
-      this.end.atomicMillis = Number(this.end.atomicMillisRatio.trunc())
       this.end.unixMillisRatio = this.end.atomicPicosRatio
         .minus(this.start.atomicPicosRatio)
         .times(this.slope.unixMillisPerAtomicPico)
