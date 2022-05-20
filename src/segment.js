@@ -5,64 +5,58 @@ const { Rat } = require('./rat')
 // For precision, we deal with ratios of BigInts.
 // Segment validity ranges are inclusive-exclusive.
 class Segment {
-  constructor (start, end, dy, dx) {
-    if (!(start.atomicPicos < end.atomicPicos)) {
-      throw Error('Segment length must be positive')
-    }
-
-    this.slope = {
-      unixPerAtomic: new Rat(BigInt(dy.unixMillis) * 1_000_000_000n, dx.atomicPicos)
-    }
+  constructor (start, end, unixPerAtomic) {
+    this.slope = { unixPerAtomic }
 
     // Start is inclusive.
-    this.start = {}
-    this.start.atomicRatio = new Rat(start.atomicPicos, 1_000_000_000_000n)
-    this.start.unixRatio = new Rat(BigInt(start.unixMillis), 1000n)
+    this.start = start
 
     // End is exclusive.
-    this.end = {}
-    if (end.atomicPicos === Infinity) {
-      this.end.atomicRatio = Infinity
-      this.end.unixRatio = Infinity
+    this.end = { ...end }
+    if (end.atomic === Infinity) {
+      this.end.unix = Infinity
     } else {
-      this.end.atomicRatio = new Rat(end.atomicPicos, 1_000_000_000_000n)
-      this.end.unixRatio = this.end.atomicRatio
-        .minus(this.start.atomicRatio)
+      if (!this.start.atomic.lt(end.atomic)) {
+        throw Error('Segment length must be positive')
+      }
+
+      this.end.unix = end.atomic
+        .minus(this.start.atomic)
         .times(this.slope.unixPerAtomic)
-        .plus(this.start.unixRatio)
+        .plus(this.start.unix)
     }
   }
 
-  unixRatioToAtomicRatioRange (unixRatio) {
+  unixToAtomicRange (unix) {
     if (this.slope.unixPerAtomic.eq(new Rat(0n))) {
-      if (!unixRatio.eq(this.start.unixRatio)) {
+      if (!unix.eq(this.start.unix)) {
         throw Error('This Unix time never happened')
       }
 
       return {
-        start: this.start.atomicRatio,
-        end: this.end.atomicRatio,
+        start: this.start.atomic,
+        end: this.end.atomic,
         closed: false
       }
     }
 
-    const atomicRatio = unixRatio
-      .minus(this.start.unixRatio)
+    const atomic = unix
+      .minus(this.start.unix)
       .divide(this.slope.unixPerAtomic)
-      .plus(this.start.atomicRatio)
+      .plus(this.start.atomic)
 
     return {
-      start: atomicRatio,
-      end: atomicRatio,
+      start: atomic,
+      end: atomic,
       closed: true
     }
   }
 
-  atomicRatioToUnixRatio (atomicRatio) {
-    return atomicRatio
-      .minus(this.start.atomicRatio)
+  atomicToUnix (atomic) {
+    return atomic
+      .minus(this.start.atomic)
       .times(this.slope.unixPerAtomic)
-      .plus(this.start.unixRatio)
+      .plus(this.start.unix)
   }
 
   // Bounds checks. Each segment has an inclusive-exclusive range of validity.
@@ -70,20 +64,20 @@ class Segment {
   // the segment. Valid Unix instants are the valid TAI instants, transformed linearly from TAI to
   // Unix by the segment.
 
-  atomicRatioOnSegment (atomicRatio) {
-    return this.start.atomicRatio.le(atomicRatio) && (
-      this.end.atomicRatio === Infinity ||
-      this.end.atomicRatio
-        .gt(atomicRatio)
+  atomicOnSegment (atomic) {
+    return this.start.atomic.le(atomic) && (
+      this.end.atomic === Infinity ||
+      this.end.atomic
+        .gt(atomic)
     )
   }
 
-  unixRatioOnSegment (unixRatio) {
+  unixOnSegment (unix) {
     return this.slope.unixPerAtomic.eq(new Rat(0n))
-      ? this.start.unixRatio.eq(unixRatio)
-      : this.start.unixRatio.le(unixRatio) && (
-        this.end.unixRatio === Infinity ||
-        this.end.unixRatio.gt(unixRatio)
+      ? this.start.unix.eq(unix)
+      : this.start.unix.le(unix) && (
+        this.end.unix === Infinity ||
+        this.end.unix.gt(unix)
       )
   }
 }

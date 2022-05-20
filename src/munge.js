@@ -1,6 +1,7 @@
 // So what do we ACTUALLY need from our data?
 
-const segment = require('./segment')
+const { Segment } = require('./segment')
+const { Rat } = require('./rat')
 
 // In all models, TAI to Unix conversions are one-to-one (or one-to-NaN). At any given instant in
 // TAI, at most one segment applies and at most one Unix time corresponds.
@@ -32,13 +33,9 @@ const MODELS = {
 }
 
 const NOV = 10
-
-const picosPerSecond = 1000 * 1000 * 1000 * 1000
-const picosPerMilli = 1000n * 1000n * 1000n
-const millisPerDay = 24 * 60 * 60 * 1000
-
+const secondsPerDay = new Rat(86_400n)
 const mjdEpoch = {
-  unixMillis: Date.UTC(1858, NOV, 17)
+  unix: new Rat(BigInt(Date.UTC(1858, NOV, 17)), 1_000n)
 }
 
 // Input some raw TAI-UTC data, output the same data but altered to be more consumable for our
@@ -50,49 +47,50 @@ const munge = (data, model) => {
     const start = {}
     const offsetAtRoot = {}
     const root = {}
-    const driftRate = {};
+    const driftRate = {}
 
-    [
+    ;[
       start.unixMillis,
-      offsetAtRoot.atomicSeconds,
+      offsetAtRoot.atomicFloat,
       root.mjds = 0,
-      driftRate.atomicSecondsPerUnixDay = 0
+      driftRate.atomicPerUnixDayFloat = 0
     ] = datum
 
-    root.unixMillis = mjdEpoch.unixMillis + root.mjds * millisPerDay
+    // Convert from a millisecond count to a precise ratio of seconds
+    start.unix = new Rat(BigInt(start.unixMillis), 1_000n)
 
-    // `4.313_170_0 * 1000_000_000_000` evaluates to `4_313_170_000_000.000_5` so we must round
-    offsetAtRoot.atomicPicos = BigInt(Math.round(offsetAtRoot.atomicSeconds * picosPerSecond))
+    // Convert from a floating point number to a precise ratio
+    // Offsets are given in TAI seconds to seven decimal places, e.g. `1.422_818_0`.
+    // So we have to do some rounding
+    offsetAtRoot.atomic = new Rat(
+      BigInt(Math.round(offsetAtRoot.atomicFloat * 10_000_000)),
+      BigInt(10_000_000)
+    )
 
-    // `8.640_0 * 1000_000_000_000` evaluates to `8_640_000_000_000.001` so we must round
-    driftRate.atomicPicosPerUnixDay = BigInt(Math.round(driftRate.atomicSecondsPerUnixDay * picosPerSecond))
-    driftRate.atomicPicosPerUnixMilli = driftRate.atomicPicosPerUnixDay / BigInt(millisPerDay)
-    // Typically 15n
+    root.unix = mjdEpoch.unix.plus(new Rat(BigInt(root.mjds)).times(secondsPerDay))
 
-    if (driftRate.atomicPicosPerUnixMilli * BigInt(millisPerDay) !== driftRate.atomicPicosPerUnixDay) {
-      // Rounding occurred
-      throw Error('Could not compute precise drift rate')
-    }
+    // Convert from a floating point number to a precise ratio
+    // Drift rates are given in TAI seconds to seven decimal places, e.g. `0.001_123_2`
+    // So we have to do some rounding
+    driftRate.atomicPerUnixDay = new Rat(
+      BigInt(Math.round(driftRate.atomicPerUnixDayFloat * 10_000_000)),
+      BigInt(10_000_000)
+    )
+    driftRate.atomicPerUnix = driftRate.atomicPerUnixDay.divide(secondsPerDay)
 
-    const dy = {
-      unixMillis: 1
-    }
+    const slope = {}
+    slope.atomicPerUnix = new Rat(1n).plus(driftRate.atomicPerUnix)
+    slope.unixPerAtomic = new Rat(1n).divide(slope.atomicPerUnix)
 
-    const dx = {
-      atomicPicos: picosPerMilli + driftRate.atomicPicosPerUnixMilli
-      // Typically 1_000_000_015n
-    }
-
-    start.atomicPicos = BigInt(root.unixMillis) * picosPerMilli +
-      offsetAtRoot.atomicPicos +
-      BigInt(start.unixMillis - root.unixMillis) *
-      dx.atomicPicos /
-      BigInt(dy.unixMillis)
+    start.atomic = start.unix
+      .minus(root.unix)
+      .divide(slope.unixPerAtomic)
+      .plus(offsetAtRoot.atomic)
+      .plus(root.unix)
 
     return {
       start,
-      dy,
-      dx
+      slope
     }
   })
 
@@ -100,7 +98,7 @@ const munge = (data, model) => {
   if (
     munged.some((datum, i, munged) =>
       i + 1 in munged &&
-      munged[i + 1].start.atomicPicos <= datum.start.atomicPicos
+      munged[i + 1].start.atomic.le(datum.start.atomic)
     )
   ) {
     throw Error('Disordered data')
@@ -109,8 +107,8 @@ const munge = (data, model) => {
   // `end` is the first TAI instant when this segment ceases to be applicable.
   munged.forEach((datum, i, munged) => {
     datum.end = {
-      atomicPicos: i + 1 in munged
-        ? munged[i + 1].start.atomicPicos
+      atomic: i + 1 in munged
+        ? munged[i + 1].start.atomic
         : Infinity
     }
   })
@@ -136,39 +134,39 @@ const munge = (data, model) => {
       // Find smear start point, which is on THIS segment.
       // When breaking/stalling, this is the Unix time when the next segment starts.
       // When smearing, this is twelve Unix hours prior to discontinuity.
-      const smearStart = {
-        unixMillis: model === MODELS.SMEAR
-          ? b.start.unixMillis - millisPerDay / 2
-          : b.start.unixMillis
-      }
+      const smearStart = {}
 
-      smearStart.atomicPicos = a.start.atomicPicos +
-        BigInt(smearStart.unixMillis - a.start.unixMillis) *
-        a.dx.atomicPicos /
-        BigInt(a.dy.unixMillis)
+      smearStart.unix = model === MODELS.SMEAR
+        ? b.start.unix.minus(secondsPerDay.divide(new Rat(2n)))
+        : b.start.unix
+
+      smearStart.atomic = smearStart.unix
+        .minus(a.start.unix)
+        .divide(a.slope.unixPerAtomic)
+        .plus(a.start.atomic)
 
       // Find smear end point, which is on the NEXT segment.
       // When breaking/stalling, this is the start of the next segment.
       // When smearing, this is twelve hours after the discontinuity.
-      const smearEnd = {
-        unixMillis: model === MODELS.SMEAR
-          ? b.start.unixMillis + millisPerDay / 2
-          : b.start.unixMillis
-      }
+      const smearEnd = {}
 
-      smearEnd.atomicPicos = b.start.atomicPicos +
-        BigInt(smearEnd.unixMillis - b.start.unixMillis) *
-        b.dx.atomicPicos /
-        BigInt(b.dy.unixMillis)
+      smearEnd.unix = model === MODELS.SMEAR
+        ? b.start.unix.plus(secondsPerDay.divide(new Rat(2n)))
+        : b.start.unix
 
-      if (smearEnd.atomicPicos <= smearStart.atomicPicos) {
+      smearEnd.atomic = smearEnd.unix
+        .minus(b.start.unix)
+        .divide(b.slope.unixPerAtomic)
+        .plus(b.start.atomic)
+
+      if (smearEnd.atomic.le(smearStart.atomic)) {
         // No negative-length or zero-length smears
         continue
       }
 
       // Create the break.
       // Terminate this segment early, start the next segment late.
-      a.end = smearStart // includes unixMillis but we'll ignore that
+      a.end = smearStart // includes unix but we'll ignore that
       b.start = smearEnd
 
       if (model === MODELS.BREAK) {
@@ -177,15 +175,13 @@ const munge = (data, model) => {
       }
 
       // Insert a new smear segment linking the two.
-      // When breaking/stalling, this is perfectly horizontal (dy.unixMillis = 0)
+      // When breaking/stalling, this is perfectly horizontal (slope = 0)
       munged.splice(i + 1, 0, {
         start: smearStart,
-        end: smearEnd, // includes unixMillis but we'll ignore that
-        dy: {
-          unixMillis: smearEnd.unixMillis - smearStart.unixMillis
-        },
-        dx: {
-          atomicPicos: smearEnd.atomicPicos - smearStart.atomicPicos
+        end: smearEnd, // includes unix but we'll ignore that
+        slope: {
+          unixPerAtomic: smearEnd.unix.minus(smearStart.unix)
+            .divide(smearEnd.atomic.minus(smearStart.atomic))
         }
       })
 
@@ -196,11 +192,15 @@ const munge = (data, model) => {
     throw Error('Unrecognised model')
   }
 
-  return munged.map(datum => new segment.Segment(
-    datum.start,
-    datum.end,
-    datum.dy,
-    datum.dx
+  return munged.map(datum => new Segment(
+    {
+      atomic: datum.start.atomic,
+      unix: datum.start.unix
+    },
+    {
+      atomic: datum.end.atomic
+    },
+    datum.slope.unixPerAtomic
   ))
 }
 
