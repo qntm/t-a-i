@@ -199,7 +199,7 @@ const munge = (data, model) => {
   return munged.map(datum => new segment.Segment(
     datum.start,
     datum.end,
-    datum.dy,
+    { unixPicos: BigInt(datum.dy.unixMillis) * 1_000_000_000n },
     datum.dx
   ))
 }

@@ -45,7 +45,7 @@ describe('munge', () => {
       ], MODELS.OVERRUN)).toEqual([new Segment(
         { atomicPicos: 0n, unixMillis: 0 },
         { atomicPicos: Infinity },
-        { unixMillis: 1 },
+        { unixPicos: 1_000_000_000n },
         { atomicPicos: 1_000_000_000n }
       )])
     })
@@ -56,7 +56,7 @@ describe('munge', () => {
       ], MODELS.OVERRUN)).toEqual([new Segment(
         { unixMillis: 7, atomicPicos: -3_993_000_000_000n },
         { atomicPicos: Infinity },
-        { unixMillis: 1 },
+        { unixPicos: 1_000_000_000n },
         { atomicPicos: 1_000_000_000n }
       )])
     })
@@ -73,17 +73,17 @@ describe('munge', () => {
       ], MODELS.OVERRUN)).toEqual([new Segment(
         { unixMillis: -1000, atomicPicos: -5_000_000_000_000n },
         { atomicPicos: 6_000_000_000_000n },
-        { unixMillis: 1 },
+        { unixPicos: 1_000_000_000n },
         { atomicPicos: 1_000_000_000n }
       ), new Segment(
         { unixMillis: 9000, atomicPicos: 6_000_000_000_000n },
         { atomicPicos: 9_000_000_000_000n },
-        { unixMillis: 1 },
+        { unixPicos: 1_000_000_000n },
         { atomicPicos: 1_000_000_000n }
       ), new Segment(
         { unixMillis: 13000, atomicPicos: 9_000_000_000_000n },
         { atomicPicos: Infinity },
-        { unixMillis: 1 },
+        { unixPicos: 1_000_000_000n },
         { atomicPicos: 1_000_000_000n }
       )])
     })
@@ -101,8 +101,8 @@ describe('munge', () => {
       ], MODELS.OVERRUN)).toEqual([new Segment(
         { unixMillis: 0, atomicPicos: 0n },
         { atomicPicos: Infinity },
-        { unixMillis: 1 },
-        { atomicPicos: 1000_100_000n }
+        { unixPicos: 1_000_000_000n },
+        { atomicPicos: 1_000_100_000n }
       )])
 
       // UTC and TAI run at identical rates
@@ -111,7 +111,7 @@ describe('munge', () => {
       ], MODELS.OVERRUN)).toEqual([new Segment(
         { unixMillis: 0, atomicPicos: 0n },
         { atomicPicos: Infinity },
-        { unixMillis: 1 },
+        { unixPicos: 1_000_000_000n },
         { atomicPicos: 1_000_000_000n }
       )])
 
@@ -121,7 +121,7 @@ describe('munge', () => {
       ], MODELS.OVERRUN)).toEqual([new Segment(
         { unixMillis: 0, atomicPicos: 0n },
         { atomicPicos: Infinity },
-        { unixMillis: 1 },
+        { unixPicos: 1_000_000_000n },
         { atomicPicos: 999_900_000n }
       )])
 
@@ -132,7 +132,7 @@ describe('munge', () => {
       ], MODELS.OVERRUN)).toEqual([new Segment(
         { unixMillis: 0, atomicPicos: 0n },
         { atomicPicos: Infinity },
-        { unixMillis: 1 },
+        { unixPicos: 1_000_000_000n },
         { atomicPicos: 100_000n }
       )])
 
@@ -146,7 +146,7 @@ describe('munge', () => {
       ], MODELS.OVERRUN)).toEqual([new Segment(
         { unixMillis: 0, atomicPicos: 0n },
         { atomicPicos: Infinity },
-        { unixMillis: 1 },
+        { unixPicos: 1_000_000_000n },
         { atomicPicos: -100_000n }
       )])
     })
@@ -157,8 +157,8 @@ describe('munge', () => {
       ], MODELS.OVERRUN)).toEqual([new Segment(
         { unixMillis: -283_996_800_000, atomicPicos: -283_996_798_577_182_000_000n },
         { atomicPicos: Infinity },
-        { unixMillis: 1 },
-        { atomicPicos: 1000_000_015n }
+        { unixPicos: 1_000_000_000n },
+        { atomicPicos: 1_000_000_015n }
       )])
     })
 
@@ -283,7 +283,7 @@ describe('munge', () => {
         ], MODELS.OVERRUN)).toEqual([new Segment(
           { unixMillis: 1, atomicPicos: 900_000_000n }, // ray start intentionally doesn't include TAI epoch
           { atomicPicos: Infinity },
-          { unixMillis: 1 },
+          { unixPicos: 1_000_000_000n },
           { atomicPicos: 1_000_000_000n }
         )])
       })
@@ -296,12 +296,12 @@ describe('munge', () => {
         ], MODELS.OVERRUN)).toEqual([new Segment(
           { unixMillis: -1, atomicPicos: -900_000_000n },
           { atomicPicos: -100_000_000n },
-          { unixMillis: 1 },
+          { unixPicos: 1_000_000_000n },
           { atomicPicos: 1_000_000_000n }
         ), new Segment(
           { unixMillis: 1, atomicPicos: -100_000_000n },
           { atomicPicos: Infinity },
-          { unixMillis: 1 },
+          { unixPicos: 1_000_000_000n },
           { atomicPicos: 1_000_000_000n }
         )])
       })
@@ -315,7 +315,7 @@ describe('munge', () => {
       ], MODELS.BREAK)).toEqual([new Segment(
         { atomicPicos: 0n, unixMillis: 0 },
         { atomicPicos: Infinity },
-        { unixMillis: 1 },
+        { unixPicos: 1_000_000_000n },
         { atomicPicos: 1_000_000_000n }
       )])
     })
@@ -332,18 +332,18 @@ describe('munge', () => {
       ], MODELS.BREAK)).toEqual([new Segment(
         { unixMillis: -1000, atomicPicos: -5_000_000_000_000n },
         { atomicPicos: 5_000_000_000_000n },
-        { unixMillis: 1 },
+        { unixPicos: 1_000_000_000n },
         { atomicPicos: 1_000_000_000n }
       ), new Segment(
         // this segment starts a full TAI second after the previous segment ended
         { unixMillis: 9000, atomicPicos: 6_000_000_000_000n },
         { atomicPicos: 9_000_000_000_000n },
-        { unixMillis: 1 },
+        { unixPicos: 1_000_000_000n },
         { atomicPicos: 1_000_000_000n }
       ), new Segment(
         { unixMillis: 13000, atomicPicos: 9_000_000_000_000n },
         { atomicPicos: Infinity },
-        { unixMillis: 1 },
+        { unixPicos: 1_000_000_000n },
         { atomicPicos: 1_000_000_000n }
       )])
     })
@@ -363,7 +363,7 @@ describe('munge', () => {
       ], MODELS.STALL)).toEqual([new Segment(
         { atomicPicos: 0n, unixMillis: 0 },
         { atomicPicos: Infinity },
-        { unixMillis: 1 },
+        { unixPicos: 1_000_000_000n },
         { atomicPicos: 1_000_000_000n }
       )])
     })
@@ -374,7 +374,7 @@ describe('munge', () => {
       ], MODELS.STALL)).toEqual([new Segment(
         { unixMillis: 7, atomicPicos: -3_993_000_000_000n },
         { atomicPicos: Infinity },
-        { unixMillis: 1 },
+        { unixPicos: 1_000_000_000n },
         { atomicPicos: 1_000_000_000n }
       )])
     })
@@ -391,23 +391,23 @@ describe('munge', () => {
       ], MODELS.STALL)).toEqual([new Segment(
         { unixMillis: -1000, atomicPicos: -5_000_000_000_000n },
         { atomicPicos: 5_000_000_000_000n },
-        { unixMillis: 1 },
+        { unixPicos: 1_000_000_000n },
         { atomicPicos: 1_000_000_000n }
       ), new Segment(
         // Stall segment inserted here
         { unixMillis: 9000, atomicPicos: 5_000_000_000_000n },
         { atomicPicos: 6_000_000_000_000n },
-        { unixMillis: 0 },
+        { unixPicos: 0n },
         { atomicPicos: 1_000_000_000_000n }
       ), new Segment(
         { unixMillis: 9000, atomicPicos: 6_000_000_000_000n },
         { atomicPicos: 9_000_000_000_000n },
-        { unixMillis: 1 },
+        { unixPicos: 1_000_000_000n },
         { atomicPicos: 1_000_000_000n }
       ), new Segment(
         { unixMillis: 13000, atomicPicos: 9_000_000_000_000n },
         { atomicPicos: Infinity },
-        { unixMillis: 1 },
+        { unixPicos: 1_000_000_000n },
         { atomicPicos: 1_000_000_000n }
       )])
     })
@@ -425,7 +425,7 @@ describe('munge', () => {
       ], MODELS.STALL)).toEqual([new Segment(
         { unixMillis: 0, atomicPicos: 0n },
         { atomicPicos: Infinity },
-        { unixMillis: 1 },
+        { unixPicos: 1_000_000_000n },
         { atomicPicos: 1000_100_000n }
       )])
 
@@ -435,7 +435,7 @@ describe('munge', () => {
       ], MODELS.STALL)).toEqual([new Segment(
         { unixMillis: 0, atomicPicos: 0n },
         { atomicPicos: Infinity },
-        { unixMillis: 1 },
+        { unixPicos: 1_000_000_000n },
         { atomicPicos: 1_000_000_000n }
       )])
 
@@ -445,7 +445,7 @@ describe('munge', () => {
       ], MODELS.STALL)).toEqual([new Segment(
         { unixMillis: 0, atomicPicos: 0n },
         { atomicPicos: Infinity },
-        { unixMillis: 1 },
+        { unixPicos: 1_000_000_000n },
         { atomicPicos: 999_900_000n }
       )])
 
@@ -456,7 +456,7 @@ describe('munge', () => {
       ], MODELS.STALL)).toEqual([new Segment(
         { unixMillis: 0, atomicPicos: 0n },
         { atomicPicos: Infinity },
-        { unixMillis: 1 },
+        { unixPicos: 1_000_000_000n },
         { atomicPicos: 100_000n }
       )])
 
@@ -470,7 +470,7 @@ describe('munge', () => {
       ], MODELS.STALL)).toEqual([new Segment(
         { unixMillis: 0, atomicPicos: 0n },
         { atomicPicos: Infinity },
-        { unixMillis: 1 },
+        { unixPicos: 1_000_000_000n },
         { atomicPicos: -100_000n }
       )])
     })
@@ -481,7 +481,7 @@ describe('munge', () => {
       ], MODELS.STALL)).toEqual([new Segment(
         { unixMillis: -283_996_800_000, atomicPicos: -283_996_798_577_182_000_000n },
         { atomicPicos: Infinity },
-        { unixMillis: 1 },
+        { unixPicos: 1_000_000_000n },
         { atomicPicos: 1000_000_015n }
       )])
     })
@@ -685,7 +685,7 @@ describe('munge', () => {
       ], MODELS.SMEAR)).toEqual([new Segment(
         { atomicPicos: 0n, unixMillis: 0 },
         { atomicPicos: Infinity },
-        { unixMillis: 1 },
+        { unixPicos: 1_000_000_000n },
         { atomicPicos: 1_000_000_000n }
       )])
     })
@@ -699,21 +699,21 @@ describe('munge', () => {
         { atomicPicos: 43_200_000_000_000_000n }, // midday
 
         // perfectly diagonal
-        { unixMillis: 1 },
+        { unixPicos: 1_000_000_000n },
         { atomicPicos: 1_000_000_000n }
       ), new Segment(
         { atomicPicos: 43_200_000_000_000_000n, unixMillis: 43_200_000 }, // midday
         { atomicPicos: 129_601_000_000_000_000n }, // midday
 
         // A full Unix day elapses, but a full TAI day plus one second elapses
-        { unixMillis: 86_400_000 },
+        { unixPicos: 86_400_000_000_000_000n },
         { atomicPicos: 86_401_000_000_000_000n }
       ), new Segment(
         { atomicPicos: 129_601_000_000_000_000n, unixMillis: 129_600_000 }, // midday
         { atomicPicos: Infinity },
 
         // perfectly diagonal
-        { unixMillis: 1 },
+        { unixPicos: 1_000_000_000n },
         { atomicPicos: 1_000_000_000n }
       )])
     })
@@ -727,21 +727,21 @@ describe('munge', () => {
         { atomicPicos: 43_200_000_000_000_000n }, // midday
 
         // perfectly diagonal
-        { unixMillis: 1 },
+        { unixPicos: 1_000_000_000n },
         { atomicPicos: 1_000_000_000n }
       ), new Segment(
         { atomicPicos: 43_200_000_000_000_000n, unixMillis: 43_200_000 }, // midday
         { atomicPicos: 129_599_000_000_000_000n }, // midday
 
         // A full Unix day elapses, but a full TAI day minus one second elapses
-        { unixMillis: 86_400_000 },
+        { unixPicos: 86_400_000_000_000_000n },
         { atomicPicos: 86_399_000_000_000_000n }
       ), new Segment(
         { atomicPicos: 129_599_000_000_000_000n, unixMillis: 129_600_000 }, // midday
         { atomicPicos: Infinity },
 
         // perfectly diagonal
-        { unixMillis: 1 },
+        { unixPicos: 1_000_000_000n },
         { atomicPicos: 1_000_000_000n }
       )])
     })

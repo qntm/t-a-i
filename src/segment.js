@@ -11,7 +11,7 @@ class Segment {
     }
 
     this.slope = {
-      unixPerAtomic: new Rat(BigInt(dy.unixMillis) * 1_000_000_000n, dx.atomicPicos)
+      unixPerAtomic: new Rat(dy.unixPicos, dx.atomicPicos)
     }
 
     // Start is inclusive.
