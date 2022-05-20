@@ -77,25 +77,27 @@ const munge = (data, model) => {
       throw Error('Could not compute precise drift rate')
     }
 
-    const dy = {
-      unixPicos: 1_000_000_000n
-    }
-
-    const dx = {
-      atomicPicos: picosPerMilli + driftRate.atomicPicosPerUnixMilli
-      // Typically 1_000_000_015n
+    const slope = {
+      dy: {
+        unixPicos: 1_000_000_000n
+      },
+      dx: {
+        atomicPicos: picosPerMilli + driftRate.atomicPicosPerUnixMilli // Typically 1_000_000_015n
+      },
+      unixPerAtomic: new Rat(1_000_000_000n, picosPerMilli + driftRate.atomicPicosPerUnixMilli)
     }
 
     start.atomicPicos = root.unixPicos +
       offsetAtRoot.atomicPicos +
       (start.unixPicos - root.unixPicos) *
-      dx.atomicPicos /
-      dy.unixPicos
+      slope.dx.atomicPicos /
+      slope.dy.unixPicos
+
+    start.atomicRatio = new Rat(start.atomicPicos, 1_000_000_000_000n)
 
     return {
       start,
-      dy,
-      dx
+      slope
     }
   })
 
@@ -147,8 +149,8 @@ const munge = (data, model) => {
 
       smearStart.atomicPicos = a.start.atomicPicos +
         (smearStart.unixPicos - a.start.unixPicos) *
-        a.dx.atomicPicos /
-        a.dy.unixPicos
+        a.slope.dx.atomicPicos /
+        a.slope.dy.unixPicos
 
       // Find smear end point, which is on the NEXT segment.
       // When breaking/stalling, this is the start of the next segment.
@@ -161,8 +163,8 @@ const munge = (data, model) => {
 
       smearEnd.atomicPicos = b.start.atomicPicos +
         (smearEnd.unixPicos - b.start.unixPicos) *
-        b.dx.atomicPicos /
-        b.dy.unixPicos
+        b.slope.dx.atomicPicos /
+        b.slope.dy.unixPicos
 
       if (smearEnd.atomicPicos <= smearStart.atomicPicos) {
         // No negative-length or zero-length smears
@@ -180,15 +182,21 @@ const munge = (data, model) => {
       }
 
       // Insert a new smear segment linking the two.
-      // When breaking/stalling, this is perfectly horizontal (dy.unixPicos = 0)
+      // When breaking/stalling, this is perfectly horizontal (slope.dy.unixPicos = 0)
       munged.splice(i + 1, 0, {
         start: smearStart,
         end: smearEnd, // includes unixPicos but we'll ignore that
-        dy: {
-          unixPicos: smearEnd.unixPicos - smearStart.unixPicos
-        },
-        dx: {
-          atomicPicos: smearEnd.atomicPicos - smearStart.atomicPicos
+        slope: {
+          dy: {
+            unixPicos: smearEnd.unixPicos - smearStart.unixPicos
+          },
+          dx: {
+            atomicPicos: smearEnd.atomicPicos - smearStart.atomicPicos
+          },
+          unixPerAtomic: new Rat(
+            smearEnd.unixPicos - smearStart.unixPicos,
+            smearEnd.atomicPicos - smearStart.atomicPicos
+          )
         }
       })
 
@@ -209,7 +217,7 @@ const munge = (data, model) => {
         ? Infinity
         : new Rat(datum.end.atomicPicos, 1_000_000_000_000n)
     },
-    new Rat(datum.dy.unixPicos, datum.dx.atomicPicos)
+    datum.slope.unixPerAtomic
   ))
 }
 
