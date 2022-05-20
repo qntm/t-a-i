@@ -6,10 +6,6 @@ const { Rat } = require('./rat')
 // Segment validity ranges are inclusive-exclusive.
 class Segment {
   constructor (start, end, unixPerAtomic) {
-    if (!(start.atomicPicos < end.atomicPicos)) {
-      throw Error('Segment length must be positive')
-    }
-
     this.slope = { unixPerAtomic }
 
     // Start is inclusive.
@@ -19,12 +15,16 @@ class Segment {
 
     // End is exclusive.
     this.end = {}
-    if (end.atomicPicos === Infinity) {
+    if (end.atomicRatio === Infinity) {
       this.end.atomicRatio = Infinity
       this.end.unixRatio = Infinity
     } else {
-      this.end.atomicRatio = new Rat(end.atomicPicos, 1_000_000_000_000n)
-      this.end.unixRatio = this.end.atomicRatio
+      if (!this.start.atomicRatio.lt(end.atomicRatio)) {
+        throw Error('Segment length must be positive')
+      }
+
+      this.end.atomicRatio = end.atomicRatio
+      this.end.unixRatio = end.atomicRatio
         .minus(this.start.atomicRatio)
         .times(this.slope.unixPerAtomic)
         .plus(this.start.unixRatio)

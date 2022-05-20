@@ -44,7 +44,7 @@ describe('munge', () => {
         [Date.UTC(1970, JAN, 1), 0]
       ], MODELS.OVERRUN)).toEqual([new Segment(
         { atomicPicos: 0n, unixMillis: 0 },
-        { atomicPicos: Infinity },
+        { atomicRatio: Infinity },
         new Rat(1n)
       )])
     })
@@ -54,7 +54,7 @@ describe('munge', () => {
         [7, -4]
       ], MODELS.OVERRUN)).toEqual([new Segment(
         { unixMillis: 7, atomicPicos: -3_993_000_000_000n },
-        { atomicPicos: Infinity },
+        { atomicRatio: Infinity },
         new Rat(1n)
       )])
     })
@@ -78,7 +78,7 @@ describe('munge', () => {
         new Rat(1n)
       ), new Segment(
         { unixMillis: 13000, atomicPicos: 9_000_000_000_000n },
-        { atomicPicos: Infinity },
+        { atomicRatio: Infinity },
         new Rat(1n)
       )])
     })
@@ -95,7 +95,7 @@ describe('munge', () => {
         [Date.UTC(1970, JAN, 1), 0, 40_587, 8.640_0]
       ], MODELS.OVERRUN)).toEqual([new Segment(
         { unixMillis: 0, atomicPicos: 0n },
-        { atomicPicos: Infinity },
+        { atomicRatio: Infinity },
         new Rat(10000n, 10001n)
       )])
 
@@ -104,7 +104,7 @@ describe('munge', () => {
         [Date.UTC(1970, JAN, 1), 0, 40_587, 0]
       ], MODELS.OVERRUN)).toEqual([new Segment(
         { unixMillis: 0, atomicPicos: 0n },
-        { atomicPicos: Infinity },
+        { atomicRatio: Infinity },
         new Rat(1n)
       )])
 
@@ -113,7 +113,7 @@ describe('munge', () => {
         [Date.UTC(1970, JAN, 1), 0, 40_587, -8.640_0]
       ], MODELS.OVERRUN)).toEqual([new Segment(
         { unixMillis: 0, atomicPicos: 0n },
-        { atomicPicos: Infinity },
+        { atomicRatio: Infinity },
         new Rat(10000n, 9999n)
       )])
 
@@ -123,7 +123,7 @@ describe('munge', () => {
         [Date.UTC(1970, JAN, 1), 0, 40_587, -86_400 + 8.640_0]
       ], MODELS.OVERRUN)).toEqual([new Segment(
         { unixMillis: 0, atomicPicos: 0n },
-        { atomicPicos: Infinity },
+        { atomicRatio: Infinity },
         new Rat(10_000n)
       )])
 
@@ -136,7 +136,7 @@ describe('munge', () => {
         [Date.UTC(1970, JAN, 1), 0, 40_587, -86_400 - 8.640_0]
       ], MODELS.OVERRUN)).toEqual([new Segment(
         { unixMillis: 0, atomicPicos: 0n },
-        { atomicPicos: Infinity },
+        { atomicRatio: Infinity },
         new Rat(-10_000n)
       )])
     })
@@ -146,7 +146,7 @@ describe('munge', () => {
         [Date.UTC(1961, JAN, 1), 1.422_818_0, 37_300, 0.001_296]
       ], MODELS.OVERRUN)).toEqual([new Segment(
         { unixMillis: -283_996_800_000, atomicPicos: -283_996_798_577_182_000_000n },
-        { atomicPicos: Infinity },
+        { atomicRatio: Infinity },
         new Rat(1_000_000_000n, 1_000_000_015n)
       )])
     })
@@ -270,7 +270,7 @@ describe('munge', () => {
           [Date.UTC(1970, JAN, 1, 0, 0, 0, 1), -0.0001]
         ], MODELS.OVERRUN)).toEqual([new Segment(
           { unixMillis: 1, atomicPicos: 900_000_000n }, // ray start intentionally doesn't include TAI epoch
-          { atomicPicos: Infinity },
+          { atomicRatio: Infinity },
           new Rat(1n)
         )])
       })
@@ -286,7 +286,7 @@ describe('munge', () => {
           new Rat(1n)
         ), new Segment(
           { unixMillis: 1, atomicPicos: -100_000_000n },
-          { atomicPicos: Infinity },
+          { atomicRatio: Infinity },
           new Rat(1n)
         )])
       })
@@ -299,7 +299,7 @@ describe('munge', () => {
         [Date.UTC(1970, JAN, 1), 0]
       ], MODELS.BREAK)).toEqual([new Segment(
         { atomicPicos: 0n, unixMillis: 0 },
-        { atomicPicos: Infinity },
+        { atomicRatio: Infinity },
         new Rat(1n)
       )])
     })
@@ -324,7 +324,7 @@ describe('munge', () => {
         new Rat(1n)
       ), new Segment(
         { unixMillis: 13000, atomicPicos: 9_000_000_000_000n },
-        { atomicPicos: Infinity },
+        { atomicRatio: Infinity },
         new Rat(1n)
       )])
     })
@@ -343,7 +343,7 @@ describe('munge', () => {
         [Date.UTC(1970, JAN, 1), 0]
       ], MODELS.STALL)).toEqual([new Segment(
         { atomicPicos: 0n, unixMillis: 0 },
-        { atomicPicos: Infinity },
+        { atomicRatio: Infinity },
         new Rat(1n)
       )])
     })
@@ -353,7 +353,7 @@ describe('munge', () => {
         [7, -4]
       ], MODELS.STALL)).toEqual([new Segment(
         { unixMillis: 7, atomicPicos: -3_993_000_000_000n },
-        { atomicPicos: Infinity },
+        { atomicRatio: Infinity },
         new Rat(1n)
       )])
     })
@@ -382,7 +382,7 @@ describe('munge', () => {
         new Rat(1n)
       ), new Segment(
         { unixMillis: 13000, atomicPicos: 9_000_000_000_000n },
-        { atomicPicos: Infinity },
+        { atomicRatio: Infinity },
         new Rat(1n)
       )])
     })
@@ -399,7 +399,7 @@ describe('munge', () => {
         [Date.UTC(1970, JAN, 1), 0, 40_587, 8.640_0]
       ], MODELS.STALL)).toEqual([new Segment(
         { unixMillis: 0, atomicPicos: 0n },
-        { atomicPicos: Infinity },
+        { atomicRatio: Infinity },
         new Rat(10_000n, 10_001n)
       )])
 
@@ -408,7 +408,7 @@ describe('munge', () => {
         [Date.UTC(1970, JAN, 1), 0, 40_587, 0]
       ], MODELS.STALL)).toEqual([new Segment(
         { unixMillis: 0, atomicPicos: 0n },
-        { atomicPicos: Infinity },
+        { atomicRatio: Infinity },
         new Rat(1n)
       )])
 
@@ -417,7 +417,7 @@ describe('munge', () => {
         [Date.UTC(1970, JAN, 1), 0, 40_587, -8.640_0]
       ], MODELS.STALL)).toEqual([new Segment(
         { unixMillis: 0, atomicPicos: 0n },
-        { atomicPicos: Infinity },
+        { atomicRatio: Infinity },
         new Rat(10_000n, 9_999n)
       )])
 
@@ -427,7 +427,7 @@ describe('munge', () => {
         [Date.UTC(1970, JAN, 1), 0, 40_587, -86_400 + 8.640_0]
       ], MODELS.STALL)).toEqual([new Segment(
         { unixMillis: 0, atomicPicos: 0n },
-        { atomicPicos: Infinity },
+        { atomicRatio: Infinity },
         new Rat(10_000n)
       )])
 
@@ -440,7 +440,7 @@ describe('munge', () => {
         [Date.UTC(1970, JAN, 1), 0, 40_587, -86_400 - 8.640_0]
       ], MODELS.STALL)).toEqual([new Segment(
         { unixMillis: 0, atomicPicos: 0n },
-        { atomicPicos: Infinity },
+        { atomicRatio: Infinity },
         new Rat(-10_000n)
       )])
     })
@@ -450,7 +450,7 @@ describe('munge', () => {
         [Date.UTC(1961, JAN, 1), 1.422_818_0, 37_300, 0.001_296]
       ], MODELS.STALL)).toEqual([new Segment(
         { unixMillis: -283_996_800_000, atomicPicos: -283_996_798_577_182_000_000n },
-        { atomicPicos: Infinity },
+        { atomicRatio: Infinity },
         new Rat(1_000_000_000n, 1_000_000_015n)
       )])
     })
@@ -652,7 +652,7 @@ describe('munge', () => {
         [Date.UTC(1970, JAN, 1), 0]
       ], MODELS.SMEAR)).toEqual([new Segment(
         { atomicPicos: 0n, unixMillis: 0 },
-        { atomicPicos: Infinity },
+        { atomicRatio: Infinity },
         new Rat(1n)
       )])
     })
@@ -671,7 +671,7 @@ describe('munge', () => {
         new Rat(86_400n, 86_401n) // A full Unix day elapses, but a full TAI day plus one second elapses
       ), new Segment(
         { atomicPicos: 129_601_000_000_000_000n, unixMillis: 129_600_000 }, // midday
-        { atomicPicos: Infinity },
+        { atomicRatio: Infinity },
         new Rat(1n) // perfectly diagonal
       )])
     })
@@ -690,7 +690,7 @@ describe('munge', () => {
         new Rat(86_400n, 86_399n) // A full Unix day elapses, but a full TAI day minus one second elapses
       ), new Segment(
         { atomicPicos: 129_599_000_000_000_000n, unixMillis: 129_600_000 }, // midday
-        { atomicPicos: Infinity },
+        { atomicRatio: Infinity },
         new Rat(1n) // perfectly diagonal
       )])
     })

@@ -34,11 +34,16 @@ class Rat {
   }
 
   cmp (other) {
+    // It's always safe to do this as `de` is always positive
     return this.nu * other.de - this.de * other.nu
   }
 
   eq (other) {
     return this.cmp(other) === 0n
+  }
+
+  lt (other) {
+    return this.cmp(other) < 0n
   }
 
   le (other) {
