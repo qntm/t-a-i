@@ -163,49 +163,49 @@ describe('munge', () => {
     })
 
     it('generates proper drift rates', () => {
-      expect(munge(taiData, MODELS.OVERRUN).map(segment => segment.slope.unixMillisPerAtomicPico))
+      expect(munge(taiData, MODELS.OVERRUN).map(segment => segment.slope.unixMillisPerAtomic))
         .toEqual([
-          new Rat(1n, 1_000_000_015n),
-          new Rat(1n, 1_000_000_015n),
-          new Rat(1n, 1_000_000_013n),
-          new Rat(1n, 1_000_000_013n),
-          new Rat(1n, 1_000_000_015n),
-          new Rat(1n, 1_000_000_015n),
-          new Rat(1n, 1_000_000_015n),
-          new Rat(1n, 1_000_000_015n),
-          new Rat(1n, 1_000_000_015n),
-          new Rat(1n, 1_000_000_015n),
-          new Rat(1n, 1_000_000_015n),
-          new Rat(1n, 1_000_000_030n),
-          new Rat(1n, 1_000_000_030n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(1n, 1_000_000_000n)
+          new Rat(1_000_000_000n, 1_000_000_015n),
+          new Rat(1_000_000_000n, 1_000_000_015n),
+          new Rat(1_000_000_000n, 1_000_000_013n),
+          new Rat(1_000_000_000n, 1_000_000_013n),
+          new Rat(1_000_000_000n, 1_000_000_015n),
+          new Rat(1_000_000_000n, 1_000_000_015n),
+          new Rat(1_000_000_000n, 1_000_000_015n),
+          new Rat(1_000_000_000n, 1_000_000_015n),
+          new Rat(1_000_000_000n, 1_000_000_015n),
+          new Rat(1_000_000_000n, 1_000_000_015n),
+          new Rat(1_000_000_000n, 1_000_000_015n),
+          new Rat(1_000_000_000n, 1_000_000_030n),
+          new Rat(1_000_000_000n, 1_000_000_030n),
+          new Rat(1_000_000_000n, 1_000_000_000n),
+          new Rat(1_000_000_000n, 1_000_000_000n),
+          new Rat(1_000_000_000n, 1_000_000_000n),
+          new Rat(1_000_000_000n, 1_000_000_000n),
+          new Rat(1_000_000_000n, 1_000_000_000n),
+          new Rat(1_000_000_000n, 1_000_000_000n),
+          new Rat(1_000_000_000n, 1_000_000_000n),
+          new Rat(1_000_000_000n, 1_000_000_000n),
+          new Rat(1_000_000_000n, 1_000_000_000n),
+          new Rat(1_000_000_000n, 1_000_000_000n),
+          new Rat(1_000_000_000n, 1_000_000_000n),
+          new Rat(1_000_000_000n, 1_000_000_000n),
+          new Rat(1_000_000_000n, 1_000_000_000n),
+          new Rat(1_000_000_000n, 1_000_000_000n),
+          new Rat(1_000_000_000n, 1_000_000_000n),
+          new Rat(1_000_000_000n, 1_000_000_000n),
+          new Rat(1_000_000_000n, 1_000_000_000n),
+          new Rat(1_000_000_000n, 1_000_000_000n),
+          new Rat(1_000_000_000n, 1_000_000_000n),
+          new Rat(1_000_000_000n, 1_000_000_000n),
+          new Rat(1_000_000_000n, 1_000_000_000n),
+          new Rat(1_000_000_000n, 1_000_000_000n),
+          new Rat(1_000_000_000n, 1_000_000_000n),
+          new Rat(1_000_000_000n, 1_000_000_000n),
+          new Rat(1_000_000_000n, 1_000_000_000n),
+          new Rat(1_000_000_000n, 1_000_000_000n),
+          new Rat(1_000_000_000n, 1_000_000_000n),
+          new Rat(1_000_000_000n, 1_000_000_000n)
         ])
     })
 
@@ -221,14 +221,16 @@ describe('munge', () => {
         const a = unixRatio
           .minus(segment.start.unixRatio)
           .times(new Rat(1000n))
-          .divide(segment.slope.unixMillisPerAtomicPico)
+          .times(new Rat(1000_000_000n))
+          .divide(segment.slope.unixMillisPerAtomic)
           .plus(segment.start.atomicRatio.times(new Rat(1_000_000_000_000n)))
 
         // TAI picoseconds as of this Unix time, at the START of the NEXT segment
         const b = unixRatio
           .minus(segments[i + 1].start.unixRatio)
           .times(new Rat(1000n))
-          .divide(segments[i + 1].slope.unixMillisPerAtomicPico)
+          .times(new Rat(1000_000_000n))
+          .divide(segments[i + 1].slope.unixMillisPerAtomic)
           .plus(segments[i + 1].start.atomicRatio.times(new Rat(1_000_000_000_000n)))
 
         return b.minus(a).trunc()
@@ -489,84 +491,84 @@ describe('munge', () => {
 
     it('generates proper drift rates', () => {
       // Note the stalls for the duration of inserted time
-      expect(munge(taiData, MODELS.STALL).map(segment => segment.slope.unixMillisPerAtomicPico))
+      expect(munge(taiData, MODELS.STALL).map(segment => segment.slope.unixMillisPerAtomic))
         .toEqual([
-          new Rat(1n, 1_000_000_015n),
-          new Rat(1n, 1_000_000_015n),
-          new Rat(1n, 1_000_000_013n),
-          new Rat(0n, 100_000_000_000n),
-          new Rat(1n, 1_000_000_013n),
-          new Rat(1n, 1_000_000_015n),
-          new Rat(0n, 100_000_000_000n),
-          new Rat(1n, 1_000_000_015n),
-          new Rat(0n, 100_000_000_000n),
-          new Rat(1n, 1_000_000_015n),
-          new Rat(0n, 100_000_000_000n),
-          new Rat(1n, 1_000_000_015n),
-          new Rat(0n, 100_000_000_000n),
-          new Rat(1n, 1_000_000_015n),
-          new Rat(0n, 100_000_000_000n),
-          new Rat(1n, 1_000_000_015n),
-          new Rat(0n, 100_000_000_000n),
-          new Rat(1n, 1_000_000_015n),
-          new Rat(1n, 1_000_000_030n),
-          new Rat(1n, 1_000_000_030n),
-          new Rat(0n, 107_758_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(0n, 1_000_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(0n, 1_000_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(0n, 1_000_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(0n, 1_000_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(0n, 1_000_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(0n, 1_000_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(0n, 1_000_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(0n, 1_000_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(0n, 1_000_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(0n, 1_000_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(0n, 1_000_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(0n, 1_000_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(0n, 1_000_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(0n, 1_000_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(0n, 1_000_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(0n, 1_000_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(0n, 1_000_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(0n, 1_000_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(0n, 1_000_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(0n, 1_000_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(0n, 1_000_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(0n, 1_000_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(0n, 1_000_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(0n, 1_000_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(0n, 1_000_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(0n, 1_000_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(0n, 1_000_000_000_000n),
-          new Rat(1n, 1_000_000_000n)
+          new Rat(1_000_000_000n, 1_000_000_015n),
+          new Rat(1_000_000_000n, 1_000_000_015n),
+          new Rat(1_000_000_000n, 1_000_000_013n),
+          new Rat(0n),
+          new Rat(1_000_000_000n, 1_000_000_013n),
+          new Rat(1_000_000_000n, 1_000_000_015n),
+          new Rat(0n),
+          new Rat(1_000_000_000n, 1_000_000_015n),
+          new Rat(0n),
+          new Rat(1_000_000_000n, 1_000_000_015n),
+          new Rat(0n),
+          new Rat(1_000_000_000n, 1_000_000_015n),
+          new Rat(0n),
+          new Rat(1_000_000_000n, 1_000_000_015n),
+          new Rat(0n),
+          new Rat(1_000_000_000n, 1_000_000_015n),
+          new Rat(0n),
+          new Rat(1_000_000_000n, 1_000_000_015n),
+          new Rat(1_000_000_000n, 1_000_000_030n),
+          new Rat(1_000_000_000n, 1_000_000_030n),
+          new Rat(0n),
+          new Rat(1n),
+          new Rat(0n),
+          new Rat(1n),
+          new Rat(0n),
+          new Rat(1n),
+          new Rat(0n),
+          new Rat(1n),
+          new Rat(0n),
+          new Rat(1n),
+          new Rat(0n),
+          new Rat(1n),
+          new Rat(0n),
+          new Rat(1n),
+          new Rat(0n),
+          new Rat(1n),
+          new Rat(0n),
+          new Rat(1n),
+          new Rat(0n),
+          new Rat(1n),
+          new Rat(0n),
+          new Rat(1n),
+          new Rat(0n),
+          new Rat(1n),
+          new Rat(0n),
+          new Rat(1n),
+          new Rat(0n),
+          new Rat(1n),
+          new Rat(0n),
+          new Rat(1n),
+          new Rat(0n),
+          new Rat(1n),
+          new Rat(0n),
+          new Rat(1n),
+          new Rat(0n),
+          new Rat(1n),
+          new Rat(0n),
+          new Rat(1n),
+          new Rat(0n),
+          new Rat(1n),
+          new Rat(0n),
+          new Rat(1n),
+          new Rat(0n),
+          new Rat(1n),
+          new Rat(0n),
+          new Rat(1n),
+          new Rat(0n),
+          new Rat(1n),
+          new Rat(0n),
+          new Rat(1n),
+          new Rat(0n),
+          new Rat(1n),
+          new Rat(0n),
+          new Rat(1n),
+          new Rat(0n),
+          new Rat(1n)
         ])
     })
 
@@ -581,21 +583,23 @@ describe('munge', () => {
         const unixRatio = segments[i + 1].start.unixRatio
 
         // TAI picoseconds as of this Unix time, at the END of the CURRENT segment
-        const a = segment.slope.unixMillisPerAtomicPico.nu === 0n
+        const a = segment.slope.unixMillisPerAtomic.nu === 0n
           ? segment.end.atomicRatio.times(new Rat(1_000_000_000_000n))
           : unixRatio
             .minus(segment.start.unixRatio)
             .times(new Rat(1000n))
-            .divide(segment.slope.unixMillisPerAtomicPico)
+            .times(new Rat(1_000_000_000n))
+            .divide(segment.slope.unixMillisPerAtomic)
             .plus(segment.start.atomicRatio.times(new Rat(1_000_000_000_000n)))
 
         // TAI picoseconds as of this Unix time, at the START of the NEXT segment
-        const b = segments[i + 1].slope.unixMillisPerAtomicPico.nu === 0n
+        const b = segments[i + 1].slope.unixMillisPerAtomic.nu === 0n
           ? segments[i + 1].start.atomicRatio.times(new Rat(1_000_000_000_000n))
           : unixRatio
             .minus(segments[i + 1].start.unixRatio)
             .times(new Rat(1000n))
-            .divide(segments[i + 1].slope.unixMillisPerAtomicPico)
+            .times(new Rat(1_000_000_000n))
+            .divide(segments[i + 1].slope.unixMillisPerAtomic)
             .plus(segments[i + 1].start.atomicRatio.times(new Rat(1_000_000_000_000n)))
 
         return b.minus(a).trunc()
@@ -749,91 +753,91 @@ describe('munge', () => {
     })
 
     it('generates proper drift rates', () => {
-      expect(munge(taiData, MODELS.SMEAR).map(segment => segment.slope.unixMillisPerAtomicPico))
+      expect(munge(taiData, MODELS.SMEAR).map(segment => segment.slope.unixMillisPerAtomic))
         .toEqual([
           // During Unix-day-long smears, elapsed atomic time is a full day PLUS daily offset
           // PLUS inserted time
-          new Rat(1n, 1_000_000_015n),
-          new Rat(86_400_000n, 86_400_000_000_000_000n + 1_296_000_000n - 50_000_000_000n),
-          new Rat(1n, 1_000_000_015n),
-          new Rat(86_400_000n, 86_400_000_000_000_000n + 1_209_600_000n + 0n),
-          new Rat(1n, 1_000_000_013n),
-          new Rat(86_400_000n, 86_400_000_000_000_000n + 1_123_200_000n + 100_000_000_000n),
-          new Rat(1n, 1_000_000_013n),
-          new Rat(86_400_000n, 86_400_000_000_000_000n + 1_209_600_000n + 0n),
-          new Rat(1n, 1_000_000_015n),
-          new Rat(86_400_000n, 86_400_000_000_000_000n + 1_296_000_000n + 100_000_000_000n),
-          new Rat(1n, 1_000_000_015n),
-          new Rat(86_400_000n, 86_400_000_000_000_000n + 1_296_000_000n + 100_000_000_000n),
-          new Rat(1n, 1_000_000_015n),
-          new Rat(86_400_000n, 86_400_000_000_000_000n + 1_296_000_000n + 100_000_000_000n),
-          new Rat(1n, 1_000_000_015n),
-          new Rat(86_400_000n, 86_400_000_000_000_000n + 1_296_000_000n + 100_000_000_000n),
-          new Rat(1n, 1_000_000_015n),
-          new Rat(86_400_000n, 86_400_000_000_000_000n + 1_296_000_000n + 100_000_000_000n),
-          new Rat(1n, 1_000_000_015n),
-          new Rat(86_400_000n, 86_400_000_000_000_000n + 1_296_000_000n + 100_000_000_000n),
-          new Rat(1n, 1_000_000_015n),
-          new Rat(86_400_000n, 86_400_000_000_000_000n + 1_944_000_000n + 0n),
-          new Rat(1n, 1_000_000_030n),
-          new Rat(86_400_000n, 86_400_000_000_000_000n + 2_592_000_000n - 100_000_000_000n),
-          new Rat(1n, 1_000_000_030n),
-          new Rat(86_400_000n, 86_400_000_000_000_000n + 0n + 109_054_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(86_400_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(86_400_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(86_400_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(86_400_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(86_400_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(86_400_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(86_400_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(86_400_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(86_400_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(86_400_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(86_400_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(86_400_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(86_400_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(86_400_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(86_400_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(86_400_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(86_400_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(86_400_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(86_400_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(86_400_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(86_400_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(86_400_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(86_400_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(86_400_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(86_400_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(86_400_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
-          new Rat(1n, 1_000_000_000n),
-          new Rat(86_400_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
-          new Rat(1n, 1_000_000_000n)
+          new Rat(1_000_000_000n, 1_000_000_015n),
+          new Rat(86_400_000_000_000_000n, 86_400_000_000_000_000n + 1_296_000_000n - 50_000_000_000n),
+          new Rat(1_000_000_000n, 1_000_000_015n),
+          new Rat(86_400_000_000_000_000n, 86_400_000_000_000_000n + 1_209_600_000n + 0n),
+          new Rat(1_000_000_000n, 1_000_000_013n),
+          new Rat(86_400_000_000_000_000n, 86_400_000_000_000_000n + 1_123_200_000n + 100_000_000_000n),
+          new Rat(1_000_000_000n, 1_000_000_013n),
+          new Rat(86_400_000_000_000_000n, 86_400_000_000_000_000n + 1_209_600_000n + 0n),
+          new Rat(1_000_000_000n, 1_000_000_015n),
+          new Rat(86_400_000_000_000_000n, 86_400_000_000_000_000n + 1_296_000_000n + 100_000_000_000n),
+          new Rat(1_000_000_000n, 1_000_000_015n),
+          new Rat(86_400_000_000_000_000n, 86_400_000_000_000_000n + 1_296_000_000n + 100_000_000_000n),
+          new Rat(1_000_000_000n, 1_000_000_015n),
+          new Rat(86_400_000_000_000_000n, 86_400_000_000_000_000n + 1_296_000_000n + 100_000_000_000n),
+          new Rat(1_000_000_000n, 1_000_000_015n),
+          new Rat(86_400_000_000_000_000n, 86_400_000_000_000_000n + 1_296_000_000n + 100_000_000_000n),
+          new Rat(1_000_000_000n, 1_000_000_015n),
+          new Rat(86_400_000_000_000_000n, 86_400_000_000_000_000n + 1_296_000_000n + 100_000_000_000n),
+          new Rat(1_000_000_000n, 1_000_000_015n),
+          new Rat(86_400_000_000_000_000n, 86_400_000_000_000_000n + 1_296_000_000n + 100_000_000_000n),
+          new Rat(1_000_000_000n, 1_000_000_015n),
+          new Rat(86_400_000_000_000_000n, 86_400_000_000_000_000n + 1_944_000_000n + 0n),
+          new Rat(1_000_000_000n, 1_000_000_030n),
+          new Rat(86_400_000_000_000_000n, 86_400_000_000_000_000n + 2_592_000_000n - 100_000_000_000n),
+          new Rat(1_000_000_000n, 1_000_000_030n),
+          new Rat(86_400_000_000_000_000n, 86_400_000_000_000_000n + 0n + 109_054_000_000n),
+          new Rat(1_000_000_000n, 1_000_000_000n),
+          new Rat(86_400_000_000_000_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
+          new Rat(1_000_000_000n, 1_000_000_000n),
+          new Rat(86_400_000_000_000_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
+          new Rat(1_000_000_000n, 1_000_000_000n),
+          new Rat(86_400_000_000_000_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
+          new Rat(1_000_000_000n, 1_000_000_000n),
+          new Rat(86_400_000_000_000_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
+          new Rat(1_000_000_000n, 1_000_000_000n),
+          new Rat(86_400_000_000_000_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
+          new Rat(1_000_000_000n, 1_000_000_000n),
+          new Rat(86_400_000_000_000_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
+          new Rat(1_000_000_000n, 1_000_000_000n),
+          new Rat(86_400_000_000_000_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
+          new Rat(1_000_000_000n, 1_000_000_000n),
+          new Rat(86_400_000_000_000_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
+          new Rat(1_000_000_000n, 1_000_000_000n),
+          new Rat(86_400_000_000_000_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
+          new Rat(1_000_000_000n, 1_000_000_000n),
+          new Rat(86_400_000_000_000_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
+          new Rat(1_000_000_000n, 1_000_000_000n),
+          new Rat(86_400_000_000_000_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
+          new Rat(1_000_000_000n, 1_000_000_000n),
+          new Rat(86_400_000_000_000_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
+          new Rat(1_000_000_000n, 1_000_000_000n),
+          new Rat(86_400_000_000_000_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
+          new Rat(1_000_000_000n, 1_000_000_000n),
+          new Rat(86_400_000_000_000_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
+          new Rat(1_000_000_000n, 1_000_000_000n),
+          new Rat(86_400_000_000_000_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
+          new Rat(1_000_000_000n, 1_000_000_000n),
+          new Rat(86_400_000_000_000_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
+          new Rat(1_000_000_000n, 1_000_000_000n),
+          new Rat(86_400_000_000_000_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
+          new Rat(1_000_000_000n, 1_000_000_000n),
+          new Rat(86_400_000_000_000_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
+          new Rat(1_000_000_000n, 1_000_000_000n),
+          new Rat(86_400_000_000_000_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
+          new Rat(1_000_000_000n, 1_000_000_000n),
+          new Rat(86_400_000_000_000_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
+          new Rat(1_000_000_000n, 1_000_000_000n),
+          new Rat(86_400_000_000_000_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
+          new Rat(1_000_000_000n, 1_000_000_000n),
+          new Rat(86_400_000_000_000_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
+          new Rat(1_000_000_000n, 1_000_000_000n),
+          new Rat(86_400_000_000_000_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
+          new Rat(1_000_000_000n, 1_000_000_000n),
+          new Rat(86_400_000_000_000_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
+          new Rat(1_000_000_000n, 1_000_000_000n),
+          new Rat(86_400_000_000_000_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
+          new Rat(1_000_000_000n, 1_000_000_000n),
+          new Rat(86_400_000_000_000_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
+          new Rat(1_000_000_000n, 1_000_000_000n),
+          new Rat(86_400_000_000_000_000n, 86_400_000_000_000_000n + 0n + 1_000_000_000_000n),
+          new Rat(1_000_000_000n, 1_000_000_000n)
         ])
     })
 
@@ -850,14 +854,16 @@ describe('munge', () => {
         const a = unixRatio
           .minus(segment.start.unixRatio)
           .times(new Rat(1000n))
-          .divide(segment.slope.unixMillisPerAtomicPico)
+          .times(new Rat(1000_000_000n))
+          .divide(segment.slope.unixMillisPerAtomic)
           .plus(segment.start.atomicRatio.times(new Rat(1_000_000_000_000n)))
 
         // TAI picoseconds as of this Unix time, at the START of the NEXT segment
         const b = unixRatio
           .minus(segments[i + 1].start.unixRatio)
           .times(new Rat(1000n))
-          .divide(segments[i + 1].slope.unixMillisPerAtomicPico)
+          .times(new Rat(1000_000_000n))
+          .divide(segments[i + 1].slope.unixMillisPerAtomic)
           .plus(segments[i + 1].start.atomicRatio.times(new Rat(1_000_000_000_000n)))
 
         return b.minus(a).trunc()
