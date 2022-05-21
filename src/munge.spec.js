@@ -53,7 +53,7 @@ describe('munge', () => {
       expect(munge([
         [7, -4]
       ], MODELS.OVERRUN)).toEqual([new Segment(
-        { atomic: new Rat(-3_993n, 1_000n), unix: new Rat(7n, 1000n) },
+        { atomic: new Rat(-3_993n, 1_000n), unix: new Rat(7n, 1_000n) },
         { atomic: Infinity },
         new Rat(1n)
       )])
@@ -65,9 +65,9 @@ describe('munge', () => {
       // TAI:          [3][4][5][6][ 7][ 8][ 9][...]
       // Unix: [...][6][7][8][9][9][10][11][13][...]
       expect(munge([
-        [-1000, -4],
-        [9000, -3], // inserted leap second
-        [13000, -4] // removed leap second
+        [-1_000, -4],
+        [9_000, -3], // inserted leap second
+        [13_000, -4] // removed leap second
       ], MODELS.OVERRUN)).toEqual([new Segment(
         { atomic: new Rat(-5n), unix: new Rat(-1n) },
         { atomic: new Rat(6n) },
@@ -90,7 +90,7 @@ describe('munge', () => {
       ], MODELS.OVERRUN)).toEqual([new Segment(
         { atomic: new Rat(0n), unix: new Rat(0n) },
         { atomic: Infinity },
-        new Rat(10000n, 10001n)
+        new Rat(10_000n, 10_001n)
       )])
 
       // UTC and TAI run at identical rates
@@ -108,7 +108,7 @@ describe('munge', () => {
       ], MODELS.OVERRUN)).toEqual([new Segment(
         { atomic: new Rat(0n), unix: new Rat(0n) },
         { atomic: Infinity },
-        new Rat(10000n, 9999n)
+        new Rat(10_000n, 9_999n)
       )])
 
       // TAI moves at one ten-thousandth the rate of UTC!
@@ -261,9 +261,9 @@ describe('munge', () => {
     describe('when unixMillis converts to an atomicPicos which fits but an atomicMillis which does not', () => {
       it('at the start of the ray', () => {
         expect(munge([
-          [Date.UTC(1970, JAN, 1, 0, 0, 0, 1), -0.0001]
+          [Date.UTC(1970, JAN, 1, 0, 0, 0, 1), -0.000_1]
         ], MODELS.OVERRUN)).toEqual([new Segment(
-          { atomic: new Rat(900n, 1_000_000n), unix: new Rat(1n, 1000n) }, // ray start intentionally doesn't include TAI epoch
+          { atomic: new Rat(900n, 1_000_000n), unix: new Rat(1n, 1_000n) }, // ray start intentionally doesn't include TAI epoch
           { atomic: Infinity },
           new Rat(1n)
         )])
@@ -272,14 +272,14 @@ describe('munge', () => {
       it('at the end of the ray', () => {
         // first ray's end intentionally doesn't include TAI epoch
         expect(munge([
-          [Date.UTC(1969, DEC, 31, 23, 59, 59, 999), 0.0001],
-          [Date.UTC(1970, JAN, 1, 0, 0, 0, 1), -0.0011]
+          [Date.UTC(1969, DEC, 31, 23, 59, 59, 999), 0.000_1],
+          [Date.UTC(1970, JAN, 1, 0, 0, 0, 1), -0.001_1]
         ], MODELS.OVERRUN)).toEqual([new Segment(
-          { atomic: new Rat(-900n, 1_000_000n), unix: new Rat(-1n, 1000n) },
+          { atomic: new Rat(-900n, 1_000_000n), unix: new Rat(-1n, 1_000n) },
           { atomic: new Rat(-100n, 1_000_000n) },
           new Rat(1n)
         ), new Segment(
-          { atomic: new Rat(-100n, 1_000_000n), unix: new Rat(1n, 1000n) },
+          { atomic: new Rat(-100n, 1_000_000n), unix: new Rat(1n, 1_000n) },
           { atomic: Infinity },
           new Rat(1n)
         )])
@@ -304,9 +304,9 @@ describe('munge', () => {
       // TAI:          [3][4][5][6][ 7][ 8][ 9][...]
       // Unix: [...][6][7][8][9][9][10][11][13][...]
       expect(munge([
-        [-1000, -4],
-        [9000, -3], // inserted leap second
-        [13000, -4] // removed leap second
+        [-1_000, -4],
+        [9_000, -3], // inserted leap second
+        [13_000, -4] // removed leap second
       ], MODELS.BREAK)).toEqual([new Segment(
         { atomic: new Rat(-5n), unix: new Rat(-1n) },
         { atomic: new Rat(5n) },
@@ -346,7 +346,7 @@ describe('munge', () => {
       expect(munge([
         [7, -4]
       ], MODELS.STALL)).toEqual([new Segment(
-        { atomic: new Rat(-3_993n, 1000n), unix: new Rat(7n, 1000n) },
+        { atomic: new Rat(-3_993n, 1_000n), unix: new Rat(7n, 1_000n) },
         { atomic: Infinity },
         new Rat(1n)
       )])
@@ -358,9 +358,9 @@ describe('munge', () => {
       // TAI:          [3][4][5][6][ 7][ 8][ 9][...]
       // Unix: [...][6][7][8][9][9][10][11][13][...]
       expect(munge([
-        [-1000, -4],
-        [9000, -3], // inserted leap second
-        [13000, -4] // removed leap second
+        [-1_000, -4],
+        [9_000, -3], // inserted leap second
+        [13_000, -4] // removed leap second
       ], MODELS.STALL)).toEqual([new Segment(
         { atomic: new Rat(-5n), unix: new Rat(-1n) },
         { atomic: new Rat(5n) },
@@ -554,7 +554,7 @@ describe('munge', () => {
 
         return b.minus(a)
       })).toEqual([
-        new Rat(-50n, 1000n), // 0.05 TAI seconds removed from UTC
+        new Rat(-50n, 1_000n), // 0.05 TAI seconds removed from UTC
         new Rat(0n),
         new Rat(0n),
         new Rat(0n),
@@ -572,7 +572,7 @@ describe('munge', () => {
         new Rat(0n),
         new Rat(0n),
         new Rat(0n),
-        new Rat(-100n, 1000n), // 0.1 TAI seconds removed from UTC
+        new Rat(-100n, 1_000n), // 0.1 TAI seconds removed from UTC
         new Rat(0n),
         new Rat(0n),
         new Rat(0n),

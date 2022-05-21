@@ -6,7 +6,7 @@ describe('sign', () => {
   it('works', () => {
     expect(sign(-6n)).toBe(-1n)
     expect(sign(0n)).toBe(0n)
-    expect(sign(7901n)).toBe(1n)
+    expect(sign(7_901n)).toBe(1n)
   })
 })
 
@@ -65,6 +65,6 @@ describe('gcd', () => {
     expect(gcd(35n, -6n)).toBe(-1n)
     expect(gcd(-35n, 6n)).toBe(1n)
     expect(gcd(-35n, -6n)).toBe(-1n)
-    expect(gcd(1071n, 462n)).toBe(21n)
+    expect(gcd(1_071n, 462n)).toBe(21n)
   })
 })

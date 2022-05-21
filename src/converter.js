@@ -23,7 +23,7 @@ const Converter = (data, model) => {
       throw Error(`Not an integer: ${atomicMillis}`)
     }
 
-    const atomic = new Rat(BigInt(atomicMillis), 1000n)
+    const atomic = new Rat(BigInt(atomicMillis), 1_000n)
 
     for (const segment of segments) {
       if (!segment.atomicOnSegment(atomic)) {
@@ -32,7 +32,7 @@ const Converter = (data, model) => {
 
       const unix = segment.atomicToUnix(atomic)
 
-      return Number(unix.times(new Rat(1000n)).trunc())
+      return Number(unix.times(new Rat(1_000n)).trunc())
     }
 
     // Pre-1961, or BREAK model and we hit a break
@@ -44,7 +44,7 @@ const Converter = (data, model) => {
       throw Error(`Not an integer: ${unixMillis}`)
     }
 
-    const unix = new Rat(BigInt(unixMillis), 1000n)
+    const unix = new Rat(BigInt(unixMillis), 1_000n)
 
     const ranges = []
     for (const segment of segments) {

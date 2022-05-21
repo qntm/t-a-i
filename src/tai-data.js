@@ -31,7 +31,7 @@ const taiData = [
   [Date.UTC(1965, SEP, 1), 3.840_130_0, 38_761, 0.001_296], // 0.1 TAI seconds added to UTC
   [Date.UTC(1966, JAN, 1), 4.313_170_0, 39_126, 0.002_592], // drift rate doubled, no discontinuity
   [Date.UTC(1968, FEB, 1), 4.213_170_0, 39_126, 0.002_592], // 0.1 TAI seconds removed from UTC
-  [Date.UTC(1972, JAN, 1), 10], // 0.107758 TAI seconds added to UTC, drift rate zeroed
+  [Date.UTC(1972, JAN, 1), 10], // 0.107_758 TAI seconds added to UTC, drift rate zeroed
   [Date.UTC(1972, JUL, 1), 11], // 1.0 seconds added to UTC
   [Date.UTC(1973, JAN, 1), 12], // etc.
   [Date.UTC(1974, JAN, 1), 13],
