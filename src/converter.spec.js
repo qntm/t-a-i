@@ -720,7 +720,7 @@ describe('Converter', () => {
     describe('when unixMillis converts to an atomicPicos which fits but an atomicMillis which does not', () => {
       it('at the start of the ray', () => {
         const data = [
-          [Date.UTC(1970, JAN, 1, 0, 0, 0, 1), -0.0001]
+          [Date.UTC(1970, JAN, 1, 0, 0, 0, 1), -0.000_1]
         ]
         const converter = Converter(data, MODELS.OVERRUN)
         // 900_000_000n TAI picoseconds rounds down to 0 seconds, which is not in the ray
@@ -729,8 +729,8 @@ describe('Converter', () => {
 
       it('at the end of the ray', () => {
         const data = [
-          [Date.UTC(1969, DEC, 31, 23, 59, 59, 999), 0.0001],
-          [Date.UTC(1970, JAN, 1, 0, 0, 0, 1), -0.0011]
+          [Date.UTC(1969, DEC, 31, 23, 59, 59, 999), 0.000_1],
+          [Date.UTC(1970, JAN, 1, 0, 0, 0, 1), -0.001_1]
         ]
         const converter = Converter(data, MODELS.OVERRUN)
         expect(converter.unixToAtomic(-1, { array: true })).toEqual([-1])
@@ -742,8 +742,8 @@ describe('Converter', () => {
     describe('two inserted leap seconds', () => {
       const data = [
         [0, 0],
-        [1000, 1],
-        [1000, 2]
+        [1_000, 1],
+        [1_000, 2]
       ]
 
       describe('OVERRUN', () => {
@@ -755,21 +755,21 @@ describe('Converter', () => {
             .toEqual([
               999
             ])
-          expect(converter.unixToAtomic(1000, { array: true }))
+          expect(converter.unixToAtomic(1_000, { array: true }))
             .toEqual([
-              1000,
-              2000,
-              3000
+              1_000,
+              2_000,
+              3_000
             ])
-          expect(converter.unixToAtomic(1999, { array: true }))
+          expect(converter.unixToAtomic(1_999, { array: true }))
             .toEqual([
-              1999,
-              2999,
-              3999
+              1_999,
+              2_999,
+              3_999
             ])
-          expect(converter.unixToAtomic(2000, { array: true }))
+          expect(converter.unixToAtomic(2_000, { array: true }))
             .toEqual([
-              4000
+              4_000
             ])
         })
 
@@ -777,24 +777,24 @@ describe('Converter', () => {
           expect(converter.unixToAtomic(0)).toBe(0)
           expect(converter.unixToAtomic(999))
             .toBe(999)
-          expect(converter.unixToAtomic(1000))
-            .toBe(3000)
-          expect(converter.unixToAtomic(1999))
-            .toBe(3999)
-          expect(converter.unixToAtomic(2000))
-            .toBe(4000)
+          expect(converter.unixToAtomic(1_000))
+            .toBe(3_000)
+          expect(converter.unixToAtomic(1_999))
+            .toBe(3_999)
+          expect(converter.unixToAtomic(2_000))
+            .toBe(4_000)
         })
 
         it('atomicToUnix', () => {
           expect(converter.atomicToUnix(0)).toBe(0)
-          expect(converter.atomicToUnix(1000)).toBe(1000)
-          expect(converter.atomicToUnix(1001)).toBe(1001)
-          expect(converter.atomicToUnix(1999)).toBe(1999)
-          expect(converter.atomicToUnix(2000)).toBe(1000)
-          expect(converter.atomicToUnix(2001)).toBe(1001)
-          expect(converter.atomicToUnix(2999)).toBe(1999)
-          expect(converter.atomicToUnix(3000)).toBe(1000)
-          expect(converter.atomicToUnix(3001)).toBe(1001)
+          expect(converter.atomicToUnix(1_000)).toBe(1_000)
+          expect(converter.atomicToUnix(1_001)).toBe(1_001)
+          expect(converter.atomicToUnix(1_999)).toBe(1_999)
+          expect(converter.atomicToUnix(2_000)).toBe(1_000)
+          expect(converter.atomicToUnix(2_001)).toBe(1_001)
+          expect(converter.atomicToUnix(2_999)).toBe(1_999)
+          expect(converter.atomicToUnix(3_000)).toBe(1_000)
+          expect(converter.atomicToUnix(3_001)).toBe(1_001)
         })
       })
 
@@ -814,12 +814,12 @@ describe('Converter', () => {
     })
 
     describe('1.5 inserted leap seconds', () => {
-      // at TAI = 1000, Unix time stalls for 1000ms
-      // then at TAI = 2500, Unix time stalls for another 500ms
+      // at TAI = 1_000, Unix time stalls for 1_000ms
+      // then at TAI = 2_500, Unix time stalls for another 500ms
       const data = [
         [0, 0],
-        [1000, 1],
-        [1500, 1.5]
+        [1_000, 1],
+        [1_500, 1.5]
       ]
 
       describe('OVERRUN', () => {
@@ -828,31 +828,31 @@ describe('Converter', () => {
         it('unixToAtomic (array mode)', () => {
           expect(converter.unixToAtomic(0, { array: true })).toEqual([0])
           expect(converter.unixToAtomic(999, { array: true })).toEqual([999])
-          expect(converter.unixToAtomic(1000, { array: true })).toEqual([1000, 2000])
-          expect(converter.unixToAtomic(1499, { array: true })).toEqual([1499, 2499])
-          expect(converter.unixToAtomic(1500, { array: true })).toEqual([1500, 2500, 3000])
+          expect(converter.unixToAtomic(1_000, { array: true })).toEqual([1_000, 2_000])
+          expect(converter.unixToAtomic(1_499, { array: true })).toEqual([1_499, 2_499])
+          expect(converter.unixToAtomic(1_500, { array: true })).toEqual([1_500, 2_500, 3_000])
         })
 
         it('unixToAtomic', () => {
           expect(converter.unixToAtomic(0)).toBe(0)
           expect(converter.unixToAtomic(999)).toBe(999)
-          expect(converter.unixToAtomic(1000)).toBe(2000)
-          expect(converter.unixToAtomic(1499)).toBe(2499)
-          expect(converter.unixToAtomic(1500)).toBe(3000)
+          expect(converter.unixToAtomic(1_000)).toBe(2_000)
+          expect(converter.unixToAtomic(1_499)).toBe(2_499)
+          expect(converter.unixToAtomic(1_500)).toBe(3_000)
         })
 
         it('atomicToUnix', () => {
           expect(converter.atomicToUnix(0)).toBe(0)
           expect(converter.atomicToUnix(999)).toBe(999)
-          expect(converter.atomicToUnix(1000)).toBe(1000)
-          expect(converter.atomicToUnix(1001)).toBe(1001)
-          expect(converter.atomicToUnix(1999)).toBe(1999)
-          expect(converter.atomicToUnix(2000)).toBe(1000)
-          expect(converter.atomicToUnix(2001)).toBe(1001)
-          expect(converter.atomicToUnix(2499)).toBe(1499)
-          expect(converter.atomicToUnix(2500)).toBe(1500)
-          expect(converter.atomicToUnix(2999)).toBe(1999)
-          expect(converter.atomicToUnix(3000)).toBe(1500)
+          expect(converter.atomicToUnix(1_000)).toBe(1_000)
+          expect(converter.atomicToUnix(1_001)).toBe(1_001)
+          expect(converter.atomicToUnix(1_999)).toBe(1_999)
+          expect(converter.atomicToUnix(2_000)).toBe(1_000)
+          expect(converter.atomicToUnix(2_001)).toBe(1_001)
+          expect(converter.atomicToUnix(2_499)).toBe(1_499)
+          expect(converter.atomicToUnix(2_500)).toBe(1_500)
+          expect(converter.atomicToUnix(2_999)).toBe(1_999)
+          expect(converter.atomicToUnix(3_000)).toBe(1_500)
         })
       })
 
@@ -862,24 +862,24 @@ describe('Converter', () => {
         it('unixToAtomic', () => {
           expect(converter.unixToAtomic(0)).toBe(0)
           expect(converter.unixToAtomic(999)).toBe(999)
-          expect(converter.unixToAtomic(1000)).toBe(2000)
-          expect(converter.unixToAtomic(1499)).toBe(2499)
-          expect(converter.unixToAtomic(1500)).toBe(3000)
+          expect(converter.unixToAtomic(1_000)).toBe(2_000)
+          expect(converter.unixToAtomic(1_499)).toBe(2_499)
+          expect(converter.unixToAtomic(1_500)).toBe(3_000)
         })
 
         it('atomicToUnix', () => {
           expect(converter.atomicToUnix(0)).toBe(0)
           expect(converter.atomicToUnix(999)).toBe(999)
-          expect(converter.atomicToUnix(1000)).toBe(NaN)
-          expect(converter.atomicToUnix(1001)).toBe(NaN)
-          expect(converter.atomicToUnix(1999)).toBe(NaN)
-          expect(converter.atomicToUnix(2000)).toBe(1000)
-          expect(converter.atomicToUnix(2001)).toBe(1001)
-          expect(converter.atomicToUnix(2499)).toBe(1499)
-          expect(converter.atomicToUnix(2500)).toBe(NaN)
-          expect(converter.atomicToUnix(2501)).toBe(NaN)
-          expect(converter.atomicToUnix(2999)).toBe(NaN)
-          expect(converter.atomicToUnix(3000)).toBe(1500)
+          expect(converter.atomicToUnix(1_000)).toBe(NaN)
+          expect(converter.atomicToUnix(1_001)).toBe(NaN)
+          expect(converter.atomicToUnix(1_999)).toBe(NaN)
+          expect(converter.atomicToUnix(2_000)).toBe(1_000)
+          expect(converter.atomicToUnix(2_001)).toBe(1_001)
+          expect(converter.atomicToUnix(2_499)).toBe(1_499)
+          expect(converter.atomicToUnix(2_500)).toBe(NaN)
+          expect(converter.atomicToUnix(2_501)).toBe(NaN)
+          expect(converter.atomicToUnix(2_999)).toBe(NaN)
+          expect(converter.atomicToUnix(3_000)).toBe(1_500)
         })
       })
 
@@ -889,37 +889,37 @@ describe('Converter', () => {
         it('unixToAtomic (range mode)', () => {
           expect(converter.unixToAtomic(0, { range: true })).toEqual([0, 0])
           expect(converter.unixToAtomic(999, { range: true })).toEqual([999, 999])
-          expect(converter.unixToAtomic(1000, { range: true })).toEqual([1000, 2000])
-          expect(converter.unixToAtomic(1001, { range: true })).toEqual([2001, 2001])
-          expect(converter.unixToAtomic(1499, { range: true })).toEqual([2499, 2499])
-          expect(converter.unixToAtomic(1500, { range: true })).toEqual([2500, 3000])
-          expect(converter.unixToAtomic(1501, { range: true })).toEqual([3001, 3001])
+          expect(converter.unixToAtomic(1_000, { range: true })).toEqual([1_000, 2_000])
+          expect(converter.unixToAtomic(1_001, { range: true })).toEqual([2_001, 2_001])
+          expect(converter.unixToAtomic(1_499, { range: true })).toEqual([2_499, 2_499])
+          expect(converter.unixToAtomic(1_500, { range: true })).toEqual([2_500, 3_000])
+          expect(converter.unixToAtomic(1_501, { range: true })).toEqual([3_001, 3_001])
         })
 
         it('unixToAtomic', () => {
           expect(converter.unixToAtomic(0)).toBe(0)
           expect(converter.unixToAtomic(999)).toBe(999)
-          expect(converter.unixToAtomic(1000)).toBe(2000)
-          expect(converter.unixToAtomic(1001)).toBe(2001)
-          expect(converter.unixToAtomic(1499)).toBe(2499)
-          expect(converter.unixToAtomic(1500)).toBe(3000)
-          expect(converter.unixToAtomic(1501)).toBe(3001)
+          expect(converter.unixToAtomic(1_000)).toBe(2_000)
+          expect(converter.unixToAtomic(1_001)).toBe(2_001)
+          expect(converter.unixToAtomic(1_499)).toBe(2_499)
+          expect(converter.unixToAtomic(1_500)).toBe(3_000)
+          expect(converter.unixToAtomic(1_501)).toBe(3_001)
         })
 
         it('atomicToUnix', () => {
           expect(converter.atomicToUnix(0)).toBe(0)
           expect(converter.atomicToUnix(999)).toBe(999)
-          expect(converter.atomicToUnix(1000)).toBe(1000)
-          expect(converter.atomicToUnix(1001)).toBe(1000)
-          expect(converter.atomicToUnix(1999)).toBe(1000)
-          expect(converter.atomicToUnix(2000)).toBe(1000)
-          expect(converter.atomicToUnix(2001)).toBe(1001)
-          expect(converter.atomicToUnix(2499)).toBe(1499)
-          expect(converter.atomicToUnix(2500)).toBe(1500)
-          expect(converter.atomicToUnix(2501)).toBe(1500)
-          expect(converter.atomicToUnix(2999)).toBe(1500)
-          expect(converter.atomicToUnix(3000)).toBe(1500)
-          expect(converter.atomicToUnix(3001)).toBe(1501)
+          expect(converter.atomicToUnix(1_000)).toBe(1_000)
+          expect(converter.atomicToUnix(1_001)).toBe(1_000)
+          expect(converter.atomicToUnix(1_999)).toBe(1_000)
+          expect(converter.atomicToUnix(2_000)).toBe(1_000)
+          expect(converter.atomicToUnix(2_001)).toBe(1_001)
+          expect(converter.atomicToUnix(2_499)).toBe(1_499)
+          expect(converter.atomicToUnix(2_500)).toBe(1_500)
+          expect(converter.atomicToUnix(2_501)).toBe(1_500)
+          expect(converter.atomicToUnix(2_999)).toBe(1_500)
+          expect(converter.atomicToUnix(3_000)).toBe(1_500)
+          expect(converter.atomicToUnix(3_001)).toBe(1_501)
         })
       })
     })
@@ -928,7 +928,7 @@ describe('Converter', () => {
       // Insertion of 1.5 additional seconds means ray #3 retroactively eliminates ray #2.
       const data = [
         [0, 0],
-        [1000, 1],
+        [1_000, 1],
         [500, 2.5]
       ]
 
@@ -938,21 +938,21 @@ describe('Converter', () => {
         it('unixToAtomic (array mode)', () => {
           expect(converter.unixToAtomic(0, { array: true })).toEqual([0])
           expect(converter.unixToAtomic(499, { array: true })).toEqual([499])
-          expect(converter.unixToAtomic(500, { array: true })).toEqual([500, 3000])
-          expect(converter.unixToAtomic(999, { array: true })).toEqual([999, 3499])
-          expect(converter.unixToAtomic(1000, { array: true })).toEqual([1000, 2000, 3500])
-          expect(converter.unixToAtomic(1999, { array: true })).toEqual([1999, 2999, 4499])
-          expect(converter.unixToAtomic(2000, { array: true })).toEqual([4500])
+          expect(converter.unixToAtomic(500, { array: true })).toEqual([500, 3_000])
+          expect(converter.unixToAtomic(999, { array: true })).toEqual([999, 3_499])
+          expect(converter.unixToAtomic(1_000, { array: true })).toEqual([1_000, 2_000, 3_500])
+          expect(converter.unixToAtomic(1_999, { array: true })).toEqual([1_999, 2_999, 4_499])
+          expect(converter.unixToAtomic(2_000, { array: true })).toEqual([4_500])
         })
 
         it('unixToAtomic', () => {
           expect(converter.unixToAtomic(0)).toBe(0)
           expect(converter.unixToAtomic(499)).toBe(499)
-          expect(converter.unixToAtomic(500)).toBe(3000)
-          expect(converter.unixToAtomic(999)).toBe(3499)
-          expect(converter.unixToAtomic(1000)).toBe(3500)
-          expect(converter.unixToAtomic(1999)).toBe(4499)
-          expect(converter.unixToAtomic(2000)).toBe(4500)
+          expect(converter.unixToAtomic(500)).toBe(3_000)
+          expect(converter.unixToAtomic(999)).toBe(3_499)
+          expect(converter.unixToAtomic(1_000)).toBe(3_500)
+          expect(converter.unixToAtomic(1_999)).toBe(4_499)
+          expect(converter.unixToAtomic(2_000)).toBe(4_500)
         })
 
         it('atomicToUnix', () => {
@@ -960,16 +960,16 @@ describe('Converter', () => {
           expect(converter.atomicToUnix(499)).toBe(499)
           expect(converter.atomicToUnix(500)).toBe(500)
           expect(converter.atomicToUnix(999)).toBe(999)
-          expect(converter.atomicToUnix(1000)).toBe(1000)
-          expect(converter.atomicToUnix(1001)).toBe(1001)
-          expect(converter.atomicToUnix(1999)).toBe(1999)
-          expect(converter.atomicToUnix(2000)).toBe(1000)
-          expect(converter.atomicToUnix(2001)).toBe(1001)
-          expect(converter.atomicToUnix(2999)).toBe(1999)
-          expect(converter.atomicToUnix(3000)).toBe(500)
-          expect(converter.atomicToUnix(3001)).toBe(501)
-          expect(converter.atomicToUnix(4499)).toBe(1999)
-          expect(converter.atomicToUnix(4500)).toBe(2000)
+          expect(converter.atomicToUnix(1_000)).toBe(1_000)
+          expect(converter.atomicToUnix(1_001)).toBe(1_001)
+          expect(converter.atomicToUnix(1_999)).toBe(1_999)
+          expect(converter.atomicToUnix(2_000)).toBe(1_000)
+          expect(converter.atomicToUnix(2_001)).toBe(1_001)
+          expect(converter.atomicToUnix(2_999)).toBe(1_999)
+          expect(converter.atomicToUnix(3_000)).toBe(500)
+          expect(converter.atomicToUnix(3_001)).toBe(501)
+          expect(converter.atomicToUnix(4_499)).toBe(1_999)
+          expect(converter.atomicToUnix(4_500)).toBe(2_000)
         })
       })
 

@@ -10,8 +10,7 @@
 // map to multiple TAI times. We can return an array of these, or just the result from the latest
 // segment (according to its numbering).
 
-const { munge, MODELS } = require('./munge')
-const { Rat } = require('./rat')
+const { MODELS, millisToExact, exactToMillis, munge } = require('./munge')
 
 const Converter = (data, model) => {
   const segments = munge(data, model)
@@ -23,7 +22,7 @@ const Converter = (data, model) => {
       throw Error(`Not an integer: ${atomicMillis}`)
     }
 
-    const atomic = new Rat(BigInt(atomicMillis), 1000n)
+    const atomic = millisToExact(atomicMillis)
 
     for (const segment of segments) {
       if (!segment.atomicOnSegment(atomic)) {
@@ -32,7 +31,7 @@ const Converter = (data, model) => {
 
       const unix = segment.atomicToUnix(atomic)
 
-      return Number(unix.times(new Rat(1000n)).trunc())
+      return exactToMillis(unix)
     }
 
     // Pre-1961, or BREAK model and we hit a break
@@ -44,7 +43,7 @@ const Converter = (data, model) => {
       throw Error(`Not an integer: ${unixMillis}`)
     }
 
-    const unix = new Rat(BigInt(unixMillis), 1000n)
+    const unix = millisToExact(unixMillis)
 
     const ranges = []
     for (const segment of segments) {
@@ -53,8 +52,8 @@ const Converter = (data, model) => {
       }
 
       const range = segment.unixToAtomicRange(unix)
-      range.start = Number(range.start.times(new Rat(1_000n)).trunc())
-      range.end = Number(range.end.times(new Rat(1_000n)).trunc())
+      range.start = exactToMillis(range.start)
+      range.end = exactToMillis(range.end)
 
       if (ranges.length - 1 in ranges) {
         const prev = ranges[ranges.length - 1]

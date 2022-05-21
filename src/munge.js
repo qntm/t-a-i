@@ -32,10 +32,13 @@ const MODELS = {
   SMEAR: Symbol('SMEAR')
 }
 
+const millisToExact = millis => new Rat(BigInt(millis), 1_000n)
+const exactToMillis = rat => Number(rat.times(new Rat(1_000n)).trunc())
+
 const NOV = 10
 const secondsPerDay = new Rat(86_400n)
 const mjdEpoch = {
-  unix: new Rat(BigInt(Date.UTC(1858, NOV, 17)), 1_000n)
+  unix: millisToExact(Date.UTC(1858, NOV, 17))
 }
 
 // Input some raw TAI-UTC data, output the same data but altered to be more consumable for our
@@ -57,7 +60,7 @@ const munge = (data, model) => {
     ] = datum
 
     // Convert from a millisecond count to a precise ratio of seconds
-    start.unix = new Rat(BigInt(start.unixMillis), 1_000n)
+    start.unix = millisToExact(start.unixMillis)
 
     // Convert from a floating point number to a precise ratio
     // Offsets are given in TAI seconds to seven decimal places, e.g. `1.422_818_0`.
@@ -204,5 +207,7 @@ const munge = (data, model) => {
   ))
 }
 
-module.exports.munge = munge
 module.exports.MODELS = MODELS
+module.exports.millisToExact = millisToExact
+module.exports.exactToMillis = exactToMillis
+module.exports.munge = munge
