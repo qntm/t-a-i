@@ -12,12 +12,12 @@ class Rat {
       throw Error('Denominator must be non-zero')
     }
 
-    const g = gcd(nu, de)
-    this.nu = nu / g
-    this.de = de / g
+    const g = gcd(nu, de) // non-zero
 
-    // `this.de` is always positive
-    // which means the sign of `this.nu` is the sign of the represented rational
+    const g2 = (de < 0) === (g < 0) ? g : -g // has the same sign as `de`
+
+    this.de = de / g2 // positive
+    this.nu = nu / g2 // sign of `this.nu` is the sign of the represented rational
   }
 
   plus (other) {
@@ -52,6 +52,7 @@ class Rat {
     return this.minus(other).nu > 0n
   }
 
+  // Truncate the fraction towards negative infinity
   trunc () {
     return div(this.nu, this.de)
   }

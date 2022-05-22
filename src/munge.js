@@ -32,8 +32,17 @@ const MODELS = {
   SMEAR: Symbol('SMEAR')
 }
 
-const millisToExact = millis => new Rat(BigInt(millis), 1_000n)
-const exactToMillis = rat => Number(rat.times(new Rat(1_000n)).trunc())
+const millisToExact = millis => {
+  if (!Number.isInteger(millis)) {
+    throw Error(`Not an integer: ${millis}`)
+  }
+
+  return new Rat(BigInt(millis), 1_000n)
+}
+
+const exactToMillis = rat => Number.isNaN(rat)
+  ? rat
+  : Number(rat.times(new Rat(1_000n)).trunc())
 
 const NOV = 10
 const secondsPerDay = new Rat(86_400n)

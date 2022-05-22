@@ -17,34 +17,23 @@ const Converter = (data, model) => {
 
   // This conversion always has the same behaviour,
   // and there's no work required in handling the output
-  const atomicToUnix = atomicMillis => {
-    if (!Number.isInteger(atomicMillis)) {
-      throw Error(`Not an integer: ${atomicMillis}`)
-    }
-
-    const atomic = millisToExact(atomicMillis)
-
+  const atomicToUnix = atomic => {
     for (const segment of segments) {
       if (!segment.atomicOnSegment(atomic)) {
         continue
       }
 
-      const unix = segment.atomicToUnix(atomic)
-
-      return exactToMillis(unix)
+      return segment.atomicToUnix(atomic)
     }
 
     // Pre-1961, or BREAK model and we hit a break
     return NaN
   }
 
-  const unixToAtomic = (unixMillis, options = {}) => {
-    if (!Number.isInteger(unixMillis)) {
-      throw Error(`Not an integer: ${unixMillis}`)
-    }
+  const atomicMillisToUnixMillis = atomicMillis =>
+    exactToMillis(atomicToUnix(millisToExact(atomicMillis)))
 
-    const unix = millisToExact(unixMillis)
-
+  const unixToAtomic = unix => {
     const ranges = []
     for (const segment of segments) {
       if (!segment.unixOnSegment(unix)) {
@@ -52,15 +41,13 @@ const Converter = (data, model) => {
       }
 
       const range = segment.unixToAtomicRange(unix)
-      range.start = exactToMillis(range.start)
-      range.end = exactToMillis(range.end)
 
       if (ranges.length - 1 in ranges) {
         const prev = ranges[ranges.length - 1]
 
         // Previous range ends where current one starts, so try to combine the two.
         // The previous range should have `closed: false` but it doesn't actually make a difference.
-        if (prev.end === range.start) {
+        if (prev.end.eq(range.start)) {
           ranges[ranges.length - 1] = {
             start: prev.start,
             end: range.end,
@@ -78,27 +65,31 @@ const Converter = (data, model) => {
       throw Error('Failed to close all open ranges, this should be impossible')
     }
 
+    // Always return an array of ranges, caller can prune this output if desired
+    return ranges
+  }
+
+  const unixMillisToAtomicMillis = (unixMillis, options = {}) => {
+    const ranges = unixToAtomic(millisToExact(unixMillis))
+      .map(range => [
+        exactToMillis(range.start),
+        exactToMillis(range.end)
+      ])
+
     if (options.array === true) {
-      return ranges.map(range =>
-        options.range === true
-          ? [range.start, range.end]
-          : range.end
-      )
+      return options.range === true ? ranges : ranges.map(range => range[1])
     }
 
     const i = ranges.length - 1
-    const range = i in ranges
-      ? ranges[i]
-      : { start: NaN, end: NaN }
-
-    return options.range === true
-      ? [range.start, range.end]
-      : range.end
+    const lastRange = i in ranges ? ranges[i] : [NaN, NaN]
+    return options.range === true ? lastRange : lastRange[1]
   }
 
   return {
+    atomicToUnix,
+    atomicMillisToUnixMillis,
     unixToAtomic,
-    atomicToUnix
+    unixMillisToAtomicMillis
   }
 }
 

@@ -27,12 +27,10 @@ const div = (a, b) => {
 // Return value always has the same sign as `b`, so we can divide both `a` and `b`
 // by the return value to always end up with a positive `b`
 const gcd = (a, b) => {
-  const bNegative = b < 0n
   while (b !== 0n) {
     [a, b] = [b, a % b]
   }
-  const aNegative = a < 0n
-  return aNegative === bNegative ? a : -a
+  return a
 }
 
 module.exports.sign = sign

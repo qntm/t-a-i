@@ -1,6 +1,6 @@
 /* eslint-env jest */
 
-const { TaiConverter, MODELS } = require('.')
+const { TaiConverter, MODELS, UNIX_START, UNIX_END } = require('.')
 
 const JAN = 0
 const FEB = 1
@@ -12,6 +12,18 @@ const SEP = 8
 const OCT = 9
 const DEC = 11
 
+describe('UNIX_START', () => {
+  it('is correct', () => {
+    expect(UNIX_START).toBe(Date.UTC(1961, JAN, 1))
+  })
+})
+
+describe('UNIX_END', () => {
+  it('is correct', () => {
+    expect(UNIX_END).toBe(Date.UTC(2022, DEC, 31, 12, 0, 0, 0))
+  })
+})
+
 describe('TaiConverter', () => {
   describe('OVERRUN', () => {
     const converter = TaiConverter(MODELS.OVERRUN)
@@ -20,7 +32,7 @@ describe('TaiConverter', () => {
       const unixToAtomic = unixMillis => converter.unixToAtomic(unixMillis, { array: true })
 
       it('starts TAI at 1961-01-01 00:00:01.422_818', () => {
-        // 00:00:01.422_818 is in range, but rounds down to 00:00:01.422 which is not
+        // 00:00:01.422_818 is in range, but rounds down to 00:00:01.422 which technically is not
         expect(unixToAtomic(Date.UTC(1961, JAN, 1, 0, 0, 0, 0)))
           .toEqual([-283_996_798_578])
       })
