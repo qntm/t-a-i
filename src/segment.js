@@ -1,6 +1,6 @@
 const { Rat } = require('./rat')
 
-// A segment is a closed linear relationship between TAI and Unix time.
+// A segment is a closed-open linear relationship between TAI and Unix time.
 // It should be able to handle arbitrary ratios between the two.
 // For precision, we deal with ratios of BigInts.
 // Segment validity ranges are inclusive-exclusive.
@@ -36,7 +36,7 @@ class Segment {
       return {
         start: this.start.atomic,
         end: this.end.atomic,
-        closed: false
+        open: true
       }
     }
 
@@ -47,8 +47,7 @@ class Segment {
 
     return {
       start: atomic,
-      end: atomic,
-      closed: true
+      end: atomic
     }
   }
 

@@ -33,7 +33,7 @@ describe('Segment', () => {
     it('zero point', () => {
       expect(segment.unixOnSegment(new Rat(0n))).toBe(true)
       expect(segment.unixToAtomicRange(new Rat(0n)))
-        .toEqual({ start: new Rat(0n), end: new Rat(0n), closed: true })
+        .toEqual({ start: new Rat(0n), end: new Rat(0n) })
       expect(segment.atomicOnSegment(new Rat(0n))).toBe(true)
       expect(segment.atomicToUnix(new Rat(0n))).toEqual(new Rat(0n))
     })
@@ -43,8 +43,7 @@ describe('Segment', () => {
       expect(segment.unixToAtomicRange(millisToExact(Date.UTC(2021, MAY, 16, 12, 11, 10, 9))))
         .toEqual({
           start: millisToExact(Date.UTC(2021, MAY, 16, 12, 11, 10, 9)),
-          end: millisToExact(Date.UTC(2021, MAY, 16, 12, 11, 10, 9)),
-          closed: true
+          end: millisToExact(Date.UTC(2021, MAY, 16, 12, 11, 10, 9))
         })
       expect(segment.atomicOnSegment(millisToExact(Date.UTC(2021, MAY, 16, 12, 11, 10, 9)))).toBe(true)
       expect(segment.atomicToUnix(millisToExact(Date.UTC(2021, MAY, 16, 12, 11, 10, 9))))
@@ -54,7 +53,7 @@ describe('Segment', () => {
     it('before start point', () => {
       expect(segment.unixOnSegment(new Rat(-1n, 1_000n))).toBe(false)
       expect(segment.unixToAtomicRange(new Rat(-1n, 1_000n)))
-        .toEqual({ start: new Rat(-1n, 1_000n), end: new Rat(-1n, 1_000n), closed: true })
+        .toEqual({ start: new Rat(-1n, 1_000n), end: new Rat(-1n, 1_000n) })
       expect(segment.atomicOnSegment(new Rat(-1n, 1_000n))).toBe(false)
       expect(segment.atomicToUnix(new Rat(-1n, 1_000n))).toEqual(new Rat(-1n, 1_000n))
     })
@@ -70,7 +69,7 @@ describe('Segment', () => {
     it('zero point', () => {
       expect(segment.unixOnSegment(new Rat(0n))).toBe(true)
       expect(segment.unixToAtomicRange(new Rat(0n)))
-        .toEqual({ start: new Rat(0n), end: new Rat(0n), closed: true })
+        .toEqual({ start: new Rat(0n), end: new Rat(0n) })
       expect(segment.atomicOnSegment(new Rat(0n))).toBe(true)
       expect(segment.atomicToUnix(new Rat(0n))).toEqual(new Rat(0n))
     })
@@ -78,7 +77,7 @@ describe('Segment', () => {
     it('a little later', () => {
       expect(segment.unixOnSegment(new Rat(501n, 1_000n))).toBe(true)
       expect(segment.unixToAtomicRange(new Rat(501n, 1_000n)))
-        .toEqual({ start: new Rat(1_002n, 1_000n), end: new Rat(1_002n, 1_000n), closed: true })
+        .toEqual({ start: new Rat(1_002n, 1_000n), end: new Rat(1_002n, 1_000n) })
       expect(segment.atomicOnSegment(new Rat(1_002n, 1_000n))).toBe(true)
       expect(segment.atomicToUnix(new Rat(1_002n, 1_000n))).toEqual(new Rat(501n, 1_000n))
     })
@@ -86,7 +85,7 @@ describe('Segment', () => {
     it('right before end point', () => {
       expect(segment.unixOnSegment(new Rat(999n, 1_000n))).toBe(true)
       expect(segment.unixToAtomicRange(new Rat(999n, 1_000n)))
-        .toEqual({ start: new Rat(1_998n, 1_000n), end: new Rat(1_998n, 1_000n), closed: true })
+        .toEqual({ start: new Rat(1_998n, 1_000n), end: new Rat(1_998n, 1_000n) })
 
       expect(segment.atomicOnSegment(new Rat(1_998n, 1_000n))).toBe(true)
       expect(segment.atomicToUnix(new Rat(1_998n, 1_000n))).toEqual(new Rat(999n, 1_000n))
@@ -97,7 +96,7 @@ describe('Segment', () => {
     it('end point', () => {
       expect(segment.unixOnSegment(new Rat(1n))).toBe(false)
       expect(segment.unixToAtomicRange(new Rat(1n)))
-        .toEqual({ start: new Rat(2_000n, 1_000n), end: new Rat(2_000n, 1_000n), closed: true })
+        .toEqual({ start: new Rat(2_000n, 1_000n), end: new Rat(2_000n, 1_000n) })
       expect(segment.atomicOnSegment(new Rat(2n))).toBe(false)
       expect(segment.atomicToUnix(new Rat(2n))).toEqual(new Rat(1n))
     })
@@ -113,7 +112,7 @@ describe('Segment', () => {
     it('zero point', () => {
       expect(segment.unixOnSegment(new Rat(0n))).toBe(true)
       expect(segment.unixToAtomicRange(new Rat(0n)))
-        .toEqual({ start: new Rat(0n), end: new Rat(2_000n, 1_000n), closed: false })
+        .toEqual({ start: new Rat(0n), end: new Rat(2_000n, 1_000n), open: true })
       expect(segment.atomicOnSegment(new Rat(0n))).toBe(true)
       expect(segment.atomicToUnix(new Rat(0n))).toEqual(new Rat(0n))
     })

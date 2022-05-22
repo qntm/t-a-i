@@ -46,12 +46,14 @@ const Converter = (data, model) => {
         const prev = ranges[ranges.length - 1]
 
         // Previous range ends where current one starts, so try to combine the two.
-        // The previous range should have `closed: false` but it doesn't actually make a difference.
+        // The previous range should have `open: true` but it doesn't actually make a difference.
         if (prev.end.eq(range.start)) {
           ranges[ranges.length - 1] = {
             start: prev.start,
-            end: range.end,
-            closed: range.closed
+            end: range.end
+          }
+          if ('open' in range) {
+            ranges[ranges.length - 1].open = range.open
           }
           continue
         }
@@ -61,7 +63,7 @@ const Converter = (data, model) => {
     }
 
     /* istanbul ignore if */
-    if (ranges.some(range => range.closed !== true)) {
+    if (ranges.some(range => 'open' in range)) {
       throw Error('Failed to close all open ranges, this should be impossible')
     }
 
