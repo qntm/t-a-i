@@ -10,7 +10,7 @@
 // map to multiple TAI times. We can return an array of these, or just the result from the latest
 // segment (according to its numbering).
 
-const { MODELS, exactToMillis, munge } = require('./munge')
+const { MODELS, munge } = require('./munge')
 const { Rat } = require('./rat.js')
 
 const Converter = (data, model) => {
@@ -31,8 +31,12 @@ const Converter = (data, model) => {
     return NaN
   }
 
-  const atomicMillisToUnixMillis = atomicMillis =>
-    exactToMillis(atomicToUnix(Rat.fromMillis(atomicMillis)))
+  const atomicMillisToUnixMillis = atomicMillis => {
+    const unix = atomicToUnix(Rat.fromMillis(atomicMillis))
+    return Number.isNaN(unix)
+      ? unix
+      : unix.toMillis()
+  }
 
   const unixToAtomic = unix => {
     const ranges = []
@@ -75,8 +79,8 @@ const Converter = (data, model) => {
   const unixMillisToAtomicMillis = (unixMillis, options = {}) => {
     const ranges = unixToAtomic(Rat.fromMillis(unixMillis))
       .map(range => [
-        exactToMillis(range.start),
-        exactToMillis(range.end)
+        range.start.toMillis(),
+        range.end.toMillis()
       ])
 
     if (options.array === true) {

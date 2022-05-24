@@ -32,10 +32,6 @@ const MODELS = {
   SMEAR: Symbol('SMEAR')
 }
 
-const exactToMillis = rat => Number.isNaN(rat)
-  ? rat
-  : Number(rat.times(new Rat(1_000n)).trunc())
-
 const NOV = 10
 const secondsPerDay = new Rat(86_400n)
 const mjdEpoch = {
@@ -209,5 +205,4 @@ const munge = (data, model) => {
 }
 
 module.exports.MODELS = MODELS
-module.exports.exactToMillis = exactToMillis
 module.exports.munge = munge

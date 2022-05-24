@@ -56,6 +56,10 @@ class Rat {
   trunc () {
     return div(this.nu, this.de)
   }
+
+  toMillis () {
+    return Number(this.times(new Rat(1_000n)).trunc())
+  }
 }
 
 Rat.fromMillis = millis => {
