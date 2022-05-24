@@ -10,7 +10,8 @@
 // map to multiple TAI times. We can return an array of these, or just the result from the latest
 // segment (according to its numbering).
 
-const { MODELS, millisToExact, exactToMillis, munge } = require('./munge')
+const { MODELS, exactToMillis, munge } = require('./munge')
+const { Rat } = require('./rat.js')
 
 const Converter = (data, model) => {
   const segments = munge(data, model)
@@ -31,7 +32,7 @@ const Converter = (data, model) => {
   }
 
   const atomicMillisToUnixMillis = atomicMillis =>
-    exactToMillis(atomicToUnix(millisToExact(atomicMillis)))
+    exactToMillis(atomicToUnix(Rat.fromMillis(atomicMillis)))
 
   const unixToAtomic = unix => {
     const ranges = []
@@ -72,7 +73,7 @@ const Converter = (data, model) => {
   }
 
   const unixMillisToAtomicMillis = (unixMillis, options = {}) => {
-    const ranges = unixToAtomic(millisToExact(unixMillis))
+    const ranges = unixToAtomic(Rat.fromMillis(unixMillis))
       .map(range => [
         exactToMillis(range.start),
         exactToMillis(range.end)

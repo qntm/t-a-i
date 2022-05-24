@@ -2,7 +2,6 @@
 
 const { Converter, MODELS } = require('./converter.js')
 const { Rat } = require('./rat.js')
-const { millisToExact } = require('./munge.js')
 
 const JAN = 0
 const OCT = 9
@@ -104,46 +103,46 @@ describe('Converter', () => {
           }])
 
         // BIFURCATION
-        expect(converter.unixToAtomic(millisToExact(Date.UTC(1979, DEC, 31, 23, 59, 59, 999))))
+        expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 999))))
           .toEqual([{
-            start: millisToExact(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)),
-            end: millisToExact(Date.UTC(1979, DEC, 31, 23, 59, 59, 999))
+            start: Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)),
+            end: Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 999))
           }])
-        expect(converter.unixToAtomic(millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 0, 0))))
+        expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 0, 0))))
           .toEqual([{
-            start: millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)),
-            end: millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 0, 0))
+            start: Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)),
+            end: Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 0, 0))
           }, {
-            start: millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 1)),
-            end: millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 1))
+            start: Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 1)),
+            end: Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 1))
           }])
-        expect(converter.unixToAtomic(millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 0, 1))))
+        expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 0, 1))))
           .toEqual([{
-            start: millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 0, 1)),
-            end: millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 0, 1))
+            start: Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 0, 1)),
+            end: Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 0, 1))
           }, {
-            start: millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 1, 1)),
-            end: millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 1, 1))
+            start: Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 1, 1)),
+            end: Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 1, 1))
           }])
 
         // COLLAPSE
-        expect(converter.unixToAtomic(millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 0, 999))))
+        expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 0, 999))))
           .toEqual([{
-            start: millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)),
-            end: millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 0, 999))
+            start: Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)),
+            end: Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 0, 999))
           }, {
-            start: millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 1, 999)),
-            end: millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 1, 999))
+            start: Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 1, 999)),
+            end: Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 1, 999))
           }])
-        expect(converter.unixToAtomic(millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 1, 0))))
+        expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 1, 0))))
           .toEqual([{
-            start: millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 2, 0)),
-            end: millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 2, 0))
+            start: Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 2, 0)),
+            end: Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 2, 0))
           }])
-        expect(converter.unixToAtomic(millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 1, 1))))
+        expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 1, 1))))
           .toEqual([{
-            start: millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 2, 1)),
-            end: millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 2, 1))
+            start: Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 2, 1)),
+            end: Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 2, 1))
           }])
       })
 
@@ -209,20 +208,20 @@ describe('Converter', () => {
         expect(converter.atomicToUnix(new Rat(0n)))
           .toEqual(new Rat(0n))
 
-        expect(converter.atomicToUnix(millisToExact(Date.UTC(1979, DEC, 31, 23, 59, 59, 999))))
-          .toEqual(millisToExact(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
-        expect(converter.atomicToUnix(millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 0, 0))))
-          .toEqual(millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)))
-        expect(converter.atomicToUnix(millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 0, 1))))
-          .toEqual(millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 0, 1)))
+        expect(converter.atomicToUnix(Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 999))))
+          .toEqual(Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
+        expect(converter.atomicToUnix(Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 0, 0))))
+          .toEqual(Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)))
+        expect(converter.atomicToUnix(Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 0, 1))))
+          .toEqual(Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 0, 1)))
 
         // BACKTRACK
-        expect(converter.atomicToUnix(millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 0, 999))))
-          .toEqual(millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)))
-        expect(converter.atomicToUnix(millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 1, 0))))
-          .toEqual(millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)))
-        expect(converter.atomicToUnix(millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 1, 1))))
-          .toEqual(millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 0, 1)))
+        expect(converter.atomicToUnix(Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 0, 999))))
+          .toEqual(Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)))
+        expect(converter.atomicToUnix(Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 1, 0))))
+          .toEqual(Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)))
+        expect(converter.atomicToUnix(Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 1, 1))))
+          .toEqual(Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 0, 1)))
       })
 
       it('atomicMillisToUnixMillis', () => {
@@ -257,36 +256,36 @@ describe('Converter', () => {
           }])
 
         // FORWARD JUMP
-        expect(converter.unixToAtomic(millisToExact(Date.UTC(1979, DEC, 31, 23, 59, 59, 999))))
+        expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 999))))
           .toEqual([{
-            start: millisToExact(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)),
-            end: millisToExact(Date.UTC(1979, DEC, 31, 23, 59, 59, 999))
+            start: Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)),
+            end: Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 999))
           }])
-        expect(converter.unixToAtomic(millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 0, 0))))
+        expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 0, 0))))
           .toEqual([{
-            start: millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 1, 0)),
-            end: millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 1, 0))
+            start: Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 1, 0)),
+            end: Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 1, 0))
           }])
-        expect(converter.unixToAtomic(millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 0, 1))))
+        expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 0, 1))))
           .toEqual([{
-            start: millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 1, 1)),
-            end: millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 1, 1))
+            start: Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 1, 1)),
+            end: Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 1, 1))
           }])
 
-        expect(converter.unixToAtomic(millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 0, 999))))
+        expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 0, 999))))
           .toEqual([{
-            start: millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 1, 999)),
-            end: millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 1, 999))
+            start: Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 1, 999)),
+            end: Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 1, 999))
           }])
-        expect(converter.unixToAtomic(millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 1, 0))))
+        expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 1, 0))))
           .toEqual([{
-            start: millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 2, 0)),
-            end: millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 2, 0))
+            start: Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 2, 0)),
+            end: Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 2, 0))
           }])
-        expect(converter.unixToAtomic(millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 1, 1))))
+        expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 1, 1))))
           .toEqual([{
-            start: millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 2, 1)),
-            end: millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 2, 1))
+            start: Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 2, 1)),
+            end: Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 2, 1))
           }])
       })
 
@@ -315,20 +314,20 @@ describe('Converter', () => {
           .toEqual(new Rat(0n))
 
         // UNDEFINED UNIX TIME STARTS
-        expect(converter.atomicToUnix(millisToExact(Date.UTC(1979, DEC, 31, 23, 59, 59, 999))))
-          .toEqual(millisToExact(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
-        expect(converter.atomicToUnix(millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 0, 0))))
+        expect(converter.atomicToUnix(Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 999))))
+          .toEqual(Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
+        expect(converter.atomicToUnix(Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 0, 0))))
           .toBe(NaN)
-        expect(converter.atomicToUnix(millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 0, 1))))
+        expect(converter.atomicToUnix(Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 0, 1))))
           .toBe(NaN)
 
         // UNDEFINED UNIX TIME ENDS
-        expect(converter.atomicToUnix(millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 0, 999))))
+        expect(converter.atomicToUnix(Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 0, 999))))
           .toBe(NaN)
-        expect(converter.atomicToUnix(millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 1, 0))))
-          .toEqual(millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)))
-        expect(converter.atomicToUnix(millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 1, 1))))
-          .toEqual(millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 0, 1)))
+        expect(converter.atomicToUnix(Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 1, 0))))
+          .toEqual(Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)))
+        expect(converter.atomicToUnix(Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 1, 1))))
+          .toEqual(Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 0, 1)))
       })
 
       it('atomicMillisToUnixMillis', () => {
@@ -364,20 +363,20 @@ describe('Converter', () => {
           }])
 
         // STALL POINT
-        expect(converter.unixToAtomic(millisToExact(Date.UTC(1979, DEC, 31, 23, 59, 59, 999))))
+        expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 999))))
           .toEqual([{
-            start: millisToExact(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)),
-            end: millisToExact(Date.UTC(1979, DEC, 31, 23, 59, 59, 999))
+            start: Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)),
+            end: Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 999))
           }])
-        expect(converter.unixToAtomic(millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 0, 0))))
+        expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 0, 0))))
           .toEqual([{
-            start: millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)),
-            end: millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 1, 0))
+            start: Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)),
+            end: Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 1, 0))
           }])
-        expect(converter.unixToAtomic(millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 0, 1))))
+        expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 0, 1))))
           .toEqual([{
-            start: millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 1, 1)),
-            end: millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 1, 1))
+            start: Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 1, 1)),
+            end: Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 1, 1))
           }])
       })
 
@@ -421,20 +420,20 @@ describe('Converter', () => {
           .toEqual(new Rat(0n))
 
         // STALL STARTS
-        expect(converter.atomicToUnix(millisToExact(Date.UTC(1979, DEC, 31, 23, 59, 59, 999))))
-          .toEqual(millisToExact(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
-        expect(converter.atomicToUnix(millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 0, 0))))
-          .toEqual(millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)))
-        expect(converter.atomicToUnix(millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 0, 1))))
-          .toEqual(millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)))
+        expect(converter.atomicToUnix(Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 999))))
+          .toEqual(Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
+        expect(converter.atomicToUnix(Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 0, 0))))
+          .toEqual(Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)))
+        expect(converter.atomicToUnix(Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 0, 1))))
+          .toEqual(Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)))
 
         // STALL ENDS
-        expect(converter.atomicToUnix(millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 0, 999))))
-          .toEqual(millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)))
-        expect(converter.atomicToUnix(millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 1, 0))))
-          .toEqual(millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)))
-        expect(converter.atomicToUnix(millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 1, 1))))
-          .toEqual(millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 0, 1)))
+        expect(converter.atomicToUnix(Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 0, 999))))
+          .toEqual(Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)))
+        expect(converter.atomicToUnix(Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 1, 0))))
+          .toEqual(Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)))
+        expect(converter.atomicToUnix(Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 1, 1))))
+          .toEqual(Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 0, 1)))
       })
 
       it('atomicMillisToUnixMillis', () => {
@@ -470,44 +469,44 @@ describe('Converter', () => {
           }])
 
         // SMEAR STARTS, ATOMIC TIME "RUNS A LITTLE FASTER" THAN UNIX (actually Unix is slower)
-        expect(converter.unixToAtomic(millisToExact(Date.UTC(1979, DEC, 31, 11, 59, 59, 999))))
+        expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1979, DEC, 31, 11, 59, 59, 999))))
           .toEqual([{
-            start: millisToExact(Date.UTC(1979, DEC, 31, 11, 59, 59, 999)),
-            end: millisToExact(Date.UTC(1979, DEC, 31, 11, 59, 59, 999))
+            start: Rat.fromMillis(Date.UTC(1979, DEC, 31, 11, 59, 59, 999)),
+            end: Rat.fromMillis(Date.UTC(1979, DEC, 31, 11, 59, 59, 999))
           }])
-        expect(converter.unixToAtomic(millisToExact(Date.UTC(1979, DEC, 31, 12, 0, 0, 0))))
+        expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1979, DEC, 31, 12, 0, 0, 0))))
           .toEqual([{
-            start: millisToExact(Date.UTC(1979, DEC, 31, 12, 0, 0, 0)),
-            end: millisToExact(Date.UTC(1979, DEC, 31, 12, 0, 0, 0))
+            start: Rat.fromMillis(Date.UTC(1979, DEC, 31, 12, 0, 0, 0)),
+            end: Rat.fromMillis(Date.UTC(1979, DEC, 31, 12, 0, 0, 0))
           }])
-        expect(converter.unixToAtomic(millisToExact(Date.UTC(1979, DEC, 31, 12, 0, 0, 1))))
+        expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1979, DEC, 31, 12, 0, 0, 1))))
           .toEqual([{
-            start: millisToExact(Date.UTC(1979, DEC, 31, 12, 0, 0, 1)).plus(new Rat(1n, 86_400_000n)),
-            end: millisToExact(Date.UTC(1979, DEC, 31, 12, 0, 0, 1)).plus(new Rat(1n, 86_400_000n))
+            start: Rat.fromMillis(Date.UTC(1979, DEC, 31, 12, 0, 0, 1)).plus(new Rat(1n, 86_400_000n)),
+            end: Rat.fromMillis(Date.UTC(1979, DEC, 31, 12, 0, 0, 1)).plus(new Rat(1n, 86_400_000n))
           }])
 
         // SMEAR MIDPOINT
-        expect(converter.unixToAtomic(millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 0, 0))))
+        expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 0, 0))))
           .toEqual([{
-            start: millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 0, 500)),
-            end: millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 0, 500))
+            start: Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 0, 500)),
+            end: Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 0, 500))
           }])
 
         // SMEAR ENDS, ATOMIC IS A FULL SECOND AHEAD (actually Unix is a full second behind)
-        expect(converter.unixToAtomic(millisToExact(Date.UTC(1980, JAN, 1, 11, 59, 59, 999))))
+        expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1980, JAN, 1, 11, 59, 59, 999))))
           .toEqual([{
-            start: millisToExact(Date.UTC(1980, JAN, 1, 11, 59, 59, 999)).plus(new Rat(86_399_999n, 86_400_000n)),
-            end: millisToExact(Date.UTC(1980, JAN, 1, 11, 59, 59, 999)).plus(new Rat(86_399_999n, 86_400_000n))
+            start: Rat.fromMillis(Date.UTC(1980, JAN, 1, 11, 59, 59, 999)).plus(new Rat(86_399_999n, 86_400_000n)),
+            end: Rat.fromMillis(Date.UTC(1980, JAN, 1, 11, 59, 59, 999)).plus(new Rat(86_399_999n, 86_400_000n))
           }])
-        expect(converter.unixToAtomic(millisToExact(Date.UTC(1980, JAN, 1, 12, 0, 0, 0))))
+        expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1980, JAN, 1, 12, 0, 0, 0))))
           .toEqual([{
-            start: millisToExact(Date.UTC(1980, JAN, 1, 12, 0, 1, 0)),
-            end: millisToExact(Date.UTC(1980, JAN, 1, 12, 0, 1, 0))
+            start: Rat.fromMillis(Date.UTC(1980, JAN, 1, 12, 0, 1, 0)),
+            end: Rat.fromMillis(Date.UTC(1980, JAN, 1, 12, 0, 1, 0))
           }])
-        expect(converter.unixToAtomic(millisToExact(Date.UTC(1980, JAN, 1, 12, 0, 0, 1))))
+        expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1980, JAN, 1, 12, 0, 0, 1))))
           .toEqual([{
-            start: millisToExact(Date.UTC(1980, JAN, 1, 12, 0, 1, 1)),
-            end: millisToExact(Date.UTC(1980, JAN, 1, 12, 0, 1, 1))
+            start: Rat.fromMillis(Date.UTC(1980, JAN, 1, 12, 0, 1, 1)),
+            end: Rat.fromMillis(Date.UTC(1980, JAN, 1, 12, 0, 1, 1))
           }])
       })
 
@@ -541,24 +540,24 @@ describe('Converter', () => {
           .toEqual(new Rat(0n))
 
         // SMEAR STARTS, UNIX TIME RUNS A LITTLE SLOWER THAN ATOMIC
-        expect(converter.atomicToUnix(millisToExact(Date.UTC(1979, DEC, 31, 11, 59, 59, 999))))
-          .toEqual(millisToExact(Date.UTC(1979, DEC, 31, 11, 59, 59, 999)))
-        expect(converter.atomicToUnix(millisToExact(Date.UTC(1979, DEC, 31, 12, 0, 0, 0))))
-          .toEqual(millisToExact(Date.UTC(1979, DEC, 31, 12, 0, 0, 0)))
-        expect(converter.atomicToUnix(millisToExact(Date.UTC(1979, DEC, 31, 12, 0, 0, 1))))
-          .toEqual(millisToExact(Date.UTC(1979, DEC, 31, 12, 0, 0, 1)).minus(new Rat(1n, 86_401_000n)))
+        expect(converter.atomicToUnix(Rat.fromMillis(Date.UTC(1979, DEC, 31, 11, 59, 59, 999))))
+          .toEqual(Rat.fromMillis(Date.UTC(1979, DEC, 31, 11, 59, 59, 999)))
+        expect(converter.atomicToUnix(Rat.fromMillis(Date.UTC(1979, DEC, 31, 12, 0, 0, 0))))
+          .toEqual(Rat.fromMillis(Date.UTC(1979, DEC, 31, 12, 0, 0, 0)))
+        expect(converter.atomicToUnix(Rat.fromMillis(Date.UTC(1979, DEC, 31, 12, 0, 0, 1))))
+          .toEqual(Rat.fromMillis(Date.UTC(1979, DEC, 31, 12, 0, 0, 1)).minus(new Rat(1n, 86_401_000n)))
 
         // SMEAR MIDPOINT
-        expect(converter.atomicToUnix(millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 0, 500))))
-          .toEqual(millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)))
+        expect(converter.atomicToUnix(Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 0, 500))))
+          .toEqual(Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)))
 
         // SMEAR ENDS, UNIX HAS DROPPED A FULL SECOND BEHIND
-        expect(converter.atomicToUnix(millisToExact(Date.UTC(1980, JAN, 1, 12, 0, 0, 999))))
-          .toEqual(millisToExact(Date.UTC(1980, JAN, 1, 12, 0, 0, 999)).minus(new Rat(86_400_999n, 86_401_000n)))
-        expect(converter.atomicToUnix(millisToExact(Date.UTC(1980, JAN, 1, 12, 0, 1, 0))))
-          .toEqual(millisToExact(Date.UTC(1980, JAN, 1, 12, 0, 0, 0)))
-        expect(converter.atomicToUnix(millisToExact(Date.UTC(1980, JAN, 1, 12, 0, 1, 1))))
-          .toEqual(millisToExact(Date.UTC(1980, JAN, 1, 12, 0, 0, 1)))
+        expect(converter.atomicToUnix(Rat.fromMillis(Date.UTC(1980, JAN, 1, 12, 0, 0, 999))))
+          .toEqual(Rat.fromMillis(Date.UTC(1980, JAN, 1, 12, 0, 0, 999)).minus(new Rat(86_400_999n, 86_401_000n)))
+        expect(converter.atomicToUnix(Rat.fromMillis(Date.UTC(1980, JAN, 1, 12, 0, 1, 0))))
+          .toEqual(Rat.fromMillis(Date.UTC(1980, JAN, 1, 12, 0, 0, 0)))
+        expect(converter.atomicToUnix(Rat.fromMillis(Date.UTC(1980, JAN, 1, 12, 0, 1, 1))))
+          .toEqual(Rat.fromMillis(Date.UTC(1980, JAN, 1, 12, 0, 0, 1)))
       })
 
       it('atomicMillisToUnixMillis', () => {
@@ -605,31 +604,31 @@ describe('Converter', () => {
           }])
 
         // START OF MISSING TIME
-        expect(converter.unixToAtomic(millisToExact(Date.UTC(1979, DEC, 31, 23, 59, 58, 999))))
+        expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 58, 999))))
           .toEqual([{
-            start: millisToExact(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)),
-            end: millisToExact(Date.UTC(1979, DEC, 31, 23, 59, 58, 999))
+            start: Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)),
+            end: Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 58, 999))
           }])
-        expect(converter.unixToAtomic(millisToExact(Date.UTC(1979, DEC, 31, 23, 59, 59, 0))))
+        expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 0))))
           .toEqual([
           ])
-        expect(converter.unixToAtomic(millisToExact(Date.UTC(1979, DEC, 31, 23, 59, 59, 1))))
+        expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 1))))
           .toEqual([
           ])
 
         // END OF MISSING TIME
-        expect(converter.unixToAtomic(millisToExact(Date.UTC(1979, DEC, 31, 23, 59, 59, 999))))
+        expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 999))))
           .toEqual([
           ])
-        expect(converter.unixToAtomic(millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 0, 0))))
+        expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 0, 0))))
           .toEqual([{
-            start: millisToExact(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)),
-            end: millisToExact(Date.UTC(1979, DEC, 31, 23, 59, 59, 0))
+            start: Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)),
+            end: Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 0))
           }])
-        expect(converter.unixToAtomic(millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 0, 1))))
+        expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 0, 1))))
           .toEqual([{
-            start: millisToExact(Date.UTC(1979, DEC, 31, 23, 59, 59, 1)),
-            end: millisToExact(Date.UTC(1979, DEC, 31, 23, 59, 59, 1))
+            start: Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 1)),
+            end: Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 1))
           }])
       })
 
@@ -689,12 +688,12 @@ describe('Converter', () => {
           .toEqual(new Rat(0n))
 
         // JUMP AHEAD
-        expect(converter.atomicToUnix(millisToExact(Date.UTC(1979, DEC, 31, 23, 59, 58, 999))))
-          .toEqual(millisToExact(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)))
-        expect(converter.atomicToUnix(millisToExact(Date.UTC(1979, DEC, 31, 23, 59, 59, 0))))
-          .toEqual(millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)))
-        expect(converter.atomicToUnix(millisToExact(Date.UTC(1979, DEC, 31, 23, 59, 59, 1))))
-          .toEqual(millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 0, 1)))
+        expect(converter.atomicToUnix(Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 58, 999))))
+          .toEqual(Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)))
+        expect(converter.atomicToUnix(Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 0))))
+          .toEqual(Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)))
+        expect(converter.atomicToUnix(Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 1))))
+          .toEqual(Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 0, 1)))
       })
 
       it('atomicMillisToUnixMillis', () => {
@@ -722,31 +721,31 @@ describe('Converter', () => {
           }])
 
         // START OF MISSING TIME
-        expect(converter.unixToAtomic(millisToExact(Date.UTC(1979, DEC, 31, 23, 59, 58, 999))))
+        expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 58, 999))))
           .toEqual([{
-            start: millisToExact(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)),
-            end: millisToExact(Date.UTC(1979, DEC, 31, 23, 59, 58, 999))
+            start: Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)),
+            end: Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 58, 999))
           }])
-        expect(converter.unixToAtomic(millisToExact(Date.UTC(1979, DEC, 31, 23, 59, 59, 0))))
+        expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 0))))
           .toEqual([
           ])
-        expect(converter.unixToAtomic(millisToExact(Date.UTC(1979, DEC, 31, 23, 59, 59, 1))))
+        expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 1))))
           .toEqual([
           ])
 
         // END OF MISSING TIME
-        expect(converter.unixToAtomic(millisToExact(Date.UTC(1979, DEC, 31, 23, 59, 59, 999))))
+        expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 999))))
           .toEqual([
           ])
-        expect(converter.unixToAtomic(millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 0, 0))))
+        expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 0, 0))))
           .toEqual([{
-            start: millisToExact(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)),
-            end: millisToExact(Date.UTC(1979, DEC, 31, 23, 59, 59, 0))
+            start: Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)),
+            end: Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 0))
           }])
-        expect(converter.unixToAtomic(millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 0, 1))))
+        expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 0, 1))))
           .toEqual([{
-            start: millisToExact(Date.UTC(1979, DEC, 31, 23, 59, 59, 1)),
-            end: millisToExact(Date.UTC(1979, DEC, 31, 23, 59, 59, 1))
+            start: Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 1)),
+            end: Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 1))
           }])
       })
 
@@ -776,12 +775,12 @@ describe('Converter', () => {
           .toEqual(new Rat(0n))
 
         // JUMP AHEAD
-        expect(converter.atomicToUnix(millisToExact(Date.UTC(1979, DEC, 31, 23, 59, 58, 999))))
-          .toEqual(millisToExact(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)))
-        expect(converter.atomicToUnix(millisToExact(Date.UTC(1979, DEC, 31, 23, 59, 59, 0))))
-          .toEqual(millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)))
-        expect(converter.atomicToUnix(millisToExact(Date.UTC(1979, DEC, 31, 23, 59, 59, 1))))
-          .toEqual(millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 0, 1)))
+        expect(converter.atomicToUnix(Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 58, 999))))
+          .toEqual(Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)))
+        expect(converter.atomicToUnix(Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 0))))
+          .toEqual(Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)))
+        expect(converter.atomicToUnix(Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 1))))
+          .toEqual(Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 0, 1)))
       })
 
       it('atomicMillisToUnixMillis', () => {
@@ -809,31 +808,31 @@ describe('Converter', () => {
           }])
 
         // START OF MISSING TIME
-        expect(converter.unixToAtomic(millisToExact(Date.UTC(1979, DEC, 31, 23, 59, 58, 999))))
+        expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 58, 999))))
           .toEqual([{
-            start: millisToExact(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)),
-            end: millisToExact(Date.UTC(1979, DEC, 31, 23, 59, 58, 999))
+            start: Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)),
+            end: Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 58, 999))
           }])
-        expect(converter.unixToAtomic(millisToExact(Date.UTC(1979, DEC, 31, 23, 59, 59, 0))))
+        expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 0))))
           .toEqual([
           ])
-        expect(converter.unixToAtomic(millisToExact(Date.UTC(1979, DEC, 31, 23, 59, 59, 1))))
+        expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 1))))
           .toEqual([
           ])
 
         // END OF MISSING TIME
-        expect(converter.unixToAtomic(millisToExact(Date.UTC(1979, DEC, 31, 23, 59, 59, 999))))
+        expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 999))))
           .toEqual([
           ])
-        expect(converter.unixToAtomic(millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 0, 0))))
+        expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 0, 0))))
           .toEqual([{
-            start: millisToExact(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)),
-            end: millisToExact(Date.UTC(1979, DEC, 31, 23, 59, 59, 0))
+            start: Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)),
+            end: Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 0))
           }])
-        expect(converter.unixToAtomic(millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 0, 1))))
+        expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 0, 1))))
           .toEqual([{
-            start: millisToExact(Date.UTC(1979, DEC, 31, 23, 59, 59, 1)),
-            end: millisToExact(Date.UTC(1979, DEC, 31, 23, 59, 59, 1))
+            start: Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 1)),
+            end: Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 1))
           }])
       })
 
@@ -905,12 +904,12 @@ describe('Converter', () => {
           .toEqual(new Rat(0n))
 
         // JUMP AHEAD
-        expect(converter.atomicToUnix(millisToExact(Date.UTC(1979, DEC, 31, 23, 59, 58, 999))))
-          .toEqual(millisToExact(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)))
-        expect(converter.atomicToUnix(millisToExact(Date.UTC(1979, DEC, 31, 23, 59, 59, 0))))
-          .toEqual(millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)))
-        expect(converter.atomicToUnix(millisToExact(Date.UTC(1979, DEC, 31, 23, 59, 59, 1))))
-          .toEqual(millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 0, 1)))
+        expect(converter.atomicToUnix(Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 58, 999))))
+          .toEqual(Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)))
+        expect(converter.atomicToUnix(Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 0))))
+          .toEqual(Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)))
+        expect(converter.atomicToUnix(Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 1))))
+          .toEqual(Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 0, 1)))
       })
 
       it('atomicMillisToUnixMillis', () => {
@@ -938,44 +937,44 @@ describe('Converter', () => {
           }])
 
         // SMEAR STARTS, ATOMIC "RUNS A LITTLE SLOWER" THAN UNIX (actually Unix runs faster)
-        expect(converter.unixToAtomic(millisToExact(Date.UTC(1979, DEC, 31, 11, 59, 59, 999))))
+        expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1979, DEC, 31, 11, 59, 59, 999))))
           .toEqual([{
-            start: millisToExact(Date.UTC(1979, DEC, 31, 11, 59, 59, 999)),
-            end: millisToExact(Date.UTC(1979, DEC, 31, 11, 59, 59, 999))
+            start: Rat.fromMillis(Date.UTC(1979, DEC, 31, 11, 59, 59, 999)),
+            end: Rat.fromMillis(Date.UTC(1979, DEC, 31, 11, 59, 59, 999))
           }])
-        expect(converter.unixToAtomic(millisToExact(Date.UTC(1979, DEC, 31, 12, 0, 0, 0))))
+        expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1979, DEC, 31, 12, 0, 0, 0))))
           .toEqual([{
-            start: millisToExact(Date.UTC(1979, DEC, 31, 12, 0, 0, 0)),
-            end: millisToExact(Date.UTC(1979, DEC, 31, 12, 0, 0, 0))
+            start: Rat.fromMillis(Date.UTC(1979, DEC, 31, 12, 0, 0, 0)),
+            end: Rat.fromMillis(Date.UTC(1979, DEC, 31, 12, 0, 0, 0))
           }])
-        expect(converter.unixToAtomic(millisToExact(Date.UTC(1979, DEC, 31, 12, 0, 0, 1))))
+        expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1979, DEC, 31, 12, 0, 0, 1))))
           .toEqual([{
-            start: millisToExact(Date.UTC(1979, DEC, 31, 12, 0, 0, 1)).minus(new Rat(1n, 86_400_000n)),
-            end: millisToExact(Date.UTC(1979, DEC, 31, 12, 0, 0, 1)).minus(new Rat(1n, 86_400_000n))
+            start: Rat.fromMillis(Date.UTC(1979, DEC, 31, 12, 0, 0, 1)).minus(new Rat(1n, 86_400_000n)),
+            end: Rat.fromMillis(Date.UTC(1979, DEC, 31, 12, 0, 0, 1)).minus(new Rat(1n, 86_400_000n))
           }])
 
         // SMEAR MIDPOINT
-        expect(converter.unixToAtomic(millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 0, 0))))
+        expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 0, 0))))
           .toEqual([{
-            start: millisToExact(Date.UTC(1979, DEC, 31, 23, 59, 59, 500)),
-            end: millisToExact(Date.UTC(1979, DEC, 31, 23, 59, 59, 500))
+            start: Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 500)),
+            end: Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 500))
           }])
 
         // SMEAR ENDS, ATOMIC IS A FULL SECOND BEHIND (actually Unix is a full second ahead)
-        expect(converter.unixToAtomic(millisToExact(Date.UTC(1980, JAN, 1, 11, 59, 59, 999))))
+        expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1980, JAN, 1, 11, 59, 59, 999))))
           .toEqual([{
-            start: millisToExact(Date.UTC(1980, JAN, 1, 11, 59, 59, 999)).minus(new Rat(86_399_999n, 86_400_000n)),
-            end: millisToExact(Date.UTC(1980, JAN, 1, 11, 59, 59, 999)).minus(new Rat(86_399_999n, 86_400_000n))
+            start: Rat.fromMillis(Date.UTC(1980, JAN, 1, 11, 59, 59, 999)).minus(new Rat(86_399_999n, 86_400_000n)),
+            end: Rat.fromMillis(Date.UTC(1980, JAN, 1, 11, 59, 59, 999)).minus(new Rat(86_399_999n, 86_400_000n))
           }])
-        expect(converter.unixToAtomic(millisToExact(Date.UTC(1980, JAN, 1, 12, 0, 0, 0))))
+        expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1980, JAN, 1, 12, 0, 0, 0))))
           .toEqual([{
-            start: millisToExact(Date.UTC(1980, JAN, 1, 11, 59, 59, 0)),
-            end: millisToExact(Date.UTC(1980, JAN, 1, 11, 59, 59, 0))
+            start: Rat.fromMillis(Date.UTC(1980, JAN, 1, 11, 59, 59, 0)),
+            end: Rat.fromMillis(Date.UTC(1980, JAN, 1, 11, 59, 59, 0))
           }])
-        expect(converter.unixToAtomic(millisToExact(Date.UTC(1980, JAN, 1, 12, 0, 0, 1))))
+        expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1980, JAN, 1, 12, 0, 0, 1))))
           .toEqual([{
-            start: millisToExact(Date.UTC(1980, JAN, 1, 11, 59, 59, 1)),
-            end: millisToExact(Date.UTC(1980, JAN, 1, 11, 59, 59, 1))
+            start: Rat.fromMillis(Date.UTC(1980, JAN, 1, 11, 59, 59, 1)),
+            end: Rat.fromMillis(Date.UTC(1980, JAN, 1, 11, 59, 59, 1))
           }])
       })
 
@@ -1009,24 +1008,24 @@ describe('Converter', () => {
           .toEqual(new Rat(0n))
 
         // SMEAR STARTS, UNIX TIME RUNS A LITTLE FASTER THAN ATOMIC
-        expect(converter.atomicToUnix(millisToExact(Date.UTC(1979, DEC, 31, 11, 59, 59, 999))))
-          .toEqual(millisToExact(Date.UTC(1979, DEC, 31, 11, 59, 59, 999)))
-        expect(converter.atomicToUnix(millisToExact(Date.UTC(1979, DEC, 31, 12, 0, 0, 0))))
-          .toEqual(millisToExact(Date.UTC(1979, DEC, 31, 12, 0, 0, 0)))
-        expect(converter.atomicToUnix(millisToExact(Date.UTC(1979, DEC, 31, 12, 0, 0, 1))))
-          .toEqual(millisToExact(Date.UTC(1979, DEC, 31, 12, 0, 0, 1)).plus(new Rat(1n, 86_399_000n)))
+        expect(converter.atomicToUnix(Rat.fromMillis(Date.UTC(1979, DEC, 31, 11, 59, 59, 999))))
+          .toEqual(Rat.fromMillis(Date.UTC(1979, DEC, 31, 11, 59, 59, 999)))
+        expect(converter.atomicToUnix(Rat.fromMillis(Date.UTC(1979, DEC, 31, 12, 0, 0, 0))))
+          .toEqual(Rat.fromMillis(Date.UTC(1979, DEC, 31, 12, 0, 0, 0)))
+        expect(converter.atomicToUnix(Rat.fromMillis(Date.UTC(1979, DEC, 31, 12, 0, 0, 1))))
+          .toEqual(Rat.fromMillis(Date.UTC(1979, DEC, 31, 12, 0, 0, 1)).plus(new Rat(1n, 86_399_000n)))
 
         // SMEAR MIDPOINT
-        expect(converter.atomicToUnix(millisToExact(Date.UTC(1979, DEC, 31, 23, 59, 59, 500))))
-          .toEqual(millisToExact(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)))
+        expect(converter.atomicToUnix(Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 500))))
+          .toEqual(Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)))
 
         // SMEAR ENDS, UNIX HAS RUN A FULL SECOND FASTER THAN ATOMIC
-        expect(converter.atomicToUnix(millisToExact(Date.UTC(1980, JAN, 1, 11, 59, 58, 999))))
-          .toEqual(millisToExact(Date.UTC(1980, JAN, 1, 11, 59, 58, 999)).plus(new Rat(86_398_999n, 86_399_000n)))
-        expect(converter.atomicToUnix(millisToExact(Date.UTC(1980, JAN, 1, 11, 59, 59, 0))))
-          .toEqual(millisToExact(Date.UTC(1980, JAN, 1, 12, 0, 0, 0)))
-        expect(converter.atomicToUnix(millisToExact(Date.UTC(1980, JAN, 1, 11, 59, 59, 1))))
-          .toEqual(millisToExact(Date.UTC(1980, JAN, 1, 12, 0, 0, 1)))
+        expect(converter.atomicToUnix(Rat.fromMillis(Date.UTC(1980, JAN, 1, 11, 59, 58, 999))))
+          .toEqual(Rat.fromMillis(Date.UTC(1980, JAN, 1, 11, 59, 58, 999)).plus(new Rat(86_398_999n, 86_399_000n)))
+        expect(converter.atomicToUnix(Rat.fromMillis(Date.UTC(1980, JAN, 1, 11, 59, 59, 0))))
+          .toEqual(Rat.fromMillis(Date.UTC(1980, JAN, 1, 12, 0, 0, 0)))
+        expect(converter.atomicToUnix(Rat.fromMillis(Date.UTC(1980, JAN, 1, 11, 59, 59, 1))))
+          .toEqual(Rat.fromMillis(Date.UTC(1980, JAN, 1, 12, 0, 0, 1)))
       })
 
       it('atomicMillisToUnixMillis', () => {

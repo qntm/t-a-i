@@ -1,7 +1,6 @@
 /* eslint-env jest */
 
 const { Segment } = require('./segment')
-const { millisToExact } = require('./munge')
 const { Rat } = require('./rat')
 
 const MAY = 4
@@ -39,15 +38,15 @@ describe('Segment', () => {
     })
 
     it('modern day', () => {
-      expect(segment.unixOnSegment(millisToExact(Date.UTC(2021, MAY, 16, 12, 11, 10, 9)))).toBe(true)
-      expect(segment.unixToAtomicRange(millisToExact(Date.UTC(2021, MAY, 16, 12, 11, 10, 9))))
+      expect(segment.unixOnSegment(Rat.fromMillis(Date.UTC(2021, MAY, 16, 12, 11, 10, 9)))).toBe(true)
+      expect(segment.unixToAtomicRange(Rat.fromMillis(Date.UTC(2021, MAY, 16, 12, 11, 10, 9))))
         .toEqual({
-          start: millisToExact(Date.UTC(2021, MAY, 16, 12, 11, 10, 9)),
-          end: millisToExact(Date.UTC(2021, MAY, 16, 12, 11, 10, 9))
+          start: Rat.fromMillis(Date.UTC(2021, MAY, 16, 12, 11, 10, 9)),
+          end: Rat.fromMillis(Date.UTC(2021, MAY, 16, 12, 11, 10, 9))
         })
-      expect(segment.atomicOnSegment(millisToExact(Date.UTC(2021, MAY, 16, 12, 11, 10, 9)))).toBe(true)
-      expect(segment.atomicToUnix(millisToExact(Date.UTC(2021, MAY, 16, 12, 11, 10, 9))))
-        .toEqual(millisToExact(Date.UTC(2021, MAY, 16, 12, 11, 10, 9)))
+      expect(segment.atomicOnSegment(Rat.fromMillis(Date.UTC(2021, MAY, 16, 12, 11, 10, 9)))).toBe(true)
+      expect(segment.atomicToUnix(Rat.fromMillis(Date.UTC(2021, MAY, 16, 12, 11, 10, 9))))
+        .toEqual(Rat.fromMillis(Date.UTC(2021, MAY, 16, 12, 11, 10, 9)))
     })
 
     it('before start point', () => {

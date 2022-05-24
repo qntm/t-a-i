@@ -58,4 +58,12 @@ class Rat {
   }
 }
 
+Rat.fromMillis = millis => {
+  if (!Number.isInteger(millis)) {
+    throw Error(`Not an integer: ${millis}`)
+  }
+
+  return new Rat(BigInt(millis), 1_000n)
+}
+
 module.exports.Rat = Rat
