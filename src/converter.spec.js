@@ -52,14 +52,14 @@ describe('Converter', () => {
       it('fails when the atomic count is out of bounds', () => {
         expect(converter.atomicToUnix(new Rat(0n))).toEqual(new Rat(0n))
         expect(converter.atomicMillisToUnixMillis(0)).toBe(0)
-        expect(converter.atomicToUnix(new Rat(-1n, 1000n))).toBe(NaN)
+        expect(converter.atomicToUnix(new Rat(-1n, 1_000n))).toBe(NaN)
         expect(converter.atomicMillisToUnixMillis(-1)).toBe(NaN)
       })
 
       it('fails when the Unix count is out of bounds', () => {
         expect(converter.unixToAtomic(new Rat(0n))).toEqual([{ start: new Rat(0n), end: new Rat(0n) }])
         expect(converter.unixMillisToAtomicMillis(0)).toBe(0)
-        expect(converter.unixToAtomic(new Rat(-1n, 1000n))).toEqual([])
+        expect(converter.unixToAtomic(new Rat(-1n, 1_000n))).toEqual([])
         expect(converter.unixMillisToAtomicMillis(-1)).toBe(NaN)
       })
 
