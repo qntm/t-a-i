@@ -61,7 +61,7 @@ describe('Segment', () => {
   describe('sloped, finite ray', () => {
     const segment = new Segment(
       { atomic: Rat.fromMillis(0), unix: Rat.fromMillis(0) },
-      { atomic: Rat.fromMillis(2_000n) }, // 2 TAI seconds
+      { atomic: Rat.fromMillis(2_000) }, // 2 TAI seconds
       new Rat(1n, 2n) // TAI runs twice as fast as Unix time
     )
 
@@ -93,18 +93,18 @@ describe('Segment', () => {
     })
 
     it('end point', () => {
-      expect(segment.unixOnSegment(Rat.fromMillis(1_000n))).toBe(false)
-      expect(segment.unixToAtomicRange(Rat.fromMillis(1_000n)))
+      expect(segment.unixOnSegment(Rat.fromMillis(1_000))).toBe(false)
+      expect(segment.unixToAtomicRange(Rat.fromMillis(1_000)))
         .toEqual({ start: Rat.fromMillis(2_000), end: Rat.fromMillis(2_000) })
-      expect(segment.atomicOnSegment(Rat.fromMillis(2_000n))).toBe(false)
-      expect(segment.atomicToUnix(Rat.fromMillis(2_000n))).toEqual(Rat.fromMillis(1_000n))
+      expect(segment.atomicOnSegment(Rat.fromMillis(2_000))).toBe(false)
+      expect(segment.atomicToUnix(Rat.fromMillis(2_000))).toEqual(Rat.fromMillis(1_000))
     })
   })
 
   describe('horizontal ray', () => {
     const segment = new Segment(
       { atomic: Rat.fromMillis(0), unix: Rat.fromMillis(0) },
-      { atomic: Rat.fromMillis(2_000n) }, // 2 TAI seconds
+      { atomic: Rat.fromMillis(2_000) }, // 2 TAI seconds
       new Rat(0n)
     )
 
@@ -124,7 +124,7 @@ describe('Segment', () => {
     })
 
     it('later in Unix time', () => {
-      expect(segment.unixOnSegment(Rat.fromMillis(1_000n))).toBe(false)
+      expect(segment.unixOnSegment(Rat.fromMillis(1_000))).toBe(false)
       expect(() => segment.unixToAtomicRange(Rat.fromMillis(-1)))
         .toThrowError('This Unix time never happened')
     })

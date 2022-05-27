@@ -160,7 +160,8 @@ const munge = (data, model) => {
         .plus(b.start.atomic)
 
       if (smearEnd.atomic.le(smearStart.atomic)) {
-        // No negative-length or zero-length smears
+        // No negative-length or zero-length smears.
+        // This handles negative leap seconds correctly.
         continue
       }
 
@@ -169,6 +170,9 @@ const munge = (data, model) => {
       a.end = smearStart // includes unix but we'll ignore that
       b.start = smearEnd
 
+      // This can reduce `a` to length 0, in which case we elide it.
+      // No point checking for negative-length segments, those throw an
+      // exception later
       if (a.start.atomic.eq(a.end.atomic)) {
         munged.splice(i, 1)
         i--
