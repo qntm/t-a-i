@@ -1172,16 +1172,220 @@ describe('Converter', () => {
       })
 
       describe('BREAK', () => {
-        it('disallows a zero-length segment between breaks', () => {
-          expect(() => Converter(data, MODELS.BREAK))
-            .toThrowError('Segment length must be positive')
+        const converter = Converter(data, MODELS.BREAK)
+
+        it('unixToAtomic', () => {
+          expect(converter.unixToAtomic(Rat.fromMillis(0)))
+            .toEqual([{
+              start: Rat.fromMillis(0),
+              end: Rat.fromMillis(0)
+            }])
+
+          // STALL POINT
+          expect(converter.unixToAtomic(Rat.fromMillis(999)))
+            .toEqual([{
+              start: Rat.fromMillis(999),
+              end: Rat.fromMillis(999)
+            }])
+          expect(converter.unixToAtomic(Rat.fromMillis(1000)))
+            .toEqual([{
+              start: Rat.fromMillis(3000),
+              end: Rat.fromMillis(3000)
+            }])
+          expect(converter.unixToAtomic(Rat.fromMillis(1001)))
+            .toEqual([{
+              start: Rat.fromMillis(3001),
+              end: Rat.fromMillis(3001)
+            }])
+        })
+
+        it('unixMillisToAtomicMillis (range mode)', () => {
+          expect(converter.unixMillisToAtomicMillis(0, { range: true }))
+            .toEqual([
+              0,
+              0
+            ])
+
+          // STALL POINT
+          expect(converter.unixMillisToAtomicMillis(999, { range: true }))
+            .toEqual([
+              999,
+              999
+            ])
+          expect(converter.unixMillisToAtomicMillis(1000, { range: true }))
+            .toEqual([
+              3000,
+              3000
+            ])
+          expect(converter.unixMillisToAtomicMillis(1001, { range: true }))
+            .toEqual([
+              3001,
+              3001
+            ])
+        })
+
+        it('unixMillisToAtomicMillis', () => {
+          expect(converter.unixMillisToAtomicMillis(0))
+            .toBe(0)
+
+          // STALL POINT
+          expect(converter.unixMillisToAtomicMillis(999))
+            .toBe(999)
+          expect(converter.unixMillisToAtomicMillis(1000))
+            .toBe(3000)
+          expect(converter.unixMillisToAtomicMillis(1001))
+            .toBe(3001)
+        })
+
+        it('atomicToUnix', () => {
+          expect(converter.atomicToUnix(Rat.fromMillis(0)))
+            .toEqual(Rat.fromMillis(0))
+
+          // STALL STARTS
+          expect(converter.atomicToUnix(Rat.fromMillis(999)))
+            .toEqual(Rat.fromMillis(999))
+          expect(converter.atomicToUnix(Rat.fromMillis(1000)))
+            .toBe(NaN)
+          expect(converter.atomicToUnix(Rat.fromMillis(1001)))
+            .toBe(NaN)
+
+          // STALL ENDS
+          expect(converter.atomicToUnix(Rat.fromMillis(2999)))
+            .toBe(NaN)
+          expect(converter.atomicToUnix(Rat.fromMillis(3000)))
+            .toEqual(Rat.fromMillis(1000))
+          expect(converter.atomicToUnix(Rat.fromMillis(3001)))
+            .toEqual(Rat.fromMillis(1001))
+        })
+
+        it('atomicMillisToUnixMillis', () => {
+          expect(converter.atomicMillisToUnixMillis(0))
+            .toBe(0)
+
+          // STALL STARTS
+          expect(converter.atomicMillisToUnixMillis(999))
+            .toBe(999)
+          expect(converter.atomicMillisToUnixMillis(1000))
+            .toBe(NaN)
+          expect(converter.atomicMillisToUnixMillis(1001))
+            .toBe(NaN)
+
+          // STALL ENDS
+          expect(converter.atomicMillisToUnixMillis(2999))
+            .toBe(NaN)
+          expect(converter.atomicMillisToUnixMillis(3000))
+            .toEqual(1000)
+          expect(converter.atomicMillisToUnixMillis(3001))
+            .toEqual(1001)
         })
       })
 
       describe('STALL', () => {
-        it('disallows a zero-length segment between stalls', () => {
-          expect(() => Converter(data, MODELS.STALL))
-            .toThrowError('Segment length must be positive')
+        const converter = Converter(data, MODELS.STALL)
+
+        it('unixToAtomic', () => {
+          expect(converter.unixToAtomic(Rat.fromMillis(0)))
+            .toEqual([{
+              start: Rat.fromMillis(0),
+              end: Rat.fromMillis(0)
+            }])
+
+          // STALL POINT
+          expect(converter.unixToAtomic(Rat.fromMillis(999)))
+            .toEqual([{
+              start: Rat.fromMillis(999),
+              end: Rat.fromMillis(999)
+            }])
+          expect(converter.unixToAtomic(Rat.fromMillis(1000)))
+            .toEqual([{
+              start: Rat.fromMillis(1000),
+              end: Rat.fromMillis(3000)
+            }])
+          expect(converter.unixToAtomic(Rat.fromMillis(1001)))
+            .toEqual([{
+              start: Rat.fromMillis(3001),
+              end: Rat.fromMillis(3001)
+            }])
+        })
+
+        it('unixMillisToAtomicMillis (range mode)', () => {
+          expect(converter.unixMillisToAtomicMillis(0, { range: true }))
+            .toEqual([
+              0,
+              0
+            ])
+
+          // STALL POINT
+          expect(converter.unixMillisToAtomicMillis(999, { range: true }))
+            .toEqual([
+              999,
+              999
+            ])
+          expect(converter.unixMillisToAtomicMillis(1000, { range: true }))
+            .toEqual([
+              1000,
+              3000
+            ])
+          expect(converter.unixMillisToAtomicMillis(1001, { range: true }))
+            .toEqual([
+              3001,
+              3001
+            ])
+        })
+
+        it('unixMillisToAtomicMillis', () => {
+          expect(converter.unixMillisToAtomicMillis(0))
+            .toBe(0)
+
+          // STALL POINT
+          expect(converter.unixMillisToAtomicMillis(999))
+            .toBe(999)
+          expect(converter.unixMillisToAtomicMillis(1000))
+            .toBe(3000)
+          expect(converter.unixMillisToAtomicMillis(1001))
+            .toBe(3001)
+        })
+
+        it('atomicToUnix', () => {
+          expect(converter.atomicToUnix(Rat.fromMillis(0)))
+            .toEqual(Rat.fromMillis(0))
+
+          // STALL STARTS
+          expect(converter.atomicToUnix(Rat.fromMillis(999)))
+            .toEqual(Rat.fromMillis(999))
+          expect(converter.atomicToUnix(Rat.fromMillis(1000)))
+            .toEqual(Rat.fromMillis(1000))
+          expect(converter.atomicToUnix(Rat.fromMillis(1001)))
+            .toEqual(Rat.fromMillis(1000))
+
+          // STALL ENDS
+          expect(converter.atomicToUnix(Rat.fromMillis(2999)))
+            .toEqual(Rat.fromMillis(1000))
+          expect(converter.atomicToUnix(Rat.fromMillis(3000)))
+            .toEqual(Rat.fromMillis(1000))
+          expect(converter.atomicToUnix(Rat.fromMillis(3001)))
+            .toEqual(Rat.fromMillis(1001))
+        })
+
+        it('atomicMillisToUnixMillis', () => {
+          expect(converter.atomicMillisToUnixMillis(0))
+            .toBe(0)
+
+          // STALL STARTS
+          expect(converter.atomicMillisToUnixMillis(999))
+            .toBe(999)
+          expect(converter.atomicMillisToUnixMillis(1000))
+            .toBe(1000)
+          expect(converter.atomicMillisToUnixMillis(1001))
+            .toBe(1000)
+
+          // STALL ENDS
+          expect(converter.atomicMillisToUnixMillis(2999))
+            .toEqual(1000)
+          expect(converter.atomicMillisToUnixMillis(3000))
+            .toEqual(1000)
+          expect(converter.atomicMillisToUnixMillis(3001))
+            .toEqual(1001)
         })
       })
     })

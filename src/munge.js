@@ -169,6 +169,11 @@ const munge = (data, model) => {
       a.end = smearStart // includes unix but we'll ignore that
       b.start = smearEnd
 
+      if (a.start.atomic.eq(a.end.atomic)) {
+        munged.splice(i, 1)
+        i--
+      }
+
       if (model === MODELS.BREAK) {
         // Just leave a gap
         continue
