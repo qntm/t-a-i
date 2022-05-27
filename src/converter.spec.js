@@ -18,13 +18,20 @@ describe('Converter', () => {
       const converter = Converter(data, MODELS.OVERRUN)
 
       it('manages basic conversions', () => {
-        expect(converter.unixToAtomic(new Rat(0n))).toEqual([{ start: new Rat(0n), end: new Rat(0n) }])
-        expect(converter.unixMillisToAtomicMillis(0, { range: true, array: true })).toEqual([[0, 0]])
-        expect(converter.unixMillisToAtomicMillis(0, { range: true })).toEqual([0, 0])
-        expect(converter.unixMillisToAtomicMillis(0, { array: true })).toEqual([0])
-        expect(converter.unixMillisToAtomicMillis(0)).toEqual(0)
-        expect(converter.atomicToUnix(new Rat(0n))).toEqual(new Rat(0n))
-        expect(converter.atomicMillisToUnixMillis(0)).toBe(0)
+        expect(converter.unixToAtomic(Rat.fromMillis(0)))
+          .toEqual([{ start: Rat.fromMillis(0), end: Rat.fromMillis(0) }])
+        expect(converter.unixMillisToAtomicMillis(0, { range: true, array: true }))
+          .toEqual([[0, 0]])
+        expect(converter.unixMillisToAtomicMillis(0, { range: true }))
+          .toEqual([0, 0])
+        expect(converter.unixMillisToAtomicMillis(0, { array: true }))
+          .toEqual([0])
+        expect(converter.unixMillisToAtomicMillis(0))
+          .toBe(0)
+        expect(converter.atomicToUnix(Rat.fromMillis(0)))
+          .toEqual(Rat.fromMillis(0))
+        expect(converter.atomicMillisToUnixMillis(0))
+          .toBe(0)
       })
     })
 
@@ -32,10 +39,14 @@ describe('Converter', () => {
       const converter = Converter(data, MODELS.BREAK)
 
       it('manages basic conversions', () => {
-        expect(converter.unixToAtomic(new Rat(0n))).toEqual([{ start: new Rat(0n), end: new Rat(0n) }])
-        expect(converter.unixMillisToAtomicMillis(0)).toEqual(0)
-        expect(converter.atomicToUnix(new Rat(0n))).toEqual(new Rat(0n))
-        expect(converter.atomicMillisToUnixMillis(0)).toBe(0)
+        expect(converter.unixToAtomic(Rat.fromMillis(0)))
+          .toEqual([{ start: Rat.fromMillis(0), end: Rat.fromMillis(0) }])
+        expect(converter.unixMillisToAtomicMillis(0))
+          .toBe(0)
+        expect(converter.atomicToUnix(Rat.fromMillis(0)))
+          .toEqual(Rat.fromMillis(0))
+        expect(converter.atomicMillisToUnixMillis(0))
+          .toBe(0)
       })
     })
 
@@ -50,26 +61,34 @@ describe('Converter', () => {
       })
 
       it('fails when the atomic count is out of bounds', () => {
-        expect(converter.atomicToUnix(new Rat(0n))).toEqual(new Rat(0n))
-        expect(converter.atomicMillisToUnixMillis(0)).toBe(0)
-        expect(converter.atomicToUnix(new Rat(-1n, 1_000n))).toBe(NaN)
-        expect(converter.atomicMillisToUnixMillis(-1)).toBe(NaN)
+        expect(converter.atomicToUnix(Rat.fromMillis(0)))
+          .toEqual(Rat.fromMillis(0))
+        expect(converter.atomicMillisToUnixMillis(0))
+          .toBe(0)
+        expect(converter.atomicToUnix(Rat.fromMillis(-1)))
+          .toBe(NaN)
+        expect(converter.atomicMillisToUnixMillis(-1))
+          .toBe(NaN)
       })
 
       it('fails when the Unix count is out of bounds', () => {
-        expect(converter.unixToAtomic(new Rat(0n))).toEqual([{ start: new Rat(0n), end: new Rat(0n) }])
-        expect(converter.unixMillisToAtomicMillis(0)).toBe(0)
-        expect(converter.unixToAtomic(new Rat(-1n, 1_000n))).toEqual([])
-        expect(converter.unixMillisToAtomicMillis(-1)).toBe(NaN)
+        expect(converter.unixToAtomic(Rat.fromMillis(0)))
+          .toEqual([{ start: Rat.fromMillis(0), end: Rat.fromMillis(0) }])
+        expect(converter.unixMillisToAtomicMillis(0))
+          .toBe(0)
+        expect(converter.unixToAtomic(Rat.fromMillis(-1)))
+          .toEqual([])
+        expect(converter.unixMillisToAtomicMillis(-1))
+          .toBe(NaN)
       })
 
       it('manages basic conversions', () => {
-        expect(converter.unixToAtomic(new Rat(0n))).toEqual([{ start: new Rat(0n), end: new Rat(0n) }])
+        expect(converter.unixToAtomic(Rat.fromMillis(0))).toEqual([{ start: Rat.fromMillis(0), end: Rat.fromMillis(0) }])
         expect(converter.unixMillisToAtomicMillis(0, { range: true, array: true })).toEqual([[0, 0]])
         expect(converter.unixMillisToAtomicMillis(0, { range: true })).toEqual([0, 0])
         expect(converter.unixMillisToAtomicMillis(0, { array: true })).toEqual([0])
         expect(converter.unixMillisToAtomicMillis(0)).toBe(0)
-        expect(converter.atomicToUnix(new Rat(0n))).toEqual(new Rat(0n))
+        expect(converter.atomicToUnix(Rat.fromMillis(0))).toEqual(Rat.fromMillis(0))
         expect(converter.atomicMillisToUnixMillis(0)).toBe(0)
       })
     })
@@ -78,10 +97,14 @@ describe('Converter', () => {
       const converter = Converter(data, MODELS.SMEAR)
 
       it('manages basic conversions', () => {
-        expect(converter.unixToAtomic(new Rat(0n))).toEqual([{ start: new Rat(0n), end: new Rat(0n) }])
-        expect(converter.unixMillisToAtomicMillis(0)).toEqual(0)
-        expect(converter.atomicToUnix(new Rat(0n))).toEqual(new Rat(0n))
-        expect(converter.atomicMillisToUnixMillis(0)).toBe(0)
+        expect(converter.unixToAtomic(Rat.fromMillis(0)))
+          .toEqual([{ start: Rat.fromMillis(0), end: Rat.fromMillis(0) }])
+        expect(converter.unixMillisToAtomicMillis(0))
+          .toBe(0)
+        expect(converter.atomicToUnix(Rat.fromMillis(0)))
+          .toEqual(Rat.fromMillis(0))
+        expect(converter.atomicMillisToUnixMillis(0))
+          .toBe(0)
       })
     })
   })
@@ -96,10 +119,10 @@ describe('Converter', () => {
       const converter = Converter(data, MODELS.OVERRUN)
 
       it('unixToAtomic', () => {
-        expect(converter.unixToAtomic(new Rat(0n)))
+        expect(converter.unixToAtomic(Rat.fromMillis(0)))
           .toEqual([{
-            start: new Rat(0n),
-            end: new Rat(0n)
+            start: Rat.fromMillis(0),
+            end: Rat.fromMillis(0)
           }])
 
         // BIFURCATION
@@ -205,8 +228,8 @@ describe('Converter', () => {
       })
 
       it('atomicToUnix', () => {
-        expect(converter.atomicToUnix(new Rat(0n)))
-          .toEqual(new Rat(0n))
+        expect(converter.atomicToUnix(Rat.fromMillis(0)))
+          .toEqual(Rat.fromMillis(0))
 
         expect(converter.atomicToUnix(Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 999))))
           .toEqual(Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))
@@ -249,10 +272,10 @@ describe('Converter', () => {
       const converter = Converter(data, MODELS.BREAK)
 
       it('unixToAtomic', () => {
-        expect(converter.unixToAtomic(new Rat(0n)))
+        expect(converter.unixToAtomic(Rat.fromMillis(0)))
           .toEqual([{
-            start: new Rat(0n),
-            end: new Rat(0n)
+            start: Rat.fromMillis(0),
+            end: Rat.fromMillis(0)
           }])
 
         // FORWARD JUMP
@@ -310,8 +333,8 @@ describe('Converter', () => {
       })
 
       it('atomicToUnix', () => {
-        expect(converter.atomicToUnix(new Rat(0n)))
-          .toEqual(new Rat(0n))
+        expect(converter.atomicToUnix(Rat.fromMillis(0)))
+          .toEqual(Rat.fromMillis(0))
 
         // UNDEFINED UNIX TIME STARTS
         expect(converter.atomicToUnix(Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 999))))
@@ -356,10 +379,10 @@ describe('Converter', () => {
       const converter = Converter(data, MODELS.STALL)
 
       it('unixToAtomic', () => {
-        expect(converter.unixToAtomic(new Rat(0n)))
+        expect(converter.unixToAtomic(Rat.fromMillis(0)))
           .toEqual([{
-            start: new Rat(0n),
-            end: new Rat(0n)
+            start: Rat.fromMillis(0),
+            end: Rat.fromMillis(0)
           }])
 
         // STALL POINT
@@ -416,8 +439,8 @@ describe('Converter', () => {
       })
 
       it('atomicToUnix', () => {
-        expect(converter.atomicToUnix(new Rat(0n)))
-          .toEqual(new Rat(0n))
+        expect(converter.atomicToUnix(Rat.fromMillis(0)))
+          .toEqual(Rat.fromMillis(0))
 
         // STALL STARTS
         expect(converter.atomicToUnix(Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 999))))
@@ -462,10 +485,10 @@ describe('Converter', () => {
       const converter = Converter(data, MODELS.SMEAR)
 
       it('unixToAtomic', () => {
-        expect(converter.unixToAtomic(new Rat(0n)))
+        expect(converter.unixToAtomic(Rat.fromMillis(0)))
           .toEqual([{
-            start: new Rat(0n),
-            end: new Rat(0n)
+            start: Rat.fromMillis(0),
+            end: Rat.fromMillis(0)
           }])
 
         // SMEAR STARTS, ATOMIC TIME "RUNS A LITTLE FASTER" THAN UNIX (actually Unix is slower)
@@ -536,8 +559,8 @@ describe('Converter', () => {
       })
 
       it('atomicToUnix', () => {
-        expect(converter.atomicToUnix(new Rat(0n)))
-          .toEqual(new Rat(0n))
+        expect(converter.atomicToUnix(Rat.fromMillis(0)))
+          .toEqual(Rat.fromMillis(0))
 
         // SMEAR STARTS, UNIX TIME RUNS A LITTLE SLOWER THAN ATOMIC
         expect(converter.atomicToUnix(Rat.fromMillis(Date.UTC(1979, DEC, 31, 11, 59, 59, 999))))
@@ -597,10 +620,10 @@ describe('Converter', () => {
       const converter = Converter(data, MODELS.OVERRUN)
 
       it('unixToAtomic', () => {
-        expect(converter.unixToAtomic(new Rat(0n)))
+        expect(converter.unixToAtomic(Rat.fromMillis(0)))
           .toEqual([{
-            start: new Rat(0n),
-            end: new Rat(0n)
+            start: Rat.fromMillis(0),
+            end: Rat.fromMillis(0)
           }])
 
         // START OF MISSING TIME
@@ -610,16 +633,13 @@ describe('Converter', () => {
             end: Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 58, 999))
           }])
         expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 0))))
-          .toEqual([
-          ])
+          .toEqual([])
         expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 1))))
-          .toEqual([
-          ])
+          .toEqual([])
 
         // END OF MISSING TIME
         expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 999))))
-          .toEqual([
-          ])
+          .toEqual([])
         expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 0, 0))))
           .toEqual([{
             start: Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)),
@@ -642,16 +662,13 @@ describe('Converter', () => {
             Date.UTC(1979, DEC, 31, 23, 59, 58, 999)
           ])
         expect(converter.unixMillisToAtomicMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 0), { array: true }))
-          .toEqual([
-          ])
+          .toEqual([])
         expect(converter.unixMillisToAtomicMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 1), { array: true }))
-          .toEqual([
-          ])
+          .toEqual([])
 
         // END OF MISSING TIME
         expect(converter.unixMillisToAtomicMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 999), { array: true }))
-          .toEqual([
-          ])
+          .toEqual([])
         expect(converter.unixMillisToAtomicMillis(Date.UTC(1980, JAN, 1, 0, 0, 0, 0), { array: true }))
           .toEqual([
             Date.UTC(1979, DEC, 31, 23, 59, 59, 0)
@@ -684,8 +701,8 @@ describe('Converter', () => {
       })
 
       it('atomicToUnix', () => {
-        expect(converter.atomicToUnix(new Rat(0n)))
-          .toEqual(new Rat(0n))
+        expect(converter.atomicToUnix(Rat.fromMillis(0)))
+          .toEqual(Rat.fromMillis(0))
 
         // JUMP AHEAD
         expect(converter.atomicToUnix(Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 58, 999))))
@@ -714,10 +731,10 @@ describe('Converter', () => {
       const converter = Converter(data, MODELS.BREAK)
 
       it('unixToAtomic', () => {
-        expect(converter.unixToAtomic(new Rat(0n)))
+        expect(converter.unixToAtomic(Rat.fromMillis(0)))
           .toEqual([{
-            start: new Rat(0n),
-            end: new Rat(0n)
+            start: Rat.fromMillis(0),
+            end: Rat.fromMillis(0)
           }])
 
         // START OF MISSING TIME
@@ -727,16 +744,13 @@ describe('Converter', () => {
             end: Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 58, 999))
           }])
         expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 0))))
-          .toEqual([
-          ])
+          .toEqual([])
         expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 1))))
-          .toEqual([
-          ])
+          .toEqual([])
 
         // END OF MISSING TIME
         expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 999))))
-          .toEqual([
-          ])
+          .toEqual([])
         expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 0, 0))))
           .toEqual([{
             start: Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)),
@@ -771,8 +785,8 @@ describe('Converter', () => {
       })
 
       it('atomicToUnix', () => {
-        expect(converter.atomicToUnix(new Rat(0n)))
-          .toEqual(new Rat(0n))
+        expect(converter.atomicToUnix(Rat.fromMillis(0)))
+          .toEqual(Rat.fromMillis(0))
 
         // JUMP AHEAD
         expect(converter.atomicToUnix(Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 58, 999))))
@@ -801,10 +815,10 @@ describe('Converter', () => {
       const converter = Converter(data, MODELS.STALL)
 
       it('unixToAtomic', () => {
-        expect(converter.unixToAtomic(new Rat(0n)))
+        expect(converter.unixToAtomic(Rat.fromMillis(0)))
           .toEqual([{
-            start: new Rat(0n),
-            end: new Rat(0n)
+            start: Rat.fromMillis(0),
+            end: Rat.fromMillis(0)
           }])
 
         // START OF MISSING TIME
@@ -814,16 +828,13 @@ describe('Converter', () => {
             end: Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 58, 999))
           }])
         expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 0))))
-          .toEqual([
-          ])
+          .toEqual([])
         expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 1))))
-          .toEqual([
-          ])
+          .toEqual([])
 
         // END OF MISSING TIME
         expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 999))))
-          .toEqual([
-          ])
+          .toEqual([])
         expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 0, 0))))
           .toEqual([{
             start: Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)),
@@ -900,8 +911,8 @@ describe('Converter', () => {
       })
 
       it('atomicToUnix', () => {
-        expect(converter.atomicToUnix(new Rat(0n)))
-          .toEqual(new Rat(0n))
+        expect(converter.atomicToUnix(Rat.fromMillis(0)))
+          .toEqual(Rat.fromMillis(0))
 
         // JUMP AHEAD
         expect(converter.atomicToUnix(Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 58, 999))))
@@ -930,10 +941,10 @@ describe('Converter', () => {
       const converter = Converter(data, MODELS.SMEAR)
 
       it('unixToAtomic', () => {
-        expect(converter.unixToAtomic(new Rat(0n)))
+        expect(converter.unixToAtomic(Rat.fromMillis(0)))
           .toEqual([{
-            start: new Rat(0n),
-            end: new Rat(0n)
+            start: Rat.fromMillis(0),
+            end: Rat.fromMillis(0)
           }])
 
         // SMEAR STARTS, ATOMIC "RUNS A LITTLE SLOWER" THAN UNIX (actually Unix runs faster)
@@ -1004,8 +1015,8 @@ describe('Converter', () => {
       })
 
       it('atomicToUnix', () => {
-        expect(converter.atomicToUnix(new Rat(0n)))
-          .toEqual(new Rat(0n))
+        expect(converter.atomicToUnix(Rat.fromMillis(0)))
+          .toEqual(Rat.fromMillis(0))
 
         // SMEAR STARTS, UNIX TIME RUNS A LITTLE FASTER THAN ATOMIC
         expect(converter.atomicToUnix(Rat.fromMillis(Date.UTC(1979, DEC, 31, 11, 59, 59, 999))))
@@ -1063,16 +1074,16 @@ describe('Converter', () => {
         ]
         const converter = Converter(data, MODELS.OVERRUN)
 
-        expect(converter.unixToAtomic(new Rat(1n, 1_000n)))
+        expect(converter.unixToAtomic(Rat.fromMillis(1)))
           .toEqual([{
             start: new Rat(900n, 1_000_000n),
             end: new Rat(900n, 1_000_000n)
           }])
         expect(converter.atomicToUnix(new Rat(900n, 1_000_000n)))
-          .toEqual(new Rat(1n, 1_000n))
+          .toEqual(Rat.fromMillis(1))
 
         expect(converter.unixMillisToAtomicMillis(1, { array: true }))
-          .toEqual([0])
+          .toEqual([0]) // truncated from .9 to 0
         expect(converter.atomicMillisToUnixMillis(0))
           .toBe(NaN)
       })
@@ -1084,13 +1095,13 @@ describe('Converter', () => {
         ]
         const converter = Converter(data, MODELS.OVERRUN)
 
-        expect(converter.unixToAtomic(new Rat(-1n, 1_000n)))
+        expect(converter.unixToAtomic(Rat.fromMillis(-1)))
           .toEqual([{
             start: new Rat(-900n, 1_000_000n),
             end: new Rat(-900n, 1_000_000n)
           }])
         expect(converter.atomicToUnix(new Rat(-900n, 1_000_000n)))
-          .toEqual(new Rat(-1n, 1_000n))
+          .toEqual(Rat.fromMillis(-1))
 
         expect(converter.unixMillisToAtomicMillis(-1, { array: true }))
           .toEqual([-1])
