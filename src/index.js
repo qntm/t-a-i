@@ -7,10 +7,4 @@ module.exports.UNIX_START = UNIX_START_MILLIS
 module.exports.UNIX_END = UNIX_END_MILLIS
 module.exports.MODELS = MODELS
 module.exports.Rat = Rat
-module.exports.TaiConverter = model => {
-  const converter = Converter(taiData, model)
-  return {
-    atomicToUnix: converter.atomicMillisToUnixMillis,
-    unixToAtomic: converter.unixMillisToAtomicMillis
-  }
-}
+module.exports.TaiConverter = model => Converter(taiData, model)

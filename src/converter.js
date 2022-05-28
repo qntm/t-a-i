@@ -10,74 +10,22 @@
 // map to multiple TAI times. We can return an array of these, or just the result from the latest
 // segment (according to its numbering).
 
-const { MODELS, munge } = require('./munge')
+const { MODELS } = require('./munge')
 const { Rat } = require('./rat.js')
+const { ExactConverter } = require('./exact-converter.js')
 
 const Converter = (data, model) => {
-  const segments = munge(data, model)
+  const exactConverter = ExactConverter(data, model)
 
-  // This conversion always has the same behaviour,
-  // and there's no work required in handling the output
-  const atomicToUnix = atomic => {
-    for (const segment of segments) {
-      if (!segment.atomicOnSegment(atomic)) {
-        continue
-      }
-
-      return segment.atomicToUnix(atomic)
-    }
-
-    // Pre-1961, or BREAK model and we hit a break
-    return NaN
-  }
-
-  const atomicMillisToUnixMillis = atomicMillis => {
-    const unix = atomicToUnix(Rat.fromMillis(atomicMillis))
+  const atomicToUnix = atomicMillis => {
+    const unix = exactConverter.atomicToUnix(Rat.fromMillis(atomicMillis))
     return Number.isNaN(unix)
       ? unix
       : unix.toMillis()
   }
 
-  const unixToAtomic = unix => {
-    const ranges = []
-    for (const segment of segments) {
-      if (!segment.unixOnSegment(unix)) {
-        continue
-      }
-
-      const range = segment.unixToAtomicRange(unix)
-
-      if (ranges.length - 1 in ranges) {
-        const prev = ranges[ranges.length - 1]
-
-        // Previous range ends where current one starts, so try to combine the two.
-        // The previous range should have `open: true` but it doesn't actually make a difference.
-        if (prev.end.eq(range.start)) {
-          ranges[ranges.length - 1] = {
-            start: prev.start,
-            end: range.end
-          }
-          if ('open' in range) {
-            ranges[ranges.length - 1].open = range.open
-          }
-          continue
-        }
-      }
-
-      ranges.push(range)
-    }
-
-    /* istanbul ignore if */
-    if (ranges.some(range => 'open' in range)) {
-      throw Error('Failed to close all open ranges, this should be impossible')
-    }
-
-    // Always return an array of ranges, caller can prune this output if desired
-    return ranges
-  }
-
-  const unixMillisToAtomicMillis = (unixMillis, options = {}) => {
-    const ranges = unixToAtomic(Rat.fromMillis(unixMillis))
+  const unixToAtomic = (unixMillis, options = {}) => {
+    const ranges = exactConverter.unixToAtomic(Rat.fromMillis(unixMillis))
       .map(range => [
         range.start.toMillis(),
         range.end.toMillis()
@@ -94,9 +42,7 @@ const Converter = (data, model) => {
 
   return {
     atomicToUnix,
-    atomicMillisToUnixMillis,
-    unixToAtomic,
-    unixMillisToAtomicMillis
+    unixToAtomic
   }
 }
 
