@@ -308,43 +308,31 @@ describe('TaiConverter', () => {
       // Hey, what! A removed leap twentieth of a second???
       // Well, technically, that's 1/20th of a TAI second, which is SLIGHTLY LESS than 1/20th of a UTC second
       // Which means that 23:59:59.950 UTC *does* actually exist...
-      expect(converter.unixToAtomic(Date.UTC(1961, JUL, 31, 23, 59, 59, 949), { array: true }).length)
-        .toBe(1)
-      expect(converter.unixToAtomic(Date.UTC(1961, JUL, 31, 23, 59, 59, 949)))
-        .toBe(-265_679_998_354)
+      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1961, JUL, 31, 23, 59, 59, 949))))
+        .toEqual([{
+          start: new Rat(-265_679_998_353_430_000_765n, 1_000_000_000_000n),
+          end: new Rat(-265_679_998_353_430_000_765n, 1_000_000_000_000n)
+        }])
+      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1961, JUL, 31, 23, 59, 59, 950))))
+        .toEqual([{
+          start: new Rat(-265_679_998_352_430_000_750n, 1_000_000_000_000n),
+          end: new Rat(-265_679_998_352_430_000_750n, 1_000_000_000_000n)
+        }])
+      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1961, JUL, 31, 23, 59, 59, 951))))
+        .toEqual([])
 
-      expect(converter.unixToAtomic(Date.UTC(1961, JUL, 31, 23, 59, 59, 950), { array: true }))
-        .toEqual([-265_679_998_353])
-      expect(converter.unixToAtomic(Date.UTC(1961, JUL, 31, 23, 59, 59, 950)))
-        .toBe(-265_679_998_353)
-
-      expect(converter.unixToAtomic(Date.UTC(1961, JUL, 31, 23, 59, 59, 951), { array: true }).length)
-        .toBe(0)
-      expect(converter.unixToAtomic(Date.UTC(1961, JUL, 31, 23, 59, 59, 951)))
-        .toBe(NaN)
-
-      expect(converter.unixToAtomic(Date.UTC(1961, JUL, 31, 23, 59, 59, 999), { array: true }).length)
-        .toBe(0)
-      expect(converter.unixToAtomic(Date.UTC(1961, JUL, 31, 23, 59, 59, 999)))
-        .toBe(NaN)
-
-      expect(converter.unixToAtomic(Date.UTC(1961, AUG, 1, 0, 0, 0, 0), { array: true }).length)
-        .toBe(1)
-      expect(converter.unixToAtomic(Date.UTC(1961, AUG, 1, 0, 0, 0, 0)))
-        .toBe(-265_679_998_353)
-
-      expect(converter.unixToAtomic(Date.UTC(1961, AUG, 1, 0, 0, 0, 1), { array: true }).length)
-        .toBe(1)
-      expect(converter.unixToAtomic(Date.UTC(1961, AUG, 1, 0, 0, 0, 1)))
-        .toBe(-265_679_998_352)
-
-      expect(converter.unixToAtomic(Date.UTC(1961, AUG, 1, 0, 0, 0, 2), { array: true }).length)
-        .toBe(1)
-      expect(converter.unixToAtomic(Date.UTC(1961, AUG, 1, 0, 0, 0, 2)))
-        .toBe(-265_679_998_351)
-
-      expect(converter.atomicToUnix(Date.UTC(1961, AUG, 1, 0, 0, 1, 647)))
-        .toBe(Date.UTC(1961, JUL, 31, 23, 59, 59, 949))
+      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1961, JUL, 31, 23, 59, 59, 999))))
+        .toEqual([])
+      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1961, AUG, 1, 0, 0, 0, 0))))
+        .toEqual([{
+          start: new Rat(-265_679_998_352_430_000_000n, 1_000_000_000_000n),
+          end: new Rat(-265_679_998_352_430_000_000n, 1_000_000_000_000n)
+        }])
+      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1961, AUG, 1, 0, 0, 0, 1))))
+        .toEqual([{
+          start: new Rat(-265_679_998_351_429_999_985n, 1_000_000_000_000n),
+          end: new Rat(-265_679_998_351_429_999_985n, 1_000_000_000_000n)
+        }])
     })
 
     it('boundaries', () => {
