@@ -29,11 +29,9 @@ describe('TaiConverter', () => {
     const taiConverter = TaiConverter(MODELS.OVERRUN)
 
     describe('unixToAtomic', () => {
-      const unixToAtomic = taiConverter.unixToAtomic.bind(taiConverter)
-
       it('starts TAI at 1961-01-01 00:00:01.422_818', () => {
         // 00:00:01.422_818 is in range, but rounds down to 00:00:01.422 which is not
-        expect(unixToAtomic(Rat.fromMillis(Date.UTC(1961, JAN, 1, 0, 0, 0, 0))))
+        expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(1961, JAN, 1, 0, 0, 0, 0))))
           .toEqual([{
             start: Rat.fromMillis(Date.UTC(1961, JAN, 1, 0, 0, 1, 422)).plus(new Rat(818_000_000n, 1_000_000_000_000n)),
             end: Rat.fromMillis(Date.UTC(1961, JAN, 1, 0, 0, 1, 422)).plus(new Rat(818_000_000n, 1_000_000_000_000n))
@@ -41,17 +39,17 @@ describe('TaiConverter', () => {
       })
 
       it('advances 15 TAI picoseconds per Unix millisecond', () => {
-        expect(unixToAtomic(Rat.fromMillis(Date.UTC(1961, JAN, 1, 0, 0, 0, 1))))
+        expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(1961, JAN, 1, 0, 0, 0, 1))))
           .toEqual([{
             start: Rat.fromMillis(Date.UTC(1961, JAN, 1, 0, 0, 1, 423)).plus(new Rat(818_000_015n, 1_000_000_000_000n)),
             end: Rat.fromMillis(Date.UTC(1961, JAN, 1, 0, 0, 1, 423)).plus(new Rat(818_000_015n, 1_000_000_000_000n))
           }])
-        expect(unixToAtomic(Rat.fromMillis(Date.UTC(1961, JAN, 1, 0, 0, 0, 2))))
+        expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(1961, JAN, 1, 0, 0, 0, 2))))
           .toEqual([{
             start: Rat.fromMillis(Date.UTC(1961, JAN, 1, 0, 0, 1, 424)).plus(new Rat(818_000_030n, 1_000_000_000_000n)),
             end: Rat.fromMillis(Date.UTC(1961, JAN, 1, 0, 0, 1, 424)).plus(new Rat(818_000_030n, 1_000_000_000_000n))
           }])
-        expect(unixToAtomic(Rat.fromMillis(Date.UTC(1961, JAN, 1, 0, 0, 0, 3))))
+        expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(1961, JAN, 1, 0, 0, 0, 3))))
           .toEqual([{
             start: Rat.fromMillis(Date.UTC(1961, JAN, 1, 0, 0, 1, 425)).plus(new Rat(818_000_045n, 1_000_000_000_000n)),
             end: Rat.fromMillis(Date.UTC(1961, JAN, 1, 0, 0, 1, 425)).plus(new Rat(818_000_045n, 1_000_000_000_000n))
@@ -59,7 +57,7 @@ describe('TaiConverter', () => {
       })
 
       it('advances 0.001_296 TAI seconds per Unix day', () => {
-        expect(unixToAtomic(Rat.fromMillis(Date.UTC(1961, JAN, 2, 0, 0, 0, 0))))
+        expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(1961, JAN, 2, 0, 0, 0, 0))))
           .toEqual([{
             start: Rat.fromMillis(Date.UTC(1961, JAN, 2, 0, 0, 1, 424)).plus(new Rat(114n, 1_000_000n)),
             end: Rat.fromMillis(Date.UTC(1961, JAN, 2, 0, 0, 1, 424)).plus(new Rat(114n, 1_000_000n))
@@ -67,12 +65,12 @@ describe('TaiConverter', () => {
       })
 
       it('makes certain TAI millisecond counts inaccessible', () => {
-        expect(unixToAtomic(Rat.fromMillis(-283_984_666_668)))
+        expect(taiConverter.unixToAtomic(Rat.fromMillis(-283_984_666_668)))
           .toEqual([{
             start: new Rat(-283_984_665_245_000_000_020n, 1_000_000_000_000n),
             end: new Rat(-283_984_665_245_000_000_020n, 1_000_000_000_000n)
           }])
-        expect(unixToAtomic(Rat.fromMillis(-283_984_666_667)))
+        expect(taiConverter.unixToAtomic(Rat.fromMillis(-283_984_666_667)))
           .toEqual([{
             start: new Rat(-283_984_665_244_000_000_005n, 1_000_000_000_000n),
             end: new Rat(-283_984_665_244_000_000_005n, 1_000_000_000_000n)
@@ -80,12 +78,12 @@ describe('TaiConverter', () => {
 
         // it's not possible to get a result of -283_984_665_244_XXX_XXX_XXXn
 
-        expect(unixToAtomic(Rat.fromMillis(-283_984_666_666)))
+        expect(taiConverter.unixToAtomic(Rat.fromMillis(-283_984_666_666)))
           .toEqual([{
             start: new Rat(-283_984_665_242_999_999_990n, 1_000_000_000_000n),
             end: new Rat(-283_984_665_242_999_999_990n, 1_000_000_000_000n)
           }])
-        expect(unixToAtomic(Rat.fromMillis(-283_984_666_665)))
+        expect(taiConverter.unixToAtomic(Rat.fromMillis(-283_984_666_665)))
           .toEqual([{
             start: new Rat(-283_984_665_241_999_999_975n, 1_000_000_000_000n),
             end: new Rat(-283_984_665_241_999_999_975n, 1_000_000_000_000n)
@@ -94,32 +92,30 @@ describe('TaiConverter', () => {
     })
 
     describe('atomicToUnix', () => {
-      const atomicToUnix = taiConverter.atomicToUnix.bind(taiConverter)
-
       it('The NEW earliest instant in TAI', () => {
-        expect(atomicToUnix(Rat.fromMillis(Date.UTC(1961, JAN, 1, 0, 0, 1, 422))))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(Date.UTC(1961, JAN, 1, 0, 0, 1, 422))))
           .toBe(NaN)
 
         // Actual start of TAI: 1961-01-01 00:00:01.422_818
-        expect(atomicToUnix(Rat.fromMillis(Date.UTC(1961, JAN, 1, 0, 0, 1, 422)).plus(new Rat(818n, 1_000_000n))))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(Date.UTC(1961, JAN, 1, 0, 0, 1, 422)).plus(new Rat(818n, 1_000_000n))))
           .toEqual(Rat.fromMillis(Date.UTC(1961, JAN, 1, 0, 0, 0, 0)))
       })
 
       it('start of 1972', () => {
         // After this point in time, conversions become far simpler and always integer numbers of milliseconds
-        expect(atomicToUnix(Rat.fromMillis(Date.UTC(1972, JAN, 1, 0, 0, 10, 0))))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(Date.UTC(1972, JAN, 1, 0, 0, 10, 0))))
           .toEqual(Rat.fromMillis(Date.UTC(1972, JAN, 1, 0, 0, 0, 0)))
-        expect(atomicToUnix(Rat.fromMillis(Date.UTC(1972, JAN, 1, 0, 0, 10, 1))))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(Date.UTC(1972, JAN, 1, 0, 0, 10, 1))))
           .toEqual(Rat.fromMillis(Date.UTC(1972, JAN, 1, 0, 0, 0, 1)))
       })
 
       it('typical', () => {
         // A typical leap second from the past, note backtracking
-        expect(atomicToUnix(Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 31, 999))))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 31, 999))))
           .toEqual(Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 0, 999)))
-        expect(atomicToUnix(Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 32, 0))))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 32, 0))))
           .toEqual(Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 0, 0)))
-        expect(atomicToUnix(Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 32, 1))))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 32, 1))))
           .toEqual(Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 0, 1)))
       })
     })
@@ -494,50 +490,48 @@ describe('TaiConverter', () => {
     const taiConverter = TaiConverter(MODELS.STALL)
 
     describe('atomicToUnix', () => {
-      const atomicToUnix = taiConverter.atomicToUnix.bind(taiConverter)
-
       it('The NEW earliest instant in TAI', () => {
         // Actual start of TAI: 1961-01-01 00:00:01.422_818
-        expect(atomicToUnix(Rat.fromMillis(Date.UTC(1961, JAN, 1, 0, 0, 1, 422)).plus(new Rat(818n, 1_000_000n))))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(Date.UTC(1961, JAN, 1, 0, 0, 1, 422)).plus(new Rat(818n, 1_000_000n))))
           .toEqual(Rat.fromMillis(Date.UTC(1961, JAN, 1, 0, 0, 0, 0)))
       })
 
       it('handles the start of 1972', () => {
-        expect(atomicToUnix(Rat.fromMillis(Date.UTC(1972, JAN, 1, 0, 0, 10, 0))))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(Date.UTC(1972, JAN, 1, 0, 0, 10, 0))))
           .toEqual(Rat.fromMillis(Date.UTC(1972, JAN, 1, 0, 0, 0, 0)))
       })
 
       it('0.107_758 seconds added, start of 1972', () => {
         // stall begins at 1972-01-01 00:00:09.892_242 TAI
-        expect(atomicToUnix(Rat.fromMillis(Date.UTC(1972, JAN, 1, 0, 0, 9, 892)).plus(new Rat(242n, 1_000_000n))))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(Date.UTC(1972, JAN, 1, 0, 0, 9, 892)).plus(new Rat(242n, 1_000_000n))))
           .toEqual(Rat.fromMillis(Date.UTC(1972, JAN, 1, 0, 0, 0, 0)))
-        expect(atomicToUnix(Rat.fromMillis(Date.UTC(1972, JAN, 1, 0, 0, 9, 893))))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(Date.UTC(1972, JAN, 1, 0, 0, 9, 893))))
           .toEqual(Rat.fromMillis(Date.UTC(1972, JAN, 1, 0, 0, 0, 0)))
 
         // Leap time over
         // After this point in time, conversions become far simpler and always integer numbers of milliseconds
-        expect(atomicToUnix(Rat.fromMillis(Date.UTC(1972, JAN, 1, 0, 0, 9, 999))))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(Date.UTC(1972, JAN, 1, 0, 0, 9, 999))))
           .toEqual(Rat.fromMillis(Date.UTC(1972, JAN, 1, 0, 0, 0, 0)))
-        expect(atomicToUnix(Rat.fromMillis(Date.UTC(1972, JAN, 1, 0, 0, 10, 0))))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(Date.UTC(1972, JAN, 1, 0, 0, 10, 0))))
           .toEqual(Rat.fromMillis(Date.UTC(1972, JAN, 1, 0, 0, 0, 0)))
-        expect(atomicToUnix(Rat.fromMillis(Date.UTC(1972, JAN, 1, 0, 0, 10, 1))))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(Date.UTC(1972, JAN, 1, 0, 0, 10, 1))))
           .toEqual(Rat.fromMillis(Date.UTC(1972, JAN, 1, 0, 0, 0, 1)))
       })
 
       it('typical', () => {
         // A typical leap second from the past, note stall
-        expect(atomicToUnix(Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 30, 999))))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 30, 999))))
           .toEqual(Rat.fromMillis(Date.UTC(1998, DEC, 31, 23, 59, 59, 999)))
-        expect(atomicToUnix(Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 31, 0))))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 31, 0))))
           .toEqual(Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 0, 0)))
-        expect(atomicToUnix(Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 31, 1))))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 31, 1))))
           .toEqual(Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 0, 0)))
 
-        expect(atomicToUnix(Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 31, 999))))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 31, 999))))
           .toEqual(Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 0, 0)))
-        expect(atomicToUnix(Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 32, 0))))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 32, 0))))
           .toEqual(Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 0, 0)))
-        expect(atomicToUnix(Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 32, 1))))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 32, 1))))
           .toEqual(Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 0, 1)))
       })
     })
