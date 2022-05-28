@@ -709,66 +709,105 @@ describe('TaiConverter', () => {
 
     describe('TAI raw data conversion unit tests based on magic numbers', () => {
       it('converter.unixToAtomic', () => {
-        expect(converter.unixToAtomic(63_072_010_000)).toBe(63_072_020_000)
-        expect(converter.unixToAtomic(78_796_811_000)).toBe(78_796_822_000)
-        expect(converter.unixToAtomic(94_694_412_000)).toBe(94_694_424_000)
-        expect(converter.unixToAtomic(126_230_413_000)).toBe(126_230_426_000)
-        expect(converter.unixToAtomic(157_766_414_000)).toBe(157_766_428_000)
-        expect(converter.unixToAtomic(189_302_415_000)).toBe(189_302_430_000)
-        expect(converter.unixToAtomic(220_924_816_000)).toBe(220_924_832_000)
-        expect(converter.unixToAtomic(252_460_817_000)).toBe(252_460_834_000)
-        expect(converter.unixToAtomic(283_996_818_000)).toBe(283_996_836_000)
-        expect(converter.unixToAtomic(315_532_819_000)).toBe(315_532_838_000)
-        expect(converter.unixToAtomic(362_793_620_000)).toBe(362_793_640_000)
-        expect(converter.unixToAtomic(394_329_621_000)).toBe(394_329_642_000)
-        expect(converter.unixToAtomic(425_865_622_000)).toBe(425_865_644_000)
-        expect(converter.unixToAtomic(489_024_023_000)).toBe(489_024_046_000)
-        expect(converter.unixToAtomic(567_993_624_000)).toBe(567_993_648_000)
-        expect(converter.unixToAtomic(631_152_025_000)).toBe(631_152_050_000)
-        expect(converter.unixToAtomic(662_688_026_000)).toBe(662_688_052_000)
-        expect(converter.unixToAtomic(709_948_827_000)).toBe(709_948_854_000)
-        expect(converter.unixToAtomic(741_484_828_000)).toBe(741_484_856_000)
-        expect(converter.unixToAtomic(773_020_829_000)).toBe(773_020_858_000)
-        expect(converter.unixToAtomic(820_454_430_000)).toBe(820_454_460_000)
-        expect(converter.unixToAtomic(867_715_231_000)).toBe(867_715_262_000)
-        expect(converter.unixToAtomic(915_148_832_000)).toBe(915_148_864_000)
-        expect(converter.unixToAtomic(1_136_073_633_000)).toBe(1_136_073_666_000)
-        expect(converter.unixToAtomic(1_230_768_034_000)).toBe(1_230_768_068_000)
-        expect(converter.unixToAtomic(1_341_100_835_000)).toBe(1_341_100_870_000)
-        expect(converter.unixToAtomic(1_435_708_836_000)).toBe(1_435_708_872_000)
-        expect(converter.unixToAtomic(1_483_228_837_000)).toBe(1_483_228_874_000)
+        const pairs = [
+          [63_072_010_000, 63_072_020_000],
+          [78_796_811_000, 78_796_822_000],
+          [94_694_412_000, 94_694_424_000],
+          [126_230_413_000, 126_230_426_000],
+          [157_766_414_000, 157_766_428_000],
+          [189_302_415_000, 189_302_430_000],
+          [220_924_816_000, 220_924_832_000],
+          [252_460_817_000, 252_460_834_000],
+          [283_996_818_000, 283_996_836_000],
+          [315_532_819_000, 315_532_838_000],
+          [362_793_620_000, 362_793_640_000],
+          [394_329_621_000, 394_329_642_000],
+          [425_865_622_000, 425_865_644_000],
+          [489_024_023_000, 489_024_046_000],
+          [567_993_624_000, 567_993_648_000],
+          [631_152_025_000, 631_152_050_000],
+          [662_688_026_000, 662_688_052_000],
+          [709_948_827_000, 709_948_854_000],
+          [741_484_828_000, 741_484_856_000],
+          [773_020_829_000, 773_020_858_000],
+          [820_454_430_000, 820_454_460_000],
+          [867_715_231_000, 867_715_262_000],
+          [915_148_832_000, 915_148_864_000],
+          [1_136_073_633_000, 1_136_073_666_000],
+          [1_230_768_034_000, 1_230_768_068_000],
+          [1_341_100_835_000, 1_341_100_870_000],
+          [1_435_708_836_000, 1_435_708_872_000],
+          [1_483_228_837_000, 1_483_228_874_000]
+        ]
+
+        pairs.forEach(([unixMillis, atomicMillis]) => {
+          expect(converter.unixToAtomic(Rat.fromMillis(unixMillis)))
+            .toEqual([{
+              start: Rat.fromMillis(atomicMillis),
+              end: Rat.fromMillis(atomicMillis)
+            }])
+        })
       })
 
       it('converter.atomicToUnix', () => {
-        expect(converter.atomicToUnix(-283_996_800_000)).toBe(NaN)
-        expect(converter.atomicToUnix(63_072_010_000)).toBe(63_072_000_000)
-        expect(converter.atomicToUnix(78_796_811_000)).toBe(78_796_800_000)
-        expect(converter.atomicToUnix(94_694_412_000)).toBe(94_694_400_000)
-        expect(converter.atomicToUnix(126_230_413_000)).toBe(126_230_400_000)
-        expect(converter.atomicToUnix(157_766_414_000)).toBe(157_766_400_000)
-        expect(converter.atomicToUnix(189_302_415_000)).toBe(189_302_400_000)
-        expect(converter.atomicToUnix(220_924_816_000)).toBe(220_924_800_000)
-        expect(converter.atomicToUnix(252_460_817_000)).toBe(252_460_800_000)
-        expect(converter.atomicToUnix(283_996_818_000)).toBe(283_996_800_000)
-        expect(converter.atomicToUnix(315_532_819_000)).toBe(315_532_800_000)
-        expect(converter.atomicToUnix(362_793_620_000)).toBe(362_793_600_000)
-        expect(converter.atomicToUnix(394_329_621_000)).toBe(394_329_600_000)
-        expect(converter.atomicToUnix(425_865_622_000)).toBe(425_865_600_000)
-        expect(converter.atomicToUnix(489_024_023_000)).toBe(489_024_000_000)
-        expect(converter.atomicToUnix(567_993_624_000)).toBe(567_993_600_000)
-        expect(converter.atomicToUnix(631_152_025_000)).toBe(631_152_000_000)
-        expect(converter.atomicToUnix(662_688_026_000)).toBe(662_688_000_000)
-        expect(converter.atomicToUnix(709_948_827_000)).toBe(709_948_800_000)
-        expect(converter.atomicToUnix(741_484_828_000)).toBe(741_484_800_000)
-        expect(converter.atomicToUnix(773_020_829_000)).toBe(773_020_800_000)
-        expect(converter.atomicToUnix(820_454_430_000)).toBe(820_454_400_000)
-        expect(converter.atomicToUnix(867_715_231_000)).toBe(867_715_200_000)
-        expect(converter.atomicToUnix(915_148_832_000)).toBe(915_148_800_000)
-        expect(converter.atomicToUnix(1_136_073_633_000)).toBe(1_136_073_600_000)
-        expect(converter.atomicToUnix(1_230_768_034_000)).toBe(1_230_768_000_000)
-        expect(converter.atomicToUnix(1_341_100_835_000)).toBe(1_341_100_800_000)
-        expect(converter.atomicToUnix(1_435_708_836_000)).toBe(1_435_708_800_000)
-        expect(converter.atomicToUnix(1_483_228_837_000)).toBe(1_483_228_800_000)
+        expect(converter.atomicToUnix(Rat.fromMillis(-283_996_800_000)))
+          .toBe(NaN)
+        expect(converter.atomicToUnix(Rat.fromMillis(63_072_010_000)))
+          .toEqual(Rat.fromMillis(63_072_000_000))
+        expect(converter.atomicToUnix(Rat.fromMillis(78_796_811_000)))
+          .toEqual(Rat.fromMillis(78_796_800_000))
+        expect(converter.atomicToUnix(Rat.fromMillis(94_694_412_000)))
+          .toEqual(Rat.fromMillis(94_694_400_000))
+        expect(converter.atomicToUnix(Rat.fromMillis(126_230_413_000)))
+          .toEqual(Rat.fromMillis(126_230_400_000))
+        expect(converter.atomicToUnix(Rat.fromMillis(157_766_414_000)))
+          .toEqual(Rat.fromMillis(157_766_400_000))
+        expect(converter.atomicToUnix(Rat.fromMillis(189_302_415_000)))
+          .toEqual(Rat.fromMillis(189_302_400_000))
+        expect(converter.atomicToUnix(Rat.fromMillis(220_924_816_000)))
+          .toEqual(Rat.fromMillis(220_924_800_000))
+        expect(converter.atomicToUnix(Rat.fromMillis(252_460_817_000)))
+          .toEqual(Rat.fromMillis(252_460_800_000))
+        expect(converter.atomicToUnix(Rat.fromMillis(283_996_818_000)))
+          .toEqual(Rat.fromMillis(283_996_800_000))
+        expect(converter.atomicToUnix(Rat.fromMillis(315_532_819_000)))
+          .toEqual(Rat.fromMillis(315_532_800_000))
+        expect(converter.atomicToUnix(Rat.fromMillis(362_793_620_000)))
+          .toEqual(Rat.fromMillis(362_793_600_000))
+        expect(converter.atomicToUnix(Rat.fromMillis(394_329_621_000)))
+          .toEqual(Rat.fromMillis(394_329_600_000))
+        expect(converter.atomicToUnix(Rat.fromMillis(425_865_622_000)))
+          .toEqual(Rat.fromMillis(425_865_600_000))
+        expect(converter.atomicToUnix(Rat.fromMillis(489_024_023_000)))
+          .toEqual(Rat.fromMillis(489_024_000_000))
+        expect(converter.atomicToUnix(Rat.fromMillis(567_993_624_000)))
+          .toEqual(Rat.fromMillis(567_993_600_000))
+        expect(converter.atomicToUnix(Rat.fromMillis(631_152_025_000)))
+          .toEqual(Rat.fromMillis(631_152_000_000))
+        expect(converter.atomicToUnix(Rat.fromMillis(662_688_026_000)))
+          .toEqual(Rat.fromMillis(662_688_000_000))
+        expect(converter.atomicToUnix(Rat.fromMillis(709_948_827_000)))
+          .toEqual(Rat.fromMillis(709_948_800_000))
+        expect(converter.atomicToUnix(Rat.fromMillis(741_484_828_000)))
+          .toEqual(Rat.fromMillis(741_484_800_000))
+        expect(converter.atomicToUnix(Rat.fromMillis(773_020_829_000)))
+          .toEqual(Rat.fromMillis(773_020_800_000))
+        expect(converter.atomicToUnix(Rat.fromMillis(820_454_430_000)))
+          .toEqual(Rat.fromMillis(820_454_400_000))
+        expect(converter.atomicToUnix(Rat.fromMillis(867_715_231_000)))
+          .toEqual(Rat.fromMillis(867_715_200_000))
+        expect(converter.atomicToUnix(Rat.fromMillis(915_148_832_000)))
+          .toEqual(Rat.fromMillis(915_148_800_000))
+        expect(converter.atomicToUnix(Rat.fromMillis(1_136_073_633_000)))
+          .toEqual(Rat.fromMillis(1_136_073_600_000))
+        expect(converter.atomicToUnix(Rat.fromMillis(1_230_768_034_000)))
+          .toEqual(Rat.fromMillis(1_230_768_000_000))
+        expect(converter.atomicToUnix(Rat.fromMillis(1_341_100_835_000)))
+          .toEqual(Rat.fromMillis(1_341_100_800_000))
+        expect(converter.atomicToUnix(Rat.fromMillis(1_435_708_836_000)))
+          .toEqual(Rat.fromMillis(1_435_708_800_000))
+        expect(converter.atomicToUnix(Rat.fromMillis(1_483_228_837_000)))
+          .toEqual(Rat.fromMillis(1_483_228_800_000))
       })
     })
 
