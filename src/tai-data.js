@@ -2,6 +2,8 @@
 // <http://hpiers.obspm.fr/eop-pc/earthor/utc/TAI-UTC_tab.html>
 // <ftp://maia.usno.navy.mil/ser7/tai-utc.dat>
 
+const { Rat } = require('./rat.js')
+
 const JAN = 0
 const FEB = 1
 const MAR = 2
@@ -61,11 +63,18 @@ const taiData = [
   [Date.UTC(2017, JAN, 1), 37]
 ]
 
-module.exports.taiData = taiData
-module.exports.UNIX_START = taiData[0][0]
+const UNIX_START_MILLIS = taiData[0][0]
+const UNIX_START = Rat.fromMillis(UNIX_START_MILLIS)
 
 // Because we don't know whether or not a leap second will be inserted or removed at this time,
 // the relationship between Unix time and TAI is unpredictable at or beyond this point.
 // (This is the start of a possible smear.)
 // Updating this value? Don't forget to update the README too!
-module.exports.UNIX_END = Date.UTC(2022, DEC, 31, 12, 0, 0, 0)
+const UNIX_END_MILLIS = Date.UTC(2022, DEC, 31, 12, 0, 0, 0)
+const UNIX_END = Rat.fromMillis(UNIX_END_MILLIS)
+
+module.exports.taiData = taiData
+module.exports.UNIX_START_MILLIS = UNIX_START_MILLIS
+module.exports.UNIX_START = UNIX_START
+module.exports.UNIX_END_MILLIS = UNIX_END_MILLIS
+module.exports.UNIX_END = UNIX_END

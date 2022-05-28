@@ -32,13 +32,10 @@ const MODELS = {
   SMEAR: Symbol('SMEAR')
 }
 
-const millisToExact = millis => new Rat(BigInt(millis), 1_000n)
-const exactToMillis = rat => Number(rat.times(new Rat(1_000n)).trunc())
-
 const NOV = 10
 const secondsPerDay = new Rat(86_400n)
 const mjdEpoch = {
-  unix: millisToExact(Date.UTC(1858, NOV, 17))
+  unix: Rat.fromMillis(Date.UTC(1858, NOV, 17))
 }
 
 // Input some raw TAI-UTC data, output the same data but altered to be more consumable for our
@@ -60,7 +57,7 @@ const munge = (data, model) => {
     ] = datum
 
     // Convert from a millisecond count to a precise ratio of seconds
-    start.unix = millisToExact(start.unixMillis)
+    start.unix = Rat.fromMillis(start.unixMillis)
 
     // Convert from a floating point number to a precise ratio
     // Offsets are given in TAI seconds to seven decimal places, e.g. `1.422_818_0`.
@@ -163,7 +160,8 @@ const munge = (data, model) => {
         .plus(b.start.atomic)
 
       if (smearEnd.atomic.le(smearStart.atomic)) {
-        // No negative-length or zero-length smears
+        // No negative-length or zero-length smears.
+        // This handles negative leap seconds correctly.
         continue
       }
 
@@ -171,6 +169,14 @@ const munge = (data, model) => {
       // Terminate this segment early, start the next segment late.
       a.end = smearStart // includes unix but we'll ignore that
       b.start = smearEnd
+
+      // This can reduce `a` to length 0, in which case we elide it.
+      // No point checking for negative-length segments, those throw an
+      // exception later
+      if (a.start.atomic.eq(a.end.atomic)) {
+        munged.splice(i, 1)
+        i--
+      }
 
       if (model === MODELS.BREAK) {
         // Just leave a gap
@@ -208,6 +214,4 @@ const munge = (data, model) => {
 }
 
 module.exports.MODELS = MODELS
-module.exports.millisToExact = millisToExact
-module.exports.exactToMillis = exactToMillis
 module.exports.munge = munge

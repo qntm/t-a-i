@@ -12,9 +12,12 @@ class Rat {
       throw Error('Denominator must be non-zero')
     }
 
-    const g = gcd(nu, de)
-    this.nu = nu / g
-    this.de = de / g // `this.de` is always positive
+    const g = gcd(nu, de) // non-zero
+
+    const g2 = (de < 0) === (g < 0) ? g : -g // has the same sign as `de`
+
+    this.de = de / g2 // positive
+    this.nu = nu / g2 // sign of `this.nu` is the sign of the represented rational
   }
 
   plus (other) {
@@ -33,30 +36,38 @@ class Rat {
     return this.times(new Rat(other.de, other.nu))
   }
 
-  cmp (other) {
-    // It's always safe to do this as `de` is always positive
-    return this.nu * other.de - this.de * other.nu
-  }
-
   eq (other) {
-    return this.cmp(other) === 0n
+    return this.minus(other).nu === 0n
   }
 
   lt (other) {
-    return this.cmp(other) < 0n
+    return this.minus(other).nu < 0n
   }
 
   le (other) {
-    return this.cmp(other) <= 0n
+    return this.minus(other).nu <= 0n
   }
 
   gt (other) {
-    return this.cmp(other) > 0n
+    return this.minus(other).nu > 0n
   }
 
+  // Truncate the fraction towards negative infinity
   trunc () {
     return div(this.nu, this.de)
   }
+
+  toMillis () {
+    return Number(this.times(new Rat(1_000n)).trunc())
+  }
+}
+
+Rat.fromMillis = millis => {
+  if (!Number.isInteger(millis)) {
+    throw Error(`Not an integer: ${millis}`)
+  }
+
+  return new Rat(BigInt(millis), 1_000n)
 }
 
 module.exports.Rat = Rat
