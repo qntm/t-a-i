@@ -2,6 +2,7 @@
 
 const { MODELS } = require('./munge.js')
 const { Converter } = require('./converter.js')
+const { ExactConverter } = require('./exact-covnerter.js')
 
 const JAN = 0
 const OCT = 9
@@ -15,7 +16,7 @@ describe('Converter', () => {
     ]
 
     describe('OVERRUN', () => {
-      const converter = Converter(data, MODELS.OVERRUN)
+      const converter = Converter(ExactConverter(data, MODELS.OVERRUN))
 
       it('manages basic conversions', () => {
         expect(converter.unixToAtomic(0, { range: true, array: true }))
@@ -32,7 +33,7 @@ describe('Converter', () => {
     })
 
     describe('BREAK', () => {
-      const converter = Converter(data, MODELS.BREAK)
+      const converter = Converter(ExactConverter(data, MODELS.BREAK))
 
       it('manages basic conversions', () => {
         expect(converter.unixToAtomic(0))
@@ -43,7 +44,7 @@ describe('Converter', () => {
     })
 
     describe('STALL', () => {
-      const converter = Converter(data, MODELS.STALL)
+      const converter = Converter(ExactConverter(data, MODELS.STALL))
 
       it('fails on a non-integer number of milliseconds', () => {
         expect(() => converter.unixToAtomic(89.3)).toThrowError('Not an integer: 89.3')
@@ -76,7 +77,7 @@ describe('Converter', () => {
     })
 
     describe('SMEAR', () => {
-      const converter = Converter(data, MODELS.SMEAR)
+      const converter = Converter(ExactConverter(data, MODELS.SMEAR))
 
       it('manages basic conversions', () => {
         expect(converter.unixToAtomic(0))
@@ -94,7 +95,7 @@ describe('Converter', () => {
     ]
 
     describe('OVERRUN', () => {
-      const converter = Converter(data, MODELS.OVERRUN)
+      const converter = Converter(ExactConverter(data, MODELS.OVERRUN))
 
       it('unixToAtomic (array mode)', () => {
         expect(converter.unixToAtomic(0, { array: true }))
@@ -176,7 +177,7 @@ describe('Converter', () => {
     })
 
     describe('BREAK', () => {
-      const converter = Converter(data, MODELS.BREAK)
+      const converter = Converter(ExactConverter(data, MODELS.BREAK))
 
       it('unixToAtomic', () => {
         expect(converter.unixToAtomic(0))
@@ -221,7 +222,7 @@ describe('Converter', () => {
     })
 
     describe('STALL', () => {
-      const converter = Converter(data, MODELS.STALL)
+      const converter = Converter(ExactConverter(data, MODELS.STALL))
 
       it('unixToAtomic (range mode)', () => {
         expect(converter.unixToAtomic(0, { range: true }))
@@ -281,7 +282,7 @@ describe('Converter', () => {
     })
 
     describe('SMEAR', () => {
-      const converter = Converter(data, MODELS.SMEAR)
+      const converter = Converter(ExactConverter(data, MODELS.SMEAR))
 
       it('unixToAtomic', () => {
         expect(converter.unixToAtomic(0))
@@ -342,7 +343,7 @@ describe('Converter', () => {
     ]
 
     describe('OVERRUN', () => {
-      const converter = Converter(data, MODELS.OVERRUN)
+      const converter = Converter(ExactConverter(data, MODELS.OVERRUN))
 
       it('unixToAtomic (array mode)', () => {
         expect(converter.unixToAtomic(0, { array: true }))
@@ -407,7 +408,7 @@ describe('Converter', () => {
     })
 
     describe('BREAK', () => {
-      const converter = Converter(data, MODELS.BREAK)
+      const converter = Converter(ExactConverter(data, MODELS.BREAK))
 
       it('unixToAtomic', () => {
         expect(converter.unixToAtomic(0))
@@ -445,7 +446,7 @@ describe('Converter', () => {
     })
 
     describe('STALL', () => {
-      const converter = Converter(data, MODELS.STALL)
+      const converter = Converter(ExactConverter(data, MODELS.STALL))
 
       it('unixToAtomic (range mode)', () => {
         expect(converter.unixToAtomic(0, { range: true }))
@@ -525,7 +526,7 @@ describe('Converter', () => {
     })
 
     describe('SMEAR', () => {
-      const converter = Converter(data, MODELS.SMEAR)
+      const converter = Converter(ExactConverter(data, MODELS.SMEAR))
 
       it('unixToAtomic', () => {
         expect(converter.unixToAtomic(0))
@@ -585,7 +586,7 @@ describe('Converter', () => {
         const data = [
           [Date.UTC(1970, JAN, 1, 0, 0, 0, 1), -0.000_1]
         ]
-        const converter = Converter(data, MODELS.OVERRUN)
+        const converter = Converter(ExactConverter(data, MODELS.OVERRUN))
 
         expect(converter.unixToAtomic(1, { array: true }))
           .toEqual([0]) // truncated from .9 to 0
@@ -598,7 +599,7 @@ describe('Converter', () => {
           [Date.UTC(1969, DEC, 31, 23, 59, 59, 999), 0.000_1],
           [Date.UTC(1970, JAN, 1, 0, 0, 0, 1), -0.001_1]
         ]
-        const converter = Converter(data, MODELS.OVERRUN)
+        const converter = Converter(ExactConverter(data, MODELS.OVERRUN))
 
         expect(converter.unixToAtomic(-1, { array: true }))
           .toEqual([-1])
@@ -617,7 +618,7 @@ describe('Converter', () => {
       ]
 
       describe('OVERRUN', () => {
-        const converter = Converter(data, MODELS.OVERRUN)
+        const converter = Converter(ExactConverter(data, MODELS.OVERRUN))
 
         it('unixToAtomic (array mode)', () => {
           expect(converter.unixToAtomic(0, { array: true })).toEqual([0])
@@ -669,7 +670,7 @@ describe('Converter', () => {
       })
 
       describe('BREAK', () => {
-        const converter = Converter(data, MODELS.BREAK)
+        const converter = Converter(ExactConverter(data, MODELS.BREAK))
 
         it('unixToAtomic (range mode)', () => {
           expect(converter.unixToAtomic(0, { range: true }))
@@ -732,7 +733,7 @@ describe('Converter', () => {
       })
 
       describe('STALL', () => {
-        const converter = Converter(data, MODELS.STALL)
+        const converter = Converter(ExactConverter(data, MODELS.STALL))
 
         it('unixToAtomic (range mode)', () => {
           expect(converter.unixToAtomic(0, { range: true }))
@@ -805,7 +806,7 @@ describe('Converter', () => {
       ]
 
       describe('OVERRUN', () => {
-        const converter = Converter(data, MODELS.OVERRUN)
+        const converter = Converter(ExactConverter(data, MODELS.OVERRUN))
 
         it('unixToAtomic (array mode)', () => {
           expect(converter.unixToAtomic(0, { array: true })).toEqual([0])
@@ -839,7 +840,7 @@ describe('Converter', () => {
       })
 
       describe('BREAK', () => {
-        const converter = Converter(data, MODELS.BREAK)
+        const converter = Converter(ExactConverter(data, MODELS.BREAK))
 
         it('unixToAtomic', () => {
           expect(converter.unixToAtomic(0)).toBe(0)
@@ -866,7 +867,7 @@ describe('Converter', () => {
       })
 
       describe('STALL', () => {
-        const converter = Converter(data, MODELS.STALL)
+        const converter = Converter(ExactConverter(data, MODELS.STALL))
 
         it('unixToAtomic (range mode)', () => {
           expect(converter.unixToAtomic(0, { range: true })).toEqual([0, 0])
@@ -915,7 +916,7 @@ describe('Converter', () => {
       ]
 
       describe('OVERRUN', () => {
-        const converter = Converter(data, MODELS.OVERRUN)
+        const converter = Converter(ExactConverter(data, MODELS.OVERRUN))
 
         it('unixToAtomic (array mode)', () => {
           expect(converter.unixToAtomic(0, { array: true })).toEqual([0])
@@ -957,14 +958,14 @@ describe('Converter', () => {
 
       describe('BREAK', () => {
         it('says no', () => {
-          expect(() => Converter(data, MODELS.BREAK))
+          expect(() => Converter(ExactConverter(data, MODELS.BREAK)))
             .toThrowError('Segment length must be positive')
         })
       })
 
       describe('STALL', () => {
         it('says no', () => {
-          expect(() => Converter(data, MODELS.STALL))
+          expect(() => Converter(ExactConverter(data, MODELS.STALL)))
             .toThrowError('Segment length must be positive')
         })
       })
@@ -976,7 +977,7 @@ describe('Converter', () => {
       [Date.UTC(1962, JAN, 1), 1.845_858_0, 37_665, 0.001_123_2],
       [Date.UTC(1963, NOV, 1), 1.945_858_0, 37_665, 0.001_123_2] // 0.1 TAI seconds added to UTC
     ]
-    const converter = Converter(data, MODELS.OVERRUN)
+    const converter = Converter(ExactConverter(data, MODELS.OVERRUN))
 
     it('before anything clever occurs', () => {
       expect(converter.unixToAtomic(Date.UTC(1963, OCT, 31, 23, 59, 59, 999), { array: true }))

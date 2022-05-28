@@ -2,7 +2,7 @@
 
 // TODO: this is all broken
 
-const { TaiConverter, MODELS, UNIX_START, UNIX_END } = require('../exact')
+const { TaiConverter, Rat, MODELS, UNIX_START, UNIX_END } = require('./exact.js')
 
 const JAN = 0
 const FEB = 1
@@ -16,13 +16,13 @@ const DEC = 11
 
 describe('UNIX_START', () => {
   it('is correct', () => {
-    expect(UNIX_START).toBe(Date.UTC(1961, JAN, 1))
+    expect(UNIX_START).toEqual(Rat.fromMillis(Date.UTC(1961, JAN, 1)))
   })
 })
 
 describe('UNIX_END', () => {
   it('is correct', () => {
-    expect(UNIX_END).toBe(Date.UTC(2022, DEC, 31, 12, 0, 0, 0))
+    expect(UNIX_END).toEqual(Rat.fromMillis(Date.UTC(2022, DEC, 31, 12, 0, 0, 0)))
   })
 })
 
@@ -813,7 +813,7 @@ describe('TaiConverter', () => {
       })
 
       describe('atomicToUnix and back', () => {
-        const numbers = [
+        const atomicMillises = [
           // Pre 9172, round trips DO NOT work due to rounding behaviour
           63_072_010_000,
           78_796_811_000,
@@ -844,9 +844,14 @@ describe('TaiConverter', () => {
           1_435_708_836_000,
           1_483_228_837_000
         ]
-        numbers.forEach(number => {
-          it(String(number), () => {
-            expect(converter.unixToAtomic(converter.atomicToUnix(number))).toBe(number)
+        atomicMillises.forEach(atomicMillis => {
+          it(String(atomicMillis), () => {
+            const atomic = Rat.fromMillis(atomicMillis)
+            expect(converter.unixToAtomic(converter.atomicToUnix(atomic)))
+              .toEqual([{
+                start: atomic.minus(Rat.fromMillis(1_000)), // start of stall
+                end: atomic
+              }])
           })
         })
       })
@@ -856,26 +861,59 @@ describe('TaiConverter', () => {
   describe('smearing', () => {
     const converter = TaiConverter(MODELS.SMEAR)
     it('smears', () => {
-      expect(converter.unixToAtomic(Date.UTC(2016, DEC, 31, 0, 0, 0, 0)))
-        .toBe(Date.UTC(2016, DEC, 31, 0, 0, 36, 0))
-      expect(converter.unixToAtomic(Date.UTC(2016, DEC, 31, 12, 0, 0, 0)))
-        .toBe(Date.UTC(2016, DEC, 31, 12, 0, 36, 0))
-      expect(converter.unixToAtomic(Date.UTC(2016, DEC, 31, 12, 0, 0, 1)))
-        .toBe(Date.UTC(2016, DEC, 31, 12, 0, 36, 1))
+      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(2016, DEC, 31, 0, 0, 0, 0))))
+        .toEqual([{
+          start: Rat.fromMillis(Date.UTC(2016, DEC, 31, 0, 0, 36, 0)),
+          end: Rat.fromMillis(Date.UTC(2016, DEC, 31, 0, 0, 36, 0))
+        }])
 
-      // After 86_400 Unix milliseconds, 86_401 TAI milliseconds have passed
-      expect(converter.unixToAtomic(Date.UTC(2016, DEC, 31, 12, 1, 26, 399)))
-        .toBe(Date.UTC(2016, DEC, 31, 12, 2, 2, 399))
-      expect(converter.unixToAtomic(Date.UTC(2016, DEC, 31, 12, 1, 26, 400)))
-        .toBe(Date.UTC(2016, DEC, 31, 12, 2, 2, 401))
+      // SMEAR BEGINS
+      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(2016, DEC, 31, 11, 59, 59, 999))))
+        .toEqual([{
+          start: Rat.fromMillis(Date.UTC(2016, DEC, 31, 12, 0, 35, 999)),
+          end: Rat.fromMillis(Date.UTC(2016, DEC, 31, 12, 0, 35, 999))
+        }])
+      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(2016, DEC, 31, 12, 0, 0, 0))))
+        .toEqual([{
+          start: Rat.fromMillis(Date.UTC(2016, DEC, 31, 12, 0, 36, 0)),
+          end: Rat.fromMillis(Date.UTC(2016, DEC, 31, 12, 0, 36, 0))
+        }])
+      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(2016, DEC, 31, 12, 0, 0, 1))))
+        .toEqual([{
+          start: Rat.fromMillis(Date.UTC(2016, DEC, 31, 12, 0, 36, 1)).plus(new Rat(1n, 86_400_000n)),
+          end: Rat.fromMillis(Date.UTC(2016, DEC, 31, 12, 0, 36, 1)).plus(new Rat(1n, 86_400_000n))
+        }])
+
+      // After 86_400 Unix milliseconds, exactly 86_401 TAI milliseconds have passed
+      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(2016, DEC, 31, 12, 1, 26, 400))))
+        .toEqual([{
+          start: Rat.fromMillis(Date.UTC(2016, DEC, 31, 12, 2, 2, 401)),
+          end: Rat.fromMillis(Date.UTC(2016, DEC, 31, 12, 2, 2, 401))
+        }])
 
       // After 12 Unix hours, 12 TAI hours and 500 milliseconds
-      expect(converter.unixToAtomic(Date.UTC(2017, JAN, 1, 0, 0, 0, 0)))
-        .toBe(Date.UTC(2017, JAN, 1, 0, 0, 36, 500))
+      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(2017, JAN, 1, 0, 0, 0, 0))))
+        .toEqual([{
+          start: Rat.fromMillis(Date.UTC(2017, JAN, 1, 0, 0, 36, 500)),
+          end: Rat.fromMillis(Date.UTC(2017, JAN, 1, 0, 0, 36, 500))
+        }])
 
-      // After 24 Unix hours, 24 TAI hours and 1 second
-      expect(converter.unixToAtomic(Date.UTC(2017, JAN, 1, 12, 0, 0, 0)))
-        .toBe(Date.UTC(2017, JAN, 1, 12, 0, 37))
+      // SMEAR ENDS. After 24 Unix hours, 24 TAI hours and 1 second
+      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(2017, JAN, 1, 11, 59, 59, 999))))
+        .toEqual([{
+          start: Rat.fromMillis(Date.UTC(2017, JAN, 1, 12, 0, 35, 999)).plus(new Rat(86_399_999n, 86_400_000n)),
+          end: Rat.fromMillis(Date.UTC(2017, JAN, 1, 12, 0, 35, 999)).plus(new Rat(86_399_999n, 86_400_000n))
+        }])
+      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(2017, JAN, 1, 12, 0, 0, 0))))
+        .toEqual([{
+          start: Rat.fromMillis(Date.UTC(2017, JAN, 1, 12, 0, 37, 0)),
+          end: Rat.fromMillis(Date.UTC(2017, JAN, 1, 12, 0, 37, 0))
+        }])
+      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(2017, JAN, 1, 12, 0, 0, 1))))
+        .toEqual([{
+          start: Rat.fromMillis(Date.UTC(2017, JAN, 1, 12, 0, 37, 1)),
+          end: Rat.fromMillis(Date.UTC(2017, JAN, 1, 12, 0, 37, 1))
+        }])
     })
   })
 })

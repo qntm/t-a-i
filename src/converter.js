@@ -1,17 +1,14 @@
 const { Rat } = require('./rat.js')
-const { ExactConverter } = require('./exact-converter.js')
 
-const Converter = (data, model) => {
-  const exactConverter = ExactConverter(data, model)
-
-  const atomicToUnix = atomicMillis => {
+module.exports.Converter = exactConverter => ({
+  atomicToUnix: atomicMillis => {
     const unix = exactConverter.atomicToUnix(Rat.fromMillis(atomicMillis))
     return Number.isNaN(unix)
       ? unix
       : unix.toMillis()
-  }
+  },
 
-  const unixToAtomic = (unixMillis, options = {}) => {
+  unixToAtomic: (unixMillis, options = {}) => {
     const ranges = exactConverter.unixToAtomic(Rat.fromMillis(unixMillis))
       .map(range => [
         range.start.toMillis(),
@@ -26,11 +23,4 @@ const Converter = (data, model) => {
     const lastRange = i in ranges ? ranges[i] : [NaN, NaN]
     return options.range === true ? lastRange : lastRange[1]
   }
-
-  return {
-    atomicToUnix,
-    unixToAtomic
-  }
-}
-
-module.exports.Converter = Converter
+})
