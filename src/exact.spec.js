@@ -774,8 +774,8 @@ describe('TaiConverter', () => {
 
     describe('round trips', () => {
       describe('unixToAtomic and back', () => {
-        const numbers = [
-          // Pre 9172, round trips DO NOT work due to rounding behaviour
+        const unixMillises = [
+          // Pre 1972, round trips DO NOT work due to rounding behaviour
           63_072_010_000,
           78_796_811_000,
           94_694_412_000,
@@ -805,17 +805,28 @@ describe('TaiConverter', () => {
           1_435_708_836_000,
           1_483_228_837_000
         ]
-        numbers.forEach(number => {
-          it(String(number), () => {
-            expect(converter.atomicToUnix(converter.unixToAtomic(number))).toBe(number)
+        unixMillises.forEach(unixMillis => {
+          it(String(unixMillis), () => {
+            const unix = Rat.fromMillis(unixMillis)
+            const atomicRange = converter.unixToAtomic(unix)
+            expect(converter.atomicToUnix(atomicRange[0].end))
+              .toEqual(unix)
           })
         })
       })
 
       describe('atomicToUnix and back', () => {
+        it(String(63_072_010_000), () => {
+          const atomic = Rat.fromMillis(63_072_010_000)
+          expect(converter.unixToAtomic(converter.atomicToUnix(atomic)))
+            .toEqual([{
+              start: atomic.minus(new Rat(107_758n, 1_000_000n)),
+              end: atomic
+            }])
+        })
+
         const atomicMillises = [
-          // Pre 9172, round trips DO NOT work due to rounding behaviour
-          63_072_010_000,
+          // Pre 1972, round trips DO NOT work due to rounding behaviour
           78_796_811_000,
           94_694_412_000,
           126_230_413_000,
