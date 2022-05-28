@@ -1,7 +1,5 @@
 /* eslint-env jest */
 
-// TODO: this is all broken
-
 const { TaiConverter, Rat, MODELS, UNIX_START, UNIX_END } = require('./exact.js')
 
 const JAN = 0
@@ -28,10 +26,10 @@ describe('UNIX_END', () => {
 
 describe('TaiConverter', () => {
   describe('OVERRUN', () => {
-    const converter = TaiConverter(MODELS.OVERRUN)
+    const taiConverter = TaiConverter(MODELS.OVERRUN)
 
     describe('unixToAtomic', () => {
-      const unixToAtomic = converter.unixToAtomic
+      const unixToAtomic = taiConverter.unixToAtomic.bind(taiConverter)
 
       it('starts TAI at 1961-01-01 00:00:01.422_818', () => {
         // 00:00:01.422_818 is in range, but rounds down to 00:00:01.422 which is not
@@ -96,7 +94,7 @@ describe('TaiConverter', () => {
     })
 
     describe('atomicToUnix', () => {
-      const atomicToUnix = converter.atomicToUnix
+      const atomicToUnix = taiConverter.atomicToUnix.bind(taiConverter)
 
       it('The NEW earliest instant in TAI', () => {
         expect(atomicToUnix(Rat.fromMillis(Date.UTC(1961, JAN, 1, 0, 0, 1, 422))))
@@ -128,20 +126,20 @@ describe('TaiConverter', () => {
 
     describe('TAI->Unix conversions', () => {
       it('now-ish', () => {
-        expect(converter.atomicToUnix(Rat.fromMillis(Date.UTC(2016, OCT, 27, 20, 5, 50, 678))))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(Date.UTC(2016, OCT, 27, 20, 5, 50, 678))))
           .toEqual(Rat.fromMillis(Date.UTC(2016, OCT, 27, 20, 5, 14, 678)))
       })
     })
 
     describe('Unix->TAI conversions', () => {
       it('The NEW earliest instant in TAI', () => {
-        expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1960, DEC, 31, 23, 59, 59, 999))))
+        expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(1960, DEC, 31, 23, 59, 59, 999))))
           .toEqual([])
       })
 
       it('icky', () => {
         // Fun fact! There is about 105 leap milliseconds here!
-        expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1972, JAN, 1, 0, 0, 0, 0))))
+        expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(1972, JAN, 1, 0, 0, 0, 0))))
           .toEqual([{
             start: Rat.fromMillis(Date.UTC(1972, JAN, 1, 0, 0, 9, 892)).plus(new Rat(242n, 1_000_000n)),
             end: Rat.fromMillis(Date.UTC(1972, JAN, 1, 0, 0, 9, 892)).plus(new Rat(242n, 1_000_000n))
@@ -153,12 +151,12 @@ describe('TaiConverter', () => {
 
       it('typical', () => {
         // A typical leap second from the past, note repetition
-        expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1998, DEC, 31, 23, 59, 59, 999))))
+        expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(1998, DEC, 31, 23, 59, 59, 999))))
           .toEqual([{
             start: Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 30, 999)),
             end: Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 30, 999))
           }])
-        expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 0, 0))))
+        expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 0, 0))))
           .toEqual([{
             start: Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 31, 0)),
             end: Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 31, 0))
@@ -166,7 +164,7 @@ describe('TaiConverter', () => {
             start: Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 32, 0)),
             end: Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 32, 0))
           }])
-        expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 0, 1))))
+        expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 0, 1))))
           .toEqual([{
             start: Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 31, 1)),
             end: Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 31, 1))
@@ -175,7 +173,7 @@ describe('TaiConverter', () => {
             end: Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 32, 1))
           }])
 
-        expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 0, 999))))
+        expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 0, 999))))
           .toEqual([{
             start: Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 31, 999)),
             end: Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 31, 999))
@@ -183,12 +181,12 @@ describe('TaiConverter', () => {
             start: Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 32, 999)),
             end: Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 32, 999))
           }])
-        expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 1, 0))))
+        expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 1, 0))))
           .toEqual([{
             start: Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 33, 0)),
             end: Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 33, 0))
           }])
-        expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 1, 1))))
+        expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 1, 1))))
           .toEqual([{
             start: Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 33, 1)),
             end: Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 33, 1))
@@ -201,17 +199,17 @@ describe('TaiConverter', () => {
 
       // Prior ray
       // TAI picosecond count rounds to -252_460_798_155 which is not in range
-      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1961, DEC, 31, 23, 59, 59, 999))))
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(1961, DEC, 31, 23, 59, 59, 999))))
         .toEqual([{
           start: new Rat(-252_460_798_155_142_000_015n, 1_000_000_000_000n),
           end: new Rat(-252_460_798_155_142_000_015n, 1_000_000_000_000n)
         }])
-      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1962, JAN, 1, 0, 0, 0, 0))))
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(1962, JAN, 1, 0, 0, 0, 0))))
         .toEqual([{
           start: new Rat(-252_460_798_154_142_000_000n, 1_000_000_000_000n),
           end: new Rat(-252_460_798_154_142_000_000n, 1_000_000_000_000n)
         }])
-      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1962, JAN, 1, 0, 0, 0, 1))))
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(1962, JAN, 1, 0, 0, 0, 1))))
         .toEqual([{
           start: new Rat(-252_460_798_153_141_999_987n, 1_000_000_000_000n),
           end: new Rat(-252_460_798_153_141_999_987n, 1_000_000_000_000n)
@@ -221,7 +219,7 @@ describe('TaiConverter', () => {
     it('inserted tenth', () => {
       // Oh look, an inserted leap tenth of a second!
       // The period between 1965-09-01 00:00:00 and 00:00:00.100 UTC happened twice!
-      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1965, SEP, 1, 0, 0, 0, 50))))
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(1965, SEP, 1, 0, 0, 0, 50))))
         .toEqual([{
           start: new Rat(-136_771_195_894_941_999_250n, 1_000_000_000_000n),
           end: new Rat(-136_771_195_894_941_999_250n, 1_000_000_000_000n)
@@ -235,27 +233,27 @@ describe('TaiConverter', () => {
       // Hey, what! A removed leap twentieth of a second???
       // Well, technically, that's 1/20th of a TAI second, which is SLIGHTLY LESS than 1/20th of a UTC second
       // Which means that 23:59:59.950 UTC *does* actually exist...
-      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1961, JUL, 31, 23, 59, 59, 949))))
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(1961, JUL, 31, 23, 59, 59, 949))))
         .toEqual([{
           start: new Rat(-265_679_998_353_430_000_765n, 1_000_000_000_000n),
           end: new Rat(-265_679_998_353_430_000_765n, 1_000_000_000_000n)
         }])
-      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1961, JUL, 31, 23, 59, 59, 950))))
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(1961, JUL, 31, 23, 59, 59, 950))))
         .toEqual([{
           start: new Rat(-265_679_998_352_430_000_750n, 1_000_000_000_000n),
           end: new Rat(-265_679_998_352_430_000_750n, 1_000_000_000_000n)
         }])
-      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1961, JUL, 31, 23, 59, 59, 951))))
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(1961, JUL, 31, 23, 59, 59, 951))))
         .toEqual([])
 
-      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1961, JUL, 31, 23, 59, 59, 999))))
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(1961, JUL, 31, 23, 59, 59, 999))))
         .toEqual([])
-      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1961, AUG, 1, 0, 0, 0, 0))))
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(1961, AUG, 1, 0, 0, 0, 0))))
         .toEqual([{
           start: new Rat(-265_679_998_352_430_000_000n, 1_000_000_000_000n),
           end: new Rat(-265_679_998_352_430_000_000n, 1_000_000_000_000n)
         }])
-      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1961, AUG, 1, 0, 0, 0, 1))))
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(1961, AUG, 1, 0, 0, 0, 1))))
         .toEqual([{
           start: new Rat(-265_679_998_351_429_999_985n, 1_000_000_000_000n),
           end: new Rat(-265_679_998_351_429_999_985n, 1_000_000_000_000n)
@@ -265,130 +263,130 @@ describe('TaiConverter', () => {
     it('boundaries', () => {
       // Let's check out some boundaries where the relationship between TAI and UTC changed
       // 1 January 1962: Perfect continuity (although the drift rate changed)
-      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1961, DEC, 31, 23, 59, 59, 999))).length)
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(1961, DEC, 31, 23, 59, 59, 999))).length)
         .toBe(1)
-      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1962, JAN, 1, 0, 0, 0, 0))).length)
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(1962, JAN, 1, 0, 0, 0, 0))).length)
         .toBe(1)
-      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1962, JAN, 1, 0, 0, 0, 1))).length)
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(1962, JAN, 1, 0, 0, 0, 1))).length)
         .toBe(1)
 
       // 1 January 1964: Perfect continuity (drift rate changes)
-      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1963, DEC, 31, 23, 59, 59, 999))).length)
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(1963, DEC, 31, 23, 59, 59, 999))).length)
         .toBe(1)
-      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1964, JAN, 1, 0, 0, 0, 0))).length)
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(1964, JAN, 1, 0, 0, 0, 0))).length)
         .toBe(1)
-      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1964, JAN, 1, 0, 0, 0, 1))).length)
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(1964, JAN, 1, 0, 0, 0, 1))).length)
         .toBe(1)
 
       // 1 April 1964: 0.1 TAI seconds inserted
-      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1964, MAR, 31, 23, 59, 59, 999))).length)
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(1964, MAR, 31, 23, 59, 59, 999))).length)
         .toBe(1)
-      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1964, APR, 1, 0, 0, 0, 0))).length)
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(1964, APR, 1, 0, 0, 0, 0))).length)
         .toBe(2)
-      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1964, APR, 1, 0, 0, 0, 99))).length)
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(1964, APR, 1, 0, 0, 0, 99))).length)
         .toBe(2)
-      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1964, APR, 1, 0, 0, 0, 100))).length)
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(1964, APR, 1, 0, 0, 0, 100))).length)
         .toBe(1)
 
       // etc. (various occasions when 0.1 TAI seconds were inserted)
-      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1964, SEP, 1, 0, 0, 0, 99))).length)
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(1964, SEP, 1, 0, 0, 0, 99))).length)
         .toBe(2)
-      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1965, JAN, 1, 0, 0, 0, 99))).length)
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(1965, JAN, 1, 0, 0, 0, 99))).length)
         .toBe(2)
-      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1965, MAR, 1, 0, 0, 0, 99))).length)
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(1965, MAR, 1, 0, 0, 0, 99))).length)
         .toBe(2)
-      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1965, JUL, 1, 0, 0, 0, 99))).length)
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(1965, JUL, 1, 0, 0, 0, 99))).length)
         .toBe(2)
-      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1965, SEP, 1, 0, 0, 0, 99))).length)
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(1965, SEP, 1, 0, 0, 0, 99))).length)
         .toBe(2)
 
       // 1 January 1966: Perfect continuity (drift rate changes)
-      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1965, DEC, 31, 23, 59, 59, 999))).length)
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(1965, DEC, 31, 23, 59, 59, 999))).length)
         .toBe(1)
-      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1966, JAN, 1, 0, 0, 0, 0))).length)
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(1966, JAN, 1, 0, 0, 0, 0))).length)
         .toBe(1)
-      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1966, JAN, 1, 0, 0, 0, 1))).length)
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(1966, JAN, 1, 0, 0, 0, 1))).length)
         .toBe(1)
 
       // 1 February 1968: 0.1 TAI seconds removed
-      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1968, JAN, 31, 23, 59, 59, 899))).length)
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(1968, JAN, 31, 23, 59, 59, 899))).length)
         .toBe(1)
-      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1968, JAN, 31, 23, 59, 59, 900))))
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(1968, JAN, 31, 23, 59, 59, 900))))
         .toEqual([{
           start: new Rat(-60_479_993_814_318_003n, 1_000_000_000n),
           end: new Rat(-60_479_993_814_318_003n, 1_000_000_000n)
         }])
 
-      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1968, JAN, 31, 23, 59, 59, 901))).length)
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(1968, JAN, 31, 23, 59, 59, 901))).length)
         .toBe(0)
-      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1968, JAN, 31, 23, 59, 59, 999))).length)
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(1968, JAN, 31, 23, 59, 59, 999))).length)
         .toBe(0)
-      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1968, FEB, 1, 0, 0, 0, 0))).length)
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(1968, FEB, 1, 0, 0, 0, 0))).length)
         .toBe(1)
 
       // 1 January 1972: 0.107_758 TAI seconds inserted
-      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1971, DEC, 31, 23, 59, 59, 999))).length)
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(1971, DEC, 31, 23, 59, 59, 999))).length)
         .toBe(1)
-      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1972, JAN, 1, 0, 0, 0, 0))).length)
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(1972, JAN, 1, 0, 0, 0, 0))).length)
         .toBe(2)
-      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1972, JAN, 1, 0, 0, 0, 107))).length)
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(1972, JAN, 1, 0, 0, 0, 107))).length)
         .toBe(2)
-      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1972, JAN, 1, 0, 0, 0, 108))).length)
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(1972, JAN, 1, 0, 0, 0, 108))).length)
         .toBe(1)
 
       // Removed time
-      expect(converter.unixToAtomic(Rat.fromMillis(-265_680_000_051)).length)
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(-265_680_000_051)).length)
         .toBe(1)
-      expect(converter.unixToAtomic(Rat.fromMillis(-265_680_000_050)).length)
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(-265_680_000_050)).length)
         .toBe(1)
-      expect(converter.unixToAtomic(Rat.fromMillis(-265_680_000_049)).length)
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(-265_680_000_049)).length)
         .toBe(0)
-      expect(converter.unixToAtomic(Rat.fromMillis(-265_680_000_048)).length)
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(-265_680_000_048)).length)
         .toBe(0)
 
-      expect(converter.unixToAtomic(Rat.fromMillis(-252_460_800_000)).length)
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(-252_460_800_000)).length)
         .toBe(1)
-      expect(converter.unixToAtomic(Rat.fromMillis(-194_659_199_900)).length)
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(-194_659_199_900)).length)
         .toBe(1)
-      expect(converter.unixToAtomic(Rat.fromMillis(-189_388_800_000)).length)
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(-189_388_800_000)).length)
         .toBe(1)
-      expect(converter.unixToAtomic(Rat.fromMillis(-181_526_399_900)).length)
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(-181_526_399_900)).length)
         .toBe(1)
-      expect(converter.unixToAtomic(Rat.fromMillis(-168_307_199_900)).length)
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(-168_307_199_900)).length)
         .toBe(1)
-      expect(converter.unixToAtomic(Rat.fromMillis(-157_766_399_900)).length)
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(-157_766_399_900)).length)
         .toBe(1)
-      expect(converter.unixToAtomic(Rat.fromMillis(-152_668_799_900)).length)
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(-152_668_799_900)).length)
         .toBe(1)
-      expect(converter.unixToAtomic(Rat.fromMillis(-142_127_999_900)).length)
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(-142_127_999_900)).length)
         .toBe(1)
-      expect(converter.unixToAtomic(Rat.fromMillis(-136_771_199_900)).length)
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(-136_771_199_900)).length)
         .toBe(1)
-      expect(converter.unixToAtomic(Rat.fromMillis(-126_230_400_000)).length)
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(-126_230_400_000)).length)
         .toBe(1)
 
       // Removed time
-      expect(converter.unixToAtomic(Rat.fromMillis(-60_480_000_101)).length)
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(-60_480_000_101)).length)
         .toBe(1)
-      expect(converter.unixToAtomic(Rat.fromMillis(-60_480_000_100)).length)
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(-60_480_000_100)).length)
         .toBe(1)
-      expect(converter.unixToAtomic(Rat.fromMillis(-60_480_000_099)).length)
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(-60_480_000_099)).length)
         .toBe(0)
-      expect(converter.unixToAtomic(Rat.fromMillis(-60_480_000_098)).length)
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(-60_480_000_098)).length)
         .toBe(0)
 
-      expect(converter.unixToAtomic(Rat.fromMillis(63_072_000_106)).length)
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(63_072_000_106)).length)
         .toBe(2)
-      expect(converter.unixToAtomic(Rat.fromMillis(63_072_000_107)).length)
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(63_072_000_107)).length)
         .toBe(2)
-      expect(converter.unixToAtomic(Rat.fromMillis(63_072_000_108)).length)
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(63_072_000_108)).length)
         .toBe(1)
-      expect(converter.unixToAtomic(Rat.fromMillis(63_072_000_109)).length)
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(63_072_000_109)).length)
         .toBe(1)
     })
 
     describe('TAI raw data conversion unit tests based on magic numbers', () => {
-      it('converter.unixToAtomic', () => {
+      it('taiConverter.unixToAtomic', () => {
         const pairs = [
           [63_072_010_000, 63_072_020_000],
           [78_796_811_000, 78_796_822_000],
@@ -421,7 +419,7 @@ describe('TaiConverter', () => {
         ]
 
         pairs.forEach(([unixMillis, atomicMillis]) => {
-          expect(converter.unixToAtomic(Rat.fromMillis(unixMillis)))
+          expect(taiConverter.unixToAtomic(Rat.fromMillis(unixMillis)))
             .toEqual([{
               start: Rat.fromMillis(atomicMillis),
               end: Rat.fromMillis(atomicMillis)
@@ -429,74 +427,74 @@ describe('TaiConverter', () => {
         })
       })
 
-      it('converter.atomicToUnix', () => {
-        expect(converter.atomicToUnix(Rat.fromMillis(-283_996_800_000)))
+      it('taiConverter.atomicToUnix', () => {
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(-283_996_800_000)))
           .toBe(NaN)
-        expect(converter.atomicToUnix(Rat.fromMillis(63_072_010_000)))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(63_072_010_000)))
           .toEqual(Rat.fromMillis(63_072_000_000))
-        expect(converter.atomicToUnix(Rat.fromMillis(78_796_811_000)))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(78_796_811_000)))
           .toEqual(Rat.fromMillis(78_796_800_000))
-        expect(converter.atomicToUnix(Rat.fromMillis(94_694_412_000)))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(94_694_412_000)))
           .toEqual(Rat.fromMillis(94_694_400_000))
-        expect(converter.atomicToUnix(Rat.fromMillis(126_230_413_000)))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(126_230_413_000)))
           .toEqual(Rat.fromMillis(126_230_400_000))
-        expect(converter.atomicToUnix(Rat.fromMillis(157_766_414_000)))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(157_766_414_000)))
           .toEqual(Rat.fromMillis(157_766_400_000))
-        expect(converter.atomicToUnix(Rat.fromMillis(189_302_415_000)))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(189_302_415_000)))
           .toEqual(Rat.fromMillis(189_302_400_000))
-        expect(converter.atomicToUnix(Rat.fromMillis(220_924_816_000)))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(220_924_816_000)))
           .toEqual(Rat.fromMillis(220_924_800_000))
-        expect(converter.atomicToUnix(Rat.fromMillis(252_460_817_000)))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(252_460_817_000)))
           .toEqual(Rat.fromMillis(252_460_800_000))
-        expect(converter.atomicToUnix(Rat.fromMillis(283_996_818_000)))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(283_996_818_000)))
           .toEqual(Rat.fromMillis(283_996_800_000))
-        expect(converter.atomicToUnix(Rat.fromMillis(315_532_819_000)))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(315_532_819_000)))
           .toEqual(Rat.fromMillis(315_532_800_000))
-        expect(converter.atomicToUnix(Rat.fromMillis(362_793_620_000)))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(362_793_620_000)))
           .toEqual(Rat.fromMillis(362_793_600_000))
-        expect(converter.atomicToUnix(Rat.fromMillis(394_329_621_000)))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(394_329_621_000)))
           .toEqual(Rat.fromMillis(394_329_600_000))
-        expect(converter.atomicToUnix(Rat.fromMillis(425_865_622_000)))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(425_865_622_000)))
           .toEqual(Rat.fromMillis(425_865_600_000))
-        expect(converter.atomicToUnix(Rat.fromMillis(489_024_023_000)))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(489_024_023_000)))
           .toEqual(Rat.fromMillis(489_024_000_000))
-        expect(converter.atomicToUnix(Rat.fromMillis(567_993_624_000)))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(567_993_624_000)))
           .toEqual(Rat.fromMillis(567_993_600_000))
-        expect(converter.atomicToUnix(Rat.fromMillis(631_152_025_000)))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(631_152_025_000)))
           .toEqual(Rat.fromMillis(631_152_000_000))
-        expect(converter.atomicToUnix(Rat.fromMillis(662_688_026_000)))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(662_688_026_000)))
           .toEqual(Rat.fromMillis(662_688_000_000))
-        expect(converter.atomicToUnix(Rat.fromMillis(709_948_827_000)))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(709_948_827_000)))
           .toEqual(Rat.fromMillis(709_948_800_000))
-        expect(converter.atomicToUnix(Rat.fromMillis(741_484_828_000)))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(741_484_828_000)))
           .toEqual(Rat.fromMillis(741_484_800_000))
-        expect(converter.atomicToUnix(Rat.fromMillis(773_020_829_000)))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(773_020_829_000)))
           .toEqual(Rat.fromMillis(773_020_800_000))
-        expect(converter.atomicToUnix(Rat.fromMillis(820_454_430_000)))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(820_454_430_000)))
           .toEqual(Rat.fromMillis(820_454_400_000))
-        expect(converter.atomicToUnix(Rat.fromMillis(867_715_231_000)))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(867_715_231_000)))
           .toEqual(Rat.fromMillis(867_715_200_000))
-        expect(converter.atomicToUnix(Rat.fromMillis(915_148_832_000)))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(915_148_832_000)))
           .toEqual(Rat.fromMillis(915_148_800_000))
-        expect(converter.atomicToUnix(Rat.fromMillis(1_136_073_633_000)))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(1_136_073_633_000)))
           .toEqual(Rat.fromMillis(1_136_073_600_000))
-        expect(converter.atomicToUnix(Rat.fromMillis(1_230_768_034_000)))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(1_230_768_034_000)))
           .toEqual(Rat.fromMillis(1_230_768_000_000))
-        expect(converter.atomicToUnix(Rat.fromMillis(1_341_100_835_000)))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(1_341_100_835_000)))
           .toEqual(Rat.fromMillis(1_341_100_800_000))
-        expect(converter.atomicToUnix(Rat.fromMillis(1_435_708_836_000)))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(1_435_708_836_000)))
           .toEqual(Rat.fromMillis(1_435_708_800_000))
-        expect(converter.atomicToUnix(Rat.fromMillis(1_483_228_837_000)))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(1_483_228_837_000)))
           .toEqual(Rat.fromMillis(1_483_228_800_000))
       })
     })
   })
 
   describe('STALL', () => {
-    const converter = TaiConverter(MODELS.STALL)
+    const taiConverter = TaiConverter(MODELS.STALL)
 
     describe('atomicToUnix', () => {
-      const atomicToUnix = converter.atomicToUnix
+      const atomicToUnix = taiConverter.atomicToUnix.bind(taiConverter)
 
       it('The NEW earliest instant in TAI', () => {
         // Actual start of TAI: 1961-01-01 00:00:01.422_818
@@ -547,17 +545,17 @@ describe('TaiConverter', () => {
     describe('Unix->TAI conversions', () => {
       it('typical', () => {
         // A typical leap second from the past, note stall
-        expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1998, DEC, 31, 23, 59, 59, 999))))
+        expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(1998, DEC, 31, 23, 59, 59, 999))))
           .toEqual([{
             start: Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 30, 999)),
             end: Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 30, 999))
           }])
-        expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 0, 0))))
+        expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 0, 0))))
           .toEqual([{
             start: Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 31, 0)),
             end: Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 32, 0))
           }])
-        expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 0, 1))))
+        expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 0, 1))))
           .toEqual([{
             start: Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 32, 1)),
             end: Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 32, 1))
@@ -565,7 +563,7 @@ describe('TaiConverter', () => {
       })
 
       it('Now-ish', () => {
-        expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(2016, OCT, 27, 20, 5, 14, 678))))
+        expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(2016, OCT, 27, 20, 5, 14, 678))))
           .toEqual([{
             start: Rat.fromMillis(Date.UTC(2016, OCT, 27, 20, 5, 50, 678)),
             end: Rat.fromMillis(Date.UTC(2016, OCT, 27, 20, 5, 50, 678))
@@ -575,12 +573,12 @@ describe('TaiConverter', () => {
 
     it('Crazy pre-1972 nonsense', () => {
       // Exact picosecond ratios
-      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1962, JAN, 1, 0, 0, 0, 0))))
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(1962, JAN, 1, 0, 0, 0, 0))))
         .toEqual([{
           start: new Rat(-252_460_798_154_142_000_000n, 1_000_000_000_000n),
           end: new Rat(-252_460_798_154_142_000_000n, 1_000_000_000_000n)
         }])
-      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1962, JAN, 1, 0, 0, 0, 1))))
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(1962, JAN, 1, 0, 0, 0, 1))))
         .toEqual([{
           start: new Rat(-252_460_798_153_141_999_987n, 1_000_000_000_000n),
           end: new Rat(-252_460_798_153_141_999_987n, 1_000_000_000_000n)
@@ -588,7 +586,7 @@ describe('TaiConverter', () => {
     })
 
     describe('TAI raw data conversion unit tests based on magic numbers', () => {
-      it('converter.unixToAtomic', () => {
+      it('taiConverter.unixToAtomic', () => {
         const pairs = [
           [63_072_010_000, 63_072_020_000],
           [78_796_811_000, 78_796_822_000],
@@ -621,7 +619,7 @@ describe('TaiConverter', () => {
         ]
 
         pairs.forEach(([unixMillis, atomicMillis]) => {
-          expect(converter.unixToAtomic(Rat.fromMillis(unixMillis)))
+          expect(taiConverter.unixToAtomic(Rat.fromMillis(unixMillis)))
             .toEqual([{
               start: Rat.fromMillis(atomicMillis),
               end: Rat.fromMillis(atomicMillis)
@@ -629,64 +627,64 @@ describe('TaiConverter', () => {
         })
       })
 
-      it('converter.atomicToUnix', () => {
-        expect(converter.atomicToUnix(Rat.fromMillis(-283_996_800_000)))
+      it('taiConverter.atomicToUnix', () => {
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(-283_996_800_000)))
           .toBe(NaN)
-        expect(converter.atomicToUnix(Rat.fromMillis(63_072_010_000)))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(63_072_010_000)))
           .toEqual(Rat.fromMillis(63_072_000_000))
-        expect(converter.atomicToUnix(Rat.fromMillis(78_796_811_000)))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(78_796_811_000)))
           .toEqual(Rat.fromMillis(78_796_800_000))
-        expect(converter.atomicToUnix(Rat.fromMillis(94_694_412_000)))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(94_694_412_000)))
           .toEqual(Rat.fromMillis(94_694_400_000))
-        expect(converter.atomicToUnix(Rat.fromMillis(126_230_413_000)))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(126_230_413_000)))
           .toEqual(Rat.fromMillis(126_230_400_000))
-        expect(converter.atomicToUnix(Rat.fromMillis(157_766_414_000)))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(157_766_414_000)))
           .toEqual(Rat.fromMillis(157_766_400_000))
-        expect(converter.atomicToUnix(Rat.fromMillis(189_302_415_000)))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(189_302_415_000)))
           .toEqual(Rat.fromMillis(189_302_400_000))
-        expect(converter.atomicToUnix(Rat.fromMillis(220_924_816_000)))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(220_924_816_000)))
           .toEqual(Rat.fromMillis(220_924_800_000))
-        expect(converter.atomicToUnix(Rat.fromMillis(252_460_817_000)))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(252_460_817_000)))
           .toEqual(Rat.fromMillis(252_460_800_000))
-        expect(converter.atomicToUnix(Rat.fromMillis(283_996_818_000)))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(283_996_818_000)))
           .toEqual(Rat.fromMillis(283_996_800_000))
-        expect(converter.atomicToUnix(Rat.fromMillis(315_532_819_000)))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(315_532_819_000)))
           .toEqual(Rat.fromMillis(315_532_800_000))
-        expect(converter.atomicToUnix(Rat.fromMillis(362_793_620_000)))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(362_793_620_000)))
           .toEqual(Rat.fromMillis(362_793_600_000))
-        expect(converter.atomicToUnix(Rat.fromMillis(394_329_621_000)))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(394_329_621_000)))
           .toEqual(Rat.fromMillis(394_329_600_000))
-        expect(converter.atomicToUnix(Rat.fromMillis(425_865_622_000)))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(425_865_622_000)))
           .toEqual(Rat.fromMillis(425_865_600_000))
-        expect(converter.atomicToUnix(Rat.fromMillis(489_024_023_000)))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(489_024_023_000)))
           .toEqual(Rat.fromMillis(489_024_000_000))
-        expect(converter.atomicToUnix(Rat.fromMillis(567_993_624_000)))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(567_993_624_000)))
           .toEqual(Rat.fromMillis(567_993_600_000))
-        expect(converter.atomicToUnix(Rat.fromMillis(631_152_025_000)))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(631_152_025_000)))
           .toEqual(Rat.fromMillis(631_152_000_000))
-        expect(converter.atomicToUnix(Rat.fromMillis(662_688_026_000)))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(662_688_026_000)))
           .toEqual(Rat.fromMillis(662_688_000_000))
-        expect(converter.atomicToUnix(Rat.fromMillis(709_948_827_000)))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(709_948_827_000)))
           .toEqual(Rat.fromMillis(709_948_800_000))
-        expect(converter.atomicToUnix(Rat.fromMillis(741_484_828_000)))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(741_484_828_000)))
           .toEqual(Rat.fromMillis(741_484_800_000))
-        expect(converter.atomicToUnix(Rat.fromMillis(773_020_829_000)))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(773_020_829_000)))
           .toEqual(Rat.fromMillis(773_020_800_000))
-        expect(converter.atomicToUnix(Rat.fromMillis(820_454_430_000)))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(820_454_430_000)))
           .toEqual(Rat.fromMillis(820_454_400_000))
-        expect(converter.atomicToUnix(Rat.fromMillis(867_715_231_000)))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(867_715_231_000)))
           .toEqual(Rat.fromMillis(867_715_200_000))
-        expect(converter.atomicToUnix(Rat.fromMillis(915_148_832_000)))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(915_148_832_000)))
           .toEqual(Rat.fromMillis(915_148_800_000))
-        expect(converter.atomicToUnix(Rat.fromMillis(1_136_073_633_000)))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(1_136_073_633_000)))
           .toEqual(Rat.fromMillis(1_136_073_600_000))
-        expect(converter.atomicToUnix(Rat.fromMillis(1_230_768_034_000)))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(1_230_768_034_000)))
           .toEqual(Rat.fromMillis(1_230_768_000_000))
-        expect(converter.atomicToUnix(Rat.fromMillis(1_341_100_835_000)))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(1_341_100_835_000)))
           .toEqual(Rat.fromMillis(1_341_100_800_000))
-        expect(converter.atomicToUnix(Rat.fromMillis(1_435_708_836_000)))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(1_435_708_836_000)))
           .toEqual(Rat.fromMillis(1_435_708_800_000))
-        expect(converter.atomicToUnix(Rat.fromMillis(1_483_228_837_000)))
+        expect(taiConverter.atomicToUnix(Rat.fromMillis(1_483_228_837_000)))
           .toEqual(Rat.fromMillis(1_483_228_800_000))
       })
     })
@@ -727,8 +725,8 @@ describe('TaiConverter', () => {
         unixMillises.forEach(unixMillis => {
           it(String(unixMillis), () => {
             const unix = Rat.fromMillis(unixMillis)
-            const atomicRange = converter.unixToAtomic(unix)
-            expect(converter.atomicToUnix(atomicRange[0].end))
+            const atomicRange = taiConverter.unixToAtomic(unix)
+            expect(taiConverter.atomicToUnix(atomicRange[0].end))
               .toEqual(unix)
           })
         })
@@ -737,7 +735,7 @@ describe('TaiConverter', () => {
       describe('atomicToUnix and back', () => {
         it(String(63_072_010_000), () => {
           const atomic = Rat.fromMillis(63_072_010_000)
-          expect(converter.unixToAtomic(converter.atomicToUnix(atomic)))
+          expect(taiConverter.unixToAtomic(taiConverter.atomicToUnix(atomic)))
             .toEqual([{
               start: atomic.minus(new Rat(107_758n, 1_000_000n)),
               end: atomic
@@ -777,7 +775,7 @@ describe('TaiConverter', () => {
         atomicMillises.forEach(atomicMillis => {
           it(String(atomicMillis), () => {
             const atomic = Rat.fromMillis(atomicMillis)
-            expect(converter.unixToAtomic(converter.atomicToUnix(atomic)))
+            expect(taiConverter.unixToAtomic(taiConverter.atomicToUnix(atomic)))
               .toEqual([{
                 start: atomic.minus(Rat.fromMillis(1_000)), // start of stall
                 end: atomic
@@ -789,57 +787,57 @@ describe('TaiConverter', () => {
   })
 
   describe('smearing', () => {
-    const converter = TaiConverter(MODELS.SMEAR)
+    const taiConverter = TaiConverter(MODELS.SMEAR)
     it('smears', () => {
-      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(2016, DEC, 31, 0, 0, 0, 0))))
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(2016, DEC, 31, 0, 0, 0, 0))))
         .toEqual([{
           start: Rat.fromMillis(Date.UTC(2016, DEC, 31, 0, 0, 36, 0)),
           end: Rat.fromMillis(Date.UTC(2016, DEC, 31, 0, 0, 36, 0))
         }])
 
       // SMEAR BEGINS
-      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(2016, DEC, 31, 11, 59, 59, 999))))
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(2016, DEC, 31, 11, 59, 59, 999))))
         .toEqual([{
           start: Rat.fromMillis(Date.UTC(2016, DEC, 31, 12, 0, 35, 999)),
           end: Rat.fromMillis(Date.UTC(2016, DEC, 31, 12, 0, 35, 999))
         }])
-      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(2016, DEC, 31, 12, 0, 0, 0))))
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(2016, DEC, 31, 12, 0, 0, 0))))
         .toEqual([{
           start: Rat.fromMillis(Date.UTC(2016, DEC, 31, 12, 0, 36, 0)),
           end: Rat.fromMillis(Date.UTC(2016, DEC, 31, 12, 0, 36, 0))
         }])
-      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(2016, DEC, 31, 12, 0, 0, 1))))
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(2016, DEC, 31, 12, 0, 0, 1))))
         .toEqual([{
           start: Rat.fromMillis(Date.UTC(2016, DEC, 31, 12, 0, 36, 1)).plus(new Rat(1n, 86_400_000n)),
           end: Rat.fromMillis(Date.UTC(2016, DEC, 31, 12, 0, 36, 1)).plus(new Rat(1n, 86_400_000n))
         }])
 
       // After 86_400 Unix milliseconds, exactly 86_401 TAI milliseconds have passed
-      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(2016, DEC, 31, 12, 1, 26, 400))))
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(2016, DEC, 31, 12, 1, 26, 400))))
         .toEqual([{
           start: Rat.fromMillis(Date.UTC(2016, DEC, 31, 12, 2, 2, 401)),
           end: Rat.fromMillis(Date.UTC(2016, DEC, 31, 12, 2, 2, 401))
         }])
 
       // After 12 Unix hours, 12 TAI hours and 500 milliseconds
-      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(2017, JAN, 1, 0, 0, 0, 0))))
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(2017, JAN, 1, 0, 0, 0, 0))))
         .toEqual([{
           start: Rat.fromMillis(Date.UTC(2017, JAN, 1, 0, 0, 36, 500)),
           end: Rat.fromMillis(Date.UTC(2017, JAN, 1, 0, 0, 36, 500))
         }])
 
       // SMEAR ENDS. After 24 Unix hours, 24 TAI hours and 1 second
-      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(2017, JAN, 1, 11, 59, 59, 999))))
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(2017, JAN, 1, 11, 59, 59, 999))))
         .toEqual([{
           start: Rat.fromMillis(Date.UTC(2017, JAN, 1, 12, 0, 35, 999)).plus(new Rat(86_399_999n, 86_400_000n)),
           end: Rat.fromMillis(Date.UTC(2017, JAN, 1, 12, 0, 35, 999)).plus(new Rat(86_399_999n, 86_400_000n))
         }])
-      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(2017, JAN, 1, 12, 0, 0, 0))))
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(2017, JAN, 1, 12, 0, 0, 0))))
         .toEqual([{
           start: Rat.fromMillis(Date.UTC(2017, JAN, 1, 12, 0, 37, 0)),
           end: Rat.fromMillis(Date.UTC(2017, JAN, 1, 12, 0, 37, 0))
         }])
-      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(2017, JAN, 1, 12, 0, 0, 1))))
+      expect(taiConverter.unixToAtomic(Rat.fromMillis(Date.UTC(2017, JAN, 1, 12, 0, 0, 1))))
         .toEqual([{
           start: Rat.fromMillis(Date.UTC(2017, JAN, 1, 12, 0, 37, 1)),
           end: Rat.fromMillis(Date.UTC(2017, JAN, 1, 12, 0, 37, 1))
