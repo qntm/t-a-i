@@ -1,18 +1,26 @@
-const { Rat } = require('./rat')
+const { Rat } = require('./rat.js')
+const { Range } = require('./range.js')
 
 // A segment is a closed-open linear relationship between TAI and Unix time.
 // It should be able to handle arbitrary ratios between the two.
 // For precision, we deal with ratios of BigInts.
 // Segment validity ranges are inclusive-exclusive.
 class Segment {
-  constructor (start, end, unixPerAtomic) {
-    this.slope = { unixPerAtomic }
+  constructor (start, end = { atomic: Infinity }, slope = { unixPerAtomic: new Rat(1n) }) {
+    this.slope = {
+      unixPerAtomic: slope.unixPerAtomic
+    }
 
     // Start is inclusive.
-    this.start = start
+    this.start = {
+      atomic: start.atomic,
+      unix: start.unix
+    }
 
     // End is exclusive.
-    this.end = { ...end }
+    this.end = {
+      atomic: end.atomic
+    }
     if (end.atomic === Infinity) {
       this.end.unix = Infinity
     } else {
@@ -33,11 +41,7 @@ class Segment {
         throw Error('This Unix time never happened')
       }
 
-      return {
-        start: this.start.atomic,
-        end: this.end.atomic,
-        open: true
-      }
+      return new Range(this.start.atomic, this.end.atomic, true)
     }
 
     const atomic = unix
@@ -45,10 +49,7 @@ class Segment {
       .divide(this.slope.unixPerAtomic)
       .plus(this.start.atomic)
 
-    return {
-      start: atomic,
-      end: atomic
-    }
+    return new Range(atomic)
   }
 
   atomicToUnix (atomic) {

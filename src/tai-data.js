@@ -63,18 +63,14 @@ const taiData = [
   [Date.UTC(2017, JAN, 1), 37]
 ]
 
-const UNIX_START_MILLIS = taiData[0][0]
-const UNIX_START = Rat.fromMillis(UNIX_START_MILLIS)
+const UNIX_START = Rat.fromMillis(taiData[0][0])
 
 // Because we don't know whether or not a leap second will be inserted or removed at this time,
 // the relationship between Unix time and TAI is unpredictable at or beyond this point.
 // (This is the start of a possible smear.)
 // Updating this value? Don't forget to update the README too!
-const UNIX_END_MILLIS = Date.UTC(2022, DEC, 31, 12, 0, 0, 0)
-const UNIX_END = Rat.fromMillis(UNIX_END_MILLIS)
+const UNIX_END = Rat.fromMillis(Date.UTC(2022, DEC, 31, 12, 0, 0, 0))
 
 module.exports.taiData = taiData
-module.exports.UNIX_START_MILLIS = UNIX_START_MILLIS
 module.exports.UNIX_START = UNIX_START
-module.exports.UNIX_END_MILLIS = UNIX_END_MILLIS
 module.exports.UNIX_END = UNIX_END

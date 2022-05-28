@@ -24,8 +24,6 @@ const div = (a, b) => {
   return q - 1n
 }
 
-// Return value always has the same sign as `b`, so we can divide both `a` and `b`
-// by the return value to always end up with a positive `b`
 const gcd = (a, b) => {
   while (b !== 0n) {
     [a, b] = [b, a % b]
