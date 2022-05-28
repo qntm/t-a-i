@@ -613,37 +613,20 @@ describe('TaiConverter', () => {
       })
 
       it('typical', () => {
-        // A typical leap second from the past, note non-canonical times
-        expect(atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 29, 750)))
-          .toBe(Date.UTC(1998, DEC, 31, 23, 59, 58, 750))
-        expect(atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 30, 0)))
-          .toBe(Date.UTC(1998, DEC, 31, 23, 59, 59, 0))
-        expect(atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 30, 250)))
-          .toBe(Date.UTC(1998, DEC, 31, 23, 59, 59, 250))
-        expect(atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 30, 500)))
-          .toBe(Date.UTC(1998, DEC, 31, 23, 59, 59, 500))
-        expect(atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 30, 750)))
-          .toBe(Date.UTC(1998, DEC, 31, 23, 59, 59, 750))
-        expect(atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 31, 0)))
-          .toBe(Date.UTC(1999, JAN, 1, 0, 0, 0, 0)) // stalled
-        expect(atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 31, 250)))
-          .toBe(Date.UTC(1999, JAN, 1, 0, 0, 0, 0)) // stalled
-        expect(atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 31, 500)))
-          .toBe(Date.UTC(1999, JAN, 1, 0, 0, 0, 0)) // stalled
-        expect(atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 31, 750)))
-          .toBe(Date.UTC(1999, JAN, 1, 0, 0, 0, 0)) // stalled
-        expect(atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 32, 0)))
-          .toBe(Date.UTC(1999, JAN, 1, 0, 0, 0, 0)) // stalled
-        expect(atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 32, 250)))
-          .toBe(Date.UTC(1999, JAN, 1, 0, 0, 0, 250))
-        expect(atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 32, 500)))
-          .toBe(Date.UTC(1999, JAN, 1, 0, 0, 0, 500))
-        expect(atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 32, 750)))
-          .toBe(Date.UTC(1999, JAN, 1, 0, 0, 0, 750))
-        expect(atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 33, 0)))
-          .toBe(Date.UTC(1999, JAN, 1, 0, 0, 1, 0))
-        expect(atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 33, 250)))
-          .toBe(Date.UTC(1999, JAN, 1, 0, 0, 1, 250))
+        // A typical leap second from the past, note stall
+        expect(atomicToUnix(Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 30, 999))))
+          .toEqual(Rat.fromMillis(Date.UTC(1998, DEC, 31, 23, 59, 59, 999)))
+        expect(atomicToUnix(Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 31, 0))))
+          .toEqual(Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 0, 0)))
+        expect(atomicToUnix(Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 31, 1))))
+          .toEqual(Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 0, 0)))
+
+        expect(atomicToUnix(Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 31, 999))))
+          .toEqual(Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 0, 0)))
+        expect(atomicToUnix(Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 32, 0))))
+          .toEqual(Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 0, 0)))
+        expect(atomicToUnix(Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 32, 1))))
+          .toEqual(Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 0, 1)))
       })
     })
 
