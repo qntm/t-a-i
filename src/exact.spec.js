@@ -649,62 +649,45 @@ describe('TaiConverter', () => {
 
     describe('Unix->TAI conversions', () => {
       it('typical', () => {
-        // A typical leap second from the past, note repetition
-        expect(converter.unixToAtomic(Date.UTC(1998, DEC, 31, 23, 59, 58, 750)))
-          .toBe(Date.UTC(1999, JAN, 1, 0, 0, 29, 750))
-        expect(converter.unixToAtomic(Date.UTC(1998, DEC, 31, 23, 59, 59, 0)))
-          .toBe(Date.UTC(1999, JAN, 1, 0, 0, 30, 0))
-        expect(converter.unixToAtomic(Date.UTC(1998, DEC, 31, 23, 59, 59, 250)))
-          .toBe(Date.UTC(1999, JAN, 1, 0, 0, 30, 250))
-        expect(converter.unixToAtomic(Date.UTC(1998, DEC, 31, 23, 59, 59, 500)))
-          .toBe(Date.UTC(1999, JAN, 1, 0, 0, 30, 500))
-        expect(converter.unixToAtomic(Date.UTC(1998, DEC, 31, 23, 59, 59, 750)))
-          .toBe(Date.UTC(1999, JAN, 1, 0, 0, 30, 750))
-        expect(converter.unixToAtomic(Date.UTC(1999, JAN, 1, 0, 0, 0, 0)))
-          .toBe(Date.UTC(1999, JAN, 1, 0, 0, 32, 0))
-        expect(converter.unixToAtomic(Date.UTC(1999, JAN, 1, 0, 0, 0, 250)))
-          .toBe(Date.UTC(1999, JAN, 1, 0, 0, 32, 250))
-        expect(converter.unixToAtomic(Date.UTC(1999, JAN, 1, 0, 0, 0, 500)))
-          .toBe(Date.UTC(1999, JAN, 1, 0, 0, 32, 500))
-        expect(converter.unixToAtomic(Date.UTC(1999, JAN, 1, 0, 0, 0, 750)))
-          .toBe(Date.UTC(1999, JAN, 1, 0, 0, 32, 750))
-        expect(converter.unixToAtomic(Date.UTC(1999, JAN, 1, 0, 0, 1, 0)))
-          .toBe(Date.UTC(1999, JAN, 1, 0, 0, 33, 0))
-        expect(converter.unixToAtomic(Date.UTC(1999, JAN, 1, 0, 0, 1, 250)))
-          .toBe(Date.UTC(1999, JAN, 1, 0, 0, 33, 250))
+        // A typical leap second from the past, note stall
+        expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1998, DEC, 31, 23, 59, 59, 999))))
+          .toEqual([{
+            start: Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 30, 999)),
+            end: Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 30, 999))
+          }])
+        expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 0, 0))))
+          .toEqual([{
+            start: Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 31, 0)),
+            end: Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 32, 0))
+          }])
+        expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 0, 1))))
+          .toEqual([{
+            start: Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 32, 1)),
+            end: Rat.fromMillis(Date.UTC(1999, JAN, 1, 0, 0, 32, 1))
+          }])
       })
 
       it('Now-ish', () => {
-        expect(converter.unixToAtomic(Date.UTC(2016, OCT, 27, 20, 5, 14, 678)))
-          .toBe(Date.UTC(2016, OCT, 27, 20, 5, 50, 678))
+        expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(2016, OCT, 27, 20, 5, 14, 678))))
+          .toEqual([{
+            start: Rat.fromMillis(Date.UTC(2016, OCT, 27, 20, 5, 50, 678)),
+            end: Rat.fromMillis(Date.UTC(2016, OCT, 27, 20, 5, 50, 678))
+          }])
       })
     })
 
-    it('Demo', () => {
-      expect(converter.unixToAtomic(915_148_799_000))
-        .toBe(915_148_830_000)
-      expect(converter.unixToAtomic(Date.UTC(1998, DEC, 31, 23, 59, 59)))
-        .toBe(Date.UTC(1999, JAN, 1, 0, 0, 30))
-      expect(converter.atomicToUnix(915_148_830_000))
-        .toBe(915_148_799_000)
-      expect(converter.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 30)))
-        .toBe(Date.UTC(1998, DEC, 31, 23, 59, 59))
-
-      expect(converter.atomicToUnix(915_148_831_000)).toBe(915_148_800_000)
-      expect(converter.atomicToUnix(915_148_831_001)).toBe(915_148_800_000)
-      expect(converter.atomicToUnix(915_148_832_000)).toBe(915_148_800_000)
-      expect(converter.atomicToUnix(915_148_832_001)).toBe(915_148_800_001)
-    })
-
     it('Crazy pre-1972 nonsense', () => {
-      // TAI picosecond count rounds to -252_460_798_155 which is not on the ray
-      expect(converter.unixToAtomic(Date.UTC(1962, JAN, 1, 0, 0, 0, 0)))
-        .toBe(-252_460_798_155)
-
-      expect(converter.unixToAtomic(Date.UTC(1962, JAN, 1, 0, 0, 0, 1)))
-        .toBe(-252_460_798_154)
-      expect(converter.unixToAtomic(Date.UTC(1962, JAN, 1, 0, 0, 0, 1)))
-        .toBe(Date.UTC(1962, JAN, 1, 0, 0, 1, 846)) // Same
+      // Exact picosecond ratios
+      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1962, JAN, 1, 0, 0, 0, 0))))
+        .toEqual([{
+          start: new Rat(-252_460_798_154_142_000_000n, 1_000_000_000_000n),
+          end: new Rat(-252_460_798_154_142_000_000n, 1_000_000_000_000n)
+        }])
+      expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1962, JAN, 1, 0, 0, 0, 1))))
+        .toEqual([{
+          start: new Rat(-252_460_798_153_141_999_987n, 1_000_000_000_000n),
+          end: new Rat(-252_460_798_153_141_999_987n, 1_000_000_000_000n)
+        }])
     })
 
     describe('TAI raw data conversion unit tests based on magic numbers', () => {
