@@ -6,7 +6,7 @@ const { Range } = require('./range.js')
 // For precision, we deal with ratios of BigInts.
 // Segment validity ranges are inclusive-exclusive.
 class Segment {
-  constructor (start, end, slope) {
+  constructor (start, end = { atomic: Infinity }, slope = { unixPerAtomic: new Rat(1n) }) {
     this.slope = {
       unixPerAtomic: slope.unixPerAtomic
     }

@@ -10,24 +10,20 @@ describe('Segment', () => {
   it('disallows rays which run backwards', () => {
     expect(() => new Segment(
       { atomic: Rat.fromMillis(0), unix: Rat.fromMillis(0) },
-      { atomic: new Rat(-1n, 1_000_000_000_000n) },
-      { unixPerAtomic: new Rat(1n) }
+      { atomic: new Rat(-1n, 1_000_000_000_000n) }
     )).toThrowError('Segment length must be positive')
   })
 
   it('disallows zero-length rays which run backwards', () => {
     expect(() => new Segment(
       { atomic: Rat.fromMillis(0), unix: Rat.fromMillis(0) },
-      { atomic: Rat.fromMillis(0) },
-      { unixPerAtomic: new Rat(1n) }
+      { atomic: Rat.fromMillis(0) }
     )).toThrowError('Segment length must be positive')
   })
 
   describe('basic infinite ray', () => {
     const segment = new Segment(
-      { atomic: Rat.fromMillis(0), unix: Rat.fromMillis(0) },
-      { atomic: Infinity },
-      { unixPerAtomic: new Rat(1n) }
+      { atomic: Rat.fromMillis(0), unix: Rat.fromMillis(0) }
     )
 
     it('zero point', () => {
