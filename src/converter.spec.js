@@ -2,7 +2,7 @@
 
 const { MODELS } = require('./munge.js')
 const { Converter } = require('./converter.js')
-const { ExactConverter } = require('./exact-covnerter.js')
+const { ExactConverter } = require('./exact-converter.js')
 
 const JAN = 0
 const OCT = 9
