@@ -45,7 +45,7 @@ describe('munge', () => {
       ], MODELS.OVERRUN)).toEqual([new Segment(
         { atomic: Rat.fromMillis(0), unix: Rat.fromMillis(0) },
         { atomic: Infinity },
-        new Rat(1n)
+        { unixPerAtomic: new Rat(1n) }
       )])
     })
 
@@ -55,7 +55,7 @@ describe('munge', () => {
       ], MODELS.OVERRUN)).toEqual([new Segment(
         { atomic: Rat.fromMillis(-3_993), unix: Rat.fromMillis(7) },
         { atomic: Infinity },
-        new Rat(1n)
+        { unixPerAtomic: new Rat(1n) }
       )])
     })
 
@@ -71,15 +71,15 @@ describe('munge', () => {
       ], MODELS.OVERRUN)).toEqual([new Segment(
         { atomic: new Rat(-5n), unix: new Rat(-1n) },
         { atomic: new Rat(6n) },
-        new Rat(1n)
+        { unixPerAtomic: new Rat(1n) }
       ), new Segment(
         { atomic: new Rat(6n), unix: new Rat(9n) },
         { atomic: new Rat(9n) },
-        new Rat(1n)
+        { unixPerAtomic: new Rat(1n) }
       ), new Segment(
         { atomic: new Rat(9n), unix: new Rat(13n) },
         { atomic: Infinity },
-        new Rat(1n)
+        { unixPerAtomic: new Rat(1n) }
       )])
     })
 
@@ -90,7 +90,7 @@ describe('munge', () => {
       ], MODELS.OVERRUN)).toEqual([new Segment(
         { atomic: Rat.fromMillis(0), unix: Rat.fromMillis(0) },
         { atomic: Infinity },
-        new Rat(10_000n, 10_001n)
+        { unixPerAtomic: new Rat(10_000n, 10_001n) }
       )])
 
       // UTC and TAI run at identical rates
@@ -99,7 +99,7 @@ describe('munge', () => {
       ], MODELS.OVERRUN)).toEqual([new Segment(
         { atomic: Rat.fromMillis(0), unix: Rat.fromMillis(0) },
         { atomic: Infinity },
-        new Rat(1n)
+        { unixPerAtomic: new Rat(1n) }
       )])
 
       // TAI runs way slower than UTC
@@ -108,7 +108,7 @@ describe('munge', () => {
       ], MODELS.OVERRUN)).toEqual([new Segment(
         { atomic: Rat.fromMillis(0), unix: Rat.fromMillis(0) },
         { atomic: Infinity },
-        new Rat(10_000n, 9_999n)
+        { unixPerAtomic: new Rat(10_000n, 9_999n) }
       )])
 
       // TAI moves at one ten-thousandth the rate of UTC!
@@ -118,7 +118,7 @@ describe('munge', () => {
       ], MODELS.OVERRUN)).toEqual([new Segment(
         { atomic: Rat.fromMillis(0), unix: Rat.fromMillis(0) },
         { atomic: Infinity },
-        new Rat(10_000n)
+        { unixPerAtomic: new Rat(10_000n) }
       )])
 
       // UTC stops
@@ -131,7 +131,7 @@ describe('munge', () => {
       ], MODELS.OVERRUN)).toEqual([new Segment(
         { atomic: Rat.fromMillis(0), unix: Rat.fromMillis(0) },
         { atomic: Infinity },
-        new Rat(-10_000n)
+        { unixPerAtomic: new Rat(-10_000n) }
       )])
     })
 
@@ -141,7 +141,7 @@ describe('munge', () => {
       ], MODELS.OVERRUN)).toEqual([new Segment(
         { atomic: new Rat(-283_996_798_577_182n, 1_000_000n), unix: new Rat(-283_996_800n) },
         { atomic: Infinity },
-        new Rat(86_400_000_000_000n, 86_400_000_000_000n + 1_296_000n)
+        { unixPerAtomic: new Rat(86_400_000_000_000n, 86_400_000_000_000n + 1_296_000n) }
       )])
     })
 
@@ -267,7 +267,7 @@ describe('munge', () => {
         ], MODELS.OVERRUN)).toEqual([new Segment(
           { atomic: new Rat(900n, 1_000_000n), unix: Rat.fromMillis(1) }, // ray start intentionally doesn't include TAI epoch
           { atomic: Infinity },
-          new Rat(1n)
+          { unixPerAtomic: new Rat(1n) }
         )])
       })
 
@@ -279,11 +279,11 @@ describe('munge', () => {
         ], MODELS.OVERRUN)).toEqual([new Segment(
           { atomic: new Rat(-900n, 1_000_000n), unix: Rat.fromMillis(-1) },
           { atomic: new Rat(-100n, 1_000_000n) },
-          new Rat(1n)
+          { unixPerAtomic: new Rat(1n) }
         ), new Segment(
           { atomic: new Rat(-100n, 1_000_000n), unix: Rat.fromMillis(1) },
           { atomic: Infinity },
-          new Rat(1n)
+          { unixPerAtomic: new Rat(1n) }
         )])
       })
     })
@@ -296,7 +296,7 @@ describe('munge', () => {
       ], MODELS.BREAK)).toEqual([new Segment(
         { atomic: Rat.fromMillis(0), unix: Rat.fromMillis(0) },
         { atomic: Infinity },
-        new Rat(1n)
+        { unixPerAtomic: new Rat(1n) }
       )])
     })
 
@@ -312,16 +312,16 @@ describe('munge', () => {
       ], MODELS.BREAK)).toEqual([new Segment(
         { atomic: new Rat(-5n), unix: new Rat(-1n) },
         { atomic: new Rat(5n) },
-        new Rat(1n)
+        { unixPerAtomic: new Rat(1n) }
       ), new Segment(
         // this segment starts a full TAI second after the previous segment ended
         { atomic: new Rat(6n), unix: new Rat(9n) },
         { atomic: new Rat(9n) },
-        new Rat(1n)
+        { unixPerAtomic: new Rat(1n) }
       ), new Segment(
         { atomic: new Rat(9n), unix: new Rat(13n) },
         { atomic: Infinity },
-        new Rat(1n)
+        { unixPerAtomic: new Rat(1n) }
       )])
     })
   })
@@ -340,7 +340,7 @@ describe('munge', () => {
       ], MODELS.STALL)).toEqual([new Segment(
         { atomic: Rat.fromMillis(0), unix: Rat.fromMillis(0) },
         { atomic: Infinity },
-        new Rat(1n)
+        { unixPerAtomic: new Rat(1n) }
       )])
     })
 
@@ -350,7 +350,7 @@ describe('munge', () => {
       ], MODELS.STALL)).toEqual([new Segment(
         { atomic: Rat.fromMillis(-3_993), unix: Rat.fromMillis(7) },
         { atomic: Infinity },
-        new Rat(1n)
+        { unixPerAtomic: new Rat(1n) }
       )])
     })
 
@@ -366,20 +366,20 @@ describe('munge', () => {
       ], MODELS.STALL)).toEqual([new Segment(
         { atomic: new Rat(-5n), unix: new Rat(-1n) },
         { atomic: new Rat(5n) },
-        new Rat(1n)
+        { unixPerAtomic: new Rat(1n) }
       ), new Segment(
         // Stall segment inserted here
         { atomic: new Rat(5n), unix: new Rat(9n) },
         { atomic: new Rat(6n) },
-        new Rat(0n)
+        { unixPerAtomic: new Rat(0n) }
       ), new Segment(
         { atomic: new Rat(6n), unix: new Rat(9n) },
         { atomic: new Rat(9n) },
-        new Rat(1n)
+        { unixPerAtomic: new Rat(1n) }
       ), new Segment(
         { atomic: new Rat(9n), unix: new Rat(13n) },
         { atomic: Infinity },
-        new Rat(1n)
+        { unixPerAtomic: new Rat(1n) }
       )])
     })
 
@@ -390,7 +390,7 @@ describe('munge', () => {
       ], MODELS.STALL)).toEqual([new Segment(
         { atomic: Rat.fromMillis(0), unix: Rat.fromMillis(0) },
         { atomic: Infinity },
-        new Rat(10_000n, 10_001n)
+        { unixPerAtomic: new Rat(10_000n, 10_001n) }
       )])
 
       // UTC and TAI run at identical rates
@@ -399,7 +399,7 @@ describe('munge', () => {
       ], MODELS.STALL)).toEqual([new Segment(
         { atomic: Rat.fromMillis(0), unix: Rat.fromMillis(0) },
         { atomic: Infinity },
-        new Rat(1n)
+        { unixPerAtomic: new Rat(1n) }
       )])
 
       // TAI runs way slower than UTC
@@ -408,7 +408,7 @@ describe('munge', () => {
       ], MODELS.STALL)).toEqual([new Segment(
         { atomic: Rat.fromMillis(0), unix: Rat.fromMillis(0) },
         { atomic: Infinity },
-        new Rat(10_000n, 9_999n)
+        { unixPerAtomic: new Rat(10_000n, 9_999n) }
       )])
 
       // TAI moves at one ten-thousandth the rate of UTC!
@@ -418,7 +418,7 @@ describe('munge', () => {
       ], MODELS.STALL)).toEqual([new Segment(
         { atomic: Rat.fromMillis(0), unix: Rat.fromMillis(0) },
         { atomic: Infinity },
-        new Rat(10_000n)
+        { unixPerAtomic: new Rat(10_000n) }
       )])
 
       // UTC stops
@@ -431,7 +431,7 @@ describe('munge', () => {
       ], MODELS.STALL)).toEqual([new Segment(
         { atomic: Rat.fromMillis(0), unix: Rat.fromMillis(0) },
         { atomic: Infinity },
-        new Rat(-10_000n)
+        { unixPerAtomic: new Rat(-10_000n) }
       )])
     })
 
@@ -441,7 +441,7 @@ describe('munge', () => {
       ], MODELS.STALL)).toEqual([new Segment(
         { atomic: new Rat(-283_996_798_577_182n, 1_000_000n), unix: new Rat(-283_996_800n) },
         { atomic: Infinity },
-        new Rat(86_400_000_000_000n, 86_400_000_000_000n + 1_296_000n)
+        { unixPerAtomic: new Rat(86_400_000_000_000n, 86_400_000_000_000n + 1_296_000n) }
       )])
     })
 
@@ -645,7 +645,7 @@ describe('munge', () => {
       ], MODELS.SMEAR)).toEqual([new Segment(
         { atomic: Rat.fromMillis(0), unix: Rat.fromMillis(0) },
         { atomic: Infinity },
-        new Rat(1n)
+        { unixPerAtomic: new Rat(1n) }
       )])
     })
 
@@ -656,15 +656,15 @@ describe('munge', () => {
       ], MODELS.SMEAR)).toEqual([new Segment(
         { atomic: Rat.fromMillis(0), unix: Rat.fromMillis(0) },
         { atomic: new Rat(43_200n) }, // midday
-        new Rat(1n) // perfectly diagonal
+        { unixPerAtomic: new Rat(1n) } // perfectly diagonal
       ), new Segment(
         { atomic: new Rat(43_200n), unix: new Rat(43_200n) }, // midday
         { atomic: new Rat(129_601n) }, // midday
-        new Rat(86_400n, 86_401n) // A full Unix day elapses, but a full TAI day plus one second elapses
+        { unixPerAtomic: new Rat(86_400n, 86_401n) } // A full Unix day elapses, but a full TAI day plus one second elapses
       ), new Segment(
         { atomic: new Rat(129_601n), unix: new Rat(129_600n) }, // midday
         { atomic: Infinity },
-        new Rat(1n) // perfectly diagonal
+        { unixPerAtomic: new Rat(1n) } // perfectly diagonal
       )])
     })
 
@@ -675,15 +675,15 @@ describe('munge', () => {
       ], MODELS.SMEAR)).toEqual([new Segment(
         { atomic: Rat.fromMillis(0), unix: Rat.fromMillis(0) },
         { atomic: new Rat(43_200n) }, // midday
-        new Rat(1n) // perfectly diagonal
+        { unixPerAtomic: new Rat(1n) } // perfectly diagonal
       ), new Segment(
         { atomic: new Rat(43_200n), unix: new Rat(43_200n) }, // midday
         { atomic: new Rat(129_599n) }, // midday
-        new Rat(86_400n, 86_399n) // A full Unix day elapses, but a full TAI day minus one second elapses
+        { unixPerAtomic: new Rat(86_400n, 86_399n) } // A full Unix day elapses, but a full TAI day minus one second elapses
       ), new Segment(
         { atomic: new Rat(129_599n), unix: new Rat(129_600n) }, // midday
         { atomic: Infinity },
-        new Rat(1n) // perfectly diagonal
+        { unixPerAtomic: new Rat(1n) } // perfectly diagonal
       )])
     })
 

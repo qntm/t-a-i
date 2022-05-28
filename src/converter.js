@@ -10,7 +10,8 @@
 // map to multiple TAI times. We can return an array of these, or just the result from the latest
 // segment (according to its numbering).
 
-const { munge } = require('./munge')
+const { munge } = require('./munge.js')
+const { Range } = require('./range.js')
 
 module.exports.Converter = class {
   constructor (data, model) {
@@ -45,13 +46,7 @@ module.exports.Converter = class {
         // Previous range ends where current one starts, so try to combine the two.
         // The previous range should have `open: true` but it doesn't actually make a difference.
         if (prev.end.eq(range.start)) {
-          ranges[ranges.length - 1] = {
-            start: prev.start,
-            end: range.end
-          }
-          if ('open' in range) {
-            ranges[ranges.length - 1].open = range.open
-          }
+          ranges[ranges.length - 1] = new Range(prev.start, range.end, range.open)
           continue
         }
       }
@@ -60,7 +55,7 @@ module.exports.Converter = class {
     }
 
     /* istanbul ignore if */
-    if (ranges.some(range => 'open' in range)) {
+    if (ranges.some(range => range.open)) {
       throw Error('Failed to close all open ranges, this should be impossible')
     }
 

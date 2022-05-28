@@ -202,14 +202,9 @@ const munge = (data, model) => {
   }
 
   return munged.map(datum => new Segment(
-    {
-      atomic: datum.start.atomic,
-      unix: datum.start.unix
-    },
-    {
-      atomic: datum.end.atomic
-    },
-    datum.slope.unixPerAtomic
+    datum.start,
+    datum.end,
+    datum.slope
   ))
 }
 

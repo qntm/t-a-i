@@ -1,7 +1,8 @@
 /* eslint-env jest */
 
-const { Segment } = require('./segment')
-const { Rat } = require('./rat')
+const { Segment } = require('./segment.js')
+const { Rat } = require('./rat.js')
+const { Range } = require('./range.js')
 
 const MAY = 4
 
@@ -10,7 +11,7 @@ describe('Segment', () => {
     expect(() => new Segment(
       { atomic: Rat.fromMillis(0), unix: Rat.fromMillis(0) },
       { atomic: new Rat(-1n, 1_000_000_000_000n) },
-      new Rat(1n)
+      { unixPerAtomic: new Rat(1n) }
     )).toThrowError('Segment length must be positive')
   })
 
@@ -18,7 +19,7 @@ describe('Segment', () => {
     expect(() => new Segment(
       { atomic: Rat.fromMillis(0), unix: Rat.fromMillis(0) },
       { atomic: Rat.fromMillis(0) },
-      new Rat(1n)
+      { unixPerAtomic: new Rat(1n) }
     )).toThrowError('Segment length must be positive')
   })
 
@@ -26,13 +27,13 @@ describe('Segment', () => {
     const segment = new Segment(
       { atomic: Rat.fromMillis(0), unix: Rat.fromMillis(0) },
       { atomic: Infinity },
-      new Rat(1n)
+      { unixPerAtomic: new Rat(1n) }
     )
 
     it('zero point', () => {
       expect(segment.unixOnSegment(Rat.fromMillis(0))).toBe(true)
       expect(segment.unixToAtomicRange(Rat.fromMillis(0)))
-        .toEqual({ start: Rat.fromMillis(0), end: Rat.fromMillis(0) })
+        .toEqual(new Range(Rat.fromMillis(0)))
       expect(segment.atomicOnSegment(Rat.fromMillis(0))).toBe(true)
       expect(segment.atomicToUnix(Rat.fromMillis(0))).toEqual(Rat.fromMillis(0))
     })
@@ -40,10 +41,7 @@ describe('Segment', () => {
     it('modern day', () => {
       expect(segment.unixOnSegment(Rat.fromMillis(Date.UTC(2021, MAY, 16, 12, 11, 10, 9)))).toBe(true)
       expect(segment.unixToAtomicRange(Rat.fromMillis(Date.UTC(2021, MAY, 16, 12, 11, 10, 9))))
-        .toEqual({
-          start: Rat.fromMillis(Date.UTC(2021, MAY, 16, 12, 11, 10, 9)),
-          end: Rat.fromMillis(Date.UTC(2021, MAY, 16, 12, 11, 10, 9))
-        })
+        .toEqual(new Range(Rat.fromMillis(Date.UTC(2021, MAY, 16, 12, 11, 10, 9))))
       expect(segment.atomicOnSegment(Rat.fromMillis(Date.UTC(2021, MAY, 16, 12, 11, 10, 9)))).toBe(true)
       expect(segment.atomicToUnix(Rat.fromMillis(Date.UTC(2021, MAY, 16, 12, 11, 10, 9))))
         .toEqual(Rat.fromMillis(Date.UTC(2021, MAY, 16, 12, 11, 10, 9)))
@@ -52,7 +50,7 @@ describe('Segment', () => {
     it('before start point', () => {
       expect(segment.unixOnSegment(Rat.fromMillis(-1))).toBe(false)
       expect(segment.unixToAtomicRange(Rat.fromMillis(-1)))
-        .toEqual({ start: Rat.fromMillis(-1), end: Rat.fromMillis(-1) })
+        .toEqual(new Range(Rat.fromMillis(-1)))
       expect(segment.atomicOnSegment(Rat.fromMillis(-1))).toBe(false)
       expect(segment.atomicToUnix(Rat.fromMillis(-1))).toEqual(Rat.fromMillis(-1))
     })
@@ -62,13 +60,13 @@ describe('Segment', () => {
     const segment = new Segment(
       { atomic: Rat.fromMillis(0), unix: Rat.fromMillis(0) },
       { atomic: Rat.fromMillis(2_000) }, // 2 TAI seconds
-      new Rat(1n, 2n) // TAI runs twice as fast as Unix time
+      { unixPerAtomic: new Rat(1n, 2n) } // TAI runs twice as fast as Unix time
     )
 
     it('zero point', () => {
       expect(segment.unixOnSegment(Rat.fromMillis(0))).toBe(true)
       expect(segment.unixToAtomicRange(Rat.fromMillis(0)))
-        .toEqual({ start: Rat.fromMillis(0), end: Rat.fromMillis(0) })
+        .toEqual(new Range(Rat.fromMillis(0)))
       expect(segment.atomicOnSegment(Rat.fromMillis(0))).toBe(true)
       expect(segment.atomicToUnix(Rat.fromMillis(0))).toEqual(Rat.fromMillis(0))
     })
@@ -76,7 +74,7 @@ describe('Segment', () => {
     it('a little later', () => {
       expect(segment.unixOnSegment(Rat.fromMillis(501))).toBe(true)
       expect(segment.unixToAtomicRange(Rat.fromMillis(501)))
-        .toEqual({ start: Rat.fromMillis(1_002), end: Rat.fromMillis(1_002) })
+        .toEqual(new Range(Rat.fromMillis(1_002)))
       expect(segment.atomicOnSegment(Rat.fromMillis(1_002))).toBe(true)
       expect(segment.atomicToUnix(Rat.fromMillis(1_002))).toEqual(Rat.fromMillis(501))
     })
@@ -84,7 +82,7 @@ describe('Segment', () => {
     it('right before end point', () => {
       expect(segment.unixOnSegment(Rat.fromMillis(999))).toBe(true)
       expect(segment.unixToAtomicRange(Rat.fromMillis(999)))
-        .toEqual({ start: Rat.fromMillis(1_998), end: Rat.fromMillis(1_998) })
+        .toEqual(new Range(Rat.fromMillis(1_998)))
 
       expect(segment.atomicOnSegment(Rat.fromMillis(1_998))).toBe(true)
       expect(segment.atomicToUnix(Rat.fromMillis(1_998))).toEqual(Rat.fromMillis(999))
@@ -95,7 +93,7 @@ describe('Segment', () => {
     it('end point', () => {
       expect(segment.unixOnSegment(Rat.fromMillis(1_000))).toBe(false)
       expect(segment.unixToAtomicRange(Rat.fromMillis(1_000)))
-        .toEqual({ start: Rat.fromMillis(2_000), end: Rat.fromMillis(2_000) })
+        .toEqual(new Range(Rat.fromMillis(2_000)))
       expect(segment.atomicOnSegment(Rat.fromMillis(2_000))).toBe(false)
       expect(segment.atomicToUnix(Rat.fromMillis(2_000))).toEqual(Rat.fromMillis(1_000))
     })
@@ -105,13 +103,13 @@ describe('Segment', () => {
     const segment = new Segment(
       { atomic: Rat.fromMillis(0), unix: Rat.fromMillis(0) },
       { atomic: Rat.fromMillis(2_000) }, // 2 TAI seconds
-      new Rat(0n)
+      { unixPerAtomic: new Rat(0n) }
     )
 
     it('zero point', () => {
       expect(segment.unixOnSegment(Rat.fromMillis(0))).toBe(true)
       expect(segment.unixToAtomicRange(Rat.fromMillis(0)))
-        .toEqual({ start: Rat.fromMillis(0), end: Rat.fromMillis(2_000), open: true })
+        .toEqual(new Range(Rat.fromMillis(0), Rat.fromMillis(2_000), true))
       expect(segment.atomicOnSegment(Rat.fromMillis(0))).toBe(true)
       expect(segment.atomicToUnix(Rat.fromMillis(0))).toEqual(Rat.fromMillis(0))
     })
