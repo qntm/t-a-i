@@ -26,5 +26,9 @@
   "files": [
     "src",
     "!src/**.spec.js"
-  ]
+  ],
+  "exports": {
+    ".": "./src/index.js",
+    "./exact": "./src/exact.js"
+  }
 }

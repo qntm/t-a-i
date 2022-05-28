@@ -1,6 +1,8 @@
 /* eslint-env jest */
 
-const { TaiConverter, MODELS, UNIX_START, UNIX_END } = require('..')
+// TODO: this is all broken
+
+const { TaiConverter, MODELS, UNIX_START, UNIX_END } = require('../exact')
 
 const JAN = 0
 const FEB = 1

@@ -1,6 +1,7 @@
 /* eslint-env jest */
 
-const { Converter, MODELS } = require('./converter.js')
+const { MODELS } = require('./munge.js')
+const { Converter } = require('./converter.js')
 
 const JAN = 0
 const OCT = 9
