@@ -95,21 +95,16 @@ const munge = (data, model) => {
   })
 
   // Check ordering of the data, no funny business please
-  if (
-    munged.some((datum, i, munged) =>
-      i + 1 in munged &&
-      munged[i + 1].start.atomic.le(datum.start.atomic)
-    )
-  ) {
-    throw Error('Disordered data')
-  }
-
   // `end` is the first TAI instant when this segment ceases to be applicable.
   munged.forEach((datum, i, munged) => {
     datum.end = {
       atomic: i + 1 in munged
         ? munged[i + 1].start.atomic
-        : Infinity
+        : Rat.INFINITY
+    }
+
+    if (datum.end.atomic.le(datum.start.atomic)) {
+      throw Error('Disordered data')
     }
   })
 

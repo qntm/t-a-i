@@ -8,19 +8,22 @@ class Rat {
     if (typeof de !== 'bigint') {
       throw Error('Denominator must be a BigInt')
     }
-    if (de === 0n) {
-      throw Error('Denominator must be non-zero')
+    if (de === 0n && nu <= 0n) {
+      throw Error('Numerator must be positive if denominator is zero')
     }
 
     const g = gcd(nu, de) // non-zero
 
-    const g2 = (de < 0) === (g < 0) ? g : -g // has the same sign as `de`
+    const g2 = (de < 0) === (g < 0) ? g : -g
 
-    this.de = de / g2 // positive
+    this.de = de / g2 // non-negative
     this.nu = nu / g2 // sign of `this.nu` is the sign of the represented rational
   }
 
   plus (other) {
+    if (this.de === 0n && other.de === 0n) {
+      return new Rat(this.nu + other.nu, 0n)
+    }
     return new Rat(this.nu * other.de + this.de * other.nu, this.de * other.de)
   }
 
@@ -61,6 +64,11 @@ class Rat {
     return Number(this.times(new Rat(1_000n)).trunc())
   }
 }
+
+// Support for this special value is limited. In all cases it either returns
+// a correct, meaningful result, or throws an exception - it does NOT return
+// bad results.
+Rat.INFINITY = new Rat(1n, 0n)
 
 Rat.fromMillis = millis => {
   if (!Number.isInteger(millis)) {

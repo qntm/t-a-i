@@ -81,7 +81,7 @@ describe('munge', () => {
         [Date.UTC(1970, JAN, 1), 0, 40_587, 8.640_0]
       ], MODELS.OVERRUN)).toEqual([new Segment(
         { atomic: Rat.fromMillis(0), unix: Rat.fromMillis(0) },
-        { atomic: Infinity },
+        { atomic: Rat.INFINITY },
         { unixPerAtomic: new Rat(10_000n, 10_001n) }
       )])
 
@@ -97,7 +97,7 @@ describe('munge', () => {
         [Date.UTC(1970, JAN, 1), 0, 40_587, -8.640_0]
       ], MODELS.OVERRUN)).toEqual([new Segment(
         { atomic: Rat.fromMillis(0), unix: Rat.fromMillis(0) },
-        { atomic: Infinity },
+        { atomic: Rat.INFINITY },
         { unixPerAtomic: new Rat(10_000n, 9_999n) }
       )])
 
@@ -107,7 +107,7 @@ describe('munge', () => {
         [Date.UTC(1970, JAN, 1), 0, 40_587, -86_400 + 8.640_0]
       ], MODELS.OVERRUN)).toEqual([new Segment(
         { atomic: Rat.fromMillis(0), unix: Rat.fromMillis(0) },
-        { atomic: Infinity },
+        { atomic: Rat.INFINITY },
         { unixPerAtomic: new Rat(10_000n) }
       )])
 
@@ -115,14 +115,9 @@ describe('munge', () => {
       // There's no way to get this by munging finite data. The drift rate would have to be
       // infinite to get this result.
 
-      // TAI runs backwards: wild and highly untested but sure!
-      expect(munge([
-        [Date.UTC(1970, JAN, 1), 0, 40_587, -86_400 - 8.640_0]
-      ], MODELS.OVERRUN)).toEqual([new Segment(
-        { atomic: Rat.fromMillis(0), unix: Rat.fromMillis(0) },
-        { atomic: Infinity },
-        { unixPerAtomic: new Rat(-10_000n) }
-      )])
+      // UTC runs backwards
+      // Disallowing this, as it makes "unix time on segment" calculations
+      // annoying, for no real gain
     })
 
     it('works with the first line of real data', () => {
@@ -130,7 +125,7 @@ describe('munge', () => {
         [Date.UTC(1961, JAN, 1), 1.422_818_0, 37_300, 0.001_296]
       ], MODELS.OVERRUN)).toEqual([new Segment(
         { atomic: new Rat(-283_996_798_577_182n, 1_000_000n), unix: new Rat(-283_996_800n) },
-        { atomic: Infinity },
+        { atomic: Rat.INFINITY },
         { unixPerAtomic: new Rat(86_400_000_000_000n, 86_400_000_000_000n + 1_296_000n) }
       )])
     })
@@ -360,7 +355,7 @@ describe('munge', () => {
         [Date.UTC(1970, JAN, 1), 0, 40_587, 8.640_0]
       ], MODELS.STALL)).toEqual([new Segment(
         { atomic: Rat.fromMillis(0), unix: Rat.fromMillis(0) },
-        { atomic: Infinity },
+        { atomic: Rat.INFINITY },
         { unixPerAtomic: new Rat(10_000n, 10_001n) }
       )])
 
@@ -376,7 +371,7 @@ describe('munge', () => {
         [Date.UTC(1970, JAN, 1), 0, 40_587, -8.640_0]
       ], MODELS.STALL)).toEqual([new Segment(
         { atomic: Rat.fromMillis(0), unix: Rat.fromMillis(0) },
-        { atomic: Infinity },
+        { atomic: Rat.INFINITY },
         { unixPerAtomic: new Rat(10_000n, 9_999n) }
       )])
 
@@ -386,7 +381,7 @@ describe('munge', () => {
         [Date.UTC(1970, JAN, 1), 0, 40_587, -86_400 + 8.640_0]
       ], MODELS.STALL)).toEqual([new Segment(
         { atomic: Rat.fromMillis(0), unix: Rat.fromMillis(0) },
-        { atomic: Infinity },
+        { atomic: Rat.INFINITY },
         { unixPerAtomic: new Rat(10_000n) }
       )])
 
@@ -394,14 +389,9 @@ describe('munge', () => {
       // There's no way to get this by munging finite data. The drift rate would have to be
       // infinite to get this result.
 
-      // TAI runs backwards: wild and highly untested but sure!
-      expect(munge([
-        [Date.UTC(1970, JAN, 1), 0, 40_587, -86_400 - 8.640_0]
-      ], MODELS.STALL)).toEqual([new Segment(
-        { atomic: Rat.fromMillis(0), unix: Rat.fromMillis(0) },
-        { atomic: Infinity },
-        { unixPerAtomic: new Rat(-10_000n) }
-      )])
+      // UTC runs backwards
+      // Disallowing this, as it makes "unix time on segment" calculations
+      // annoying, for no real gain
     })
 
     it('works with the first line of real data', () => {
@@ -409,7 +399,7 @@ describe('munge', () => {
         [Date.UTC(1961, JAN, 1), 1.422_818_0, 37_300, 0.001_296]
       ], MODELS.STALL)).toEqual([new Segment(
         { atomic: new Rat(-283_996_798_577_182n, 1_000_000n), unix: new Rat(-283_996_800n) },
-        { atomic: Infinity },
+        { atomic: Rat.INFINITY },
         { unixPerAtomic: new Rat(86_400_000_000_000n, 86_400_000_000_000n + 1_296_000n) }
       )])
     })

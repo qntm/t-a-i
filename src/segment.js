@@ -6,7 +6,11 @@ const { Range } = require('./range.js')
 // For precision, we deal with ratios of BigInts.
 // Segment validity ranges are inclusive-exclusive.
 class Segment {
-  constructor (start, end = { atomic: Infinity }, slope = { unixPerAtomic: new Rat(1n) }) {
+  constructor (start, end = { atomic: Rat.INFINITY }, slope = { unixPerAtomic: new Rat(1n) }) {
+    if (end.atomic.le(start.atomic)) {
+      throw Error('Segment length must be positive')
+    }
+
     this.slope = {
       unixPerAtomic: slope.unixPerAtomic
     }
@@ -19,19 +23,8 @@ class Segment {
 
     // End is exclusive.
     this.end = {
-      atomic: end.atomic
-    }
-    if (end.atomic === Infinity) {
-      this.end.unix = Infinity
-    } else {
-      if (!this.start.atomic.lt(end.atomic)) {
-        throw Error('Segment length must be positive')
-      }
-
-      this.end.unix = end.atomic
-        .minus(this.start.atomic)
-        .times(this.slope.unixPerAtomic)
-        .plus(this.start.unix)
+      atomic: end.atomic,
+      unix: this.atomicToUnix(end.atomic)
     }
   }
 
@@ -65,20 +58,13 @@ class Segment {
   // Unix by the segment.
 
   atomicOnSegment (atomic) {
-    return this.start.atomic.le(atomic) && (
-      this.end.atomic === Infinity ||
-      this.end.atomic
-        .gt(atomic)
-    )
+    return this.start.atomic.le(atomic) && this.end.atomic.gt(atomic)
   }
 
   unixOnSegment (unix) {
     return this.slope.unixPerAtomic.eq(new Rat(0n))
       ? this.start.unix.eq(unix)
-      : this.start.unix.le(unix) && (
-        this.end.unix === Infinity ||
-        this.end.unix.gt(unix)
-      )
+      : this.start.unix.le(unix) && this.end.unix.gt(unix)
   }
 }
 
