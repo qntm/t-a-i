@@ -267,7 +267,7 @@ describe('Converter', () => {
           ])
         expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1979, DEC, 31, 12, 0, 0, 1))))
           .toEqual([
-            new Range(Rat.fromMillis(Date.UTC(1979, DEC, 31, 12, 0, 0, 1)).plus(new Rat(1n, 86_400_000n)))
+            new Range(Rat.fromMillis(Date.UTC(1979, DEC, 31, 12, 0, 0, 1)).plus(new Rat(1n, 86_400_000n, 1)))
           ])
 
         // SMEAR MIDPOINT
@@ -279,7 +279,7 @@ describe('Converter', () => {
         // SMEAR ENDS, ATOMIC IS A FULL SECOND AHEAD (actually Unix is a full second behind)
         expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1980, JAN, 1, 11, 59, 59, 999))))
           .toEqual([
-            new Range(Rat.fromMillis(Date.UTC(1980, JAN, 1, 11, 59, 59, 999)).plus(new Rat(86_399_999n, 86_400_000n)))
+            new Range(Rat.fromMillis(Date.UTC(1980, JAN, 1, 11, 59, 59, 999)).plus(new Rat(86_399_999n, 86_400_000n, 1)))
           ])
         expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1980, JAN, 1, 12, 0, 0, 0))))
           .toEqual([
@@ -301,7 +301,7 @@ describe('Converter', () => {
         expect(converter.atomicToUnix(Rat.fromMillis(Date.UTC(1979, DEC, 31, 12, 0, 0, 0))))
           .toEqual(Rat.fromMillis(Date.UTC(1979, DEC, 31, 12, 0, 0, 0)))
         expect(converter.atomicToUnix(Rat.fromMillis(Date.UTC(1979, DEC, 31, 12, 0, 0, 1))))
-          .toEqual(Rat.fromMillis(Date.UTC(1979, DEC, 31, 12, 0, 0, 1)).minus(new Rat(1n, 86_401_000n)))
+          .toEqual(Rat.fromMillis(Date.UTC(1979, DEC, 31, 12, 0, 0, 1)).minus(new Rat(1n, 86_401_000n, 1)))
 
         // SMEAR MIDPOINT
         expect(converter.atomicToUnix(Rat.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 0, 500))))
@@ -309,7 +309,7 @@ describe('Converter', () => {
 
         // SMEAR ENDS, UNIX HAS DROPPED A FULL SECOND BEHIND
         expect(converter.atomicToUnix(Rat.fromMillis(Date.UTC(1980, JAN, 1, 12, 0, 0, 999))))
-          .toEqual(Rat.fromMillis(Date.UTC(1980, JAN, 1, 12, 0, 0, 999)).minus(new Rat(86_400_999n, 86_401_000n)))
+          .toEqual(Rat.fromMillis(Date.UTC(1980, JAN, 1, 12, 0, 0, 999)).minus(new Rat(86_400_999n, 86_401_000n, 1)))
         expect(converter.atomicToUnix(Rat.fromMillis(Date.UTC(1980, JAN, 1, 12, 0, 1, 0))))
           .toEqual(Rat.fromMillis(Date.UTC(1980, JAN, 1, 12, 0, 0, 0)))
         expect(converter.atomicToUnix(Rat.fromMillis(Date.UTC(1980, JAN, 1, 12, 0, 1, 1))))
@@ -482,7 +482,7 @@ describe('Converter', () => {
           ])
         expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1979, DEC, 31, 12, 0, 0, 1))))
           .toEqual([
-            new Range(Rat.fromMillis(Date.UTC(1979, DEC, 31, 12, 0, 0, 1)).minus(new Rat(1n, 86_400_000n)))
+            new Range(Rat.fromMillis(Date.UTC(1979, DEC, 31, 12, 0, 0, 1)).minus(new Rat(1n, 86_400_000n, 1)))
           ])
 
         // SMEAR MIDPOINT
@@ -494,7 +494,7 @@ describe('Converter', () => {
         // SMEAR ENDS, ATOMIC IS A FULL SECOND BEHIND (actually Unix is a full second ahead)
         expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1980, JAN, 1, 11, 59, 59, 999))))
           .toEqual([
-            new Range(Rat.fromMillis(Date.UTC(1980, JAN, 1, 11, 59, 59, 999)).minus(new Rat(86_399_999n, 86_400_000n)))
+            new Range(Rat.fromMillis(Date.UTC(1980, JAN, 1, 11, 59, 59, 999)).minus(new Rat(86_399_999n, 86_400_000n, 1)))
           ])
         expect(converter.unixToAtomic(Rat.fromMillis(Date.UTC(1980, JAN, 1, 12, 0, 0, 0))))
           .toEqual([
@@ -516,7 +516,7 @@ describe('Converter', () => {
         expect(converter.atomicToUnix(Rat.fromMillis(Date.UTC(1979, DEC, 31, 12, 0, 0, 0))))
           .toEqual(Rat.fromMillis(Date.UTC(1979, DEC, 31, 12, 0, 0, 0)))
         expect(converter.atomicToUnix(Rat.fromMillis(Date.UTC(1979, DEC, 31, 12, 0, 0, 1))))
-          .toEqual(Rat.fromMillis(Date.UTC(1979, DEC, 31, 12, 0, 0, 1)).plus(new Rat(1n, 86_399_000n)))
+          .toEqual(Rat.fromMillis(Date.UTC(1979, DEC, 31, 12, 0, 0, 1)).plus(new Rat(1n, 86_399_000n, 1)))
 
         // SMEAR MIDPOINT
         expect(converter.atomicToUnix(Rat.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 500))))
@@ -524,7 +524,7 @@ describe('Converter', () => {
 
         // SMEAR ENDS, UNIX HAS RUN A FULL SECOND FASTER THAN ATOMIC
         expect(converter.atomicToUnix(Rat.fromMillis(Date.UTC(1980, JAN, 1, 11, 59, 58, 999))))
-          .toEqual(Rat.fromMillis(Date.UTC(1980, JAN, 1, 11, 59, 58, 999)).plus(new Rat(86_398_999n, 86_399_000n)))
+          .toEqual(Rat.fromMillis(Date.UTC(1980, JAN, 1, 11, 59, 58, 999)).plus(new Rat(86_398_999n, 86_399_000n, 1)))
         expect(converter.atomicToUnix(Rat.fromMillis(Date.UTC(1980, JAN, 1, 11, 59, 59, 0))))
           .toEqual(Rat.fromMillis(Date.UTC(1980, JAN, 1, 12, 0, 0, 0)))
         expect(converter.atomicToUnix(Rat.fromMillis(Date.UTC(1980, JAN, 1, 11, 59, 59, 1))))
@@ -543,9 +543,9 @@ describe('Converter', () => {
 
         expect(converter.unixToAtomic(Rat.fromMillis(1)))
           .toEqual([
-            new Range(new Rat(900n, 1_000_000n))
+            new Range(new Rat(900n, 1_000_000n, 1))
           ])
-        expect(converter.atomicToUnix(new Rat(900n, 1_000_000n)))
+        expect(converter.atomicToUnix(new Rat(900n, 1_000_000n, 1)))
           .toEqual(Rat.fromMillis(1))
       })
 
@@ -558,9 +558,9 @@ describe('Converter', () => {
 
         expect(converter.unixToAtomic(Rat.fromMillis(-1)))
           .toEqual([
-            new Range(new Rat(-900n, 1_000_000n))
+            new Range(new Rat(-900n, 1_000_000n, 1))
           ])
-        expect(converter.atomicToUnix(new Rat(-900n, 1_000_000n)))
+        expect(converter.atomicToUnix(new Rat(-900n, 1_000_000n, 1)))
           .toEqual(Rat.fromMillis(-1))
       })
     })

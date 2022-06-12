@@ -33,7 +33,7 @@ const MODELS = {
 }
 
 const NOV = 10
-const secondsPerDay = new Rat(86_400n)
+const secondsPerDay = new Rat(86_400n, 1n, 1)
 const mjdEpoch = {
   unix: Rat.fromMillis(Date.UTC(1858, NOV, 17))
 }
@@ -64,7 +64,8 @@ const munge = (data, model) => {
     // So we have to do some rounding
     offsetAtRoot.atomic = new Rat(
       BigInt(Math.round(offsetAtRoot.atomicFloat * 10_000_000)),
-      BigInt(10_000_000)
+      BigInt(10_000_000),
+      1
     )
 
     root.unix = mjdEpoch.unix.plus(new Rat(BigInt(root.mjds)).times(secondsPerDay))
@@ -74,7 +75,8 @@ const munge = (data, model) => {
     // So we have to do some rounding
     driftRate.atomicPerUnixDay = new Rat(
       BigInt(Math.round(driftRate.atomicPerUnixDayFloat * 10_000_000)),
-      BigInt(10_000_000)
+      BigInt(10_000_000),
+      1
     )
     driftRate.atomicPerUnix = driftRate.atomicPerUnixDay.divide(secondsPerDay)
 

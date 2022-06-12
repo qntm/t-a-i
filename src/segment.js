@@ -7,6 +7,18 @@ const { Range } = require('./range.js')
 // Segment validity ranges are inclusive-exclusive.
 class Segment {
   constructor (start, end = { atomic: Rat.INFINITY }, slope = { unixPerAtomic: new Rat(1n) }) {
+    if (start.atomic.power !== 1) {
+      throw Error('TAI start must be a rational number of seconds')
+    }
+    if (start.unix.power !== 1) {
+      throw Error('Unix start must be a rational number of seconds')
+    }
+    if (end.atomic.power !== 1) {
+      throw Error('TAI end must be a rational number of seconds')
+    }
+    if (slope.unixPerAtomic.power !== 0) {
+      throw Error('Slope must be a pure ratio')
+    }
     if (end.atomic.le(start.atomic)) {
       throw Error('Segment length must be positive')
     }

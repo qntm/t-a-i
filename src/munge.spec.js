@@ -65,13 +65,13 @@ describe('munge', () => {
         [9_000, -3], // inserted leap second
         [13_000, -4] // removed leap second
       ], MODELS.OVERRUN)).toEqual([new Segment(
-        { atomic: new Rat(-5n), unix: new Rat(-1n) },
-        { atomic: new Rat(6n) }
+        { atomic: new Rat(-5n, 1n, 1), unix: new Rat(-1n, 1n, 1) },
+        { atomic: new Rat(6n, 1n, 1) }
       ), new Segment(
-        { atomic: new Rat(6n), unix: new Rat(9n) },
-        { atomic: new Rat(9n) }
+        { atomic: new Rat(6n, 1n, 1), unix: new Rat(9n, 1n, 1) },
+        { atomic: new Rat(9n, 1n, 1) }
       ), new Segment(
-        { atomic: new Rat(9n), unix: new Rat(13n) }
+        { atomic: new Rat(9n, 1n, 1), unix: new Rat(13n, 1n, 1) }
       )])
     })
 
@@ -124,7 +124,7 @@ describe('munge', () => {
       expect(munge([
         [Date.UTC(1961, JAN, 1), 1.422_818_0, 37_300, 0.001_296]
       ], MODELS.OVERRUN)).toEqual([new Segment(
-        { atomic: new Rat(-283_996_798_577_182n, 1_000_000n), unix: new Rat(-283_996_800n) },
+        { atomic: new Rat(-283_996_798_577_182n, 1_000_000n, 1), unix: new Rat(-283_996_800n, 1n, 1) },
         { atomic: Rat.INFINITY },
         { unixPerAtomic: new Rat(86_400_000_000_000n, 86_400_000_000_000n + 1_296_000n) }
       )])
@@ -201,46 +201,46 @@ describe('munge', () => {
         return b.minus(a)
       })).toEqual([
         // Exact ratio of microseconds
-        new Rat(-50_000n, 1_000_000n),
-        new Rat(0n, 1_000_000n),
-        new Rat(100_000n, 1_000_000n),
-        new Rat(0n, 1_000_000n),
-        new Rat(100_000n, 1_000_000n),
-        new Rat(100_000n, 1_000_000n),
-        new Rat(100_000n, 1_000_000n),
-        new Rat(100_000n, 1_000_000n),
-        new Rat(100_000n, 1_000_000n),
-        new Rat(100_000n, 1_000_000n),
-        new Rat(0n, 1_000_000n),
-        new Rat(-100_000n, 1_000_000n),
-        new Rat(107_758n, 1_000_000n),
-        new Rat(1_000_000n, 1_000_000n),
-        new Rat(1_000_000n, 1_000_000n),
-        new Rat(1_000_000n, 1_000_000n),
-        new Rat(1_000_000n, 1_000_000n),
-        new Rat(1_000_000n, 1_000_000n),
-        new Rat(1_000_000n, 1_000_000n),
-        new Rat(1_000_000n, 1_000_000n),
-        new Rat(1_000_000n, 1_000_000n),
-        new Rat(1_000_000n, 1_000_000n),
-        new Rat(1_000_000n, 1_000_000n),
-        new Rat(1_000_000n, 1_000_000n),
-        new Rat(1_000_000n, 1_000_000n),
-        new Rat(1_000_000n, 1_000_000n),
-        new Rat(1_000_000n, 1_000_000n),
-        new Rat(1_000_000n, 1_000_000n),
-        new Rat(1_000_000n, 1_000_000n),
-        new Rat(1_000_000n, 1_000_000n),
-        new Rat(1_000_000n, 1_000_000n),
-        new Rat(1_000_000n, 1_000_000n),
-        new Rat(1_000_000n, 1_000_000n),
-        new Rat(1_000_000n, 1_000_000n),
-        new Rat(1_000_000n, 1_000_000n),
-        new Rat(1_000_000n, 1_000_000n),
-        new Rat(1_000_000n, 1_000_000n),
-        new Rat(1_000_000n, 1_000_000n),
-        new Rat(1_000_000n, 1_000_000n),
-        new Rat(1_000_000n, 1_000_000n),
+        new Rat(-50_000n, 1_000_000n, 1),
+        new Rat(0n, 1_000_000n, 1),
+        new Rat(100_000n, 1_000_000n, 1),
+        new Rat(0n, 1_000_000n, 1),
+        new Rat(100_000n, 1_000_000n, 1),
+        new Rat(100_000n, 1_000_000n, 1),
+        new Rat(100_000n, 1_000_000n, 1),
+        new Rat(100_000n, 1_000_000n, 1),
+        new Rat(100_000n, 1_000_000n, 1),
+        new Rat(100_000n, 1_000_000n, 1),
+        new Rat(0n, 1_000_000n, 1),
+        new Rat(-100_000n, 1_000_000n, 1),
+        new Rat(107_758n, 1_000_000n, 1),
+        new Rat(1_000_000n, 1_000_000n, 1),
+        new Rat(1_000_000n, 1_000_000n, 1),
+        new Rat(1_000_000n, 1_000_000n, 1),
+        new Rat(1_000_000n, 1_000_000n, 1),
+        new Rat(1_000_000n, 1_000_000n, 1),
+        new Rat(1_000_000n, 1_000_000n, 1),
+        new Rat(1_000_000n, 1_000_000n, 1),
+        new Rat(1_000_000n, 1_000_000n, 1),
+        new Rat(1_000_000n, 1_000_000n, 1),
+        new Rat(1_000_000n, 1_000_000n, 1),
+        new Rat(1_000_000n, 1_000_000n, 1),
+        new Rat(1_000_000n, 1_000_000n, 1),
+        new Rat(1_000_000n, 1_000_000n, 1),
+        new Rat(1_000_000n, 1_000_000n, 1),
+        new Rat(1_000_000n, 1_000_000n, 1),
+        new Rat(1_000_000n, 1_000_000n, 1),
+        new Rat(1_000_000n, 1_000_000n, 1),
+        new Rat(1_000_000n, 1_000_000n, 1),
+        new Rat(1_000_000n, 1_000_000n, 1),
+        new Rat(1_000_000n, 1_000_000n, 1),
+        new Rat(1_000_000n, 1_000_000n, 1),
+        new Rat(1_000_000n, 1_000_000n, 1),
+        new Rat(1_000_000n, 1_000_000n, 1),
+        new Rat(1_000_000n, 1_000_000n, 1),
+        new Rat(1_000_000n, 1_000_000n, 1),
+        new Rat(1_000_000n, 1_000_000n, 1),
+        new Rat(1_000_000n, 1_000_000n, 1),
         NaN // `Infinity - Infinity`
       ])
     })
@@ -250,7 +250,7 @@ describe('munge', () => {
         expect(munge([
           [Date.UTC(1970, JAN, 1, 0, 0, 0, 1), -0.000_1]
         ], MODELS.OVERRUN)).toEqual([new Segment(
-          { atomic: new Rat(900n, 1_000_000n), unix: Rat.fromMillis(1) } // ray start intentionally doesn't include TAI epoch
+          { atomic: new Rat(900n, 1_000_000n, 1), unix: Rat.fromMillis(1) } // ray start intentionally doesn't include TAI epoch
         )])
       })
 
@@ -260,10 +260,10 @@ describe('munge', () => {
           [Date.UTC(1969, DEC, 31, 23, 59, 59, 999), 0.000_1],
           [Date.UTC(1970, JAN, 1, 0, 0, 0, 1), -0.001_1]
         ], MODELS.OVERRUN)).toEqual([new Segment(
-          { atomic: new Rat(-900n, 1_000_000n), unix: Rat.fromMillis(-1) },
-          { atomic: new Rat(-100n, 1_000_000n) }
+          { atomic: new Rat(-900n, 1_000_000n, 1), unix: Rat.fromMillis(-1) },
+          { atomic: new Rat(-100n, 1_000_000n, 1) }
         ), new Segment(
-          { atomic: new Rat(-100n, 1_000_000n), unix: Rat.fromMillis(1) }
+          { atomic: new Rat(-100n, 1_000_000n, 1), unix: Rat.fromMillis(1) }
         )])
       })
     })
@@ -288,14 +288,14 @@ describe('munge', () => {
         [9_000, -3], // inserted leap second
         [13_000, -4] // removed leap second
       ], MODELS.BREAK)).toEqual([new Segment(
-        { atomic: new Rat(-5n), unix: new Rat(-1n) },
-        { atomic: new Rat(5n) }
+        { atomic: new Rat(-5n, 1n, 1), unix: new Rat(-1n, 1n, 1) },
+        { atomic: new Rat(5n, 1n, 1) }
       ), new Segment(
         // this segment starts a full TAI second after the previous segment ended
-        { atomic: new Rat(6n), unix: new Rat(9n) },
-        { atomic: new Rat(9n) }
+        { atomic: new Rat(6n, 1n, 1), unix: new Rat(9n, 1n, 1) },
+        { atomic: new Rat(9n, 1n, 1) }
       ), new Segment(
-        { atomic: new Rat(9n), unix: new Rat(13n) }
+        { atomic: new Rat(9n, 1n, 1), unix: new Rat(13n, 1n, 1) }
       )])
     })
   })
@@ -334,18 +334,18 @@ describe('munge', () => {
         [9_000, -3], // inserted leap second
         [13_000, -4] // removed leap second
       ], MODELS.STALL)).toEqual([new Segment(
-        { atomic: new Rat(-5n), unix: new Rat(-1n) },
-        { atomic: new Rat(5n) }
+        { atomic: new Rat(-5n, 1n, 1), unix: new Rat(-1n, 1n, 1) },
+        { atomic: new Rat(5n, 1n, 1) }
       ), new Segment(
         // Stall segment inserted here
-        { atomic: new Rat(5n), unix: new Rat(9n) },
-        { atomic: new Rat(6n) },
+        { atomic: new Rat(5n, 1n, 1), unix: new Rat(9n, 1n, 1) },
+        { atomic: new Rat(6n, 1n, 1) },
         { unixPerAtomic: new Rat(0n) }
       ), new Segment(
-        { atomic: new Rat(6n), unix: new Rat(9n) },
-        { atomic: new Rat(9n) }
+        { atomic: new Rat(6n, 1n, 1), unix: new Rat(9n, 1n, 1) },
+        { atomic: new Rat(9n, 1n, 1) }
       ), new Segment(
-        { atomic: new Rat(9n), unix: new Rat(13n) }
+        { atomic: new Rat(9n, 1n, 1), unix: new Rat(13n, 1n, 1) }
       )])
     })
 
@@ -398,7 +398,7 @@ describe('munge', () => {
       expect(munge([
         [Date.UTC(1961, JAN, 1), 1.422_818_0, 37_300, 0.001_296]
       ], MODELS.STALL)).toEqual([new Segment(
-        { atomic: new Rat(-283_996_798_577_182n, 1_000_000n), unix: new Rat(-283_996_800n) },
+        { atomic: new Rat(-283_996_798_577_182n, 1_000_000n, 1), unix: new Rat(-283_996_800n, 1n, 1) },
         { atomic: Rat.INFINITY },
         { unixPerAtomic: new Rat(86_400_000_000_000n, 86_400_000_000_000n + 1_296_000n) }
       )])
@@ -516,82 +516,82 @@ describe('munge', () => {
 
         return b.minus(a)
       })).toEqual([
-        // Exact ratio of milliseconds
-        new Rat(-50n, 1_000n), // 0.05 TAI seconds removed from UTC
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(-100n, 1_000n), // 0.1 TAI seconds removed from UTC
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
-        new Rat(0n, 1_000n),
+        // Exact ratio expressing milliseconds
+        new Rat(-50n, 1_000n, 1), // 0.05 TAI seconds removed from UTC
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(-100n, 1_000n, 1), // 0.1 TAI seconds removed from UTC
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
+        new Rat(0n, 1_000n, 1),
         NaN
       ])
     })
@@ -612,13 +612,13 @@ describe('munge', () => {
         [86_400_000, 1] // inserted leap second after one day
       ], MODELS.SMEAR)).toEqual([new Segment(
         { atomic: Rat.fromMillis(0), unix: Rat.fromMillis(0) },
-        { atomic: new Rat(43_200n) } // midday
+        { atomic: new Rat(43_200n, 1n, 1) } // midday
       ), new Segment(
-        { atomic: new Rat(43_200n), unix: new Rat(43_200n) }, // midday
-        { atomic: new Rat(129_601n) }, // midday
+        { atomic: new Rat(43_200n, 1n, 1), unix: new Rat(43_200n, 1n, 1) }, // midday
+        { atomic: new Rat(129_601n, 1n, 1) }, // midday
         { unixPerAtomic: new Rat(86_400n, 86_401n) } // A full Unix day elapses, but a full TAI day plus one second elapses
       ), new Segment(
-        { atomic: new Rat(129_601n), unix: new Rat(129_600n) } // midday
+        { atomic: new Rat(129_601n, 1n, 1), unix: new Rat(129_600n, 1n, 1) } // midday
       )])
     })
 
@@ -628,13 +628,13 @@ describe('munge', () => {
         [86_400_000, -1] // removed leap second after one day
       ], MODELS.SMEAR)).toEqual([new Segment(
         { atomic: Rat.fromMillis(0), unix: Rat.fromMillis(0) },
-        { atomic: new Rat(43_200n) } // midday
+        { atomic: new Rat(43_200n, 1n, 1) } // midday
       ), new Segment(
-        { atomic: new Rat(43_200n), unix: new Rat(43_200n) }, // midday
-        { atomic: new Rat(129_599n) }, // midday
+        { atomic: new Rat(43_200n, 1n, 1), unix: new Rat(43_200n, 1n, 1) }, // midday
+        { atomic: new Rat(129_599n, 1n, 1) }, // midday
         { unixPerAtomic: new Rat(86_400n, 86_399n) } // A full Unix day elapses, but a full TAI day minus one second elapses
       ), new Segment(
-        { atomic: new Rat(129_599n), unix: new Rat(129_600n) } // midday
+        { atomic: new Rat(129_599n, 1n, 1), unix: new Rat(129_600n, 1n, 1) } // midday
       )])
     })
 
@@ -751,86 +751,86 @@ describe('munge', () => {
 
         return b.minus(a)
       })).toEqual([
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
-        new Rat(0n),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
+        new Rat(0n, 1n, 1),
         NaN
       ])
     })
