@@ -15,6 +15,7 @@ describe('Rat', () => {
   })
 
   it('adds', () => {
+    expect(() => new Rat(1n, 2n).plus(new Rat(1n, 3n, 1))).toThrowError('Mismatched powers: s^0 + s^1')
     expect(new Rat(1n, 2n).plus(new Rat(1n, 3n))).toEqual(new Rat(5n, 6n))
     expect(new Rat(1n, 2n).plus(new Rat(0n, 3n))).toEqual(new Rat(1n, 2n))
     expect(new Rat(0n, 2n).plus(new Rat(1n, 3n))).toEqual(new Rat(1n, 3n))
@@ -58,6 +59,11 @@ describe('Rat', () => {
   it('fromMillis', () => {
     expect(Rat.fromMillis(123)).toEqual(new Rat(123n, 1_000n, 1))
     expect(() => Rat.fromMillis(Infinity)).toThrowError()
+  })
+
+  it('toMillis', () => {
+    expect(new Rat(123n, 1_000n, 1).toMillis()).toBe(123)
+    expect(() => new Rat(123n, 1_000n).toMillis()).toThrowError('Wrong power')
   })
 
   describe('truncates', () => {

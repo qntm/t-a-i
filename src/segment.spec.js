@@ -7,6 +7,24 @@ const { Range } = require('./range.js')
 const MAY = 4
 
 describe('Segment', () => {
+  it('disallows bad powers', () => {
+    expect(() => new Segment(
+      { atomic: new Rat(0n) }
+    )).toThrowError('TAI start must be a rational number of seconds')
+    expect(() => new Segment(
+      { atomic: Rat.fromMillis(0), unix: new Rat(0n) }
+    )).toThrowError('Unix start must be a rational number of seconds')
+    expect(() => new Segment(
+      { atomic: Rat.fromMillis(0), unix: Rat.fromMillis(0) },
+      { atomic: new Rat(1n) }
+    )).toThrowError('TAI end must be a rational number of seconds')
+    expect(() => new Segment(
+      { atomic: Rat.fromMillis(0), unix: Rat.fromMillis(0) },
+      { atomic: Rat.fromMillis(1_000) },
+      { unixPerAtomic: new Rat(1n, 1n, 1) }
+    )).toThrowError('Slope must be a pure ratio')
+  })
+
   it('disallows rays which run backwards', () => {
     expect(() => new Segment(
       { atomic: Rat.fromMillis(0), unix: Rat.fromMillis(0) },
