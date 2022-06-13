@@ -16,8 +16,8 @@ class Rat {
 
     const g2 = (de < 0) === (g < 0) ? g : -g
 
-    this.de = de / g2 // non-negative
     this.nu = nu / g2 // sign of `this.nu` is the sign of the represented rational
+    this.de = de / g2 // non-negative
   }
 
   plus (other) {
@@ -43,10 +43,6 @@ class Rat {
     return this.minus(other).nu === 0n
   }
 
-  lt (other) {
-    return this.minus(other).nu < 0n
-  }
-
   le (other) {
     return this.minus(other).nu <= 0n
   }
@@ -59,23 +55,8 @@ class Rat {
   trunc () {
     return div(this.nu, this.de)
   }
-
-  toMillis () {
-    return Number(this.times(new Rat(1_000n)).trunc())
-  }
 }
 
-// Support for this special value is limited. In all cases it either returns
-// a correct, meaningful result, or throws an exception - it does NOT return
-// bad results.
 Rat.INFINITY = new Rat(1n, 0n)
-
-Rat.fromMillis = millis => {
-  if (!Number.isInteger(millis)) {
-    throw Error(`Not an integer: ${millis}`)
-  }
-
-  return new Rat(BigInt(millis), 1_000n)
-}
 
 module.exports.Rat = Rat

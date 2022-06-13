@@ -55,11 +55,6 @@ describe('Rat', () => {
     expect(new Rat(9n, 13n).le(new Rat(6n, 8n))).toBe(true)
   })
 
-  it('fromMillis', () => {
-    expect(Rat.fromMillis(123)).toEqual(new Rat(123n, 1_000n))
-    expect(() => Rat.fromMillis(Infinity)).toThrowError()
-  })
-
   describe('truncates', () => {
     it('positives', () => {
       expect(new Rat(18n, 10n).trunc()).toBe(1n)
@@ -136,7 +131,7 @@ describe('Rat', () => {
     it('divides', () => {
       expect(Rat.INFINITY.divide(new Rat(15n, 69n))).toEqual(Rat.INFINITY)
       expect(Rat.INFINITY.divide(new Rat(0n, 3n))).toEqual(Rat.INFINITY)
-      expect(() => Rat.INFINITY.divide(new Rat(-12n, 1n))).toThrowError()
+      expect(() => Rat.INFINITY.divide(new Rat(-12n, 1n))).toThrowError('Numerator must be positive if denominator is zero')
       expect(new Rat(15n, 69n).divide(Rat.INFINITY)).toEqual(new Rat(0n))
       expect(new Rat(0n, 3n).divide(Rat.INFINITY)).toEqual(new Rat(0n))
       expect(new Rat(-12n, 1n).divide(Rat.INFINITY)).toEqual(new Rat(0n))
@@ -151,16 +146,6 @@ describe('Rat', () => {
       expect(() => new Rat(0n, 3n).eq(Rat.INFINITY)).toThrowError()
       expect(() => new Rat(-12n, 1n).eq(Rat.INFINITY)).toThrowError()
       expect(() => Rat.INFINITY.eq(Rat.INFINITY)).toThrowError()
-    })
-
-    it('less than', () => {
-      expect(Rat.INFINITY.lt(new Rat(15n, 69n))).toBe(false)
-      expect(Rat.INFINITY.lt(new Rat(0n, 3n))).toBe(false)
-      expect(Rat.INFINITY.lt(new Rat(-12n, 1n))).toBe(false)
-      expect(() => new Rat(15n, 69n).lt(Rat.INFINITY)).toThrowError()
-      expect(() => new Rat(0n, 3n).lt(Rat.INFINITY)).toThrowError()
-      expect(() => new Rat(-12n, 1n).lt(Rat.INFINITY)).toThrowError()
-      expect(() => Rat.INFINITY.lt(Rat.INFINITY)).toThrowError()
     })
 
     it('less than or equal', () => {
@@ -185,10 +170,6 @@ describe('Rat', () => {
 
     it('truncates', () => {
       expect(() => Rat.INFINITY.trunc()).toThrowError()
-    })
-
-    it('converts to milliseconds', () => {
-      expect(() => Rat.INFINITY.toMillis()).toThrowError()
     })
   })
 })

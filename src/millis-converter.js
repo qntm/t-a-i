@@ -1,4 +1,4 @@
-const { Rat } = require('./rat.js')
+const { Second } = require('./second.js')
 const { Converter } = require('./converter.js')
 
 // Do not subclass `Converter` as we do not expose the same interface
@@ -8,14 +8,14 @@ module.exports.MillisConverter = class {
   }
 
   atomicToUnix (atomicMillis) {
-    const unix = this.converter.atomicToUnix(Rat.fromMillis(atomicMillis))
+    const unix = this.converter.atomicToUnix(Second.fromMillis(atomicMillis))
     return Number.isNaN(unix)
       ? unix
       : unix.toMillis()
   }
 
   unixToAtomic (unixMillis, options = {}) {
-    const ranges = this.converter.unixToAtomic(Rat.fromMillis(unixMillis))
+    const ranges = this.converter.unixToAtomic(Second.fromMillis(unixMillis))
       .map(range => [
         range.start.toMillis(),
         range.end.toMillis()

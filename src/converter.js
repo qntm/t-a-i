@@ -45,7 +45,7 @@ module.exports.Converter = class {
 
         // Previous range ends where current one starts, so try to combine the two.
         // The previous range should have `open: true` but it doesn't actually make a difference.
-        if (prev.end.eq(range.start)) {
+        if (prev.end.eqS(range.start)) {
           ranges[ranges.length - 1] = new Range(prev.start, range.end, range.open)
           continue
         }

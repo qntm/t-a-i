@@ -1,13 +1,26 @@
 const { Rat } = require('./rat.js')
 const { Range } = require('./range.js')
+const { Second } = require('./second.js')
 
 // A segment is a closed-open linear relationship between TAI and Unix time.
 // It should be able to handle arbitrary ratios between the two.
 // For precision, we deal with ratios of BigInts.
 // Segment validity ranges are inclusive-exclusive.
 class Segment {
-  constructor (start, end = { atomic: Rat.INFINITY }, slope = { unixPerAtomic: new Rat(1n) }) {
-    if (end.atomic.le(start.atomic)) {
+  constructor (start, end = { atomic: Second.END_OF_TIME }, slope = { unixPerAtomic: new Rat(1n) }) {
+    if (!(start.atomic instanceof Second)) {
+      throw Error('TAI start must be a rational number of seconds')
+    }
+    if (!(start.unix instanceof Second)) {
+      throw Error('Unix start must be a rational number of seconds')
+    }
+    if (!(end.atomic instanceof Second)) {
+      throw Error('TAI end must be a rational number of seconds')
+    }
+    if (!(slope.unixPerAtomic instanceof Rat)) {
+      throw Error('Slope must be a pure ratio')
+    }
+    if (end.atomic.leS(start.atomic)) {
       throw Error('Segment length must be positive')
     }
 
@@ -30,7 +43,7 @@ class Segment {
 
   unixToAtomicRange (unix) {
     if (this.slope.unixPerAtomic.eq(new Rat(0n))) {
-      if (!unix.eq(this.start.unix)) {
+      if (!unix.eqS(this.start.unix)) {
         throw Error('This Unix time never happened')
       }
 
@@ -38,18 +51,18 @@ class Segment {
     }
 
     const atomic = unix
-      .minus(this.start.unix)
-      .divide(this.slope.unixPerAtomic)
-      .plus(this.start.atomic)
+      .minusS(this.start.unix)
+      .divideR(this.slope.unixPerAtomic)
+      .plusS(this.start.atomic)
 
     return new Range(atomic)
   }
 
   atomicToUnix (atomic) {
     return atomic
-      .minus(this.start.atomic)
-      .times(this.slope.unixPerAtomic)
-      .plus(this.start.unix)
+      .minusS(this.start.atomic)
+      .timesR(this.slope.unixPerAtomic)
+      .plusS(this.start.unix)
   }
 
   // Bounds checks. Each segment has an inclusive-exclusive range of validity.
@@ -58,13 +71,13 @@ class Segment {
   // Unix by the segment.
 
   atomicOnSegment (atomic) {
-    return this.start.atomic.le(atomic) && this.end.atomic.gt(atomic)
+    return this.start.atomic.leS(atomic) && this.end.atomic.gtS(atomic)
   }
 
   unixOnSegment (unix) {
     return this.slope.unixPerAtomic.eq(new Rat(0n))
-      ? this.start.unix.eq(unix)
-      : this.start.unix.le(unix) && this.end.unix.gt(unix)
+      ? this.start.unix.eqS(unix)
+      : this.start.unix.leS(unix) && this.end.unix.gtS(unix)
   }
 }
 

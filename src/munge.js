@@ -1,7 +1,8 @@
 // So what do we ACTUALLY need from our data?
 
-const { Segment } = require('./segment')
-const { Rat } = require('./rat')
+const { Rat } = require('./rat.js')
+const { Second } = require('./second.js')
+const { Segment } = require('./segment.js')
 
 // In all models, TAI to Unix conversions are one-to-one (or one-to-NaN). At any given instant in
 // TAI, at most one segment applies and at most one Unix time corresponds.
@@ -33,9 +34,9 @@ const MODELS = {
 }
 
 const NOV = 10
-const secondsPerDay = new Rat(86_400n)
+const secondsPerDay = new Second(86_400n, 1n)
 const mjdEpoch = {
-  unix: Rat.fromMillis(Date.UTC(1858, NOV, 17))
+  unix: Second.fromMillis(Date.UTC(1858, NOV, 17))
 }
 
 // Input some raw TAI-UTC data, output the same data but altered to be more consumable for our
@@ -57,36 +58,36 @@ const munge = (data, model) => {
     ] = datum
 
     // Convert from a millisecond count to a precise ratio of seconds
-    start.unix = Rat.fromMillis(start.unixMillis)
+    start.unix = Second.fromMillis(start.unixMillis)
 
     // Convert from a floating point number to a precise ratio
     // Offsets are given in TAI seconds to seven decimal places, e.g. `1.422_818_0`.
     // So we have to do some rounding
-    offsetAtRoot.atomic = new Rat(
+    offsetAtRoot.atomic = new Second(
       BigInt(Math.round(offsetAtRoot.atomicFloat * 10_000_000)),
       BigInt(10_000_000)
     )
 
-    root.unix = mjdEpoch.unix.plus(new Rat(BigInt(root.mjds)).times(secondsPerDay))
+    root.unix = mjdEpoch.unix.plusS(secondsPerDay.timesR(new Rat(BigInt(root.mjds))))
 
     // Convert from a floating point number to a precise ratio
     // Drift rates are given in TAI seconds to seven decimal places, e.g. `0.001_123_2`
     // So we have to do some rounding
-    driftRate.atomicPerUnixDay = new Rat(
+    driftRate.atomicPerUnixDay = new Second(
       BigInt(Math.round(driftRate.atomicPerUnixDayFloat * 10_000_000)),
       BigInt(10_000_000)
     )
-    driftRate.atomicPerUnix = driftRate.atomicPerUnixDay.divide(secondsPerDay)
+    driftRate.atomicPerUnix = driftRate.atomicPerUnixDay.divideS(secondsPerDay)
 
     const slope = {}
     slope.atomicPerUnix = new Rat(1n).plus(driftRate.atomicPerUnix)
     slope.unixPerAtomic = new Rat(1n).divide(slope.atomicPerUnix)
 
     start.atomic = start.unix
-      .minus(root.unix)
-      .divide(slope.unixPerAtomic)
-      .plus(offsetAtRoot.atomic)
-      .plus(root.unix)
+      .minusS(root.unix)
+      .divideR(slope.unixPerAtomic)
+      .plusS(offsetAtRoot.atomic)
+      .plusS(root.unix)
 
     return {
       start,
@@ -100,10 +101,10 @@ const munge = (data, model) => {
     datum.end = {
       atomic: i + 1 in munged
         ? munged[i + 1].start.atomic
-        : Rat.INFINITY
+        : Second.END_OF_TIME
     }
 
-    if (datum.end.atomic.le(datum.start.atomic)) {
+    if (datum.end.atomic.leS(datum.start.atomic)) {
       throw Error('Disordered data')
     }
   })
@@ -132,13 +133,13 @@ const munge = (data, model) => {
       const smearStart = {}
 
       smearStart.unix = model === MODELS.SMEAR
-        ? b.start.unix.minus(secondsPerDay.divide(new Rat(2n)))
+        ? b.start.unix.minusS(secondsPerDay.divideR(new Rat(2n)))
         : b.start.unix
 
       smearStart.atomic = smearStart.unix
-        .minus(a.start.unix)
-        .divide(a.slope.unixPerAtomic)
-        .plus(a.start.atomic)
+        .minusS(a.start.unix)
+        .divideR(a.slope.unixPerAtomic)
+        .plusS(a.start.atomic)
 
       // Find smear end point, which is on the NEXT segment.
       // When breaking/stalling, this is the start of the next segment.
@@ -146,15 +147,15 @@ const munge = (data, model) => {
       const smearEnd = {}
 
       smearEnd.unix = model === MODELS.SMEAR
-        ? b.start.unix.plus(secondsPerDay.divide(new Rat(2n)))
+        ? b.start.unix.plusS(secondsPerDay.divideR(new Rat(2n)))
         : b.start.unix
 
       smearEnd.atomic = smearEnd.unix
-        .minus(b.start.unix)
-        .divide(b.slope.unixPerAtomic)
-        .plus(b.start.atomic)
+        .minusS(b.start.unix)
+        .divideR(b.slope.unixPerAtomic)
+        .plusS(b.start.atomic)
 
-      if (smearEnd.atomic.le(smearStart.atomic)) {
+      if (smearEnd.atomic.leS(smearStart.atomic)) {
         // No negative-length or zero-length smears.
         // This handles negative leap seconds correctly.
         continue
@@ -168,7 +169,7 @@ const munge = (data, model) => {
       // This can reduce `a` to length 0, in which case we elide it.
       // No point checking for negative-length segments, those throw an
       // exception later
-      if (a.start.atomic.eq(a.end.atomic)) {
+      if (a.start.atomic.eqS(a.end.atomic)) {
         munged.splice(i, 1)
         i--
       }
@@ -184,8 +185,8 @@ const munge = (data, model) => {
         start: smearStart,
         end: smearEnd, // includes unix but we'll ignore that
         slope: {
-          unixPerAtomic: smearEnd.unix.minus(smearStart.unix)
-            .divide(smearEnd.atomic.minus(smearStart.atomic))
+          unixPerAtomic: smearEnd.unix.minusS(smearStart.unix)
+            .divideS(smearEnd.atomic.minusS(smearStart.atomic))
         }
       })
 
