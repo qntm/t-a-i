@@ -29,15 +29,15 @@ class Second {
     return this.rat.divide(other.rat)
   }
 
-  eq (other) {
+  eqS (other) {
     return this.rat.eq(other.rat)
   }
 
-  le (other) {
+  leS (other) {
     return this.rat.le(other.rat)
   }
 
-  gt (other) {
+  gtS (other) {
     return this.rat.gt(other.rat)
   }
 

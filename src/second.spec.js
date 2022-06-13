@@ -39,21 +39,21 @@ describe('Second', () => {
   })
 
   it('greater than', () => {
-    expect(new Second(-1n, 3n).gt(new Second(1n, -2n))).toBe(true)
-    expect(new Second(0n).gt(new Second(1n))).toBe(false)
+    expect(new Second(-1n, 3n).gtS(new Second(1n, -2n))).toBe(true)
+    expect(new Second(0n).gtS(new Second(1n))).toBe(false)
   })
 
   it('equal', () => {
-    expect(new Second(-1n, 3n).eq(new Second(4n, -12n))).toBe(true)
-    expect(new Second(0n).eq(new Second(-1n))).toBe(false)
-    expect(new Second(0n).eq(new Second(-0n))).toBe(true)
+    expect(new Second(-1n, 3n).eqS(new Second(4n, -12n))).toBe(true)
+    expect(new Second(0n).eqS(new Second(-1n))).toBe(false)
+    expect(new Second(0n).eqS(new Second(-0n))).toBe(true)
   })
 
   it('less than or equal', () => {
-    expect(new Second(-2n, -3n).le(new Second(-2n, -3n))).toBe(true)
-    expect(new Second(-2n, -3n).le(new Second(2n, 3n))).toBe(true)
-    expect(new Second(9n, 12n).le(new Second(6n, 8n))).toBe(true)
-    expect(new Second(9n, 13n).le(new Second(6n, 8n))).toBe(true)
+    expect(new Second(-2n, -3n).leS(new Second(-2n, -3n))).toBe(true)
+    expect(new Second(-2n, -3n).leS(new Second(2n, 3n))).toBe(true)
+    expect(new Second(9n, 12n).leS(new Second(6n, 8n))).toBe(true)
+    expect(new Second(9n, 13n).leS(new Second(6n, 8n))).toBe(true)
   })
 
   it('fromMillis', () => {
@@ -110,33 +110,33 @@ describe('Second', () => {
     })
 
     it('equals', () => {
-      expect(Second.END_OF_TIME.eq(new Second(15n, 69n))).toBe(false)
-      expect(Second.END_OF_TIME.eq(new Second(0n, 3n))).toBe(false)
-      expect(Second.END_OF_TIME.eq(new Second(-12n, 1n))).toBe(false)
-      expect(() => new Second(15n, 69n).eq(Second.END_OF_TIME)).toThrowError()
-      expect(() => new Second(0n, 3n).eq(Second.END_OF_TIME)).toThrowError()
-      expect(() => new Second(-12n, 1n).eq(Second.END_OF_TIME)).toThrowError()
-      expect(() => Second.END_OF_TIME.eq(Second.END_OF_TIME)).toThrowError()
+      expect(Second.END_OF_TIME.eqS(new Second(15n, 69n))).toBe(false)
+      expect(Second.END_OF_TIME.eqS(new Second(0n, 3n))).toBe(false)
+      expect(Second.END_OF_TIME.eqS(new Second(-12n, 1n))).toBe(false)
+      expect(() => new Second(15n, 69n).eqS(Second.END_OF_TIME)).toThrowError()
+      expect(() => new Second(0n, 3n).eqS(Second.END_OF_TIME)).toThrowError()
+      expect(() => new Second(-12n, 1n).eqS(Second.END_OF_TIME)).toThrowError()
+      expect(() => Second.END_OF_TIME.eqS(Second.END_OF_TIME)).toThrowError()
     })
 
     it('less than or equal', () => {
-      expect(Second.END_OF_TIME.le(new Second(15n, 69n))).toBe(false)
-      expect(Second.END_OF_TIME.le(new Second(0n, 3n))).toBe(false)
-      expect(Second.END_OF_TIME.le(new Second(-12n, 1n))).toBe(false)
-      expect(() => new Second(15n, 69n).le(Second.END_OF_TIME)).toThrowError()
-      expect(() => new Second(0n, 3n).le(Second.END_OF_TIME)).toThrowError()
-      expect(() => new Second(-12n, 1n).le(Second.END_OF_TIME)).toThrowError()
-      expect(() => Second.END_OF_TIME.le(Second.END_OF_TIME)).toThrowError()
+      expect(Second.END_OF_TIME.leS(new Second(15n, 69n))).toBe(false)
+      expect(Second.END_OF_TIME.leS(new Second(0n, 3n))).toBe(false)
+      expect(Second.END_OF_TIME.leS(new Second(-12n, 1n))).toBe(false)
+      expect(() => new Second(15n, 69n).leS(Second.END_OF_TIME)).toThrowError()
+      expect(() => new Second(0n, 3n).leS(Second.END_OF_TIME)).toThrowError()
+      expect(() => new Second(-12n, 1n).leS(Second.END_OF_TIME)).toThrowError()
+      expect(() => Second.END_OF_TIME.leS(Second.END_OF_TIME)).toThrowError()
     })
 
     it('greater than', () => {
-      expect(Second.END_OF_TIME.gt(new Second(15n, 69n))).toBe(true)
-      expect(Second.END_OF_TIME.gt(new Second(0n, 3n))).toBe(true)
-      expect(Second.END_OF_TIME.gt(new Second(-12n, 1n))).toBe(true)
-      expect(() => new Second(15n, 69n).gt(Second.END_OF_TIME)).toThrowError()
-      expect(() => new Second(0n, 3n).gt(Second.END_OF_TIME)).toThrowError()
-      expect(() => new Second(-12n, 1n).gt(Second.END_OF_TIME)).toThrowError()
-      expect(() => Second.END_OF_TIME.gt(Second.END_OF_TIME)).toThrowError()
+      expect(Second.END_OF_TIME.gtS(new Second(15n, 69n))).toBe(true)
+      expect(Second.END_OF_TIME.gtS(new Second(0n, 3n))).toBe(true)
+      expect(Second.END_OF_TIME.gtS(new Second(-12n, 1n))).toBe(true)
+      expect(() => new Second(15n, 69n).gtS(Second.END_OF_TIME)).toThrowError()
+      expect(() => new Second(0n, 3n).gtS(Second.END_OF_TIME)).toThrowError()
+      expect(() => new Second(-12n, 1n).gtS(Second.END_OF_TIME)).toThrowError()
+      expect(() => Second.END_OF_TIME.gtS(Second.END_OF_TIME)).toThrowError()
     })
 
     it('converts to milliseconds', () => {

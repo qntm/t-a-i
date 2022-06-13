@@ -104,7 +104,7 @@ const munge = (data, model) => {
         : Second.END_OF_TIME
     }
 
-    if (datum.end.atomic.le(datum.start.atomic)) {
+    if (datum.end.atomic.leS(datum.start.atomic)) {
       throw Error('Disordered data')
     }
   })
@@ -155,7 +155,7 @@ const munge = (data, model) => {
         .divideR(b.slope.unixPerAtomic)
         .plusS(b.start.atomic)
 
-      if (smearEnd.atomic.le(smearStart.atomic)) {
+      if (smearEnd.atomic.leS(smearStart.atomic)) {
         // No negative-length or zero-length smears.
         // This handles negative leap seconds correctly.
         continue
@@ -169,7 +169,7 @@ const munge = (data, model) => {
       // This can reduce `a` to length 0, in which case we elide it.
       // No point checking for negative-length segments, those throw an
       // exception later
-      if (a.start.atomic.eq(a.end.atomic)) {
+      if (a.start.atomic.eqS(a.end.atomic)) {
         munged.splice(i, 1)
         i--
       }

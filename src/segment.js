@@ -20,7 +20,7 @@ class Segment {
     if (!(slope.unixPerAtomic instanceof Rat)) {
       throw Error('Slope must be a pure ratio')
     }
-    if (end.atomic.le(start.atomic)) {
+    if (end.atomic.leS(start.atomic)) {
       throw Error('Segment length must be positive')
     }
 
@@ -43,7 +43,7 @@ class Segment {
 
   unixToAtomicRange (unix) {
     if (this.slope.unixPerAtomic.eq(new Rat(0n))) {
-      if (!unix.eq(this.start.unix)) {
+      if (!unix.eqS(this.start.unix)) {
         throw Error('This Unix time never happened')
       }
 
@@ -71,13 +71,13 @@ class Segment {
   // Unix by the segment.
 
   atomicOnSegment (atomic) {
-    return this.start.atomic.le(atomic) && this.end.atomic.gt(atomic)
+    return this.start.atomic.leS(atomic) && this.end.atomic.gtS(atomic)
   }
 
   unixOnSegment (unix) {
     return this.slope.unixPerAtomic.eq(new Rat(0n))
-      ? this.start.unix.eq(unix)
-      : this.start.unix.le(unix) && this.end.unix.gt(unix)
+      ? this.start.unix.eqS(unix)
+      : this.start.unix.leS(unix) && this.end.unix.gtS(unix)
   }
 }
 
