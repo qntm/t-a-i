@@ -1,22 +1,23 @@
 const { Rat } = require('./rat.js')
 const { Range } = require('./range.js')
+const { Second } = require('./second.js')
 
 // A segment is a closed-open linear relationship between TAI and Unix time.
 // It should be able to handle arbitrary ratios between the two.
 // For precision, we deal with ratios of BigInts.
 // Segment validity ranges are inclusive-exclusive.
 class Segment {
-  constructor (start, end = { atomic: Rat.INFINITY }, slope = { unixPerAtomic: new Rat(1n) }) {
-    if (start.atomic.power !== 1) {
+  constructor (start, end = { atomic: Second.END_OF_TIME }, slope = { unixPerAtomic: new Rat(1n) }) {
+    if (!(start.atomic instanceof Second)) {
       throw Error('TAI start must be a rational number of seconds')
     }
-    if (start.unix.power !== 1) {
+    if (!(start.unix instanceof Second)) {
       throw Error('Unix start must be a rational number of seconds')
     }
-    if (end.atomic.power !== 1) {
+    if (!(end.atomic instanceof Second)) {
       throw Error('TAI end must be a rational number of seconds')
     }
-    if (slope.unixPerAtomic.power !== 0) {
+    if (!(slope.unixPerAtomic instanceof Rat)) {
       throw Error('Slope must be a pure ratio')
     }
     if (end.atomic.le(start.atomic)) {
@@ -50,18 +51,18 @@ class Segment {
     }
 
     const atomic = unix
-      .minus(this.start.unix)
-      .divide(this.slope.unixPerAtomic)
-      .plus(this.start.atomic)
+      .minusS(this.start.unix)
+      .divideR(this.slope.unixPerAtomic)
+      .plusS(this.start.atomic)
 
     return new Range(atomic)
   }
 
   atomicToUnix (atomic) {
     return atomic
-      .minus(this.start.atomic)
-      .times(this.slope.unixPerAtomic)
-      .plus(this.start.unix)
+      .minusS(this.start.atomic)
+      .timesR(this.slope.unixPerAtomic)
+      .plusS(this.start.unix)
   }
 
   // Bounds checks. Each segment has an inclusive-exclusive range of validity.

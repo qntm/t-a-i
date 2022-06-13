@@ -1,7 +1,7 @@
 const { div, gcd } = require('./div')
 
 class Rat {
-  constructor (nu, de = 1n, power = 0) {
+  constructor (nu, de = 1n) {
     if (typeof nu !== 'bigint') {
       throw Error('Numerator must be a BigInt')
     }
@@ -16,78 +16,47 @@ class Rat {
 
     const g2 = (de < 0) === (g < 0) ? g : -g
 
-    this.de = de / g2 // non-negative
     this.nu = nu / g2 // sign of `this.nu` is the sign of the represented rational
-
-    this.power = power
+    this.de = de / g2 // non-negative
   }
 
   plus (other) {
-    if (other.power !== this.power) {
-      throw Error(`Mismatched powers: s^${this.power} + s^${other.power}`)
-    }
     if (this.de === 0n && other.de === 0n) {
-      return new Rat(this.nu + other.nu, 0n, this.power)
+      return new Rat(this.nu + other.nu, 0n)
     }
-    return new Rat(this.nu * other.de + this.de * other.nu, this.de * other.de, this.power)
+    return new Rat(this.nu * other.de + this.de * other.nu, this.de * other.de)
   }
 
   minus (other) {
-    return this.plus(new Rat(-other.nu, other.de, other.power))
+    return this.plus(new Rat(-other.nu, other.de))
   }
 
   times (other) {
-    return new Rat(this.nu * other.nu, this.de * other.de, this.power + other.power)
+    return new Rat(this.nu * other.nu, this.de * other.de)
   }
 
   divide (other) {
-    return this.times(new Rat(other.de, other.nu, -other.power))
-  }
-
-  cmp (other) {
-    return this.minus(other).nu
+    return this.times(new Rat(other.de, other.nu))
   }
 
   eq (other) {
-    return this.cmp(other) === 0n
-  }
-
-  lt (other) {
-    return this.cmp(other) < 0n
+    return this.minus(other).nu === 0n
   }
 
   le (other) {
-    return this.cmp(other) <= 0n
+    return this.minus(other).nu <= 0n
   }
 
   gt (other) {
-    return this.cmp(other) > 0n
+    return this.minus(other).nu > 0n
   }
 
   // Truncate the fraction towards negative infinity
   trunc () {
     return div(this.nu, this.de)
   }
-
-  toMillis () {
-    if (this.power !== 1) {
-      throw Error('Wrong power')
-    }
-    return Number(this.times(new Rat(1_000n)).trunc())
-  }
 }
 
-// Support for this special value is limited. In all cases it either returns
-// a correct, meaningful result, or throws an exception - it does NOT return
-// bad results.
-Rat.INFINITY = new Rat(1n, 0n, 1)
-
-Rat.fromMillis = millis => {
-  if (!Number.isInteger(millis)) {
-    throw Error(`Not an integer: ${millis}`)
-  }
-
-  return new Rat(BigInt(millis), 1_000n, 1)
-}
+Rat.INFINITY = new Rat(1n, 0n)
 
 module.exports.Rat = Rat

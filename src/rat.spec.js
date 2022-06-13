@@ -15,7 +15,6 @@ describe('Rat', () => {
   })
 
   it('adds', () => {
-    expect(() => new Rat(1n, 2n).plus(new Rat(1n, 3n, 1))).toThrowError('Mismatched powers: s^0 + s^1')
     expect(new Rat(1n, 2n).plus(new Rat(1n, 3n))).toEqual(new Rat(5n, 6n))
     expect(new Rat(1n, 2n).plus(new Rat(0n, 3n))).toEqual(new Rat(1n, 2n))
     expect(new Rat(0n, 2n).plus(new Rat(1n, 3n))).toEqual(new Rat(1n, 3n))
@@ -54,16 +53,6 @@ describe('Rat', () => {
     expect(new Rat(-2n, -3n).le(new Rat(2n, 3n))).toBe(true)
     expect(new Rat(9n, 12n).le(new Rat(6n, 8n))).toBe(true)
     expect(new Rat(9n, 13n).le(new Rat(6n, 8n))).toBe(true)
-  })
-
-  it('fromMillis', () => {
-    expect(Rat.fromMillis(123)).toEqual(new Rat(123n, 1_000n, 1))
-    expect(() => Rat.fromMillis(Infinity)).toThrowError()
-  })
-
-  it('toMillis', () => {
-    expect(new Rat(123n, 1_000n, 1).toMillis()).toBe(123)
-    expect(() => new Rat(123n, 1_000n).toMillis()).toThrowError('Wrong power')
   })
 
   describe('truncates', () => {
@@ -106,26 +95,26 @@ describe('Rat', () => {
 
   describe('positive infinity', () => {
     it('reduces to the lowest terms', () => {
-      expect(Rat.INFINITY).toEqual(new Rat(133n, 0n, 1))
+      expect(Rat.INFINITY).toEqual(new Rat(133n, 0n))
     })
 
     it('adds', () => {
-      expect(Rat.INFINITY.plus(new Rat(15n, 69n, 1))).toEqual(Rat.INFINITY)
-      expect(Rat.INFINITY.plus(new Rat(0n, 3n, 1))).toEqual(Rat.INFINITY)
-      expect(Rat.INFINITY.plus(new Rat(-12n, 1n, 1))).toEqual(Rat.INFINITY)
-      expect(new Rat(15n, 69n, 1).plus(Rat.INFINITY)).toEqual(Rat.INFINITY)
-      expect(new Rat(0n, 3n, 1).plus(Rat.INFINITY)).toEqual(Rat.INFINITY)
-      expect(new Rat(-12n, 1n, 1).plus(Rat.INFINITY)).toEqual(Rat.INFINITY)
+      expect(Rat.INFINITY.plus(new Rat(15n, 69n))).toEqual(Rat.INFINITY)
+      expect(Rat.INFINITY.plus(new Rat(0n, 3n))).toEqual(Rat.INFINITY)
+      expect(Rat.INFINITY.plus(new Rat(-12n, 1n))).toEqual(Rat.INFINITY)
+      expect(new Rat(15n, 69n).plus(Rat.INFINITY)).toEqual(Rat.INFINITY)
+      expect(new Rat(0n, 3n).plus(Rat.INFINITY)).toEqual(Rat.INFINITY)
+      expect(new Rat(-12n, 1n).plus(Rat.INFINITY)).toEqual(Rat.INFINITY)
       expect(Rat.INFINITY.plus(Rat.INFINITY)).toEqual(Rat.INFINITY)
     })
 
     it('subtracts', () => {
-      expect(Rat.INFINITY.minus(new Rat(15n, 69n, 1))).toEqual(Rat.INFINITY)
-      expect(Rat.INFINITY.minus(new Rat(0n, 3n, 1))).toEqual(Rat.INFINITY)
-      expect(Rat.INFINITY.minus(new Rat(-12n, 1n, 1))).toEqual(Rat.INFINITY)
-      expect(() => new Rat(15n, 69n, 1).minus(Rat.INFINITY)).toThrowError()
-      expect(() => new Rat(0n, 3n, 1).minus(Rat.INFINITY)).toThrowError()
-      expect(() => new Rat(-12n, 1n, 1).minus(Rat.INFINITY)).toThrowError()
+      expect(Rat.INFINITY.minus(new Rat(15n, 69n))).toEqual(Rat.INFINITY)
+      expect(Rat.INFINITY.minus(new Rat(0n, 3n))).toEqual(Rat.INFINITY)
+      expect(Rat.INFINITY.minus(new Rat(-12n, 1n))).toEqual(Rat.INFINITY)
+      expect(() => new Rat(15n, 69n).minus(Rat.INFINITY)).toThrowError()
+      expect(() => new Rat(0n, 3n).minus(Rat.INFINITY)).toThrowError()
+      expect(() => new Rat(-12n, 1n).minus(Rat.INFINITY)).toThrowError()
       expect(() => Rat.INFINITY.minus(Rat.INFINITY)).toThrowError()
     })
 
@@ -136,65 +125,51 @@ describe('Rat', () => {
       expect(new Rat(15n, 69n).times(Rat.INFINITY)).toEqual(Rat.INFINITY)
       expect(() => new Rat(0n, 3n).times(Rat.INFINITY)).toThrowError()
       expect(() => new Rat(-12n, 1n).times(Rat.INFINITY)).toThrowError()
-      expect(Rat.INFINITY.times(Rat.INFINITY)).toEqual(new Rat(1n, 0n, 2))
+      expect(Rat.INFINITY.times(Rat.INFINITY)).toEqual(Rat.INFINITY)
     })
 
     it('divides', () => {
       expect(Rat.INFINITY.divide(new Rat(15n, 69n))).toEqual(Rat.INFINITY)
       expect(Rat.INFINITY.divide(new Rat(0n, 3n))).toEqual(Rat.INFINITY)
       expect(() => Rat.INFINITY.divide(new Rat(-12n, 1n))).toThrowError('Numerator must be positive if denominator is zero')
-      expect(new Rat(15n, 69n, 1).divide(Rat.INFINITY)).toEqual(new Rat(0n))
-      expect(new Rat(0n, 3n, 1).divide(Rat.INFINITY)).toEqual(new Rat(0n))
-      expect(new Rat(-12n, 1n, 1).divide(Rat.INFINITY)).toEqual(new Rat(0n))
+      expect(new Rat(15n, 69n).divide(Rat.INFINITY)).toEqual(new Rat(0n))
+      expect(new Rat(0n, 3n).divide(Rat.INFINITY)).toEqual(new Rat(0n))
+      expect(new Rat(-12n, 1n).divide(Rat.INFINITY)).toEqual(new Rat(0n))
       expect(() => Rat.INFINITY.divide(Rat.INFINITY)).toThrowError()
     })
 
     it('equals', () => {
-      expect(Rat.INFINITY.eq(new Rat(15n, 69n, 1))).toBe(false)
-      expect(Rat.INFINITY.eq(new Rat(0n, 3n, 1))).toBe(false)
-      expect(Rat.INFINITY.eq(new Rat(-12n, 1n, 1))).toBe(false)
-      expect(() => new Rat(15n, 69n, 1).eq(Rat.INFINITY)).toThrowError()
-      expect(() => new Rat(0n, 3n, 1).eq(Rat.INFINITY)).toThrowError()
-      expect(() => new Rat(-12n, 1n, 1).eq(Rat.INFINITY)).toThrowError()
+      expect(Rat.INFINITY.eq(new Rat(15n, 69n))).toBe(false)
+      expect(Rat.INFINITY.eq(new Rat(0n, 3n))).toBe(false)
+      expect(Rat.INFINITY.eq(new Rat(-12n, 1n))).toBe(false)
+      expect(() => new Rat(15n, 69n).eq(Rat.INFINITY)).toThrowError()
+      expect(() => new Rat(0n, 3n).eq(Rat.INFINITY)).toThrowError()
+      expect(() => new Rat(-12n, 1n).eq(Rat.INFINITY)).toThrowError()
       expect(() => Rat.INFINITY.eq(Rat.INFINITY)).toThrowError()
     })
 
-    it('less than', () => {
-      expect(Rat.INFINITY.lt(new Rat(15n, 69n, 1))).toBe(false)
-      expect(Rat.INFINITY.lt(new Rat(0n, 3n, 1))).toBe(false)
-      expect(Rat.INFINITY.lt(new Rat(-12n, 1n, 1))).toBe(false)
-      expect(() => new Rat(15n, 69n, 1).lt(Rat.INFINITY)).toThrowError()
-      expect(() => new Rat(0n, 3n, 1).lt(Rat.INFINITY)).toThrowError()
-      expect(() => new Rat(-12n, 1n, 1).lt(Rat.INFINITY)).toThrowError()
-      expect(() => Rat.INFINITY.lt(Rat.INFINITY)).toThrowError()
-    })
-
     it('less than or equal', () => {
-      expect(Rat.INFINITY.le(new Rat(15n, 69n, 1))).toBe(false)
-      expect(Rat.INFINITY.le(new Rat(0n, 3n, 1))).toBe(false)
-      expect(Rat.INFINITY.le(new Rat(-12n, 1n, 1))).toBe(false)
-      expect(() => new Rat(15n, 69n, 1).le(Rat.INFINITY)).toThrowError()
-      expect(() => new Rat(0n, 3n, 1).le(Rat.INFINITY)).toThrowError()
-      expect(() => new Rat(-12n, 1n, 1).le(Rat.INFINITY)).toThrowError()
+      expect(Rat.INFINITY.le(new Rat(15n, 69n))).toBe(false)
+      expect(Rat.INFINITY.le(new Rat(0n, 3n))).toBe(false)
+      expect(Rat.INFINITY.le(new Rat(-12n, 1n))).toBe(false)
+      expect(() => new Rat(15n, 69n).le(Rat.INFINITY)).toThrowError()
+      expect(() => new Rat(0n, 3n).le(Rat.INFINITY)).toThrowError()
+      expect(() => new Rat(-12n, 1n).le(Rat.INFINITY)).toThrowError()
       expect(() => Rat.INFINITY.le(Rat.INFINITY)).toThrowError()
     })
 
     it('greater than', () => {
-      expect(Rat.INFINITY.gt(new Rat(15n, 69n, 1))).toBe(true)
-      expect(Rat.INFINITY.gt(new Rat(0n, 3n, 1))).toBe(true)
-      expect(Rat.INFINITY.gt(new Rat(-12n, 1n, 1))).toBe(true)
-      expect(() => new Rat(15n, 69n, 1).gt(Rat.INFINITY)).toThrowError()
-      expect(() => new Rat(0n, 3n, 1).gt(Rat.INFINITY)).toThrowError()
-      expect(() => new Rat(-12n, 1n, 1).gt(Rat.INFINITY)).toThrowError()
+      expect(Rat.INFINITY.gt(new Rat(15n, 69n))).toBe(true)
+      expect(Rat.INFINITY.gt(new Rat(0n, 3n))).toBe(true)
+      expect(Rat.INFINITY.gt(new Rat(-12n, 1n))).toBe(true)
+      expect(() => new Rat(15n, 69n).gt(Rat.INFINITY)).toThrowError()
+      expect(() => new Rat(0n, 3n).gt(Rat.INFINITY)).toThrowError()
+      expect(() => new Rat(-12n, 1n).gt(Rat.INFINITY)).toThrowError()
       expect(() => Rat.INFINITY.gt(Rat.INFINITY)).toThrowError()
     })
 
     it('truncates', () => {
       expect(() => Rat.INFINITY.trunc()).toThrowError()
-    })
-
-    it('converts to milliseconds', () => {
-      expect(() => Rat.INFINITY.toMillis()).toThrowError()
     })
   })
 })
