@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## Forthcoming changes in 4.0.0, expected May 2023
+
+* `t-a-i` will drop support for Node.js 14.
+* `t-a-i` will switch over from providing [CommonJS modules](https://nodejs.org/docs/latest/api/modules.html) (which use `require` and `module.exports`) to using [ECMAScript modules](https://nodejs.org/docs/latest/api/esm.html) (which use `import` and `export`).
+
 ## 3.0.x
 
 `t-a-i`'s API has been completely overhauled. Code like:
