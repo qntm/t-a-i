@@ -22,7 +22,7 @@ describe('UNIX_START', () => {
 
 describe('UNIX_END', () => {
   it('is correct', () => {
-    expect(UNIX_END).toEqual(Second.fromMillis(Date.UTC(2022, JUN, 30, 12, 0, 0, 0)))
+    expect(UNIX_END).toEqual(Second.fromMillis(Date.UTC(2023, JUN, 30, 12, 0, 0, 0)))
   })
 })
 
