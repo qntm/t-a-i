@@ -7,7 +7,6 @@ const JAN = 0
 const FEB = 1
 const MAR = 2
 const APR = 3
-const JUN = 5
 const JUL = 6
 const AUG = 7
 const SEP = 8
@@ -22,7 +21,8 @@ describe('UNIX_START', () => {
 
 describe('UNIX_END', () => {
   it('is correct', () => {
-    expect(UNIX_END).toEqual(Second.fromMillis(Date.UTC(2023, JUN, 30, 12, 0, 0, 0)))
+    expect(UNIX_END).toEqual(Second.fromMillis(Date.UTC(2023, DEC, 31, 12, 0, 0, 0)))
+    expect(UNIX_END).toEqual(Second.fromMillis(Date.UTC(2023, DEC, 31, 12, 0, 0, 0)))
   })
 })
 
