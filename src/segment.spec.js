@@ -1,5 +1,6 @@
 /* eslint-env jest */
 
+const assert = require('node:assert')
 const { Rat } = require('./rat.js')
 const { Range } = require('./range.js')
 const { Second } = require('./second.js')
@@ -9,35 +10,35 @@ const MAY = 4
 
 describe('Segment', () => {
   it('disallows bad powers', () => {
-    expect(() => new Segment(
+    assert.throws(() => new Segment(
       { atomic: new Rat(0n) }
-    )).toThrowError('TAI start must be a rational number of seconds')
-    expect(() => new Segment(
+    ), /TAI start must be a rational number of seconds/)
+    assert.throws(() => new Segment(
       { atomic: Second.fromMillis(0), unix: new Rat(0n) }
-    )).toThrowError('Unix start must be a rational number of seconds')
-    expect(() => new Segment(
+    ), /Unix start must be a rational number of seconds/)
+    assert.throws(() => new Segment(
       { atomic: Second.fromMillis(0), unix: Second.fromMillis(0) },
       { atomic: new Rat(1n) }
-    )).toThrowError('TAI end must be a rational number of seconds')
-    expect(() => new Segment(
+    ), /TAI end must be a rational number of seconds/)
+    assert.throws(() => new Segment(
       { atomic: Second.fromMillis(0), unix: Second.fromMillis(0) },
       { atomic: Second.fromMillis(1_000) },
       { unixPerAtomic: new Second(1n, 1n) }
-    )).toThrowError('Slope must be a pure ratio')
+    ), /Slope must be a pure ratio/)
   })
 
   it('disallows rays which run backwards', () => {
-    expect(() => new Segment(
+    assert.throws(() => new Segment(
       { atomic: Second.fromMillis(0), unix: Second.fromMillis(0) },
       { atomic: new Second(-1n, 1_000_000_000_000n) }
-    )).toThrowError('Segment length must be positive')
+    ), /Segment length must be positive/)
   })
 
   it('disallows zero-length rays which run backwards', () => {
-    expect(() => new Segment(
+    assert.throws(() => new Segment(
       { atomic: Second.fromMillis(0), unix: Second.fromMillis(0) },
       { atomic: Second.fromMillis(0) }
-    )).toThrowError('Segment length must be positive')
+    ), /Segment length must be positive/)
   })
 
   describe('basic infinite ray', () => {
@@ -46,36 +47,36 @@ describe('Segment', () => {
     )
 
     it('zero point', () => {
-      expect(segment.unixOnSegment(Second.fromMillis(0)))
-        .toBe(true)
-      expect(segment.unixToAtomicRange(Second.fromMillis(0)))
-        .toEqual(new Range(Second.fromMillis(0)))
-      expect(segment.atomicOnSegment(Second.fromMillis(0)))
-        .toBe(true)
-      expect(segment.atomicToUnix(Second.fromMillis(0)))
-        .toEqual(Second.fromMillis(0))
+      assert.strictEqual(segment.unixOnSegment(Second.fromMillis(0)),
+        true)
+      assert.deepStrictEqual(segment.unixToAtomicRange(Second.fromMillis(0)),
+        new Range(Second.fromMillis(0)))
+      assert.strictEqual(segment.atomicOnSegment(Second.fromMillis(0)),
+        true)
+      assert.deepStrictEqual(segment.atomicToUnix(Second.fromMillis(0)),
+        Second.fromMillis(0))
     })
 
     it('modern day', () => {
-      expect(segment.unixOnSegment(Second.fromMillis(Date.UTC(2021, MAY, 16, 12, 11, 10, 9))))
-        .toBe(true)
-      expect(segment.unixToAtomicRange(Second.fromMillis(Date.UTC(2021, MAY, 16, 12, 11, 10, 9))))
-        .toEqual(new Range(Second.fromMillis(Date.UTC(2021, MAY, 16, 12, 11, 10, 9))))
-      expect(segment.atomicOnSegment(Second.fromMillis(Date.UTC(2021, MAY, 16, 12, 11, 10, 9))))
-        .toBe(true)
-      expect(segment.atomicToUnix(Second.fromMillis(Date.UTC(2021, MAY, 16, 12, 11, 10, 9))))
-        .toEqual(Second.fromMillis(Date.UTC(2021, MAY, 16, 12, 11, 10, 9)))
+      assert.strictEqual(segment.unixOnSegment(Second.fromMillis(Date.UTC(2021, MAY, 16, 12, 11, 10, 9))),
+        true)
+      assert.deepStrictEqual(segment.unixToAtomicRange(Second.fromMillis(Date.UTC(2021, MAY, 16, 12, 11, 10, 9))),
+        new Range(Second.fromMillis(Date.UTC(2021, MAY, 16, 12, 11, 10, 9))))
+      assert.strictEqual(segment.atomicOnSegment(Second.fromMillis(Date.UTC(2021, MAY, 16, 12, 11, 10, 9))),
+        true)
+      assert.deepStrictEqual(segment.atomicToUnix(Second.fromMillis(Date.UTC(2021, MAY, 16, 12, 11, 10, 9))),
+        Second.fromMillis(Date.UTC(2021, MAY, 16, 12, 11, 10, 9)))
     })
 
     it('before start point', () => {
-      expect(segment.unixOnSegment(Second.fromMillis(-1)))
-        .toBe(false)
-      expect(segment.unixToAtomicRange(Second.fromMillis(-1)))
-        .toEqual(new Range(Second.fromMillis(-1)))
-      expect(segment.atomicOnSegment(Second.fromMillis(-1)))
-        .toBe(false)
-      expect(segment.atomicToUnix(Second.fromMillis(-1)))
-        .toEqual(Second.fromMillis(-1))
+      assert.strictEqual(segment.unixOnSegment(Second.fromMillis(-1)),
+        false)
+      assert.deepStrictEqual(segment.unixToAtomicRange(Second.fromMillis(-1)),
+        new Range(Second.fromMillis(-1)))
+      assert.strictEqual(segment.atomicOnSegment(Second.fromMillis(-1)),
+        false)
+      assert.deepStrictEqual(segment.atomicToUnix(Second.fromMillis(-1)),
+        Second.fromMillis(-1))
     })
   })
 
@@ -87,52 +88,52 @@ describe('Segment', () => {
     )
 
     it('zero point', () => {
-      expect(segment.unixOnSegment(Second.fromMillis(0)))
-        .toBe(true)
-      expect(segment.unixToAtomicRange(Second.fromMillis(0)))
-        .toEqual(new Range(Second.fromMillis(0)))
-      expect(segment.atomicOnSegment(Second.fromMillis(0)))
-        .toBe(true)
-      expect(segment.atomicToUnix(Second.fromMillis(0)))
-        .toEqual(Second.fromMillis(0))
+      assert.strictEqual(segment.unixOnSegment(Second.fromMillis(0)),
+        true)
+      assert.deepStrictEqual(segment.unixToAtomicRange(Second.fromMillis(0)),
+        new Range(Second.fromMillis(0)))
+      assert.strictEqual(segment.atomicOnSegment(Second.fromMillis(0)),
+        true)
+      assert.deepStrictEqual(segment.atomicToUnix(Second.fromMillis(0)),
+        Second.fromMillis(0))
     })
 
     it('a little later', () => {
-      expect(segment.unixOnSegment(Second.fromMillis(501)))
-        .toBe(true)
-      expect(segment.unixToAtomicRange(Second.fromMillis(501)))
-        .toEqual(new Range(Second.fromMillis(1_002)))
-      expect(segment.atomicOnSegment(Second.fromMillis(1_002)))
-        .toBe(true)
-      expect(segment.atomicToUnix(Second.fromMillis(1_002)))
-        .toEqual(Second.fromMillis(501))
+      assert.strictEqual(segment.unixOnSegment(Second.fromMillis(501)),
+        true)
+      assert.deepStrictEqual(segment.unixToAtomicRange(Second.fromMillis(501)),
+        new Range(Second.fromMillis(1_002)))
+      assert.strictEqual(segment.atomicOnSegment(Second.fromMillis(1_002)),
+        true)
+      assert.deepStrictEqual(segment.atomicToUnix(Second.fromMillis(1_002)),
+        Second.fromMillis(501))
     })
 
     it('right before end point', () => {
-      expect(segment.unixOnSegment(Second.fromMillis(999)))
-        .toBe(true)
-      expect(segment.unixToAtomicRange(Second.fromMillis(999)))
-        .toEqual(new Range(Second.fromMillis(1_998)))
+      assert.strictEqual(segment.unixOnSegment(Second.fromMillis(999)),
+        true)
+      assert.deepStrictEqual(segment.unixToAtomicRange(Second.fromMillis(999)),
+        new Range(Second.fromMillis(1_998)))
 
-      expect(segment.atomicOnSegment(Second.fromMillis(1_998)))
-        .toBe(true)
-      expect(segment.atomicToUnix(Second.fromMillis(1_998)))
-        .toEqual(Second.fromMillis(999))
-      expect(segment.atomicOnSegment(Second.fromMillis(1_999)))
-        .toBe(true)
-      expect(segment.atomicToUnix(Second.fromMillis(1_999)))
-        .toEqual(new Second(1_999n, 2_000n)) // truncates to 999ms
+      assert.strictEqual(segment.atomicOnSegment(Second.fromMillis(1_998)),
+        true)
+      assert.deepStrictEqual(segment.atomicToUnix(Second.fromMillis(1_998)),
+        Second.fromMillis(999))
+      assert.strictEqual(segment.atomicOnSegment(Second.fromMillis(1_999)),
+        true)
+      assert.deepStrictEqual(segment.atomicToUnix(Second.fromMillis(1_999)),
+        new Second(1_999n, 2_000n)) // truncates to 999ms
     })
 
     it('end point', () => {
-      expect(segment.unixOnSegment(Second.fromMillis(1_000)))
-        .toBe(false)
-      expect(segment.unixToAtomicRange(Second.fromMillis(1_000)))
-        .toEqual(new Range(Second.fromMillis(2_000)))
-      expect(segment.atomicOnSegment(Second.fromMillis(2_000)))
-        .toBe(false)
-      expect(segment.atomicToUnix(Second.fromMillis(2_000)))
-        .toEqual(Second.fromMillis(1_000))
+      assert.strictEqual(segment.unixOnSegment(Second.fromMillis(1_000)),
+        false)
+      assert.deepStrictEqual(segment.unixToAtomicRange(Second.fromMillis(1_000)),
+        new Range(Second.fromMillis(2_000)))
+      assert.strictEqual(segment.atomicOnSegment(Second.fromMillis(2_000)),
+        false)
+      assert.deepStrictEqual(segment.atomicToUnix(Second.fromMillis(2_000)),
+        Second.fromMillis(1_000))
     })
   })
 
@@ -144,32 +145,32 @@ describe('Segment', () => {
     )
 
     it('zero point', () => {
-      expect(segment.unixOnSegment(Second.fromMillis(0)))
-        .toBe(true)
-      expect(segment.unixToAtomicRange(Second.fromMillis(0)))
-        .toEqual(new Range(Second.fromMillis(0), Second.fromMillis(2_000), true))
-      expect(segment.atomicOnSegment(Second.fromMillis(0)))
-        .toBe(true)
-      expect(segment.atomicToUnix(Second.fromMillis(0)))
-        .toEqual(Second.fromMillis(0))
+      assert.strictEqual(segment.unixOnSegment(Second.fromMillis(0)),
+        true)
+      assert.deepStrictEqual(segment.unixToAtomicRange(Second.fromMillis(0)),
+        new Range(Second.fromMillis(0), Second.fromMillis(2_000), true))
+      assert.strictEqual(segment.atomicOnSegment(Second.fromMillis(0)),
+        true)
+      assert.deepStrictEqual(segment.atomicToUnix(Second.fromMillis(0)),
+        Second.fromMillis(0))
     })
 
     it('later in TAI', () => {
-      expect(segment.atomicOnSegment(Second.fromMillis(1_999)))
-        .toBe(true)
-      expect(segment.atomicToUnix(Second.fromMillis(1_999)))
-        .toEqual(Second.fromMillis(0))
-      expect(segment.atomicOnSegment(Second.fromMillis(2_000)))
-        .toBe(false)
-      expect(segment.atomicToUnix(Second.fromMillis(2_000)))
-        .toEqual(Second.fromMillis(0))
+      assert.strictEqual(segment.atomicOnSegment(Second.fromMillis(1_999)),
+        true)
+      assert.deepStrictEqual(segment.atomicToUnix(Second.fromMillis(1_999)),
+        Second.fromMillis(0))
+      assert.strictEqual(segment.atomicOnSegment(Second.fromMillis(2_000)),
+        false)
+      assert.deepStrictEqual(segment.atomicToUnix(Second.fromMillis(2_000)),
+        Second.fromMillis(0))
     })
 
     it('later in Unix time', () => {
-      expect(segment.unixOnSegment(Second.fromMillis(1_000)))
-        .toBe(false)
-      expect(() => segment.unixToAtomicRange(Second.fromMillis(-1)))
-        .toThrowError('This Unix time never happened')
+      assert.strictEqual(segment.unixOnSegment(Second.fromMillis(1_000)),
+        false)
+      assert.throws(() => segment.unixToAtomicRange(Second.fromMillis(-1)),
+        /This Unix time never happened/)
     })
   })
 })
