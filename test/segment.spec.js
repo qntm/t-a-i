@@ -1,4 +1,5 @@
 const assert = require('node:assert')
+const { describe, it } = require('mocha')
 const { Rat } = require('../src/rat.js')
 const { Range } = require('../src/range.js')
 const { Second } = require('../src/second.js')

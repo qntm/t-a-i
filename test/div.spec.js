@@ -1,4 +1,5 @@
 const assert = require('node:assert')
+const { describe, it } = require('mocha')
 const { sign, div, gcd } = require('../src/div.js')
 
 describe('sign', () => {

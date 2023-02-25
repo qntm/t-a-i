@@ -1,4 +1,5 @@
 const assert = require('node:assert')
+const { describe, it } = require('mocha')
 const { TaiConverter, Second, MODELS, UNIX_START, UNIX_END } = require('../src/exact.js')
 const { Range } = require('../src/range.js')
 

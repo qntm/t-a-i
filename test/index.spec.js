@@ -1,4 +1,5 @@
 const assert = require('node:assert')
+const { describe, it } = require('mocha')
 const { TaiConverter, MODELS, UNIX_START, UNIX_END } = require('../src/index.js')
 
 const JAN = 0
