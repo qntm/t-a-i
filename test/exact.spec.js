@@ -1,8 +1,6 @@
-/* eslint-env jest */
-
 const assert = require('node:assert')
-const { TaiConverter, Second, MODELS, UNIX_START, UNIX_END } = require('./exact.js')
-const { Range } = require('./range.js')
+const { TaiConverter, Second, MODELS, UNIX_START, UNIX_END } = require('../src/exact.js')
+const { Range } = require('../src/range.js')
 
 const JAN = 0
 const FEB = 1

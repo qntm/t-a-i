@@ -1,10 +1,8 @@
-/* eslint-env jest */
-
 const assert = require('node:assert')
-const { Rat } = require('./rat.js')
-const { Range } = require('./range.js')
-const { Second } = require('./second.js')
-const { Segment } = require('./segment.js')
+const { Rat } = require('../src/rat.js')
+const { Range } = require('../src/range.js')
+const { Second } = require('../src/second.js')
+const { Segment } = require('../src/segment.js')
 
 const MAY = 4
 

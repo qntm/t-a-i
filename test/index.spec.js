@@ -1,5 +1,3 @@
-/* eslint-env jest */
-
 const assert = require('node:assert')
 const { TaiConverter, MODELS, UNIX_START, UNIX_END } = require('..')
 

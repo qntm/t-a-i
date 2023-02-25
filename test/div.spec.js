@@ -1,7 +1,5 @@
-/* eslint-env jest */
-
 const assert = require('node:assert')
-const { sign, div, gcd } = require('./div.js')
+const { sign, div, gcd } = require('../src/div.js')
 
 describe('sign', () => {
   it('works', () => {

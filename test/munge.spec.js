@@ -1,11 +1,9 @@
-/* eslint-env jest */
-
 const assert = require('node:assert')
-const { taiData } = require('./tai-data.js')
-const { munge, MODELS } = require('./munge.js')
-const { Second } = require('./second.js')
-const { Segment } = require('./segment.js')
-const { Rat } = require('./rat.js')
+const { taiData } = require('../src/tai-data.js')
+const { munge, MODELS } = require('../src/munge.js')
+const { Second } = require('../src/second.js')
+const { Segment } = require('../src/segment.js')
+const { Rat } = require('../src/rat.js')
 
 const JAN = 0
 const DEC = 11
@@ -133,7 +131,7 @@ describe('munge', () => {
     })
 
     it('generates proper slopes', () => {
-      assert.deepStrictEqual(munge(taiData, MODELS.OVERRUN).map(segment => segment.slope.unixPerAtomic), 
+      assert.deepStrictEqual(munge(taiData, MODELS.OVERRUN).map(segment => segment.slope.unixPerAtomic),
         [
           // Exact ratio of nanoseconds. TAI adds a millisecond or two per day
           new Rat(86_400_000_000_000n, 86_400_000_000_000n + 1_296_000n),
@@ -408,7 +406,7 @@ describe('munge', () => {
 
     it('generates proper slopes', () => {
       // Note the stalls for the duration of inserted time
-      assert.deepStrictEqual(munge(taiData, MODELS.STALL).map(segment => segment.slope.unixPerAtomic), 
+      assert.deepStrictEqual(munge(taiData, MODELS.STALL).map(segment => segment.slope.unixPerAtomic),
         [
           // Exact ratio of nanoseconds. TAI adds a millisecond or two per day
           new Rat(86_400_000_000_000n, 86_400_000_000_000n + 1_296_000n),
@@ -641,7 +639,7 @@ describe('munge', () => {
     })
 
     it('generates proper slopes', () => {
-      assert.deepStrictEqual(munge(taiData, MODELS.SMEAR).map(segment => segment.slope.unixPerAtomic), 
+      assert.deepStrictEqual(munge(taiData, MODELS.SMEAR).map(segment => segment.slope.unixPerAtomic),
         [
           // Exact ratio of nanoseconds.
           // During Unix-day-long smears, elapsed atomic time is a full day PLUS daily offset

@@ -1,8 +1,6 @@
-/* eslint-env jest */
-
 const assert = require('node:assert')
-const { Rat } = require('./rat.js')
-const { Second } = require('./second.js')
+const { Rat } = require('../src/rat.js')
+const { Second } = require('../src/second.js')
 
 describe('Second', () => {
   it('type checking', () => {

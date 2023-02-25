@@ -1,8 +1,6 @@
-/* eslint-env jest */
-
 const assert = require('node:assert')
-const { MODELS } = require('./munge.js')
-const { MillisConverter } = require('./millis-converter.js')
+const { MODELS } = require('../src/munge.js')
+const { MillisConverter } = require('../src/millis-converter.js')
 
 const JAN = 0
 const OCT = 9
@@ -959,14 +957,14 @@ describe('MillisConverter', () => {
       describe('BREAK', () => {
         it('says no', () => {
           assert.throws(() => new MillisConverter(data, MODELS.BREAK),
-             /Segment length must be positive/)
+            /Segment length must be positive/)
         })
       })
 
       describe('STALL', () => {
         it('says no', () => {
           assert.throws(() => new MillisConverter(data, MODELS.STALL),
-             /Segment length must be positive/)
+            /Segment length must be positive/)
         })
       })
     })
@@ -984,7 +982,7 @@ describe('MillisConverter', () => {
         [
           Date.UTC(1963, NOV, 1, 0, 0, 2, 596)
         ])
-        // -194_745_597_404_844_400_013n TAI picoseconds
+      // -194_745_597_404_844_400_013n TAI picoseconds
     })
 
     it('exactly at the time', () => {

@@ -1,10 +1,8 @@
-/* eslint-env jest */
-
 const assert = require('node:assert')
-const { Converter } = require('./converter.js')
-const { MODELS } = require('./munge.js')
-const { Range } = require('./range.js')
-const { Second } = require('./second.js')
+const { Converter } = require('../src/converter.js')
+const { MODELS } = require('../src/munge.js')
+const { Range } = require('../src/range.js')
+const { Second } = require('../src/second.js')
 
 const JAN = 0
 const DEC = 11
@@ -679,14 +677,14 @@ describe('Converter', () => {
       describe('BREAK', () => {
         it('says no', () => {
           assert.throws(() => new Converter(data, MODELS.BREAK),
-             /Segment length must be positive/)
+            /Segment length must be positive/)
         })
       })
 
       describe('STALL', () => {
         it('says no', () => {
           assert.throws(() => new Converter(data, MODELS.STALL),
-             /Segment length must be positive/)
+            /Segment length must be positive/)
         })
       })
     })
