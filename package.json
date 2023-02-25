@@ -19,7 +19,6 @@
   "license": "MIT",
   "devDependencies": {
     "c8": "^7.13.0",
-    "jest": "^29.0.1",
     "mocha": "^10.2.0",
     "standard": "^17.0.0"
   },
