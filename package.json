@@ -9,8 +9,7 @@
   },
   "main": "./src",
   "scripts": {
-    "mocha": "mocha",
-    "jest": "jest",
+    "mocha": "c8 --100 mocha",
     "standard": "standard",
     "tag": "node -e \"require('child_process').spawn('git', ['tag', `v${require('./package.json').version}`], { stdio: 'inherit' })\"",
     "tag-and-publish": "npm run tag && git push --tags && npm publish && npm version patch --no-git-tag-version && git add . && git commit -m \"Bump patch\" && git push",
@@ -25,8 +24,7 @@
     "standard": "^17.0.0"
   },
   "files": [
-    "src",
-    "!src/**.spec.js"
+    "src"
   ],
   "exports": {
     ".": "./src/index.js",

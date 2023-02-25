@@ -1,5 +1,5 @@
 const assert = require('node:assert')
-const { TaiConverter, MODELS, UNIX_START, UNIX_END } = require('..')
+const { TaiConverter, MODELS, UNIX_START, UNIX_END } = require('../src/index.js')
 
 const JAN = 0
 const FEB = 1
