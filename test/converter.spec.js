@@ -1,9 +1,9 @@
-const assert = require('node:assert')
-const { describe, it } = require('mocha')
-const { Converter } = require('../src/converter.js')
-const { MODELS } = require('../src/munge.js')
-const { Range } = require('../src/range.js')
-const { Second } = require('../src/second.js')
+import assert from 'node:assert'
+import { describe, it } from 'mocha'
+import { Converter } from '../src/converter.js'
+import { MODELS } from '../src/munge.js'
+import { Range } from '../src/range.js'
+import { Second } from '../src/second.js'
 
 const JAN = 0
 const DEC = 11

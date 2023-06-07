@@ -1,7 +1,7 @@
-const assert = require('node:assert')
-const { describe, it } = require('mocha')
-const { TaiConverter, Second, MODELS, UNIX_START, UNIX_END } = require('../src/exact.js')
-const { Range } = require('../src/range.js')
+import assert from 'node:assert'
+import { describe, it } from 'mocha'
+import { TaiConverter, Second, MODELS, UNIX_START, UNIX_END } from '../src/exact.js'
+import { Range } from '../src/range.js'
 
 const JAN = 0
 const FEB = 1

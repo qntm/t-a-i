@@ -1,7 +1,7 @@
-const assert = require('node:assert')
-const { describe, it } = require('mocha')
-const { MODELS } = require('../src/munge.js')
-const { MillisConverter } = require('../src/millis-converter.js')
+import assert from 'node:assert'
+import { describe, it } from 'mocha'
+import { MODELS } from '../src/munge.js'
+import { MillisConverter } from '../src/millis-converter.js'
 
 const JAN = 0
 const OCT = 9

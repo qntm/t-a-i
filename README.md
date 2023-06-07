@@ -67,7 +67,7 @@ None these proposed/implied models are perfect; each has its own disadvantages, 
 Exactly how long was 1972?
 
 ```javascript
-const { TaiConverter, MODELS } = require('t-a-i')
+import { TaiConverter, MODELS } from 't-a-i'
 
 const unixStart = Date.UTC(1972, 0, 1) // 63_072_000_000
 const unixEnd   = Date.UTC(1973, 0, 1) // 94_694_400_000
@@ -134,7 +134,7 @@ Instead, consider using a [`TaiDate`](https://github.com/ferno/tai-date)!
 
 ```js
 // do this instead
-const TaiDate = require('tai-date')
+import { TaiDate } from 'tai-date'
 const taiDate = new TaiDate(taiConverter.unixToAtomic(unixDate.getTime())
 ```
 
@@ -211,7 +211,7 @@ When Unix time is removed,
 With the `OVERRUN` model, you can do `taiConverter.unixToAtomic(unix, { array: true })` to receive an array of TAI millisecond counts. Normally this array has a single entry. If the input Unix millisecond count is prior to the beginning of TAI, or was removed, an empty array `[]` is returned. During inserted time, an array containing two entries is returned.
 
 ```javascript
-const { TaiConverter, MODELS } = require('t-a-i')
+import { TaiConverter, MODELS } from 't-a-i'
 
 const taiConverter = TaiConverter(MODELS.OVERRUN)
 
@@ -230,7 +230,7 @@ taiConverter.unixToAtomic(unix, { array: true })
 With the `STALL` model, you can do `taiConverter.unixToAtomic(unix, { range: true })` to receive a closed range `[first, last]` of TAI millisecond counts. Normally `first` and `last` will be equal. If the input Unix millisecond count is prior to the beginning of TAI, or was removed, `[NaN, NaN]` is returned. During inserted time, Unix time stalls; if the input Unix millisecond count is precisely the value at which Unix time stalled, the array's entries indicate the first and last TAI millisecond counts in the stall.
 
 ```javascript
-const { TaiConverter, MODELS } = require('t-a-i')
+import { TaiConverter, MODELS } from 't-a-i'
 
 const taiConverter = TaiConverter(MODELS.STALL)
 

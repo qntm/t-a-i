@@ -1,8 +1,8 @@
-const { Second } = require('./second.js')
-const { Converter } = require('./converter.js')
+import { Second } from './second.js'
+import { Converter } from './converter.js'
 
 // Do not subclass `Converter` as we do not expose the same interface
-module.exports.MillisConverter = class {
+export class MillisConverter {
   constructor (data, model) {
     this.converter = new Converter(data, model)
   }

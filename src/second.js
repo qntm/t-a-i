@@ -1,6 +1,6 @@
-const { Rat } = require('./rat.js')
+import { Rat } from './rat.js'
 
-class Second {
+export class Second {
   constructor (nu, de) {
     this.rat = new Rat(nu, de)
   }
@@ -58,5 +58,3 @@ Second.fromMillis = millis => {
 // a correct, meaningful result, or throws an exception - it does NOT return
 // bad results.
 Second.END_OF_TIME = new Second(1n, 0n)
-
-module.exports.Second = Second

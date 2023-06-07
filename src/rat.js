@@ -1,6 +1,6 @@
-const { div, gcd } = require('./div')
+import { div, gcd } from './div.js'
 
-class Rat {
+export class Rat {
   constructor (nu, de = 1n) {
     if (typeof nu !== 'bigint') {
       throw Error('Numerator must be a BigInt')
@@ -58,5 +58,3 @@ class Rat {
 }
 
 Rat.INFINITY = new Rat(1n, 0n)
-
-module.exports.Rat = Rat

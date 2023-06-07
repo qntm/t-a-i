@@ -1,12 +1,12 @@
-const { Rat } = require('./rat.js')
-const { Range } = require('./range.js')
-const { Second } = require('./second.js')
+import { Rat } from './rat.js'
+import { Range } from './range.js'
+import { Second } from './second.js'
 
 // A segment is a closed-open linear relationship between TAI and Unix time.
 // It should be able to handle arbitrary ratios between the two.
 // For precision, we deal with ratios of BigInts.
 // Segment validity ranges are inclusive-exclusive.
-class Segment {
+export class Segment {
   constructor (start, end = { atomic: Second.END_OF_TIME }, slope = { unixPerAtomic: new Rat(1n) }) {
     if (!(start.atomic instanceof Second)) {
       throw Error('TAI start must be a rational number of seconds')
@@ -80,5 +80,3 @@ class Segment {
       : this.start.unix.leS(unix) && this.end.unix.gtS(unix)
   }
 }
-
-module.exports.Segment = Segment

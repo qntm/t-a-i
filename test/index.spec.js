@@ -1,6 +1,6 @@
-const assert = require('node:assert')
-const { describe, it } = require('mocha')
-const { TaiConverter, MODELS, UNIX_START, UNIX_END } = require('../src/index.js')
+import assert from 'node:assert'
+import { describe, it } from 'mocha'
+import { TaiConverter, MODELS, UNIX_START, UNIX_END } from '../src/index.js'
 
 const JAN = 0
 const FEB = 1

@@ -1,6 +1,6 @@
-const assert = require('node:assert')
-const { describe, it } = require('mocha')
-const { sign, div, gcd } = require('../src/div.js')
+import assert from 'node:assert'
+import { describe, it } from 'mocha'
+import { sign, div, gcd } from '../src/div.js'
 
 describe('sign', () => {
   it('works', () => {

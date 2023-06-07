@@ -1,9 +1,9 @@
 // Divide two BigInts and round the result towards negative infinity
 
 // Why doesn't JavaScript have this?
-const sign = a => a > 0n ? 1n : a === 0n ? 0n : -1n
+export const sign = a => a > 0n ? 1n : a === 0n ? 0n : -1n
 
-const div = (a, b) => {
+export const div = (a, b) => {
   const q = a / b
 
   // `b` must be non-zero or we would have thrown an exception by now
@@ -24,13 +24,9 @@ const div = (a, b) => {
   return q - 1n
 }
 
-const gcd = (a, b) => {
+export const gcd = (a, b) => {
   while (b !== 0n) {
     [a, b] = [b, a % b]
   }
   return a
 }
-
-module.exports.sign = sign
-module.exports.div = div
-module.exports.gcd = gcd

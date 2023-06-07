@@ -1,9 +1,9 @@
-const assert = require('node:assert')
-const { describe, it } = require('mocha')
-const { Rat } = require('../src/rat.js')
-const { Range } = require('../src/range.js')
-const { Second } = require('../src/second.js')
-const { Segment } = require('../src/segment.js')
+import assert from 'node:assert'
+import { describe, it } from 'mocha'
+import { Rat } from '../src/rat.js'
+import { Range } from '../src/range.js'
+import { Second } from '../src/second.js'
+import { Segment } from '../src/segment.js'
 
 const MAY = 4
 
