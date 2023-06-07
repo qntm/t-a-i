@@ -1,7 +1,7 @@
-const assert = require('node:assert')
-const { describe, it } = require('mocha')
-const { Rat } = require('../src/rat.js')
-const { Second } = require('../src/second.js')
+import assert from 'node:assert'
+import { describe, it } from 'mocha'
+import { Rat } from '../src/rat.js'
+import { Second } from '../src/second.js'
 
 describe('Second', () => {
   it('type checking', () => {

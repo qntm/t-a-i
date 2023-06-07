@@ -10,10 +10,10 @@
 // map to multiple TAI times. We can return an array of these, or just the result from the latest
 // segment (according to its numbering).
 
-const { munge } = require('./munge.js')
-const { Range } = require('./range.js')
+import { munge } from './munge.js'
+import { Range } from './range.js'
 
-module.exports.Converter = class {
+export class Converter {
   constructor (data, model) {
     this.segments = munge(data, model)
   }

@@ -17,7 +17,7 @@ const DEC = 11
 // Third column: "root" point in UTC days since MJD epoch, defaults to 0
 // Fourth column: Drift rate in TAI seconds per UTC day, defaults to 0
 
-const taiData = [
+export const taiData = [
   [Date.UTC(1961, JAN, 1), 1.422_818_0, 37_300, 0.001_296],
   [Date.UTC(1961, AUG, 1), 1.372_818_0, 37_300, 0.001_296], // 0.05 TAI seconds removed from UTC
   [Date.UTC(1962, JAN, 1), 1.845_858_0, 37_665, 0.001_123_2], // drift rate reduced, no discontinuity
@@ -61,14 +61,10 @@ const taiData = [
   [Date.UTC(2017, JAN, 1), 37]
 ]
 
-const UNIX_START_MILLIS = taiData[0][0]
+export const UNIX_START_MILLIS = taiData[0][0]
 
 // Because we don't know whether or not a leap second will be inserted or removed at this time,
 // the relationship between Unix time and TAI is unpredictable at or beyond this point.
 // (This is the start of a possible smear.)
 // Updating this value? Don't forget to update the README too!
-const UNIX_END_MILLIS = Date.UTC(2023, DEC, 31, 12, 0, 0, 0)
-
-module.exports.taiData = taiData
-module.exports.UNIX_START_MILLIS = UNIX_START_MILLIS
-module.exports.UNIX_END_MILLIS = UNIX_END_MILLIS
+export const UNIX_END_MILLIS = Date.UTC(2023, DEC, 31, 12, 0, 0, 0)

@@ -1,8 +1,8 @@
-const { taiData, UNIX_START_MILLIS, UNIX_END_MILLIS } = require('./tai-data.js')
-const { MODELS } = require('./munge.js')
-const { MillisConverter } = require('./millis-converter.js')
+import { taiData, UNIX_START_MILLIS, UNIX_END_MILLIS } from './tai-data.js'
+import { MillisConverter } from './millis-converter.js'
 
-module.exports.UNIX_START = UNIX_START_MILLIS
-module.exports.UNIX_END = UNIX_END_MILLIS
-module.exports.MODELS = MODELS
-module.exports.TaiConverter = model => new MillisConverter(taiData, model)
+export { MODELS } from './munge.js'
+
+export const UNIX_START = UNIX_START_MILLIS
+export const UNIX_END = UNIX_END_MILLIS
+export const TaiConverter = model => new MillisConverter(taiData, model)

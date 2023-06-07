@@ -1,12 +1,12 @@
 // So what do we ACTUALLY need from our data?
 
-const { Rat } = require('./rat.js')
-const { Second } = require('./second.js')
-const { Segment } = require('./segment.js')
+import { Rat } from './rat.js'
+import { Second } from './second.js'
+import { Segment } from './segment.js'
 
 // In all models, TAI to Unix conversions are one-to-one (or one-to-NaN). At any given instant in
 // TAI, at most one segment applies and at most one Unix time corresponds.
-const MODELS = {
+export const MODELS = {
   // Each segment continues until it reaches the TAI start of the next segment, even if that start
   // point is in the past (Unix time) due to inserted time and the result is a backtrack. Unix to
   // TAI conversions are potentially one-to-many but the many are discrete instants in time.
@@ -43,7 +43,7 @@ const mjdEpoch = {
 // purposes: start point is expressed both in Unix milliseconds and TAI picoseconds, ratio between
 // TAI picoseconds and UTC milliseconds is given as a precise BigInt, and the root is moved to the
 // Unix epoch
-const munge = (data, model) => {
+export const munge = (data, model) => {
   const munged = data.map(datum => {
     const start = {}
     const offsetAtRoot = {}
@@ -203,6 +203,3 @@ const munge = (data, model) => {
     datum.slope
   ))
 }
-
-module.exports.MODELS = MODELS
-module.exports.munge = munge

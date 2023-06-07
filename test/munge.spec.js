@@ -1,10 +1,10 @@
-const assert = require('node:assert')
-const { describe, it } = require('mocha')
-const { taiData } = require('../src/tai-data.js')
-const { munge, MODELS } = require('../src/munge.js')
-const { Second } = require('../src/second.js')
-const { Segment } = require('../src/segment.js')
-const { Rat } = require('../src/rat.js')
+import assert from 'node:assert'
+import { describe, it } from 'mocha'
+import { taiData } from '../src/tai-data.js'
+import { munge, MODELS } from '../src/munge.js'
+import { Second } from '../src/second.js'
+import { Segment } from '../src/segment.js'
+import { Rat } from '../src/rat.js'
 
 const JAN = 0
 const DEC = 11
