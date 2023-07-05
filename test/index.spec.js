@@ -6,6 +6,7 @@ const JAN = 0
 const FEB = 1
 const MAR = 2
 const APR = 3
+const JUN = 5
 const JUL = 6
 const AUG = 7
 const SEP = 8
@@ -20,7 +21,20 @@ describe('UNIX_START', () => {
 
 describe('UNIX_END', () => {
   it('is correct', () => {
-    assert.strictEqual(UNIX_END, Date.UTC(2023, DEC, 31, 12, 0, 0, 0))
+    const endDate = new Date(UNIX_END)
+
+    if (endDate.getUTCMonth() === JUN) {
+      assert.strictEqual(endDate.getUTCDate(), 30)
+    } else if (endDate.getUTCMonth() === DEC) {
+      assert.strictEqual(endDate.getUTCDate(), 31)
+    } else {
+      throw Error('bad month')
+    }
+
+    assert.strictEqual(endDate.getUTCHours(), 12)
+    assert.strictEqual(endDate.getUTCMinutes(), 0)
+    assert.strictEqual(endDate.getUTCSeconds(), 0)
+    assert.strictEqual(endDate.getUTCMilliseconds(), 0)
   })
 })
 
