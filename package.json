@@ -7,7 +7,7 @@
     "type": "git",
     "url": "git://github.com/qntm/t-a-i.git"
   },
-  "main": "./src",
+  "main": "./src/index.js",
   "type": "module",
   "scripts": {
     "mocha": "c8 --100 mocha",
