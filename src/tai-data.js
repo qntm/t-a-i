@@ -6,11 +6,12 @@ const JAN = 0
 const FEB = 1
 const MAR = 2
 const APR = 3
+const JUN = 5
 const JUL = 6
 const AUG = 7
 const SEP = 8
 const NOV = 10
-const DEC = 11
+// const DEC = 11
 
 // First column: Unix millisecond count when this relationship became effective
 // Second column: TAI minus UTC in TAI seconds as of the root point
@@ -67,4 +68,4 @@ export const UNIX_START_MILLIS = taiData[0][0]
 // the relationship between Unix time and TAI is unpredictable at or beyond this point.
 // (This is the start of a possible smear.)
 // Updating this value? Don't forget to update the README too!
-export const UNIX_END_MILLIS = Date.UTC(2024, DEC, 31, 12, 0, 0, 0)
+export const UNIX_END_MILLIS = Date.UTC(2025, JUN, 30, 12, 0, 0, 0)
