@@ -678,14 +678,14 @@ describe('Converter', () => {
       describe('BREAK', () => {
         it('says no', () => {
           assert.throws(() => new Converter(data, MODELS.BREAK),
-            /Segment length must be positive/)
+            /segment length must be positive/)
         })
       })
 
       describe('STALL', () => {
         it('says no', () => {
           assert.throws(() => new Converter(data, MODELS.STALL),
-            /Segment length must be positive/)
+            /segment length must be positive/)
         })
       })
     })

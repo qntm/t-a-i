@@ -54,7 +54,4 @@ Second.fromMillis = millis => {
   return new Second(BigInt(millis), 1_000n)
 }
 
-// Support for this special value is limited. In all cases it either returns
-// a correct, meaningful result, or throws an exception - it does NOT return
-// bad results.
-Second.END_OF_TIME = new Second(1n, 0n)
+Second.END_OF_TIME = Symbol('end of time')

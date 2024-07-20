@@ -4,10 +4,10 @@ import { Rat } from '../src/rat.js'
 
 describe('Rat', () => {
   it('type checking', () => {
-    assert.throws(() => new Rat(1, 2n), /Numerator must be a BigInt/)
-    assert.throws(() => new Rat(1n, 2), /Denominator must be a BigInt/)
-    assert.throws(() => new Rat(1n, 0), /Denominator must be a BigInt/)
-    assert.throws(() => new Rat(-1n, 0n), /Numerator must be positive if denominator is zero/)
+    assert.throws(() => new Rat(1, 2n), /numerator must be a BigInt/)
+    assert.throws(() => new Rat(1n, 2), /denominator must be a BigInt/)
+    assert.throws(() => new Rat(1n, 0), /denominator must be a BigInt/)
+    assert.throws(() => new Rat(-1n, 0n), /denominator cannot be zero/)
   })
 
   it('defaults to an integer', () => {
@@ -90,86 +90,6 @@ describe('Rat', () => {
       assert.strictEqual(new Rat(12n, -10n).trunc(), -2n)
       assert.strictEqual(new Rat(15n, -10n).trunc(), -2n)
       assert.strictEqual(new Rat(18n, -10n).trunc(), -2n)
-    })
-  })
-
-  describe('positive infinity', () => {
-    it('reduces to the lowest terms', () => {
-      assert.deepStrictEqual(Rat.INFINITY, new Rat(133n, 0n))
-    })
-
-    it('adds', () => {
-      assert.deepStrictEqual(Rat.INFINITY.plus(new Rat(15n, 69n)), Rat.INFINITY)
-      assert.deepStrictEqual(Rat.INFINITY.plus(new Rat(0n, 3n)), Rat.INFINITY)
-      assert.deepStrictEqual(Rat.INFINITY.plus(new Rat(-12n, 1n)), Rat.INFINITY)
-      assert.deepStrictEqual(new Rat(15n, 69n).plus(Rat.INFINITY), Rat.INFINITY)
-      assert.deepStrictEqual(new Rat(0n, 3n).plus(Rat.INFINITY), Rat.INFINITY)
-      assert.deepStrictEqual(new Rat(-12n, 1n).plus(Rat.INFINITY), Rat.INFINITY)
-      assert.deepStrictEqual(Rat.INFINITY.plus(Rat.INFINITY), Rat.INFINITY)
-    })
-
-    it('subtracts', () => {
-      assert.deepStrictEqual(Rat.INFINITY.minus(new Rat(15n, 69n)), Rat.INFINITY)
-      assert.deepStrictEqual(Rat.INFINITY.minus(new Rat(0n, 3n)), Rat.INFINITY)
-      assert.deepStrictEqual(Rat.INFINITY.minus(new Rat(-12n, 1n)), Rat.INFINITY)
-      assert.throws(() => new Rat(15n, 69n).minus(Rat.INFINITY))
-      assert.throws(() => new Rat(0n, 3n).minus(Rat.INFINITY))
-      assert.throws(() => new Rat(-12n, 1n).minus(Rat.INFINITY))
-      assert.throws(() => Rat.INFINITY.minus(Rat.INFINITY))
-    })
-
-    it('multiplies', () => {
-      assert.deepStrictEqual(Rat.INFINITY.times(new Rat(15n, 69n)), Rat.INFINITY)
-      assert.throws(() => Rat.INFINITY.times(new Rat(0n, 3n)))
-      assert.throws(() => Rat.INFINITY.times(new Rat(-12n, 1n)))
-      assert.deepStrictEqual(new Rat(15n, 69n).times(Rat.INFINITY), Rat.INFINITY)
-      assert.throws(() => new Rat(0n, 3n).times(Rat.INFINITY))
-      assert.throws(() => new Rat(-12n, 1n).times(Rat.INFINITY))
-      assert.deepStrictEqual(Rat.INFINITY.times(Rat.INFINITY), Rat.INFINITY)
-    })
-
-    it('divides', () => {
-      assert.deepStrictEqual(Rat.INFINITY.divide(new Rat(15n, 69n)), Rat.INFINITY)
-      assert.deepStrictEqual(Rat.INFINITY.divide(new Rat(0n, 3n)), Rat.INFINITY)
-      assert.throws(() => Rat.INFINITY.divide(new Rat(-12n, 1n)), /Numerator must be positive if denominator is zero/)
-      assert.deepStrictEqual(new Rat(15n, 69n).divide(Rat.INFINITY), new Rat(0n))
-      assert.deepStrictEqual(new Rat(0n, 3n).divide(Rat.INFINITY), new Rat(0n))
-      assert.deepStrictEqual(new Rat(-12n, 1n).divide(Rat.INFINITY), new Rat(0n))
-      assert.throws(() => Rat.INFINITY.divide(Rat.INFINITY))
-    })
-
-    it('equals', () => {
-      assert.strictEqual(Rat.INFINITY.eq(new Rat(15n, 69n)), false)
-      assert.strictEqual(Rat.INFINITY.eq(new Rat(0n, 3n)), false)
-      assert.strictEqual(Rat.INFINITY.eq(new Rat(-12n, 1n)), false)
-      assert.throws(() => new Rat(15n, 69n).eq(Rat.INFINITY))
-      assert.throws(() => new Rat(0n, 3n).eq(Rat.INFINITY))
-      assert.throws(() => new Rat(-12n, 1n).eq(Rat.INFINITY))
-      assert.throws(() => Rat.INFINITY.eq(Rat.INFINITY))
-    })
-
-    it('less than or equal', () => {
-      assert.strictEqual(Rat.INFINITY.le(new Rat(15n, 69n)), false)
-      assert.strictEqual(Rat.INFINITY.le(new Rat(0n, 3n)), false)
-      assert.strictEqual(Rat.INFINITY.le(new Rat(-12n, 1n)), false)
-      assert.throws(() => new Rat(15n, 69n).le(Rat.INFINITY))
-      assert.throws(() => new Rat(0n, 3n).le(Rat.INFINITY))
-      assert.throws(() => new Rat(-12n, 1n).le(Rat.INFINITY))
-      assert.throws(() => Rat.INFINITY.le(Rat.INFINITY))
-    })
-
-    it('greater than', () => {
-      assert.strictEqual(Rat.INFINITY.gt(new Rat(15n, 69n)), true)
-      assert.strictEqual(Rat.INFINITY.gt(new Rat(0n, 3n)), true)
-      assert.strictEqual(Rat.INFINITY.gt(new Rat(-12n, 1n)), true)
-      assert.throws(() => new Rat(15n, 69n).gt(Rat.INFINITY))
-      assert.throws(() => new Rat(0n, 3n).gt(Rat.INFINITY))
-      assert.throws(() => new Rat(-12n, 1n).gt(Rat.INFINITY))
-      assert.throws(() => Rat.INFINITY.gt(Rat.INFINITY))
-    })
-
-    it('truncates', () => {
-      assert.throws(() => Rat.INFINITY.trunc())
     })
   })
 })

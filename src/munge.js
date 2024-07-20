@@ -104,7 +104,7 @@ export const munge = (data, model) => {
         : Second.END_OF_TIME
     }
 
-    if (datum.end.atomic.leS(datum.start.atomic)) {
+    if (datum.end.atomic === Second.END_OF_TIME ? datum.start.atomic === Second.END_OF_TIME : datum.end.atomic.leS(datum.start.atomic)) {
       throw Error('Disordered data')
     }
   })
