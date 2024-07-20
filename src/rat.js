@@ -17,7 +17,7 @@ export class Rat {
     const g2 = (de < 0) === (g < 0) ? g : -g
 
     this.nu = nu / g2 // sign of `this.nu` is the sign of the represented rational
-    this.de = de / g2 // non-negative
+    this.de = de / g2 // positive
   }
 
   plus (other) {

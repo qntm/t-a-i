@@ -22,14 +22,14 @@ describe('Segment', () => {
     assert.throws(() => new Segment(
       { atomic: Second.fromMillis(0), unix: Second.fromMillis(0) },
       { atomic: Second.fromMillis(1_000) },
-      { unixPerAtomic: new Second(1n, 1n) }
+      { unixPerAtomic: new Second(new Rat(1n, 1n)) }
     ), /slope must be a `Rat`/)
   })
 
   it('disallows rays which run backwards', () => {
     assert.throws(() => new Segment(
       { atomic: Second.fromMillis(0), unix: Second.fromMillis(0) },
-      { atomic: new Second(-1n, 1_000_000_000_000n) }
+      { atomic: new Second(new Rat(-1n, 1_000_000_000_000n)) }
     ), /segment length must be positive/)
   })
 
@@ -121,7 +121,7 @@ describe('Segment', () => {
       assert.strictEqual(segment.atomicOnSegment(Second.fromMillis(1_999)),
         true)
       assert.deepStrictEqual(segment.atomicToUnix(Second.fromMillis(1_999)),
-        new Second(1_999n, 2_000n)) // truncates to 999ms
+        new Second(new Rat(1_999n, 2_000n))) // truncates to 999ms
     })
 
     it('end point', () => {

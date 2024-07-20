@@ -3,6 +3,7 @@ import { describe, it } from 'mocha'
 import { Converter } from '../src/converter.js'
 import { MODELS } from '../src/munge.js'
 import { Range } from '../src/range.js'
+import { Rat } from '../src/rat.js'
 import { Second } from '../src/second.js'
 
 const JAN = 0
@@ -267,7 +268,7 @@ describe('Converter', () => {
           ])
         assert.deepStrictEqual(converter.unixToAtomic(Second.fromMillis(Date.UTC(1979, DEC, 31, 12, 0, 0, 1))),
           [
-            new Range(Second.fromMillis(Date.UTC(1979, DEC, 31, 12, 0, 0, 1)).plusS(new Second(1n, 86_400_000n)))
+            new Range(Second.fromMillis(Date.UTC(1979, DEC, 31, 12, 0, 0, 1)).plusS(new Second(new Rat(1n, 86_400_000n))))
           ])
 
         // SMEAR MIDPOINT
@@ -279,7 +280,7 @@ describe('Converter', () => {
         // SMEAR ENDS, ATOMIC IS A FULL SECOND AHEAD (actually Unix is a full second behind)
         assert.deepStrictEqual(converter.unixToAtomic(Second.fromMillis(Date.UTC(1980, JAN, 1, 11, 59, 59, 999))),
           [
-            new Range(Second.fromMillis(Date.UTC(1980, JAN, 1, 11, 59, 59, 999)).plusS(new Second(86_399_999n, 86_400_000n)))
+            new Range(Second.fromMillis(Date.UTC(1980, JAN, 1, 11, 59, 59, 999)).plusS(new Second(new Rat(86_399_999n, 86_400_000n))))
           ])
         assert.deepStrictEqual(converter.unixToAtomic(Second.fromMillis(Date.UTC(1980, JAN, 1, 12, 0, 0, 0))),
           [
@@ -301,7 +302,7 @@ describe('Converter', () => {
         assert.deepStrictEqual(converter.atomicToUnix(Second.fromMillis(Date.UTC(1979, DEC, 31, 12, 0, 0, 0))),
           Second.fromMillis(Date.UTC(1979, DEC, 31, 12, 0, 0, 0)))
         assert.deepStrictEqual(converter.atomicToUnix(Second.fromMillis(Date.UTC(1979, DEC, 31, 12, 0, 0, 1))),
-          Second.fromMillis(Date.UTC(1979, DEC, 31, 12, 0, 0, 1)).minusS(new Second(1n, 86_401_000n)))
+          Second.fromMillis(Date.UTC(1979, DEC, 31, 12, 0, 0, 1)).minusS(new Second(new Rat(1n, 86_401_000n))))
 
         // SMEAR MIDPOINT
         assert.deepStrictEqual(converter.atomicToUnix(Second.fromMillis(Date.UTC(1980, JAN, 1, 0, 0, 0, 500))),
@@ -309,7 +310,7 @@ describe('Converter', () => {
 
         // SMEAR ENDS, UNIX HAS DROPPED A FULL SECOND BEHIND
         assert.deepStrictEqual(converter.atomicToUnix(Second.fromMillis(Date.UTC(1980, JAN, 1, 12, 0, 0, 999))),
-          Second.fromMillis(Date.UTC(1980, JAN, 1, 12, 0, 0, 999)).minusS(new Second(86_400_999n, 86_401_000n)))
+          Second.fromMillis(Date.UTC(1980, JAN, 1, 12, 0, 0, 999)).minusS(new Second(new Rat(86_400_999n, 86_401_000n))))
         assert.deepStrictEqual(converter.atomicToUnix(Second.fromMillis(Date.UTC(1980, JAN, 1, 12, 0, 1, 0))),
           Second.fromMillis(Date.UTC(1980, JAN, 1, 12, 0, 0, 0)))
         assert.deepStrictEqual(converter.atomicToUnix(Second.fromMillis(Date.UTC(1980, JAN, 1, 12, 0, 1, 1))),
@@ -482,7 +483,7 @@ describe('Converter', () => {
           ])
         assert.deepStrictEqual(converter.unixToAtomic(Second.fromMillis(Date.UTC(1979, DEC, 31, 12, 0, 0, 1))),
           [
-            new Range(Second.fromMillis(Date.UTC(1979, DEC, 31, 12, 0, 0, 1)).minusS(new Second(1n, 86_400_000n)))
+            new Range(Second.fromMillis(Date.UTC(1979, DEC, 31, 12, 0, 0, 1)).minusS(new Second(new Rat(1n, 86_400_000n))))
           ])
 
         // SMEAR MIDPOINT
@@ -494,7 +495,7 @@ describe('Converter', () => {
         // SMEAR ENDS, ATOMIC IS A FULL SECOND BEHIND (actually Unix is a full second ahead)
         assert.deepStrictEqual(converter.unixToAtomic(Second.fromMillis(Date.UTC(1980, JAN, 1, 11, 59, 59, 999))),
           [
-            new Range(Second.fromMillis(Date.UTC(1980, JAN, 1, 11, 59, 59, 999)).minusS(new Second(86_399_999n, 86_400_000n)))
+            new Range(Second.fromMillis(Date.UTC(1980, JAN, 1, 11, 59, 59, 999)).minusS(new Second(new Rat(86_399_999n, 86_400_000n))))
           ])
         assert.deepStrictEqual(converter.unixToAtomic(Second.fromMillis(Date.UTC(1980, JAN, 1, 12, 0, 0, 0))),
           [
@@ -516,7 +517,7 @@ describe('Converter', () => {
         assert.deepStrictEqual(converter.atomicToUnix(Second.fromMillis(Date.UTC(1979, DEC, 31, 12, 0, 0, 0))),
           Second.fromMillis(Date.UTC(1979, DEC, 31, 12, 0, 0, 0)))
         assert.deepStrictEqual(converter.atomicToUnix(Second.fromMillis(Date.UTC(1979, DEC, 31, 12, 0, 0, 1))),
-          Second.fromMillis(Date.UTC(1979, DEC, 31, 12, 0, 0, 1)).plusS(new Second(1n, 86_399_000n)))
+          Second.fromMillis(Date.UTC(1979, DEC, 31, 12, 0, 0, 1)).plusS(new Second(new Rat(1n, 86_399_000n))))
 
         // SMEAR MIDPOINT
         assert.deepStrictEqual(converter.atomicToUnix(Second.fromMillis(Date.UTC(1979, DEC, 31, 23, 59, 59, 500))),
@@ -524,7 +525,7 @@ describe('Converter', () => {
 
         // SMEAR ENDS, UNIX HAS RUN A FULL SECOND FASTER THAN ATOMIC
         assert.deepStrictEqual(converter.atomicToUnix(Second.fromMillis(Date.UTC(1980, JAN, 1, 11, 59, 58, 999))),
-          Second.fromMillis(Date.UTC(1980, JAN, 1, 11, 59, 58, 999)).plusS(new Second(86_398_999n, 86_399_000n)))
+          Second.fromMillis(Date.UTC(1980, JAN, 1, 11, 59, 58, 999)).plusS(new Second(new Rat(86_398_999n, 86_399_000n))))
         assert.deepStrictEqual(converter.atomicToUnix(Second.fromMillis(Date.UTC(1980, JAN, 1, 11, 59, 59, 0))),
           Second.fromMillis(Date.UTC(1980, JAN, 1, 12, 0, 0, 0)))
         assert.deepStrictEqual(converter.atomicToUnix(Second.fromMillis(Date.UTC(1980, JAN, 1, 11, 59, 59, 1))),
@@ -543,9 +544,9 @@ describe('Converter', () => {
 
         assert.deepStrictEqual(converter.unixToAtomic(Second.fromMillis(1)),
           [
-            new Range(new Second(900n, 1_000_000n))
+            new Range(new Second(new Rat(900n, 1_000_000n)))
           ])
-        assert.deepStrictEqual(converter.atomicToUnix(new Second(900n, 1_000_000n)),
+        assert.deepStrictEqual(converter.atomicToUnix(new Second(new Rat(900n, 1_000_000n))),
           Second.fromMillis(1))
       })
 
@@ -558,9 +559,9 @@ describe('Converter', () => {
 
         assert.deepStrictEqual(converter.unixToAtomic(Second.fromMillis(-1)),
           [
-            new Range(new Second(-900n, 1_000_000n))
+            new Range(new Second(new Rat(-900n, 1_000_000n)))
           ])
-        assert.deepStrictEqual(converter.atomicToUnix(new Second(-900n, 1_000_000n)),
+        assert.deepStrictEqual(converter.atomicToUnix(new Second(new Rat(-900n, 1_000_000n))),
           Second.fromMillis(-1))
       })
     })

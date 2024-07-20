@@ -34,7 +34,7 @@ export const MODELS = {
 }
 
 const NOV = 10
-const secondsPerDay = new Second(86_400n, 1n)
+const secondsPerDay = new Second(new Rat(86_400n, 1n))
 const mjdEpoch = {
   unix: Second.fromMillis(Date.UTC(1858, NOV, 17))
 }
@@ -63,20 +63,20 @@ export const munge = (data, model) => {
     // Convert from a floating point number to a precise ratio
     // Offsets are given in TAI seconds to seven decimal places, e.g. `1.422_818_0`.
     // So we have to do some rounding
-    offsetAtRoot.atomic = new Second(
+    offsetAtRoot.atomic = new Second(new Rat(
       BigInt(Math.round(offsetAtRoot.atomicFloat * 10_000_000)),
       BigInt(10_000_000)
-    )
+    ))
 
     root.unix = mjdEpoch.unix.plusS(secondsPerDay.timesR(new Rat(BigInt(root.mjds))))
 
     // Convert from a floating point number to a precise ratio
     // Drift rates are given in TAI seconds to seven decimal places, e.g. `0.001_123_2`
     // So we have to do some rounding
-    driftRate.atomicPerUnixDay = new Second(
+    driftRate.atomicPerUnixDay = new Second(new Rat(
       BigInt(Math.round(driftRate.atomicPerUnixDayFloat * 10_000_000)),
       BigInt(10_000_000)
-    )
+    ))
     driftRate.atomicPerUnix = driftRate.atomicPerUnixDay.divideS(secondsPerDay)
 
     const slope = {}
