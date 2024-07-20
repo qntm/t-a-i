@@ -11,33 +11,33 @@ describe('Segment', () => {
   it('disallows bad powers', () => {
     assert.throws(() => new Segment(
       { atomic: new Rat(0n) }
-    ), /TAI start must be a rational number of seconds/)
+    ), /TAI start must be a `Second`/)
     assert.throws(() => new Segment(
       { atomic: Second.fromMillis(0), unix: new Rat(0n) }
-    ), /Unix start must be a rational number of seconds/)
+    ), /Unix start must be a `Second`/)
     assert.throws(() => new Segment(
       { atomic: Second.fromMillis(0), unix: Second.fromMillis(0) },
       { atomic: new Rat(1n) }
-    ), /TAI end must be a rational number of seconds/)
+    ), /TAI end must be a `Second` or `Second.END_OF_TIME`/)
     assert.throws(() => new Segment(
       { atomic: Second.fromMillis(0), unix: Second.fromMillis(0) },
       { atomic: Second.fromMillis(1_000) },
-      { unixPerAtomic: new Second(1n, 1n) }
-    ), /Slope must be a pure ratio/)
+      { unixPerAtomic: new Second(new Rat(1n, 1n)) }
+    ), /slope must be a `Rat`/)
   })
 
   it('disallows rays which run backwards', () => {
     assert.throws(() => new Segment(
       { atomic: Second.fromMillis(0), unix: Second.fromMillis(0) },
-      { atomic: new Second(-1n, 1_000_000_000_000n) }
-    ), /Segment length must be positive/)
+      { atomic: new Second(new Rat(-1n, 1_000_000_000_000n)) }
+    ), /segment length must be positive/)
   })
 
   it('disallows zero-length rays which run backwards', () => {
     assert.throws(() => new Segment(
       { atomic: Second.fromMillis(0), unix: Second.fromMillis(0) },
       { atomic: Second.fromMillis(0) }
-    ), /Segment length must be positive/)
+    ), /segment length must be positive/)
   })
 
   describe('basic infinite ray', () => {
@@ -121,7 +121,7 @@ describe('Segment', () => {
       assert.strictEqual(segment.atomicOnSegment(Second.fromMillis(1_999)),
         true)
       assert.deepStrictEqual(segment.atomicToUnix(Second.fromMillis(1_999)),
-        new Second(1_999n, 2_000n)) // truncates to 999ms
+        new Second(new Rat(1_999n, 2_000n))) // truncates to 999ms
     })
 
     it('end point', () => {

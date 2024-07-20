@@ -66,13 +66,13 @@ describe('munge', () => {
         [9_000, -3], // inserted leap second
         [13_000, -4] // removed leap second
       ], MODELS.OVERRUN), [new Segment(
-        { atomic: new Second(-5n, 1n), unix: new Second(-1n, 1n) },
-        { atomic: new Second(6n, 1n) }
+        { atomic: new Second(new Rat(-5n, 1n)), unix: new Second(new Rat(-1n, 1n)) },
+        { atomic: new Second(new Rat(6n, 1n)) }
       ), new Segment(
-        { atomic: new Second(6n, 1n), unix: new Second(9n, 1n) },
-        { atomic: new Second(9n, 1n) }
+        { atomic: new Second(new Rat(6n, 1n)), unix: new Second(new Rat(9n, 1n)) },
+        { atomic: new Second(new Rat(9n, 1n)) }
       ), new Segment(
-        { atomic: new Second(9n, 1n), unix: new Second(13n, 1n) }
+        { atomic: new Second(new Rat(9n, 1n)), unix: new Second(new Rat(13n, 1n)) }
       )])
     })
 
@@ -125,7 +125,7 @@ describe('munge', () => {
       assert.deepStrictEqual(munge([
         [Date.UTC(1961, JAN, 1), 1.422_818_0, 37_300, 0.001_296]
       ], MODELS.OVERRUN), [new Segment(
-        { atomic: new Second(-283_996_798_577_182n, 1_000_000n), unix: new Second(-283_996_800n, 1n) },
+        { atomic: new Second(new Rat(-283_996_798_577_182n, 1_000_000n)), unix: new Second(new Rat(-283_996_800n, 1n)) },
         { atomic: Second.END_OF_TIME },
         { unixPerAtomic: new Rat(86_400_000_000_000n, 86_400_000_000_000n + 1_296_000n) }
       )])
@@ -202,46 +202,46 @@ describe('munge', () => {
         return b.minusS(a)
       }), [
         // Exact ratio of microseconds
-        new Second(-50_000n, 1_000_000n),
-        new Second(0n, 1_000_000n),
-        new Second(100_000n, 1_000_000n),
-        new Second(0n, 1_000_000n),
-        new Second(100_000n, 1_000_000n),
-        new Second(100_000n, 1_000_000n),
-        new Second(100_000n, 1_000_000n),
-        new Second(100_000n, 1_000_000n),
-        new Second(100_000n, 1_000_000n),
-        new Second(100_000n, 1_000_000n),
-        new Second(0n, 1_000_000n),
-        new Second(-100_000n, 1_000_000n),
-        new Second(107_758n, 1_000_000n),
-        new Second(1_000_000n, 1_000_000n),
-        new Second(1_000_000n, 1_000_000n),
-        new Second(1_000_000n, 1_000_000n),
-        new Second(1_000_000n, 1_000_000n),
-        new Second(1_000_000n, 1_000_000n),
-        new Second(1_000_000n, 1_000_000n),
-        new Second(1_000_000n, 1_000_000n),
-        new Second(1_000_000n, 1_000_000n),
-        new Second(1_000_000n, 1_000_000n),
-        new Second(1_000_000n, 1_000_000n),
-        new Second(1_000_000n, 1_000_000n),
-        new Second(1_000_000n, 1_000_000n),
-        new Second(1_000_000n, 1_000_000n),
-        new Second(1_000_000n, 1_000_000n),
-        new Second(1_000_000n, 1_000_000n),
-        new Second(1_000_000n, 1_000_000n),
-        new Second(1_000_000n, 1_000_000n),
-        new Second(1_000_000n, 1_000_000n),
-        new Second(1_000_000n, 1_000_000n),
-        new Second(1_000_000n, 1_000_000n),
-        new Second(1_000_000n, 1_000_000n),
-        new Second(1_000_000n, 1_000_000n),
-        new Second(1_000_000n, 1_000_000n),
-        new Second(1_000_000n, 1_000_000n),
-        new Second(1_000_000n, 1_000_000n),
-        new Second(1_000_000n, 1_000_000n),
-        new Second(1_000_000n, 1_000_000n),
+        new Second(new Rat(-50_000n, 1_000_000n)),
+        new Second(new Rat(0n, 1_000_000n)),
+        new Second(new Rat(100_000n, 1_000_000n)),
+        new Second(new Rat(0n, 1_000_000n)),
+        new Second(new Rat(100_000n, 1_000_000n)),
+        new Second(new Rat(100_000n, 1_000_000n)),
+        new Second(new Rat(100_000n, 1_000_000n)),
+        new Second(new Rat(100_000n, 1_000_000n)),
+        new Second(new Rat(100_000n, 1_000_000n)),
+        new Second(new Rat(100_000n, 1_000_000n)),
+        new Second(new Rat(0n, 1_000_000n)),
+        new Second(new Rat(-100_000n, 1_000_000n)),
+        new Second(new Rat(107_758n, 1_000_000n)),
+        new Second(new Rat(1_000_000n, 1_000_000n)),
+        new Second(new Rat(1_000_000n, 1_000_000n)),
+        new Second(new Rat(1_000_000n, 1_000_000n)),
+        new Second(new Rat(1_000_000n, 1_000_000n)),
+        new Second(new Rat(1_000_000n, 1_000_000n)),
+        new Second(new Rat(1_000_000n, 1_000_000n)),
+        new Second(new Rat(1_000_000n, 1_000_000n)),
+        new Second(new Rat(1_000_000n, 1_000_000n)),
+        new Second(new Rat(1_000_000n, 1_000_000n)),
+        new Second(new Rat(1_000_000n, 1_000_000n)),
+        new Second(new Rat(1_000_000n, 1_000_000n)),
+        new Second(new Rat(1_000_000n, 1_000_000n)),
+        new Second(new Rat(1_000_000n, 1_000_000n)),
+        new Second(new Rat(1_000_000n, 1_000_000n)),
+        new Second(new Rat(1_000_000n, 1_000_000n)),
+        new Second(new Rat(1_000_000n, 1_000_000n)),
+        new Second(new Rat(1_000_000n, 1_000_000n)),
+        new Second(new Rat(1_000_000n, 1_000_000n)),
+        new Second(new Rat(1_000_000n, 1_000_000n)),
+        new Second(new Rat(1_000_000n, 1_000_000n)),
+        new Second(new Rat(1_000_000n, 1_000_000n)),
+        new Second(new Rat(1_000_000n, 1_000_000n)),
+        new Second(new Rat(1_000_000n, 1_000_000n)),
+        new Second(new Rat(1_000_000n, 1_000_000n)),
+        new Second(new Rat(1_000_000n, 1_000_000n)),
+        new Second(new Rat(1_000_000n, 1_000_000n)),
+        new Second(new Rat(1_000_000n, 1_000_000n)),
         NaN // `Infinity - Infinity`
       ])
     })
@@ -251,7 +251,7 @@ describe('munge', () => {
         assert.deepStrictEqual(munge([
           [Date.UTC(1970, JAN, 1, 0, 0, 0, 1), -0.000_1]
         ], MODELS.OVERRUN), [new Segment(
-          { atomic: new Second(900n, 1_000_000n), unix: Second.fromMillis(1) } // ray start intentionally doesn't include TAI epoch
+          { atomic: new Second(new Rat(900n, 1_000_000n)), unix: Second.fromMillis(1) } // ray start intentionally doesn't include TAI epoch
         )])
       })
 
@@ -261,10 +261,10 @@ describe('munge', () => {
           [Date.UTC(1969, DEC, 31, 23, 59, 59, 999), 0.000_1],
           [Date.UTC(1970, JAN, 1, 0, 0, 0, 1), -0.001_1]
         ], MODELS.OVERRUN), [new Segment(
-          { atomic: new Second(-900n, 1_000_000n), unix: Second.fromMillis(-1) },
-          { atomic: new Second(-100n, 1_000_000n) }
+          { atomic: new Second(new Rat(-900n, 1_000_000n)), unix: Second.fromMillis(-1) },
+          { atomic: new Second(new Rat(-100n, 1_000_000n)) }
         ), new Segment(
-          { atomic: new Second(-100n, 1_000_000n), unix: Second.fromMillis(1) }
+          { atomic: new Second(new Rat(-100n, 1_000_000n)), unix: Second.fromMillis(1) }
         )])
       })
     })
@@ -289,14 +289,14 @@ describe('munge', () => {
         [9_000, -3], // inserted leap second
         [13_000, -4] // removed leap second
       ], MODELS.BREAK), [new Segment(
-        { atomic: new Second(-5n, 1n), unix: new Second(-1n, 1n) },
-        { atomic: new Second(5n, 1n) }
+        { atomic: new Second(new Rat(-5n, 1n)), unix: new Second(new Rat(-1n, 1n)) },
+        { atomic: new Second(new Rat(5n, 1n)) }
       ), new Segment(
         // this segment starts a full TAI second after the previous segment ended
-        { atomic: new Second(6n, 1n), unix: new Second(9n, 1n) },
-        { atomic: new Second(9n, 1n) }
+        { atomic: new Second(new Rat(6n, 1n)), unix: new Second(new Rat(9n, 1n)) },
+        { atomic: new Second(new Rat(9n, 1n)) }
       ), new Segment(
-        { atomic: new Second(9n, 1n), unix: new Second(13n, 1n) }
+        { atomic: new Second(new Rat(9n, 1n)), unix: new Second(new Rat(13n, 1n)) }
       )])
     })
   })
@@ -335,18 +335,18 @@ describe('munge', () => {
         [9_000, -3], // inserted leap second
         [13_000, -4] // removed leap second
       ], MODELS.STALL), [new Segment(
-        { atomic: new Second(-5n, 1n), unix: new Second(-1n, 1n) },
-        { atomic: new Second(5n, 1n) }
+        { atomic: new Second(new Rat(-5n, 1n)), unix: new Second(new Rat(-1n, 1n)) },
+        { atomic: new Second(new Rat(5n, 1n)) }
       ), new Segment(
         // Stall segment inserted here
-        { atomic: new Second(5n, 1n), unix: new Second(9n, 1n) },
-        { atomic: new Second(6n, 1n) },
+        { atomic: new Second(new Rat(5n, 1n)), unix: new Second(new Rat(9n, 1n)) },
+        { atomic: new Second(new Rat(6n, 1n)) },
         { unixPerAtomic: new Rat(0n) }
       ), new Segment(
-        { atomic: new Second(6n, 1n), unix: new Second(9n, 1n) },
-        { atomic: new Second(9n, 1n) }
+        { atomic: new Second(new Rat(6n, 1n)), unix: new Second(new Rat(9n, 1n)) },
+        { atomic: new Second(new Rat(9n, 1n)) }
       ), new Segment(
-        { atomic: new Second(9n, 1n), unix: new Second(13n, 1n) }
+        { atomic: new Second(new Rat(9n, 1n)), unix: new Second(new Rat(13n, 1n)) }
       )])
     })
 
@@ -399,7 +399,7 @@ describe('munge', () => {
       assert.deepStrictEqual(munge([
         [Date.UTC(1961, JAN, 1), 1.422_818_0, 37_300, 0.001_296]
       ], MODELS.STALL), [new Segment(
-        { atomic: new Second(-283_996_798_577_182n, 1_000_000n), unix: new Second(-283_996_800n, 1n) },
+        { atomic: new Second(new Rat(-283_996_798_577_182n, 1_000_000n)), unix: new Second(new Rat(-283_996_800n, 1n)) },
         { atomic: Second.END_OF_TIME },
         { unixPerAtomic: new Rat(86_400_000_000_000n, 86_400_000_000_000n + 1_296_000n) }
       )])
@@ -518,81 +518,81 @@ describe('munge', () => {
         return b.minusS(a)
       }), [
         // Exact ratio expressing milliseconds
-        new Second(-50n, 1_000n), // 0.05 TAI seconds removed from UTC
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(-100n, 1_000n), // 0.1 TAI seconds removed from UTC
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
-        new Second(0n, 1_000n),
+        new Second(new Rat(-50n, 1_000n)), // 0.05 TAI seconds removed from UTC
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(-100n, 1_000n)), // 0.1 TAI seconds removed from UTC
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
+        new Second(new Rat(0n, 1_000n)),
         NaN
       ])
     })
@@ -613,13 +613,13 @@ describe('munge', () => {
         [86_400_000, 1] // inserted leap second after one day
       ], MODELS.SMEAR), [new Segment(
         { atomic: Second.fromMillis(0), unix: Second.fromMillis(0) },
-        { atomic: new Second(43_200n, 1n) } // midday
+        { atomic: new Second(new Rat(43_200n, 1n)) } // midday
       ), new Segment(
-        { atomic: new Second(43_200n, 1n), unix: new Second(43_200n, 1n) }, // midday
-        { atomic: new Second(129_601n, 1n) }, // midday
+        { atomic: new Second(new Rat(43_200n, 1n)), unix: new Second(new Rat(43_200n, 1n)) }, // midday
+        { atomic: new Second(new Rat(129_601n, 1n)) }, // midday
         { unixPerAtomic: new Rat(86_400n, 86_401n) } // A full Unix day elapses, but a full TAI day plus one second elapses
       ), new Segment(
-        { atomic: new Second(129_601n, 1n), unix: new Second(129_600n, 1n) } // midday
+        { atomic: new Second(new Rat(129_601n, 1n)), unix: new Second(new Rat(129_600n, 1n)) } // midday
       )])
     })
 
@@ -629,13 +629,13 @@ describe('munge', () => {
         [86_400_000, -1] // removed leap second after one day
       ], MODELS.SMEAR), [new Segment(
         { atomic: Second.fromMillis(0), unix: Second.fromMillis(0) },
-        { atomic: new Second(43_200n, 1n) } // midday
+        { atomic: new Second(new Rat(43_200n, 1n)) } // midday
       ), new Segment(
-        { atomic: new Second(43_200n, 1n), unix: new Second(43_200n, 1n) }, // midday
-        { atomic: new Second(129_599n, 1n) }, // midday
+        { atomic: new Second(new Rat(43_200n, 1n)), unix: new Second(new Rat(43_200n, 1n)) }, // midday
+        { atomic: new Second(new Rat(129_599n, 1n)) }, // midday
         { unixPerAtomic: new Rat(86_400n, 86_399n) } // A full Unix day elapses, but a full TAI day minus one second elapses
       ), new Segment(
-        { atomic: new Second(129_599n, 1n), unix: new Second(129_600n, 1n) } // midday
+        { atomic: new Second(new Rat(129_599n, 1n)), unix: new Second(new Rat(129_600n, 1n)) } // midday
       )])
     })
 
@@ -752,86 +752,86 @@ describe('munge', () => {
 
         return b.minusS(a)
       }), [
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
-        new Second(0n, 1n),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
+        new Second(new Rat(0n, 1n)),
         NaN
       ])
     })

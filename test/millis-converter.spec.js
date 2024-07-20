@@ -958,14 +958,14 @@ describe('MillisConverter', () => {
       describe('BREAK', () => {
         it('says no', () => {
           assert.throws(() => new MillisConverter(data, MODELS.BREAK),
-            /Segment length must be positive/)
+            /segment length must be positive/)
         })
       })
 
       describe('STALL', () => {
         it('says no', () => {
           assert.throws(() => new MillisConverter(data, MODELS.STALL),
-            /Segment length must be positive/)
+            /segment length must be positive/)
         })
       })
     })

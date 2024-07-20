@@ -9,19 +9,19 @@ import { Second } from './second.js'
 export class Segment {
   constructor (start, end = { atomic: Second.END_OF_TIME }, slope = { unixPerAtomic: new Rat(1n) }) {
     if (!(start.atomic instanceof Second)) {
-      throw Error('TAI start must be a rational number of seconds')
+      throw Error('TAI start must be a `Second`')
     }
     if (!(start.unix instanceof Second)) {
-      throw Error('Unix start must be a rational number of seconds')
+      throw Error('Unix start must be a `Second`')
     }
-    if (!(end.atomic instanceof Second)) {
-      throw Error('TAI end must be a rational number of seconds')
+    if (!(end.atomic instanceof Second || end.atomic === Second.END_OF_TIME)) {
+      throw Error('TAI end must be a `Second` or `Second.END_OF_TIME`')
     }
     if (!(slope.unixPerAtomic instanceof Rat)) {
-      throw Error('Slope must be a pure ratio')
+      throw Error('slope must be a `Rat`')
     }
-    if (end.atomic.leS(start.atomic)) {
-      throw Error('Segment length must be positive')
+    if (end.atomic === Second.END_OF_TIME ? start.atomic === Second.END_OF_TIME : end.atomic.leS(start.atomic)) {
+      throw Error('segment length must be positive')
     }
 
     this.slope = {
@@ -59,6 +59,10 @@ export class Segment {
   }
 
   atomicToUnix (atomic) {
+    if (atomic === Second.END_OF_TIME) {
+      return Second.END_OF_TIME
+    }
+
     return atomic
       .minusS(this.start.atomic)
       .timesR(this.slope.unixPerAtomic)
@@ -71,12 +75,12 @@ export class Segment {
   // Unix by the segment.
 
   atomicOnSegment (atomic) {
-    return this.start.atomic.leS(atomic) && this.end.atomic.gtS(atomic)
+    return this.start.atomic.leS(atomic) && (this.end.atomic === Second.END_OF_TIME ? atomic !== Second.END_OF_TIME : this.end.atomic.gtS(atomic))
   }
 
   unixOnSegment (unix) {
     return this.slope.unixPerAtomic.eq(new Rat(0n))
       ? this.start.unix.eqS(unix)
-      : this.start.unix.leS(unix) && this.end.unix.gtS(unix)
+      : this.start.unix.leS(unix) && (this.end.unix === Second.END_OF_TIME ? unix !== Second.END_OF_TIME : this.end.unix.gtS(unix))
   }
 }
