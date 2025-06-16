@@ -29,6 +29,6 @@
   "exports": {
     ".": "./src/index.js",
     "./exact": "./src/exact.js",
-    "./nanos": "./src/nanos-converter.js"
+    "./nanos": "./src/nanos.js"
   }
 }
