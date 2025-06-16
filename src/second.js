@@ -40,6 +40,10 @@ export class Second {
   toMillis () {
     return Number(this.rat.times(new Rat(1_000n)).trunc())
   }
+
+  toNanos () {
+    return Number(this.rat.times(new Rat(1_000_000_000n)).trunc())
+  }
 }
 
 Second.fromMillis = millis => {
@@ -48,6 +52,14 @@ Second.fromMillis = millis => {
   }
 
   return new Second(new Rat(BigInt(millis), 1_000n))
+}
+
+Second.fromNanos = nanos => {
+  if (!Number.isInteger(nanos)) {
+    throw Error(`Not an integer: ${nanos}`)
+  }
+
+  return new Second(new Rat(BigInt(nanos), 1_000_000_000n))
 }
 
 Second.END_OF_TIME = Symbol('end of time')

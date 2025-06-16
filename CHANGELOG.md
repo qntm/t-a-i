@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 4.1.0
+
+Added `t-a-i/nanos` support.
+
 ## 4.0.0
 
 * `t-a-i` has dropped support for Node.js 14.
