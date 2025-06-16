@@ -256,10 +256,10 @@ import { TaiConverter, MODELS, UNIX_START } from 't-a-i/nanos'
 const taiConverter = TaiConverter(MODELS.STALL)
 
 console.log(UNIX_START)
-// -283_996_800_000_000_000 Unix milliseconds
+// -283_996_800_000_000_000 Unix nanoseconds
 
 console.log(taiConverter.unixToAtomic(UNIX_START))
-// -283_996_798_577_182_000 TAI milliseconds
+// -283_996_798_577_182_000 TAI nanoseconds
 ```
 
 ## Background: TAI vs UTC vs Unix
