@@ -246,6 +246,22 @@ taiConverter.unixToAtomic(unix, { range: true })
 // i.e. [1999-01-01 00:00:31.000 TAI, 1999-01-01 00:00:32.000 TAI]
 ```
 
+### Nanoseconds API
+
+All of the above works with integer numbers of TAI or Unix milliseconds. You can also work in nanoseconds:
+
+```js
+import { TaiConverter, MODELS, UNIX_START } from 't-a-i/nanos'
+
+const taiConverter = TaiConverter(MODELS.STALL)
+
+console.log(UNIX_START)
+// -283_996_800_000_000_000 Unix milliseconds
+
+console.log(taiConverter.unixToAtomic(UNIX_START))
+// -283_996_798_577_182_000 TAI milliseconds
+```
+
 ## Background: TAI vs UTC vs Unix
 
 The relationship between UTC and TAI starts at 00:00:00 UTC on 1 January 1961. The relationship has always been [linear](https://en.wikipedia.org/wiki/Linear_function_(calculus)), but the nature of the linear relationship has changed on various discrete occasions.
