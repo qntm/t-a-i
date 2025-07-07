@@ -6,12 +6,12 @@ const JAN = 0
 const FEB = 1
 const MAR = 2
 const APR = 3
-// const JUN = 5
+const JUN = 5
 const JUL = 6
 const AUG = 7
 const SEP = 8
 const NOV = 10
-const DEC = 11
+// const DEC = 11
 
 // First column: Unix millisecond count when this relationship became effective
 // Second column: TAI minus UTC in TAI seconds as of the root point
@@ -64,8 +64,7 @@ export const taiData = [
 
 export const UNIX_START_MILLIS = taiData[0][0]
 
-// Because we don't know whether or not a leap second will be inserted or removed at this time,
-// the relationship between Unix time and TAI is unpredictable at or beyond this point.
-// (This is the start of a possible smear.)
+// Our limit of validity is determined by IERS Bulletin C's limit of validity.
+// https://hpiers.obspm.fr/iers/bul/bulc/BULLETINC.GUIDE.html
 // Updating this value? Don't forget to update the README too!
-export const UNIX_END_MILLIS = Date.UTC(2025, DEC, 31, 12, 0, 0, 0)
+export const UNIX_END_MILLIS = Date.UTC(2026, JUN, 28)
