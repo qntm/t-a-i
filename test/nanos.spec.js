@@ -3,7 +3,6 @@ import { describe, it } from 'mocha'
 import { TaiConverter, MODELS, UNIX_START, UNIX_END } from '../src/nanos.js'
 
 const JAN = 0
-const JUN = 5
 const OCT = 9
 const DEC = 11
 
@@ -14,18 +13,12 @@ describe('UNIX_START', () => {
 })
 
 describe('UNIX_END', () => {
-  it('is correct', () => {
+  it('is at the limit of validity', () => {
+    // https://hpiers.obspm.fr/iers/bul/bulc/BULLETINC.GUIDE.html
     const endDate = new Date(UNIX_END / 1_000_000)
 
-    if (endDate.getUTCMonth() === JUN) {
-      assert.strictEqual(endDate.getUTCDate(), 30)
-    } else if (endDate.getUTCMonth() === DEC) {
-      assert.strictEqual(endDate.getUTCDate(), 31)
-    } else {
-      throw Error('bad month')
-    }
-
-    assert.strictEqual(endDate.getUTCHours(), 12)
+    assert.strictEqual(endDate.getUTCDate(), 28)
+    assert.strictEqual(endDate.getUTCHours(), 0)
     assert.strictEqual(endDate.getUTCMinutes(), 0)
     assert.strictEqual(endDate.getUTCSeconds(), 0)
     assert.strictEqual(endDate.getUTCMilliseconds(), 0)
