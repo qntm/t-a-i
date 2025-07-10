@@ -262,6 +262,47 @@ console.log(taiConverter.unixToAtomic(UNIX_START))
 // -283_996_798_577_182_000 TAI nanoseconds
 ```
 
+#### A note on precision when using the nanoseconds API
+
+JavaScript numbers are IEEE 754 64-bit floats which cannot precisely represent all integers beyond a certain range. [`Number.MAX_SAFE_INTEGER`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER) is `9_007_199_254_740_991` which, when interpreted as a nanosecond count, is 104 days, 5 hours, 59 minutes, 59.254_740_991 seconds. This means that nanosecond counts for:
+
+* times before 1969-09-18 18:00:00.745_259_009
+* times after 1970-04-15 05:59:59.254_740_991
+
+are sometimes inaccessible. This affects both `unixToAtomic` and `atomicToUnix`, and it affects both the inputs and the return values of these methods.
+
+For example, suppose it's one millisecond before the end of the 24-hour smear for the most recent leap second. Let's try to convert that Unix time to TAI:
+
+```js
+import { TaiConverter, MODELS, UNIX_START } from 't-a-i/nanos'
+
+const taiConverter = TaiConverter(MODELS.SMEAR)
+
+const unixNanos = Date.UTC(2017, 0 /* January */, 1, 11, 59, 59, 999) * 1_000_000
+const taiNanos = taiConverter.unixToAtomic(unixNanos)
+```
+
+The correct, exact values here *should* be:
+
+<table>
+<tr><td><b>UTC time</b></td><td>2017-01-01 11:59:59.999_000_000</td></tr>
+<tr><td><b>Unix nanosecond count</b></td><td>1_483_271_999_999_000_000</td></tr>
+<tr><td><b>TAI nanosecond count</b></td><td>1_483_272_036_998_999_988.425_925_925_925...</td></tr>
+<tr><td><b>Rounded TAI nanosecond count</b>*</td><td>1_483_272_036_998_999_988</td></tr>
+<tr><td><b>Returned value</b></td><td>1_483_272_036_998_999_988</td></tr>
+</table>
+
+However, because some of these numbers cannot be represented in JavaScript, the actual calculation which takes place is:
+
+<table>
+<tr><td><b><code>unixNanos</code></b></td><td>1_483_271_999_999_000_064 (off by 64)</td></tr>
+<tr><td><b>TAI nanosecond count</b></td><td>1_483_272_036_999_000_052.426_666_666_666 (off by 64.000_740_740_740...)</td></tr>
+<tr><td><b>Rounded TAI nanosecond count</b>*</td><td>1_483_272_036_999_000_052 (off by 64)</td></tr>
+<tr><td><b><code>taiNanos</code></b></td><td>1_483_272_036_999_000_064 (off by 76)</td></tr>
+</table>
+
+\* `t-a-i` rounds all returned values towards negative infinity.
+
 ## Background: TAI vs UTC vs Unix
 
 The relationship between UTC and TAI starts at 00:00:00 UTC on 1 January 1961. The relationship has always been [linear](https://en.wikipedia.org/wiki/Linear_function_(calculus)), but the nature of the linear relationship has changed on various discrete occasions.
