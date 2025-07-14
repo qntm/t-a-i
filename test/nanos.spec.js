@@ -1,7 +1,6 @@
 import assert from 'node:assert'
 import { describe, it } from 'mocha'
 import { TaiConverter, MODELS, UNIX_START, UNIX_END } from '../src/nanos.js'
-import { UNIX_START_MILLIS, UNIX_END_MILLIS } from '../src/tai-data.js'
 
 const JAN = 0
 const JUN = 5
