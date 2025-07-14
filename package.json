@@ -1,6 +1,6 @@
 {
   "name": "t-a-i",
-  "version": "4.1.2",
+  "version": "4.1.3",
   "description": "Converts Unix milliseconds to and from International Atomic Time (TAI) milliseconds",
   "homepage": "https://github.com/qntm/t-a-i",
   "repository": {
