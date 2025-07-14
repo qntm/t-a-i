@@ -276,7 +276,7 @@ are sometimes inaccessible. This affects both `unixToAtomic` and `atomicToUnix`,
 For example, suppose it's one millisecond before the end of the 24-hour smear for the most recent leap second. Let's try to convert that Unix time to TAI, using ordinary floats:
 
 ```js
-import { TaiConverter, MODELS, UNIX_START } from 't-a-i/nanos'
+import { TaiConverter, MODELS } from 't-a-i/nanos'
 
 const taiConverter = TaiConverter(MODELS.SMEAR)
 
@@ -306,7 +306,7 @@ However, because some of these numbers cannot be represented in JavaScript, the 
 If we use BigInts, these problems go away and we obtain precise results:
 
 ```js
-import { TaiConverter, MODELS, UNIX_START } from 't-a-i/nanos'
+import { TaiConverter, MODELS } from 't-a-i/nanos'
 
 const taiConverter = TaiConverter(MODELS.SMEAR)
 
