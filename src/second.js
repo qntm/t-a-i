@@ -38,7 +38,7 @@ export class Second {
   }
 
   toMillis () {
-    return Number(this.rat.times(new Rat(1_000n)).trunc())
+    return this.rat.times(new Rat(1_000n)).trunc()
   }
 
   toNanos () {

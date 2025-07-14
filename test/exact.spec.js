@@ -23,7 +23,7 @@ describe('UNIX_START', () => {
 describe('UNIX_END', () => {
   it('is at the limit of validity', () => {
     // https://hpiers.obspm.fr/iers/bul/bulc/BULLETINC.GUIDE.html
-    const endDate = new Date(UNIX_END.toMillis())
+    const endDate = new Date(Number(UNIX_END.toMillis()))
 
     assert.strictEqual(endDate.getUTCDate(), 28)
     assert.strictEqual(endDate.getUTCHours(), 0)

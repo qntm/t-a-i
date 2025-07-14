@@ -51,7 +51,7 @@ describe('Second', () => {
   })
 
   it('toMillis', () => {
-    assert.strictEqual(new Second(new Rat(123n, 1_000n)).toMillis(), 123)
+    assert.strictEqual(new Second(new Rat(123n, 1_000n)).toMillis(), 123n)
   })
 
   it('fromNanos', () => {

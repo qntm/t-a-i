@@ -8,26 +8,53 @@ export class MillisConverter {
   }
 
   atomicToUnix (atomicMillis) {
-    if (!Number.isInteger(atomicMillis)) {
+    const isInteger = Number.isInteger(atomicMillis)
+
+    if (isInteger) {
+      atomicMillis = BigInt(atomicMillis)
+    }
+
+    if (typeof atomicMillis !== 'bigint') {
       throw Error(`Not an integer: ${atomicMillis}`)
     }
 
-    const unix = this.converter.atomicToUnix(Second.fromMillis(BigInt(atomicMillis)))
-    return Number.isNaN(unix)
-      ? unix
-      : unix.toMillis()
+    let unix = this.converter.atomicToUnix(Second.fromMillis(atomicMillis))
+    if (Number.isNaN(unix)) {
+      return unix
+    }
+
+    unix = unix.toMillis()
+
+    if (isInteger) {
+      unix = Number(unix)
+    }
+
+    return unix
   }
 
   unixToAtomic (unixMillis, options = {}) {
-    if (!Number.isInteger(unixMillis)) {
+    const isInteger = Number.isInteger(unixMillis)
+
+    if (isInteger) {
+      unixMillis = BigInt(unixMillis)
+    }
+
+    if (typeof unixMillis !== 'bigint') {
       throw Error(`Not an integer: ${unixMillis}`)
     }
 
-    const ranges = this.converter.unixToAtomic(Second.fromMillis(BigInt(unixMillis)))
-      .map(range => [
-        range.start.toMillis(),
-        range.end.toMillis()
+    let ranges = this.converter.unixToAtomic(Second.fromMillis(unixMillis))
+    ranges = ranges.map(range => [
+      range.start.toMillis(),
+      range.end.toMillis()
+    ])
+
+    if (isInteger) {
+      ranges = ranges.map(range => [
+        Number(range[0]),
+        Number(range[1])
       ])
+    }
 
     if (options.array === true) {
       return options.range === true ? ranges : ranges.map(range => range[1])
