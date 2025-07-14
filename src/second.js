@@ -50,6 +50,6 @@ Second.fromMillis = millis =>
   new Second(new Rat(millis, 1_000n))
 
 Second.fromNanos = nanos =>
-  return new Second(new Rat(nanos, 1_000_000_000n))
+  new Second(new Rat(nanos, 1_000_000_000n))
 
 Second.END_OF_TIME = Symbol('end of time')
