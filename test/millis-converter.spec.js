@@ -26,8 +26,12 @@ describe('MillisConverter', () => {
           [0])
         assert.strictEqual(millisConverter.unixToAtomic(0),
           0)
+        assert.strictEqual(millisConverter.unixToAtomic(0n),
+          0n)
         assert.strictEqual(millisConverter.atomicToUnix(0),
           0)
+        assert.strictEqual(millisConverter.atomicToUnix(0n),
+          0n)
       })
     })
 
@@ -937,6 +941,16 @@ describe('MillisConverter', () => {
           assert.strictEqual(millisConverter.unixToAtomic(2_000), 4_500)
         })
 
+        it('unixToAtomic (BigInts)', () => {
+          assert.strictEqual(millisConverter.unixToAtomic(0n), 0n)
+          assert.strictEqual(millisConverter.unixToAtomic(499n), 499n)
+          assert.strictEqual(millisConverter.unixToAtomic(500n), 3_000n)
+          assert.strictEqual(millisConverter.unixToAtomic(999n), 3_499n)
+          assert.strictEqual(millisConverter.unixToAtomic(1_000n), 3_500n)
+          assert.strictEqual(millisConverter.unixToAtomic(1_999n), 4_499n)
+          assert.strictEqual(millisConverter.unixToAtomic(2_000n), 4_500n)
+        })
+
         it('atomicToUnix', () => {
           assert.strictEqual(millisConverter.atomicToUnix(0), 0)
           assert.strictEqual(millisConverter.atomicToUnix(499), 499)
@@ -952,6 +966,23 @@ describe('MillisConverter', () => {
           assert.strictEqual(millisConverter.atomicToUnix(3_001), 501)
           assert.strictEqual(millisConverter.atomicToUnix(4_499), 1_999)
           assert.strictEqual(millisConverter.atomicToUnix(4_500), 2_000)
+        })
+
+        it('atomicToUnix (BigInts)', () => {
+          assert.strictEqual(millisConverter.atomicToUnix(0n), 0n)
+          assert.strictEqual(millisConverter.atomicToUnix(499n), 499n)
+          assert.strictEqual(millisConverter.atomicToUnix(500n), 500n)
+          assert.strictEqual(millisConverter.atomicToUnix(999n), 999n)
+          assert.strictEqual(millisConverter.atomicToUnix(1_000n), 1_000n)
+          assert.strictEqual(millisConverter.atomicToUnix(1_001n), 1_001n)
+          assert.strictEqual(millisConverter.atomicToUnix(1_999n), 1_999n)
+          assert.strictEqual(millisConverter.atomicToUnix(2_000n), 1_000n)
+          assert.strictEqual(millisConverter.atomicToUnix(2_001n), 1_001n)
+          assert.strictEqual(millisConverter.atomicToUnix(2_999n), 1_999n)
+          assert.strictEqual(millisConverter.atomicToUnix(3_000n), 500n)
+          assert.strictEqual(millisConverter.atomicToUnix(3_001n), 501n)
+          assert.strictEqual(millisConverter.atomicToUnix(4_499n), 1_999n)
+          assert.strictEqual(millisConverter.atomicToUnix(4_500n), 2_000n)
         })
       })
 
