@@ -8,6 +8,7 @@ const JAN = 0
 const FEB = 1
 const MAR = 2
 const APR = 3
+const JUN = 5
 const JUL = 6
 const AUG = 7
 const SEP = 8
@@ -25,6 +26,7 @@ describe('UNIX_END', () => {
     // https://hpiers.obspm.fr/iers/bul/bulc/BULLETINC.GUIDE.html
     const endDate = new Date(Number(UNIX_END.toMillis()))
 
+    assert([JUN, DEC].includes(endDate.getUTCMonth()))
     assert.strictEqual(endDate.getUTCDate(), 28)
     assert.strictEqual(endDate.getUTCHours(), 0)
     assert.strictEqual(endDate.getUTCMinutes(), 0)
