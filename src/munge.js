@@ -36,7 +36,7 @@ export const MODELS = {
 const NOV = 10
 const secondsPerDay = new Second(new Rat(86_400n, 1n))
 const mjdEpoch = {
-  unix: Second.fromMillis(Date.UTC(1858, NOV, 17))
+  unix: Second.fromMillis(BigInt(Date.UTC(1858, NOV, 17)))
 }
 
 // Input some raw TAI-UTC data, output the same data but altered to be more consumable for our
@@ -58,7 +58,7 @@ export const munge = (data, model) => {
     ] = datum
 
     // Convert from a millisecond count to a precise ratio of seconds
-    start.unix = Second.fromMillis(start.unixMillis)
+    start.unix = Second.fromMillis(BigInt(start.unixMillis))
 
     // Convert from a floating point number to a precise ratio
     // Offsets are given in TAI seconds to seven decimal places, e.g. `1.422_818_0`.

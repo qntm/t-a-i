@@ -8,14 +8,22 @@ export class MillisConverter {
   }
 
   atomicToUnix (atomicMillis) {
-    const unix = this.converter.atomicToUnix(Second.fromMillis(atomicMillis))
+    if (!Number.isInteger(atomicMillis)) {
+      throw Error(`Not an integer: ${atomicMillis}`)
+    }
+
+    const unix = this.converter.atomicToUnix(Second.fromMillis(BigInt(atomicMillis)))
     return Number.isNaN(unix)
       ? unix
       : unix.toMillis()
   }
 
   unixToAtomic (unixMillis, options = {}) {
-    const ranges = this.converter.unixToAtomic(Second.fromMillis(unixMillis))
+    if (!Number.isInteger(unixMillis)) {
+      throw Error(`Not an integer: ${unixMillis}`)
+    }
+
+    const ranges = this.converter.unixToAtomic(Second.fromMillis(BigInt(unixMillis)))
       .map(range => [
         range.start.toMillis(),
         range.end.toMillis()

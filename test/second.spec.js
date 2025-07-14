@@ -46,7 +46,7 @@ describe('Second', () => {
   })
 
   it('fromMillis', () => {
-    assert.deepStrictEqual(Second.fromMillis(123), new Second(new Rat(123n, 1_000n)))
+    assert.deepStrictEqual(Second.fromMillis(123n), new Second(new Rat(123n, 1_000n)))
     assert.throws(() => Second.fromMillis(Infinity))
   })
 

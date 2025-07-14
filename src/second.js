@@ -47,11 +47,7 @@ export class Second {
 }
 
 Second.fromMillis = millis => {
-  if (!Number.isInteger(millis)) {
-    throw Error(`Not an integer: ${millis}`)
-  }
-
-  return new Second(new Rat(BigInt(millis), 1_000n))
+  return new Second(new Rat(millis, 1_000n))
 }
 
 Second.fromNanos = nanos => {
