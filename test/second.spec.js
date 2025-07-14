@@ -55,11 +55,11 @@ describe('Second', () => {
   })
 
   it('fromNanos', () => {
-    assert.deepStrictEqual(Second.fromNanos(123), new Second(new Rat(123n, 1_000_000_000n)))
+    assert.deepStrictEqual(Second.fromNanos(123n), new Second(new Rat(123n, 1_000_000_000n)))
     assert.throws(() => Second.fromNanos(Infinity))
   })
 
   it('toNanos', () => {
-    assert.strictEqual(new Second(new Rat(123n, 1_000_000_000n)).toNanos(), 123)
+    assert.strictEqual(new Second(new Rat(123n, 1_000_000_000n)).toNanos(), 123n)
   })
 })
