@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 5.0.0
+
+Support for Node.js 18 and lower is dropped.
+
 ## 4.1.0
 
 Added `t-a-i/nanos` support.
