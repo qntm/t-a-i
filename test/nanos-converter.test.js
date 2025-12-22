@@ -1,4 +1,5 @@
-import assert from 'node:assert'
+import assert from 'node:assert/strict'
+
 import { describe, it } from 'mocha'
 import { MODELS } from '../src/munge.js'
 import { NanosConverter } from '../src/nanos-converter.js'
@@ -17,15 +18,15 @@ describe('NanosConverter', () => {
       const nanosConverter = new NanosConverter(data, MODELS.OVERRUN)
 
       it('manages basic conversions', () => {
-        assert.deepStrictEqual(nanosConverter.unixToAtomic(0, { range: true, array: true }),
+        assert.deepEqual(nanosConverter.unixToAtomic(0, { range: true, array: true }),
           [[0, 0]])
-        assert.deepStrictEqual(nanosConverter.unixToAtomic(0, { range: true }),
+        assert.deepEqual(nanosConverter.unixToAtomic(0, { range: true }),
           [0, 0])
-        assert.deepStrictEqual(nanosConverter.unixToAtomic(0, { array: true }),
+        assert.deepEqual(nanosConverter.unixToAtomic(0, { array: true }),
           [0])
-        assert.strictEqual(nanosConverter.unixToAtomic(0),
+        assert.equal(nanosConverter.unixToAtomic(0),
           0)
-        assert.strictEqual(nanosConverter.atomicToUnix(0),
+        assert.equal(nanosConverter.atomicToUnix(0),
           0)
       })
     })
@@ -34,9 +35,9 @@ describe('NanosConverter', () => {
       const nanosConverter = new NanosConverter(data, MODELS.BREAK)
 
       it('manages basic conversions', () => {
-        assert.strictEqual(nanosConverter.unixToAtomic(0),
+        assert.equal(nanosConverter.unixToAtomic(0),
           0)
-        assert.strictEqual(nanosConverter.atomicToUnix(0),
+        assert.equal(nanosConverter.atomicToUnix(0),
           0)
       })
     })
@@ -52,25 +53,25 @@ describe('NanosConverter', () => {
       })
 
       it('fails when the atomic count is out of bounds', () => {
-        assert.strictEqual(nanosConverter.atomicToUnix(0),
+        assert.equal(nanosConverter.atomicToUnix(0),
           0)
-        assert.strictEqual(nanosConverter.atomicToUnix(-1),
+        assert.equal(nanosConverter.atomicToUnix(-1),
           NaN)
       })
 
       it('fails when the Unix count is out of bounds', () => {
-        assert.strictEqual(nanosConverter.unixToAtomic(0),
+        assert.equal(nanosConverter.unixToAtomic(0),
           0)
-        assert.strictEqual(nanosConverter.unixToAtomic(-1),
+        assert.equal(nanosConverter.unixToAtomic(-1),
           NaN)
       })
 
       it('manages basic conversions', () => {
-        assert.deepStrictEqual(nanosConverter.unixToAtomic(0, { range: true, array: true }), [[0, 0]])
-        assert.deepStrictEqual(nanosConverter.unixToAtomic(0, { range: true }), [0, 0])
-        assert.deepStrictEqual(nanosConverter.unixToAtomic(0, { array: true }), [0])
-        assert.strictEqual(nanosConverter.unixToAtomic(0), 0)
-        assert.strictEqual(nanosConverter.atomicToUnix(0), 0)
+        assert.deepEqual(nanosConverter.unixToAtomic(0, { range: true, array: true }), [[0, 0]])
+        assert.deepEqual(nanosConverter.unixToAtomic(0, { range: true }), [0, 0])
+        assert.deepEqual(nanosConverter.unixToAtomic(0, { array: true }), [0])
+        assert.equal(nanosConverter.unixToAtomic(0), 0)
+        assert.equal(nanosConverter.atomicToUnix(0), 0)
       })
     })
 
@@ -78,9 +79,9 @@ describe('NanosConverter', () => {
       const nanosConverter = new NanosConverter(data, MODELS.SMEAR)
 
       it('manages basic conversions', () => {
-        assert.strictEqual(nanosConverter.unixToAtomic(0),
+        assert.equal(nanosConverter.unixToAtomic(0),
           0)
-        assert.strictEqual(nanosConverter.atomicToUnix(0),
+        assert.equal(nanosConverter.atomicToUnix(0),
           0)
       })
     })
@@ -94,7 +95,7 @@ describe('NanosConverter', () => {
     const nanosConverter = new NanosConverter(data, MODELS.OVERRUN)
 
     it('before anything clever occurs', () => {
-      assert.deepStrictEqual(nanosConverter.unixToAtomic(Date.UTC(1963, OCT, 31, 23, 59, 59, 999) * 1_000_000, { array: true }),
+      assert.deepEqual(nanosConverter.unixToAtomic(Date.UTC(1963, OCT, 31, 23, 59, 59, 999) * 1_000_000, { array: true }),
         [
           Date.UTC(1963, NOV, 1, 0, 0, 2, 596) * 1_000_000 + 278_800
         ])
@@ -102,7 +103,7 @@ describe('NanosConverter', () => {
     })
 
     it('exactly at the time', () => {
-      assert.deepStrictEqual(nanosConverter.unixToAtomic(Date.UTC(1963, NOV, 1, 0, 0, 0, 0) * 1_000_000, { array: true }),
+      assert.deepEqual(nanosConverter.unixToAtomic(Date.UTC(1963, NOV, 1, 0, 0, 0, 0) * 1_000_000, { array: true }),
         [
           Date.UTC(1963, NOV, 1, 0, 0, 2, 597) * 1_000_000 + 278_800,
           Date.UTC(1963, NOV, 1, 0, 0, 2, 697) * 1_000_000 + 278_800
@@ -110,24 +111,24 @@ describe('NanosConverter', () => {
     })
 
     it('then', () => {
-      assert.deepStrictEqual(nanosConverter.unixToAtomic(Date.UTC(1963, NOV, 1, 0, 0, 0, 1) * 1_000_000, { array: true }),
+      assert.deepEqual(nanosConverter.unixToAtomic(Date.UTC(1963, NOV, 1, 0, 0, 0, 1) * 1_000_000, { array: true }),
         [
           Date.UTC(1963, NOV, 1, 0, 0, 2, 598) * 1_000_000 + 278_800,
           Date.UTC(1963, NOV, 1, 0, 0, 2, 698) * 1_000_000 + 278_800
         ])
 
-      assert.deepStrictEqual(nanosConverter.unixToAtomic(Date.UTC(1963, NOV, 1, 0, 0, 0, 99) * 1_000_000, { array: true }),
+      assert.deepEqual(nanosConverter.unixToAtomic(Date.UTC(1963, NOV, 1, 0, 0, 0, 99) * 1_000_000, { array: true }),
         [
           Date.UTC(1963, NOV, 1, 0, 0, 2, 696) * 1_000_000 + 278_820,
           Date.UTC(1963, NOV, 1, 0, 0, 2, 796) * 1_000_000 + 278_820 // -194_659_197_203_721_198_713n TAI
         ])
 
-      assert.deepStrictEqual(nanosConverter.unixToAtomic(Date.UTC(1963, NOV, 1, 0, 0, 0, 100) * 1_000_000, { array: true }),
+      assert.deepEqual(nanosConverter.unixToAtomic(Date.UTC(1963, NOV, 1, 0, 0, 0, 100) * 1_000_000, { array: true }),
         [
           Date.UTC(1963, NOV, 1, 0, 0, 2, 797) * 1_000_000 + 278_820
         ])
 
-      assert.deepStrictEqual(nanosConverter.unixToAtomic(Date.UTC(1963, NOV, 1, 0, 0, 0, 101) * 1_000_000, { array: true }),
+      assert.deepEqual(nanosConverter.unixToAtomic(Date.UTC(1963, NOV, 1, 0, 0, 0, 101) * 1_000_000, { array: true }),
         [
           Date.UTC(1963, NOV, 1, 0, 0, 2, 798) * 1_000_000 + 278_820
         ])
