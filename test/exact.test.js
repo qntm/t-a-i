@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
+import { describe, it } from 'node:test'
 
-import { describe, it } from 'mocha'
 import { TaiConverter, Second, MODELS, UNIX_START, UNIX_END } from '../src/exact.js'
 import { Range } from '../src/range.js'
 import { Rat } from '../src/rat.js'
