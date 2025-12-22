@@ -1,4 +1,5 @@
-import assert from 'node:assert'
+import assert from 'node:assert/strict'
+
 import { describe, it } from 'mocha'
 import { taiData } from '../src/tai-data.js'
 import { munge, MODELS } from '../src/munge.js'
@@ -11,10 +12,10 @@ const DEC = 11
 
 describe('MODELS', () => {
   it('pointless symbol string tests', () => {
-    assert.strictEqual(MODELS.OVERRUN.description, 'OVERRUN')
-    assert.strictEqual(MODELS.BREAK.description, 'BREAK')
-    assert.strictEqual(MODELS.STALL.description, 'STALL')
-    assert.strictEqual(MODELS.SMEAR.description, 'SMEAR')
+    assert.equal(MODELS.OVERRUN.description, 'OVERRUN')
+    assert.equal(MODELS.BREAK.description, 'BREAK')
+    assert.equal(MODELS.STALL.description, 'STALL')
+    assert.equal(MODELS.SMEAR.description, 'SMEAR')
   })
 })
 
@@ -41,7 +42,7 @@ describe('munge', () => {
     })
 
     it('works in the simplest possible case', () => {
-      assert.deepStrictEqual(munge([
+      assert.deepEqual(munge([
         [Date.UTC(1970, JAN, 1), 0]
       ], MODELS.OVERRUN), [new Segment(
         { atomic: Second.fromMillis(0n), unix: Second.fromMillis(0n) }
@@ -49,7 +50,7 @@ describe('munge', () => {
     })
 
     it('works when there is an initial offset', () => {
-      assert.deepStrictEqual(munge([
+      assert.deepEqual(munge([
         [7, -4]
       ], MODELS.OVERRUN), [new Segment(
         { atomic: Second.fromMillis(-3_993n), unix: Second.fromMillis(7n) }
@@ -61,7 +62,7 @@ describe('munge', () => {
       //                       \/         \/
       // TAI:          [3][4][5][6][ 7][ 8][ 9][...]
       // Unix: [...][6][7][8][9][9][10][11][13][...]
-      assert.deepStrictEqual(munge([
+      assert.deepEqual(munge([
         [-1_000, -4],
         [9_000, -3], // inserted leap second
         [13_000, -4] // removed leap second
@@ -78,7 +79,7 @@ describe('munge', () => {
 
     it('allows a negative ratio somehow', () => {
       // TAI runs way faster than UTC
-      assert.deepStrictEqual(munge([
+      assert.deepEqual(munge([
         [Date.UTC(1970, JAN, 1), 0, 40_587, 8.640_0]
       ], MODELS.OVERRUN), [new Segment(
         { atomic: Second.fromMillis(0n), unix: Second.fromMillis(0n) },
@@ -87,14 +88,14 @@ describe('munge', () => {
       )])
 
       // UTC and TAI run at identical rates
-      assert.deepStrictEqual(munge([
+      assert.deepEqual(munge([
         [Date.UTC(1970, JAN, 1), 0, 40_587, 0]
       ], MODELS.OVERRUN), [new Segment(
         { atomic: Second.fromMillis(0n), unix: Second.fromMillis(0n) }
       )])
 
       // TAI runs way slower than UTC
-      assert.deepStrictEqual(munge([
+      assert.deepEqual(munge([
         [Date.UTC(1970, JAN, 1), 0, 40_587, -8.640_0]
       ], MODELS.OVERRUN), [new Segment(
         { atomic: Second.fromMillis(0n), unix: Second.fromMillis(0n) },
@@ -104,7 +105,7 @@ describe('munge', () => {
 
       // TAI moves at one ten-thousandth the rate of UTC!
       // Equivalently, UTC moves 10,000 times the rate of TAI
-      assert.deepStrictEqual(munge([
+      assert.deepEqual(munge([
         [Date.UTC(1970, JAN, 1), 0, 40_587, -86_400 + 8.640_0]
       ], MODELS.OVERRUN), [new Segment(
         { atomic: Second.fromMillis(0n), unix: Second.fromMillis(0n) },
@@ -122,7 +123,7 @@ describe('munge', () => {
     })
 
     it('works with the first line of real data', () => {
-      assert.deepStrictEqual(munge([
+      assert.deepEqual(munge([
         [Date.UTC(1961, JAN, 1), 1.422_818_0, 37_300, 0.001_296]
       ], MODELS.OVERRUN), [new Segment(
         { atomic: new Second(new Rat(-283_996_798_577_182n, 1_000_000n)), unix: new Second(new Rat(-283_996_800n, 1n)) },
@@ -132,7 +133,7 @@ describe('munge', () => {
     })
 
     it('generates proper slopes', () => {
-      assert.deepStrictEqual(munge(taiData, MODELS.OVERRUN).map(segment => segment.slope.unixPerAtomic),
+      assert.deepEqual(munge(taiData, MODELS.OVERRUN).map(segment => segment.slope.unixPerAtomic),
         [
           // Exact ratio of nanoseconds. TAI adds a millisecond or two per day
           new Rat(86_400_000_000_000n, 86_400_000_000_000n + 1_296_000n),
@@ -180,7 +181,7 @@ describe('munge', () => {
     })
 
     it('generates proper Unix time overlaps', () => {
-      assert.deepStrictEqual(munge(taiData, MODELS.OVERRUN).map((segment, i, segments) => {
+      assert.deepEqual(munge(taiData, MODELS.OVERRUN).map((segment, i, segments) => {
         if (!(i + 1 in segments)) {
           return NaN
         }
@@ -248,7 +249,7 @@ describe('munge', () => {
 
     describe('when unixMillis converts to an atomicPicos which fits but an atomicMillis which does not', () => {
       it('at the start of the ray', () => {
-        assert.deepStrictEqual(munge([
+        assert.deepEqual(munge([
           [Date.UTC(1970, JAN, 1, 0, 0, 0, 1), -0.000_1]
         ], MODELS.OVERRUN), [new Segment(
           { atomic: new Second(new Rat(900n, 1_000_000n)), unix: Second.fromMillis(1n) } // ray start intentionally doesn't include TAI epoch
@@ -257,7 +258,7 @@ describe('munge', () => {
 
       it('at the end of the ray', () => {
         // first ray's end intentionally doesn't include TAI epoch
-        assert.deepStrictEqual(munge([
+        assert.deepEqual(munge([
           [Date.UTC(1969, DEC, 31, 23, 59, 59, 999), 0.000_1],
           [Date.UTC(1970, JAN, 1, 0, 0, 0, 1), -0.001_1]
         ], MODELS.OVERRUN), [new Segment(
@@ -272,7 +273,7 @@ describe('munge', () => {
 
   describe('break model', () => {
     it('works in the simplest possible case', () => {
-      assert.deepStrictEqual(munge([
+      assert.deepEqual(munge([
         [Date.UTC(1970, JAN, 1), 0]
       ], MODELS.BREAK), [new Segment(
         { atomic: Second.fromMillis(0n), unix: Second.fromMillis(0n) }
@@ -284,7 +285,7 @@ describe('munge', () => {
       //                       \/         \/
       // TAI:          [3][4][5][6][ 7][ 8][ 9][...]
       // Unix: [...][6][7][8][9][9][10][11][13][...]
-      assert.deepStrictEqual(munge([
+      assert.deepEqual(munge([
         [-1_000, -4],
         [9_000, -3], // inserted leap second
         [13_000, -4] // removed leap second
@@ -310,7 +311,7 @@ describe('munge', () => {
     })
 
     it('works in the simplest possible case', () => {
-      assert.deepStrictEqual(munge([
+      assert.deepEqual(munge([
         [Date.UTC(1970, JAN, 1), 0]
       ], MODELS.STALL), [new Segment(
         { atomic: Second.fromMillis(0n), unix: Second.fromMillis(0n) }
@@ -318,7 +319,7 @@ describe('munge', () => {
     })
 
     it('works when there is an initial offset', () => {
-      assert.deepStrictEqual(munge([
+      assert.deepEqual(munge([
         [7, -4]
       ], MODELS.STALL), [new Segment(
         { atomic: Second.fromMillis(-3_993n), unix: Second.fromMillis(7n) }
@@ -330,7 +331,7 @@ describe('munge', () => {
       //                       \/         \/
       // TAI:          [3][4][5][6][ 7][ 8][ 9][...]
       // Unix: [...][6][7][8][9][9][10][11][13][...]
-      assert.deepStrictEqual(munge([
+      assert.deepEqual(munge([
         [-1_000, -4],
         [9_000, -3], // inserted leap second
         [13_000, -4] // removed leap second
@@ -352,7 +353,7 @@ describe('munge', () => {
 
     it('allows a negative ratio somehow', () => {
       // TAI runs way faster than UTC
-      assert.deepStrictEqual(munge([
+      assert.deepEqual(munge([
         [Date.UTC(1970, JAN, 1), 0, 40_587, 8.640_0]
       ], MODELS.STALL), [new Segment(
         { atomic: Second.fromMillis(0n), unix: Second.fromMillis(0n) },
@@ -361,14 +362,14 @@ describe('munge', () => {
       )])
 
       // UTC and TAI run at identical rates
-      assert.deepStrictEqual(munge([
+      assert.deepEqual(munge([
         [Date.UTC(1970, JAN, 1), 0, 40_587, 0]
       ], MODELS.STALL), [new Segment(
         { atomic: Second.fromMillis(0n), unix: Second.fromMillis(0n) }
       )])
 
       // TAI runs way slower than UTC
-      assert.deepStrictEqual(munge([
+      assert.deepEqual(munge([
         [Date.UTC(1970, JAN, 1), 0, 40_587, -8.640_0]
       ], MODELS.STALL), [new Segment(
         { atomic: Second.fromMillis(0n), unix: Second.fromMillis(0n) },
@@ -378,7 +379,7 @@ describe('munge', () => {
 
       // TAI moves at one ten-thousandth the rate of UTC!
       // Equivalently, UTC moves 10,000 times the rate of TAI
-      assert.deepStrictEqual(munge([
+      assert.deepEqual(munge([
         [Date.UTC(1970, JAN, 1), 0, 40_587, -86_400 + 8.640_0]
       ], MODELS.STALL), [new Segment(
         { atomic: Second.fromMillis(0n), unix: Second.fromMillis(0n) },
@@ -396,7 +397,7 @@ describe('munge', () => {
     })
 
     it('works with the first line of real data', () => {
-      assert.deepStrictEqual(munge([
+      assert.deepEqual(munge([
         [Date.UTC(1961, JAN, 1), 1.422_818_0, 37_300, 0.001_296]
       ], MODELS.STALL), [new Segment(
         { atomic: new Second(new Rat(-283_996_798_577_182n, 1_000_000n)), unix: new Second(new Rat(-283_996_800n, 1n)) },
@@ -407,7 +408,7 @@ describe('munge', () => {
 
     it('generates proper slopes', () => {
       // Note the stalls for the duration of inserted time
-      assert.deepStrictEqual(munge(taiData, MODELS.STALL).map(segment => segment.slope.unixPerAtomic),
+      assert.deepEqual(munge(taiData, MODELS.STALL).map(segment => segment.slope.unixPerAtomic),
         [
           // Exact ratio of nanoseconds. TAI adds a millisecond or two per day
           new Rat(86_400_000_000_000n, 86_400_000_000_000n + 1_296_000n),
@@ -492,7 +493,7 @@ describe('munge', () => {
     it('generates proper overlaps', () => {
       // See how all inserted time discontinuities disappear with this model,
       // but the removed time remains
-      assert.deepStrictEqual(munge(taiData, MODELS.STALL).map((segment, i, segments) => {
+      assert.deepEqual(munge(taiData, MODELS.STALL).map((segment, i, segments) => {
         if (!(i + 1 in segments)) {
           return NaN
         }
@@ -600,7 +601,7 @@ describe('munge', () => {
 
   describe('smear model', () => {
     it('works in the simplest possible case', () => {
-      assert.deepStrictEqual(munge([
+      assert.deepEqual(munge([
         [Date.UTC(1970, JAN, 1), 0]
       ], MODELS.SMEAR), [new Segment(
         { atomic: Second.fromMillis(0n), unix: Second.fromMillis(0n) }
@@ -608,7 +609,7 @@ describe('munge', () => {
     })
 
     it('works when one second is inserted', () => {
-      assert.deepStrictEqual(munge([
+      assert.deepEqual(munge([
         [0, 0],
         [86_400_000, 1] // inserted leap second after one day
       ], MODELS.SMEAR), [new Segment(
@@ -624,7 +625,7 @@ describe('munge', () => {
     })
 
     it('works when one second is removed', () => {
-      assert.deepStrictEqual(munge([
+      assert.deepEqual(munge([
         [0, 0],
         [86_400_000, -1] // removed leap second after one day
       ], MODELS.SMEAR), [new Segment(
@@ -640,7 +641,7 @@ describe('munge', () => {
     })
 
     it('generates proper slopes', () => {
-      assert.deepStrictEqual(munge(taiData, MODELS.SMEAR).map(segment => segment.slope.unixPerAtomic),
+      assert.deepEqual(munge(taiData, MODELS.SMEAR).map(segment => segment.slope.unixPerAtomic),
         [
           // Exact ratio of nanoseconds.
           // During Unix-day-long smears, elapsed atomic time is a full day PLUS daily offset
@@ -731,7 +732,7 @@ describe('munge', () => {
 
     it('generates proper overlaps', () => {
       // Due to smearing, there are NEVER overlaps, no removed or inserted time remains
-      assert.deepStrictEqual(munge(taiData, MODELS.SMEAR).map((segment, i, segments) => {
+      assert.deepEqual(munge(taiData, MODELS.SMEAR).map((segment, i, segments) => {
         if (!(i + 1 in segments)) {
           return NaN
         }
