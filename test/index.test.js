@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { describe, it } from 'node:mocha'
+import { describe, it } from 'node:test'
 
 import { TaiConverter, MODELS, UNIX_START, UNIX_END } from '../src/index.js'
 
