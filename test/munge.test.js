@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
+import { describe, it } from 'node:test'
 
-import { describe, it } from 'mocha'
 import { taiData } from '../src/tai-data.js'
 import { munge, MODELS } from '../src/munge.js'
 import { Second } from '../src/second.js'
