@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
+import { describe, it } from 'node:test'
 
-import { describe, it } from 'mocha'
 import { Converter } from '../src/converter.js'
 import { MODELS } from '../src/munge.js'
 import { Range } from '../src/range.js'

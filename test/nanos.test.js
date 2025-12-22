@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
+import { describe, it } from 'node:test'
 
-import { describe, it } from 'mocha'
 import { TaiConverter, MODELS, UNIX_START, UNIX_END } from '../src/nanos.js'
 
 const JAN = 0

@@ -10,7 +10,7 @@
   "main": "./src/index.js",
   "type": "module",
   "scripts": {
-    "unit": "c8 --100 mocha",
+    "unit": "c8 --100 node --test",
     "standard": "standard",
     "tag": "node -e \"require('child_process').spawn('git', ['tag', `v${require('./package.json').version}`], { stdio: 'inherit' })\"",
     "tag-and-publish": "npm run tag && git push --tags && npm publish && npm version patch --no-git-tag-version && git add . && git commit -m \"Bump patch\" && git push",
@@ -20,7 +20,6 @@
   "license": "MIT",
   "devDependencies": {
     "c8": "^10.1.2",
-    "mocha": "^11.0.0",
     "standard": "^17.0.0"
   },
   "files": [
