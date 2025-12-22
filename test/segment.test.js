@@ -1,4 +1,5 @@
-import assert from 'node:assert'
+import assert from 'node:assert/strict'
+
 import { describe, it } from 'mocha'
 import { Rat } from '../src/rat.js'
 import { Range } from '../src/range.js'
@@ -46,35 +47,35 @@ describe('Segment', () => {
     )
 
     it('zero point', () => {
-      assert.strictEqual(segment.unixOnSegment(Second.fromMillis(0n)),
+      assert.equal(segment.unixOnSegment(Second.fromMillis(0n)),
         true)
-      assert.deepStrictEqual(segment.unixToAtomicRange(Second.fromMillis(0n)),
+      assert.deepEqual(segment.unixToAtomicRange(Second.fromMillis(0n)),
         new Range(Second.fromMillis(0n)))
-      assert.strictEqual(segment.atomicOnSegment(Second.fromMillis(0n)),
+      assert.equal(segment.atomicOnSegment(Second.fromMillis(0n)),
         true)
-      assert.deepStrictEqual(segment.atomicToUnix(Second.fromMillis(0n)),
+      assert.deepEqual(segment.atomicToUnix(Second.fromMillis(0n)),
         Second.fromMillis(0n))
     })
 
     it('modern day', () => {
-      assert.strictEqual(segment.unixOnSegment(Second.fromMillis(BigInt(Date.UTC(2021, MAY, 16, 12, 11, 10, 9)))),
+      assert.equal(segment.unixOnSegment(Second.fromMillis(BigInt(Date.UTC(2021, MAY, 16, 12, 11, 10, 9)))),
         true)
-      assert.deepStrictEqual(segment.unixToAtomicRange(Second.fromMillis(BigInt(Date.UTC(2021, MAY, 16, 12, 11, 10, 9)))),
+      assert.deepEqual(segment.unixToAtomicRange(Second.fromMillis(BigInt(Date.UTC(2021, MAY, 16, 12, 11, 10, 9)))),
         new Range(Second.fromMillis(BigInt(Date.UTC(2021, MAY, 16, 12, 11, 10, 9)))))
-      assert.strictEqual(segment.atomicOnSegment(Second.fromMillis(BigInt(Date.UTC(2021, MAY, 16, 12, 11, 10, 9)))),
+      assert.equal(segment.atomicOnSegment(Second.fromMillis(BigInt(Date.UTC(2021, MAY, 16, 12, 11, 10, 9)))),
         true)
-      assert.deepStrictEqual(segment.atomicToUnix(Second.fromMillis(BigInt(Date.UTC(2021, MAY, 16, 12, 11, 10, 9)))),
+      assert.deepEqual(segment.atomicToUnix(Second.fromMillis(BigInt(Date.UTC(2021, MAY, 16, 12, 11, 10, 9)))),
         Second.fromMillis(BigInt(Date.UTC(2021, MAY, 16, 12, 11, 10, 9))))
     })
 
     it('before start point', () => {
-      assert.strictEqual(segment.unixOnSegment(Second.fromMillis(-1n)),
+      assert.equal(segment.unixOnSegment(Second.fromMillis(-1n)),
         false)
-      assert.deepStrictEqual(segment.unixToAtomicRange(Second.fromMillis(-1n)),
+      assert.deepEqual(segment.unixToAtomicRange(Second.fromMillis(-1n)),
         new Range(Second.fromMillis(-1n)))
-      assert.strictEqual(segment.atomicOnSegment(Second.fromMillis(-1n)),
+      assert.equal(segment.atomicOnSegment(Second.fromMillis(-1n)),
         false)
-      assert.deepStrictEqual(segment.atomicToUnix(Second.fromMillis(-1n)),
+      assert.deepEqual(segment.atomicToUnix(Second.fromMillis(-1n)),
         Second.fromMillis(-1n))
     })
   })
@@ -87,51 +88,51 @@ describe('Segment', () => {
     )
 
     it('zero point', () => {
-      assert.strictEqual(segment.unixOnSegment(Second.fromMillis(0n)),
+      assert.equal(segment.unixOnSegment(Second.fromMillis(0n)),
         true)
-      assert.deepStrictEqual(segment.unixToAtomicRange(Second.fromMillis(0n)),
+      assert.deepEqual(segment.unixToAtomicRange(Second.fromMillis(0n)),
         new Range(Second.fromMillis(0n)))
-      assert.strictEqual(segment.atomicOnSegment(Second.fromMillis(0n)),
+      assert.equal(segment.atomicOnSegment(Second.fromMillis(0n)),
         true)
-      assert.deepStrictEqual(segment.atomicToUnix(Second.fromMillis(0n)),
+      assert.deepEqual(segment.atomicToUnix(Second.fromMillis(0n)),
         Second.fromMillis(0n))
     })
 
     it('a little later', () => {
-      assert.strictEqual(segment.unixOnSegment(Second.fromMillis(501n)),
+      assert.equal(segment.unixOnSegment(Second.fromMillis(501n)),
         true)
-      assert.deepStrictEqual(segment.unixToAtomicRange(Second.fromMillis(501n)),
+      assert.deepEqual(segment.unixToAtomicRange(Second.fromMillis(501n)),
         new Range(Second.fromMillis(1_002n)))
-      assert.strictEqual(segment.atomicOnSegment(Second.fromMillis(1_002n)),
+      assert.equal(segment.atomicOnSegment(Second.fromMillis(1_002n)),
         true)
-      assert.deepStrictEqual(segment.atomicToUnix(Second.fromMillis(1_002n)),
+      assert.deepEqual(segment.atomicToUnix(Second.fromMillis(1_002n)),
         Second.fromMillis(501n))
     })
 
     it('right before end point', () => {
-      assert.strictEqual(segment.unixOnSegment(Second.fromMillis(999n)),
+      assert.equal(segment.unixOnSegment(Second.fromMillis(999n)),
         true)
-      assert.deepStrictEqual(segment.unixToAtomicRange(Second.fromMillis(999n)),
+      assert.deepEqual(segment.unixToAtomicRange(Second.fromMillis(999n)),
         new Range(Second.fromMillis(1_998n)))
 
-      assert.strictEqual(segment.atomicOnSegment(Second.fromMillis(1_998n)),
+      assert.equal(segment.atomicOnSegment(Second.fromMillis(1_998n)),
         true)
-      assert.deepStrictEqual(segment.atomicToUnix(Second.fromMillis(1_998n)),
+      assert.deepEqual(segment.atomicToUnix(Second.fromMillis(1_998n)),
         Second.fromMillis(999n))
-      assert.strictEqual(segment.atomicOnSegment(Second.fromMillis(1_999n)),
+      assert.equal(segment.atomicOnSegment(Second.fromMillis(1_999n)),
         true)
-      assert.deepStrictEqual(segment.atomicToUnix(Second.fromMillis(1_999n)),
+      assert.deepEqual(segment.atomicToUnix(Second.fromMillis(1_999n)),
         new Second(new Rat(1_999n, 2_000n))) // truncates to 999ms
     })
 
     it('end point', () => {
-      assert.strictEqual(segment.unixOnSegment(Second.fromMillis(1_000n)),
+      assert.equal(segment.unixOnSegment(Second.fromMillis(1_000n)),
         false)
-      assert.deepStrictEqual(segment.unixToAtomicRange(Second.fromMillis(1_000n)),
+      assert.deepEqual(segment.unixToAtomicRange(Second.fromMillis(1_000n)),
         new Range(Second.fromMillis(2_000n)))
-      assert.strictEqual(segment.atomicOnSegment(Second.fromMillis(2_000n)),
+      assert.equal(segment.atomicOnSegment(Second.fromMillis(2_000n)),
         false)
-      assert.deepStrictEqual(segment.atomicToUnix(Second.fromMillis(2_000n)),
+      assert.deepEqual(segment.atomicToUnix(Second.fromMillis(2_000n)),
         Second.fromMillis(1_000n))
     })
   })
@@ -144,29 +145,29 @@ describe('Segment', () => {
     )
 
     it('zero point', () => {
-      assert.strictEqual(segment.unixOnSegment(Second.fromMillis(0n)),
+      assert.equal(segment.unixOnSegment(Second.fromMillis(0n)),
         true)
-      assert.deepStrictEqual(segment.unixToAtomicRange(Second.fromMillis(0n)),
+      assert.deepEqual(segment.unixToAtomicRange(Second.fromMillis(0n)),
         new Range(Second.fromMillis(0n), Second.fromMillis(2_000n), true))
-      assert.strictEqual(segment.atomicOnSegment(Second.fromMillis(0n)),
+      assert.equal(segment.atomicOnSegment(Second.fromMillis(0n)),
         true)
-      assert.deepStrictEqual(segment.atomicToUnix(Second.fromMillis(0n)),
+      assert.deepEqual(segment.atomicToUnix(Second.fromMillis(0n)),
         Second.fromMillis(0n))
     })
 
     it('later in TAI', () => {
-      assert.strictEqual(segment.atomicOnSegment(Second.fromMillis(1_999n)),
+      assert.equal(segment.atomicOnSegment(Second.fromMillis(1_999n)),
         true)
-      assert.deepStrictEqual(segment.atomicToUnix(Second.fromMillis(1_999n)),
+      assert.deepEqual(segment.atomicToUnix(Second.fromMillis(1_999n)),
         Second.fromMillis(0n))
-      assert.strictEqual(segment.atomicOnSegment(Second.fromMillis(2_000n)),
+      assert.equal(segment.atomicOnSegment(Second.fromMillis(2_000n)),
         false)
-      assert.deepStrictEqual(segment.atomicToUnix(Second.fromMillis(2_000n)),
+      assert.deepEqual(segment.atomicToUnix(Second.fromMillis(2_000n)),
         Second.fromMillis(0n))
     })
 
     it('later in Unix time', () => {
-      assert.strictEqual(segment.unixOnSegment(Second.fromMillis(1_000n)),
+      assert.equal(segment.unixOnSegment(Second.fromMillis(1_000n)),
         false)
       assert.throws(() => segment.unixToAtomicRange(Second.fromMillis(-1n)),
         /This Unix time never happened/)
