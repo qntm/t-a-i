@@ -54,11 +54,9 @@ export class Converter {
       ranges.push(range)
     }
 
-    /* c8 ignore start */
     if (ranges.some(range => range.open)) {
       throw Error('Failed to close all open ranges, this should be impossible')
     }
-    /* c8 ignore stop */
 
     // Always return an array of ranges, caller can prune this output if desired
     return ranges
