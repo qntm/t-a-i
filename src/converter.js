@@ -54,9 +54,11 @@ export class Converter {
       ranges.push(range)
     }
 
+    /* node:coverage disable */
     if (ranges.some(range => range.open)) {
       throw Error('Failed to close all open ranges, this should be impossible')
     }
+    /* node:coverage enable */
 
     // Always return an array of ranges, caller can prune this output if desired
     return ranges
