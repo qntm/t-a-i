@@ -115,7 +115,7 @@ For your reference, at the time of writing:
 
 ### Validity for the future
 
-Leap seconds (or the lack thereof) are announced in the International Earth Rotation and Reference Systems Service (IERS)'s six-monthly Bulletin C. For example, at the time of writing, [the latest such bulletin](https://hpiers.obspm.fr/iers/bul/bulc/bulletinc.70) was published on 7 July 2025 and announced that there will be no leap second at the end of December 2025. This means that `t-a-i`'s calculations are guaranteed to be correct up to, but not including, the *next* potential leap second, which in this case is at the end of June 2026. At or beyond this point, the introduction of leap seconds cannot be predicted in advance, and the correctness of `t-a-i`'s behaviour cannot be guaranteed.
+Leap seconds (or the lack thereof) are announced in the International Earth Rotation and Reference Systems Service (IERS)'s six-monthly Bulletin C. For example, at the time of writing, [the latest such bulletin](https://hpiers.obspm.fr/iers/bul/bulc/bulletinc.71) was published on 6 January 2026 and announced that there will be no leap second at the end of June 2026. This means that `t-a-i`'s calculations are guaranteed to be correct up to, but not including, the *next* potential leap second, which in this case is at the end of December 2026. At or beyond this point, the introduction of leap seconds cannot be predicted in advance, and the correctness of `t-a-i`'s behaviour cannot be guaranteed.
 
 As a result, `t-a-i`'s behaviour beyond the next-but-one (possible) leap second is considered to be undefined. Updates to the source data when new leap seconds are announced will not be considered breaking changes, and will not incur a major version bump.
 
