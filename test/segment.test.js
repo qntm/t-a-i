@@ -55,6 +55,7 @@ describe('Segment', () => {
         true)
       assert.deepEqual(segment.atomicToUnix(Second.fromMillis(0n)),
         Second.fromMillis(0n))
+      assert.deepEqual(segment.atomicToOffset(Second.fromMillis(0n)), Second.fromMillis(0n))
     })
 
     it('modern day', () => {
@@ -66,6 +67,7 @@ describe('Segment', () => {
         true)
       assert.deepEqual(segment.atomicToUnix(Second.fromMillis(BigInt(Date.UTC(2021, MAY, 16, 12, 11, 10, 9)))),
         Second.fromMillis(BigInt(Date.UTC(2021, MAY, 16, 12, 11, 10, 9))))
+      assert.deepEqual(segment.atomicToOffset(Second.fromMillis(BigInt(Date.UTC(2021, MAY, 16, 12, 11, 10, 9)))), Second.fromMillis(0n))
     })
 
     it('before start point', () => {
@@ -77,6 +79,7 @@ describe('Segment', () => {
         false)
       assert.deepEqual(segment.atomicToUnix(Second.fromMillis(-1n)),
         Second.fromMillis(-1n))
+      assert.deepEqual(segment.atomicToOffset(Second.fromMillis(-1n)), Second.fromMillis(0n))
     })
   })
 
@@ -84,7 +87,7 @@ describe('Segment', () => {
     const segment = new Segment(
       { atomic: Second.fromMillis(0n), unix: Second.fromMillis(0n) },
       { atomic: Second.fromMillis(2_000n) }, // 2 TAI seconds
-      { unixPerAtomic: new Rat(1n, 2n) } // TAI runs twice as fast as Unix time
+      { unixPerAtomic: new Rat(1n, 2n) } // Unix time runs half as fast as TAI
     )
 
     it('zero point', () => {
@@ -96,6 +99,7 @@ describe('Segment', () => {
         true)
       assert.deepEqual(segment.atomicToUnix(Second.fromMillis(0n)),
         Second.fromMillis(0n))
+      assert.deepEqual(segment.atomicToOffset(Second.fromMillis(0n)), Second.fromMillis(0n))
     })
 
     it('a little later', () => {
@@ -107,6 +111,7 @@ describe('Segment', () => {
         true)
       assert.deepEqual(segment.atomicToUnix(Second.fromMillis(1_002n)),
         Second.fromMillis(501n))
+      assert.deepEqual(segment.atomicToOffset(Second.fromMillis(1_002n)), Second.fromMillis(501n))
     })
 
     it('right before end point', () => {
@@ -123,6 +128,7 @@ describe('Segment', () => {
         true)
       assert.deepEqual(segment.atomicToUnix(Second.fromMillis(1_999n)),
         new Second(new Rat(1_999n, 2_000n))) // truncates to 999ms
+      assert.deepEqual(segment.atomicToOffset(Second.fromMillis(1_998n)), Second.fromMillis(999n))
     })
 
     it('end point', () => {
@@ -134,6 +140,7 @@ describe('Segment', () => {
         false)
       assert.deepEqual(segment.atomicToUnix(Second.fromMillis(2_000n)),
         Second.fromMillis(1_000n))
+      assert.deepEqual(segment.atomicToOffset(Second.fromMillis(2_000n)), Second.fromMillis(1000n))
     })
   })
 
@@ -141,7 +148,7 @@ describe('Segment', () => {
     const segment = new Segment(
       { atomic: Second.fromMillis(0n), unix: Second.fromMillis(0n) },
       { atomic: Second.fromMillis(2_000n) }, // 2 TAI seconds
-      { unixPerAtomic: new Rat(0n) }
+      { unixPerAtomic: new Rat(0n) } // Unix time is stalled
     )
 
     it('zero point', () => {
@@ -153,6 +160,7 @@ describe('Segment', () => {
         true)
       assert.deepEqual(segment.atomicToUnix(Second.fromMillis(0n)),
         Second.fromMillis(0n))
+      assert.deepEqual(segment.atomicToOffset(Second.fromMillis(0n)), Second.fromMillis(0n))
     })
 
     it('later in TAI', () => {
@@ -164,6 +172,7 @@ describe('Segment', () => {
         false)
       assert.deepEqual(segment.atomicToUnix(Second.fromMillis(2_000n)),
         Second.fromMillis(0n))
+      assert.deepEqual(segment.atomicToOffset(Second.fromMillis(2_000n)), Second.fromMillis(2_000n))
     })
 
     it('later in Unix time', () => {
