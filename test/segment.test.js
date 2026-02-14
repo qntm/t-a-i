@@ -56,6 +56,7 @@ describe('Segment', () => {
       assert.deepEqual(segment.atomicToUnix(Second.fromMillis(0n)),
         Second.fromMillis(0n))
       assert.deepEqual(segment.atomicToOffset(Second.fromMillis(0n)), Second.fromMillis(0n))
+      assert.deepEqual(segment.driftRate(), new Rat(0n))
     })
 
     it('modern day', () => {
@@ -100,6 +101,7 @@ describe('Segment', () => {
       assert.deepEqual(segment.atomicToUnix(Second.fromMillis(0n)),
         Second.fromMillis(0n))
       assert.deepEqual(segment.atomicToOffset(Second.fromMillis(0n)), Second.fromMillis(0n))
+      assert.deepEqual(segment.driftRate(), new Rat(1n))
     })
 
     it('a little later', () => {
@@ -161,6 +163,7 @@ describe('Segment', () => {
       assert.deepEqual(segment.atomicToUnix(Second.fromMillis(0n)),
         Second.fromMillis(0n))
       assert.deepEqual(segment.atomicToOffset(Second.fromMillis(0n)), Second.fromMillis(0n))
+      assert.deepEqual(segment.driftRate(), Infinity)
     })
 
     it('later in TAI', () => {

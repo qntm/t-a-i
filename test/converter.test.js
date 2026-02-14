@@ -24,6 +24,8 @@ describe('Converter', () => {
           [new Range(Second.fromMillis(0n))])
         assert.deepEqual(converter.atomicToUnix(Second.fromMillis(0n)),
           Second.fromMillis(0n))
+        assert.deepEqual(converter.atomicToOffset(Second.fromMillis(0n)),
+          Second.fromMillis(0n))
       })
     })
 
@@ -35,6 +37,8 @@ describe('Converter', () => {
           [new Range(Second.fromMillis(0n))])
         assert.deepEqual(converter.atomicToUnix(Second.fromMillis(0n)),
           Second.fromMillis(0n))
+        assert.deepEqual(converter.atomicToOffset(Second.fromMillis(0n)),
+          Second.fromMillis(0n))
       })
     })
 
@@ -45,6 +49,8 @@ describe('Converter', () => {
         assert.deepEqual(converter.atomicToUnix(Second.fromMillis(0n)),
           Second.fromMillis(0n))
         assert.equal(converter.atomicToUnix(Second.fromMillis(-1n)),
+          NaN)
+        assert.equal(converter.atomicToOffset(Second.fromMillis(-1n)),
           NaN)
       })
 
@@ -58,6 +64,7 @@ describe('Converter', () => {
       it('manages basic conversions', () => {
         assert.deepEqual(converter.unixToAtomic(Second.fromMillis(0n)), [new Range(Second.fromMillis(0n))])
         assert.deepEqual(converter.atomicToUnix(Second.fromMillis(0n)), Second.fromMillis(0n))
+        assert.deepEqual(converter.atomicToOffset(Second.fromMillis(0n)), Second.fromMillis(0n))
       })
     })
 
@@ -68,6 +75,8 @@ describe('Converter', () => {
         assert.deepEqual(converter.unixToAtomic(Second.fromMillis(0n)),
           [new Range(Second.fromMillis(0n))])
         assert.deepEqual(converter.atomicToUnix(Second.fromMillis(0n)),
+          Second.fromMillis(0n))
+        assert.deepEqual(converter.atomicToOffset(Second.fromMillis(0n)),
           Second.fromMillis(0n))
       })
     })
@@ -139,6 +148,26 @@ describe('Converter', () => {
         assert.deepEqual(converter.atomicToUnix(Second.fromMillis(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 1, 1)))),
           Second.fromMillis(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 1))))
       })
+
+      it('atomicToOffset', () => {
+        assert.deepEqual(converter.atomicToOffset(Second.fromMillis(0n)),
+          Second.fromMillis(0n))
+
+        assert.deepEqual(converter.atomicToOffset(Second.fromMillis(BigInt(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))),
+          Second.fromMillis(0n))
+        assert.deepEqual(converter.atomicToOffset(Second.fromMillis(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)))),
+          Second.fromMillis(0n))
+        assert.deepEqual(converter.atomicToOffset(Second.fromMillis(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 1)))),
+          Second.fromMillis(0n))
+
+        // BACKTRACK
+        assert.deepEqual(converter.atomicToOffset(Second.fromMillis(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)))),
+          Second.fromMillis(0n))
+        assert.deepEqual(converter.atomicToOffset(Second.fromMillis(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 1, 0)))),
+          Second.fromMillis(1_000n))
+        assert.deepEqual(converter.atomicToOffset(Second.fromMillis(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 1, 1)))),
+          Second.fromMillis(1_000n))
+      })
     })
 
     describe('BREAK', () => {
@@ -198,6 +227,27 @@ describe('Converter', () => {
         assert.deepEqual(converter.atomicToUnix(Second.fromMillis(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 1, 1)))),
           Second.fromMillis(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 1))))
       })
+
+      it('atomicToOffset', () => {
+        assert.deepEqual(converter.atomicToOffset(Second.fromMillis(0n)),
+          Second.fromMillis(0n))
+
+        // UNDEFINED UNIX TIME STARTS
+        assert.deepEqual(converter.atomicToOffset(Second.fromMillis(BigInt(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))),
+          Second.fromMillis(0n))
+        assert.equal(converter.atomicToOffset(Second.fromMillis(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)))),
+          NaN)
+        assert.equal(converter.atomicToOffset(Second.fromMillis(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 1)))),
+          NaN)
+
+        // UNDEFINED UNIX TIME ENDS
+        assert.equal(converter.atomicToOffset(Second.fromMillis(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)))),
+          NaN)
+        assert.deepEqual(converter.atomicToOffset(Second.fromMillis(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 1, 0)))),
+          Second.fromMillis(1_000n))
+        assert.deepEqual(converter.atomicToOffset(Second.fromMillis(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 1, 1)))),
+          Second.fromMillis(1_000n))
+      })
     })
 
     describe('STALL', () => {
@@ -246,6 +296,27 @@ describe('Converter', () => {
           Second.fromMillis(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 0))))
         assert.deepEqual(converter.atomicToUnix(Second.fromMillis(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 1, 1)))),
           Second.fromMillis(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 1))))
+      })
+
+      it('atomicToOffset', () => {
+        assert.deepEqual(converter.atomicToOffset(Second.fromMillis(0n)),
+          Second.fromMillis(0n))
+
+        // STALL STARTS
+        assert.deepEqual(converter.atomicToOffset(Second.fromMillis(BigInt(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))),
+          Second.fromMillis(0n))
+        assert.deepEqual(converter.atomicToOffset(Second.fromMillis(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)))),
+          Second.fromMillis(0n))
+        assert.deepEqual(converter.atomicToOffset(Second.fromMillis(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 1)))),
+          Second.fromMillis(1n))
+
+        // STALL ENDS
+        assert.deepEqual(converter.atomicToOffset(Second.fromMillis(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)))),
+          Second.fromMillis(999n))
+        assert.deepEqual(converter.atomicToOffset(Second.fromMillis(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 1, 0)))),
+          Second.fromMillis(1_000n))
+        assert.deepEqual(converter.atomicToOffset(Second.fromMillis(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 1, 1)))),
+          Second.fromMillis(1_000n))
       })
     })
 
@@ -317,6 +388,31 @@ describe('Converter', () => {
         assert.deepEqual(converter.atomicToUnix(Second.fromMillis(BigInt(Date.UTC(1980, JAN, 1, 12, 0, 1, 1)))),
           Second.fromMillis(BigInt(Date.UTC(1980, JAN, 1, 12, 0, 0, 1))))
       })
+
+      it('atomicToOffset', () => {
+        assert.deepEqual(converter.atomicToOffset(Second.fromMillis(0n)),
+          Second.fromMillis(0n))
+
+        // SMEAR STARTS, UNIX TIME RUNS A LITTLE SLOWER THAN ATOMIC
+        assert.deepEqual(converter.atomicToOffset(Second.fromMillis(BigInt(Date.UTC(1979, DEC, 31, 11, 59, 59, 999)))),
+          Second.fromMillis(0n))
+        assert.deepEqual(converter.atomicToOffset(Second.fromMillis(BigInt(Date.UTC(1979, DEC, 31, 12, 0, 0, 0)))),
+          Second.fromMillis(0n))
+        assert.deepEqual(converter.atomicToOffset(Second.fromMillis(BigInt(Date.UTC(1979, DEC, 31, 12, 0, 0, 1)))),
+          new Second(new Rat(1n, 86_401_000n)))
+
+        // SMEAR MIDPOINT
+        assert.deepEqual(converter.atomicToOffset(Second.fromMillis(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 500)))),
+          new Second(new Rat(1n, 2n)))
+
+        // SMEAR ENDS, UNIX HAS DROPPED A FULL SECOND BEHIND
+        assert.deepEqual(converter.atomicToOffset(Second.fromMillis(BigInt(Date.UTC(1980, JAN, 1, 12, 0, 0, 999)))),
+          new Second(new Rat(86_400_999n, 86_401_000n)))
+        assert.deepEqual(converter.atomicToOffset(Second.fromMillis(BigInt(Date.UTC(1980, JAN, 1, 12, 0, 1, 0)))),
+          Second.fromMillis(1000n))
+        assert.deepEqual(converter.atomicToOffset(Second.fromMillis(BigInt(Date.UTC(1980, JAN, 1, 12, 0, 1, 1)))),
+          Second.fromMillis(1000n))
+      })
     })
   })
 
@@ -370,6 +466,19 @@ describe('Converter', () => {
         assert.deepEqual(converter.atomicToUnix(Second.fromMillis(BigInt(Date.UTC(1979, DEC, 31, 23, 59, 59, 1)))),
           Second.fromMillis(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 1))))
       })
+
+      it('atomicToOffset', () => {
+        assert.deepEqual(converter.atomicToOffset(Second.fromMillis(0n)),
+          Second.fromMillis(0n))
+
+        // JUMP AHEAD
+        assert.deepEqual(converter.atomicToOffset(Second.fromMillis(BigInt(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)))),
+          Second.fromMillis(0n))
+        assert.deepEqual(converter.atomicToOffset(Second.fromMillis(BigInt(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)))),
+          Second.fromMillis(-1_000n))
+        assert.deepEqual(converter.atomicToOffset(Second.fromMillis(BigInt(Date.UTC(1979, DEC, 31, 23, 59, 59, 1)))),
+          Second.fromMillis(-1_000n))
+      })
     })
 
     describe('BREAK', () => {
@@ -416,6 +525,19 @@ describe('Converter', () => {
         assert.deepEqual(converter.atomicToUnix(Second.fromMillis(BigInt(Date.UTC(1979, DEC, 31, 23, 59, 59, 1)))),
           Second.fromMillis(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 1))))
       })
+
+      it('atomicToOffset', () => {
+        assert.deepEqual(converter.atomicToOffset(Second.fromMillis(0n)),
+          Second.fromMillis(0n))
+
+        // JUMP AHEAD
+        assert.deepEqual(converter.atomicToOffset(Second.fromMillis(BigInt(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)))),
+          Second.fromMillis(0n))
+        assert.deepEqual(converter.atomicToOffset(Second.fromMillis(BigInt(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)))),
+          Second.fromMillis(-1_000n))
+        assert.deepEqual(converter.atomicToOffset(Second.fromMillis(BigInt(Date.UTC(1979, DEC, 31, 23, 59, 59, 1)))),
+          Second.fromMillis(-1_000n))
+      })
     })
 
     describe('STALL', () => {
@@ -461,6 +583,19 @@ describe('Converter', () => {
           Second.fromMillis(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 0))))
         assert.deepEqual(converter.atomicToUnix(Second.fromMillis(BigInt(Date.UTC(1979, DEC, 31, 23, 59, 59, 1)))),
           Second.fromMillis(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 1))))
+      })
+
+      it('atomicToOffset', () => {
+        assert.deepEqual(converter.atomicToOffset(Second.fromMillis(0n)),
+          Second.fromMillis(0n))
+
+        // JUMP AHEAD
+        assert.deepEqual(converter.atomicToOffset(Second.fromMillis(BigInt(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)))),
+          Second.fromMillis(0n))
+        assert.deepEqual(converter.atomicToOffset(Second.fromMillis(BigInt(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)))),
+          Second.fromMillis(-1_000n))
+        assert.deepEqual(converter.atomicToOffset(Second.fromMillis(BigInt(Date.UTC(1979, DEC, 31, 23, 59, 59, 1)))),
+          Second.fromMillis(-1_000n))
       })
     })
 
@@ -532,6 +667,31 @@ describe('Converter', () => {
         assert.deepEqual(converter.atomicToUnix(Second.fromMillis(BigInt(Date.UTC(1980, JAN, 1, 11, 59, 59, 1)))),
           Second.fromMillis(BigInt(Date.UTC(1980, JAN, 1, 12, 0, 0, 1))))
       })
+
+      it('atomicToOffset', () => {
+        assert.deepEqual(converter.atomicToOffset(Second.fromMillis(0n)),
+          Second.fromMillis(0n))
+
+        // SMEAR STARTS, UNIX TIME RUNS A LITTLE FASTER THAN ATOMIC
+        assert.deepEqual(converter.atomicToOffset(Second.fromMillis(BigInt(Date.UTC(1979, DEC, 31, 11, 59, 59, 999)))),
+          Second.fromMillis(0n))
+        assert.deepEqual(converter.atomicToOffset(Second.fromMillis(BigInt(Date.UTC(1979, DEC, 31, 12, 0, 0, 0)))),
+          Second.fromMillis(0n))
+        assert.deepEqual(converter.atomicToOffset(Second.fromMillis(BigInt(Date.UTC(1979, DEC, 31, 12, 0, 0, 1)))),
+          new Second(new Rat(-1n, 86_399_000n)))
+
+        // SMEAR MIDPOINT
+        assert.deepEqual(converter.atomicToOffset(Second.fromMillis(BigInt(Date.UTC(1979, DEC, 31, 23, 59, 59, 500)))),
+          Second.fromMillis(-500n))
+
+        // SMEAR ENDS, UNIX HAS RUN A FULL SECOND FASTER THAN ATOMIC
+        assert.deepEqual(converter.atomicToOffset(Second.fromMillis(BigInt(Date.UTC(1980, JAN, 1, 11, 59, 58, 999)))),
+          new Second(new Rat(-86_398_999n, 86_399_000n)))
+        assert.deepEqual(converter.atomicToOffset(Second.fromMillis(BigInt(Date.UTC(1980, JAN, 1, 11, 59, 59, 0)))),
+          Second.fromMillis(-1_000n))
+        assert.deepEqual(converter.atomicToOffset(Second.fromMillis(BigInt(Date.UTC(1980, JAN, 1, 11, 59, 59, 1)))),
+          Second.fromMillis(-1_000n))
+      })
     })
   })
 
@@ -549,6 +709,8 @@ describe('Converter', () => {
           ])
         assert.deepEqual(converter.atomicToUnix(new Second(new Rat(900n, 1_000_000n))),
           Second.fromMillis(1n))
+        assert.deepEqual(converter.atomicToOffset(new Second(new Rat(900n, 1_000_000n))),
+          new Second(new Rat(-1n, 10_000n)))
       })
 
       it('at the end of the ray', () => {
@@ -564,6 +726,8 @@ describe('Converter', () => {
           ])
         assert.deepEqual(converter.atomicToUnix(new Second(new Rat(-900n, 1_000_000n))),
           Second.fromMillis(-1n))
+        assert.deepEqual(converter.atomicToOffset(new Second(new Rat(-900n, 1_000_000n))),
+          new Second(new Rat(1n, 10_000n)))
       })
     })
   })
@@ -620,6 +784,27 @@ describe('Converter', () => {
           assert.deepEqual(converter.atomicToUnix(Second.fromMillis(3001n)),
             Second.fromMillis(1001n))
         })
+
+        it('atomicToOffset', () => {
+          assert.deepEqual(converter.atomicToOffset(Second.fromMillis(0n)),
+            Second.fromMillis(0n))
+
+          // STALL STARTS
+          assert.deepEqual(converter.atomicToOffset(Second.fromMillis(999n)),
+            Second.fromMillis(0n))
+          assert.equal(converter.atomicToOffset(Second.fromMillis(1000n)),
+            NaN)
+          assert.equal(converter.atomicToOffset(Second.fromMillis(1001n)),
+            NaN)
+
+          // STALL ENDS
+          assert.equal(converter.atomicToOffset(Second.fromMillis(2999n)),
+            NaN)
+          assert.deepEqual(converter.atomicToOffset(Second.fromMillis(3000n)),
+            Second.fromMillis(2000n))
+          assert.deepEqual(converter.atomicToOffset(Second.fromMillis(3001n)),
+            Second.fromMillis(2000n))
+        })
       })
 
       describe('STALL', () => {
@@ -665,6 +850,27 @@ describe('Converter', () => {
             Second.fromMillis(1000n))
           assert.deepEqual(converter.atomicToUnix(Second.fromMillis(3001n)),
             Second.fromMillis(1001n))
+        })
+
+        it('atomicToOffset', () => {
+          assert.deepEqual(converter.atomicToOffset(Second.fromMillis(0n)),
+            Second.fromMillis(0n))
+
+          // STALL STARTS
+          assert.deepEqual(converter.atomicToOffset(Second.fromMillis(999n)),
+            Second.fromMillis(0n))
+          assert.deepEqual(converter.atomicToOffset(Second.fromMillis(1000n)),
+            Second.fromMillis(0n))
+          assert.deepEqual(converter.atomicToOffset(Second.fromMillis(1001n)),
+            Second.fromMillis(1n))
+
+          // STALL ENDS
+          assert.deepEqual(converter.atomicToOffset(Second.fromMillis(2999n)),
+            Second.fromMillis(1999n))
+          assert.deepEqual(converter.atomicToOffset(Second.fromMillis(3000n)),
+            Second.fromMillis(2000n))
+          assert.deepEqual(converter.atomicToOffset(Second.fromMillis(3001n)),
+            Second.fromMillis(2000n))
         })
       })
     })

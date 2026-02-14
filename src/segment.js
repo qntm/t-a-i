@@ -74,6 +74,13 @@ export class Segment {
     return atomic.minusS(unix)
   }
 
+  driftRate () {
+    if (this.slope.unixPerAtomic.eq(new Rat(0n))) {
+      return Infinity
+    }
+    return new Rat(1n).divide(this.slope.unixPerAtomic).minus(new Rat(1n))
+  }
+
   // Bounds checks. Each segment has an inclusive-exclusive range of validity.
   // Valid TAI instants are from the computed TAI start of the segment to the computed TAI end of
   // the segment. Valid Unix instants are the valid TAI instants, transformed linearly from TAI to

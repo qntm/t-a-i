@@ -18,17 +18,28 @@ export class Converter {
     this.segments = munge(data, model)
   }
 
-  atomicToUnix (atomic) {
-    for (const segment of this.segments) {
-      if (!segment.atomicOnSegment(atomic)) {
-        continue
-      }
+  atomicToSegment (atomic) {
+    return this.segments.find(segment => segment.atomicOnSegment(atomic))
+  }
 
-      return segment.atomicToUnix(atomic)
+  atomicToUnix (atomic) {
+    const segment = this.atomicToSegment(atomic)
+    if (segment === undefined) {
+      // Pre-1961, or BREAK model and we hit a break
+      return NaN
     }
 
-    // Pre-1961, or BREAK model and we hit a break
-    return NaN
+    return segment.atomicToUnix(atomic)
+  }
+
+  atomicToOffset (atomic) {
+    const segment = this.atomicToSegment(atomic)
+    if (segment === undefined) {
+      // Pre-1961, or BREAK model and we hit a break
+      return NaN
+    }
+
+    return segment.atomicToOffset(atomic)
   }
 
   unixToAtomic (unix) {
