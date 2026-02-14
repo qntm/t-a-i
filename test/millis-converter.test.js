@@ -33,6 +33,8 @@ describe('MillisConverter', () => {
           0)
         assert.equal(millisConverter.atomicToUnix(0n),
           0n)
+        assert.equal(millisConverter.atomicToOffset(0n),
+          0n)
       })
     })
 
@@ -43,6 +45,8 @@ describe('MillisConverter', () => {
         assert.equal(millisConverter.unixToAtomic(0),
           0)
         assert.equal(millisConverter.atomicToUnix(0),
+          0)
+        assert.equal(millisConverter.atomicToOffset(0),
           0)
       })
     })
@@ -55,12 +59,18 @@ describe('MillisConverter', () => {
         assert.throws(() => millisConverter.unixToAtomic('boop'), /Not an integer: boop/)
         assert.throws(() => millisConverter.atomicToUnix(Infinity), /Not an integer: Infinity/)
         assert.throws(() => millisConverter.atomicToUnix('boops'), /Not an integer: boops/)
+        assert.throws(() => millisConverter.atomicToOffset(NaN), /Not an integer: NaN/)
+        assert.throws(() => millisConverter.atomicToOffset('booops'), /Not an integer: booops/)
       })
 
       it('fails when the atomic count is out of bounds', () => {
         assert.equal(millisConverter.atomicToUnix(0),
           0)
         assert.equal(millisConverter.atomicToUnix(-1),
+          NaN)
+        assert.equal(millisConverter.atomicToOffset(0),
+          0)
+        assert.equal(millisConverter.atomicToOffset(-1),
           NaN)
       })
 
@@ -77,6 +87,7 @@ describe('MillisConverter', () => {
         assert.deepEqual(millisConverter.unixToAtomic(0, { array: true }), [0])
         assert.equal(millisConverter.unixToAtomic(0), 0)
         assert.equal(millisConverter.atomicToUnix(0), 0)
+        assert.equal(millisConverter.atomicToOffset(0), 0)
       })
     })
 
@@ -87,6 +98,8 @@ describe('MillisConverter', () => {
         assert.equal(millisConverter.unixToAtomic(0),
           0)
         assert.equal(millisConverter.atomicToUnix(0),
+          0)
+        assert.equal(millisConverter.atomicToOffset(0),
           0)
       })
     })
@@ -178,6 +191,26 @@ describe('MillisConverter', () => {
         assert.equal(millisConverter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 1, 1)),
           Date.UTC(1980, JAN, 1, 0, 0, 0, 1))
       })
+
+      it('atomicToOffset', () => {
+        assert.equal(millisConverter.atomicToOffset(0),
+          0)
+
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)),
+          0)
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)),
+          0)
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 0, 0, 0, 1)),
+          0)
+
+        // BACKTRACK
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)),
+          0)
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 0, 0, 1, 0)),
+          1000)
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 0, 0, 1, 1)),
+          1000)
+      })
     })
 
     describe('BREAK', () => {
@@ -222,6 +255,27 @@ describe('MillisConverter', () => {
           Date.UTC(1980, JAN, 1, 0, 0, 0, 0))
         assert.equal(millisConverter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 1, 1)),
           Date.UTC(1980, JAN, 1, 0, 0, 0, 1))
+      })
+
+      it('atomicToOffset', () => {
+        assert.equal(millisConverter.atomicToOffset(0),
+          0)
+
+        // UNDEFINED UNIX TIME STARTS
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)),
+          0)
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)),
+          NaN)
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 0, 0, 0, 1)),
+          NaN)
+
+        // UNDEFINED UNIX TIME ENDS
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)),
+          NaN)
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 0, 0, 1, 0)),
+          1000)
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 0, 0, 1, 1)),
+          1000)
       })
     })
 
@@ -283,6 +337,27 @@ describe('MillisConverter', () => {
         assert.equal(millisConverter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 1, 1)),
           Date.UTC(1980, JAN, 1, 0, 0, 0, 1))
       })
+
+      it('atomicToOffset', () => {
+        assert.equal(millisConverter.atomicToOffset(0),
+          0)
+
+        // STALL STARTS
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)),
+          0)
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)),
+          0)
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 0, 0, 0, 1)),
+          1)
+
+        // STALL ENDS
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)),
+          999)
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 0, 0, 1, 0)),
+          1000)
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 0, 0, 1, 1)),
+          1000)
+      })
     })
 
     describe('SMEAR', () => {
@@ -336,6 +411,31 @@ describe('MillisConverter', () => {
           Date.UTC(1980, JAN, 1, 12, 0, 0, 0))
         assert.equal(millisConverter.atomicToUnix(Date.UTC(1980, JAN, 1, 12, 0, 1, 1)),
           Date.UTC(1980, JAN, 1, 12, 0, 0, 1))
+      })
+
+      it('atomicToOffset', () => {
+        assert.equal(millisConverter.atomicToUnix(0),
+          0)
+
+        // SMEAR STARTS
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1979, DEC, 31, 11, 59, 59, 999)),
+          0)
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1979, DEC, 31, 12, 0, 0, 0)),
+          0)
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1979, DEC, 31, 12, 0, 0, 1)),
+          0) // truncated down
+
+        // SMEAR MIDPOINT
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 0, 0, 0, 500)),
+          500)
+
+        // SMEAR ENDS
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 12, 0, 0, 999)),
+          999) // truncated down
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 12, 0, 1, 0)),
+          1000)
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 12, 0, 1, 1)),
+          1000)
       })
     })
   })
@@ -409,6 +509,19 @@ describe('MillisConverter', () => {
         assert.equal(millisConverter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 59, 1)),
           Date.UTC(1980, JAN, 1, 0, 0, 0, 1))
       })
+
+      it('atomicToOffset', () => {
+        assert.equal(millisConverter.atomicToOffset(0),
+          0)
+
+        // JUMP AHEAD
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)),
+          0)
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)),
+          -1000)
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1979, DEC, 31, 23, 59, 59, 1)),
+          -1000)
+      })
     })
 
     describe('BREAK', () => {
@@ -446,6 +559,19 @@ describe('MillisConverter', () => {
           Date.UTC(1980, JAN, 1, 0, 0, 0, 0))
         assert.equal(millisConverter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 59, 1)),
           Date.UTC(1980, JAN, 1, 0, 0, 0, 1))
+      })
+
+      it('atomicToOffset', () => {
+        assert.equal(millisConverter.atomicToOffset(0),
+          0)
+
+        // JUMP AHEAD
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)),
+          0)
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)),
+          -1000)
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1979, DEC, 31, 23, 59, 59, 1)),
+          -1000)
       })
     })
 
@@ -527,6 +653,19 @@ describe('MillisConverter', () => {
         assert.equal(millisConverter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 59, 1)),
           Date.UTC(1980, JAN, 1, 0, 0, 0, 1))
       })
+
+      it('atomicToOffset', () => {
+        assert.equal(millisConverter.atomicToOffset(0),
+          0)
+
+        // JUMP AHEAD
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)),
+          0)
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)),
+          -1000)
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1979, DEC, 31, 23, 59, 59, 1)),
+          -1000)
+      })
     })
 
     describe('SMEAR', () => {
@@ -581,6 +720,31 @@ describe('MillisConverter', () => {
         assert.equal(millisConverter.atomicToUnix(Date.UTC(1980, JAN, 1, 11, 59, 59, 1)),
           Date.UTC(1980, JAN, 1, 12, 0, 0, 1))
       })
+
+      it('atomicToOffset', () => {
+        assert.equal(millisConverter.atomicToOffset(0),
+          0)
+
+        // START OF SMEAR
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1979, DEC, 31, 11, 59, 59, 999)),
+          0)
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1979, DEC, 31, 12, 0, 0, 0)),
+          0)
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1979, DEC, 31, 12, 0, 0, 1)),
+          -1) // truncated down from -0.000...1
+
+        // MIDPOINT OF SMEAR
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1979, DEC, 31, 23, 59, 59, 500)),
+          -500)
+
+        // END OF SMEAR
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 11, 59, 59, 999)),
+          -1000) // truncated down from -999.999...9
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 11, 59, 59, 0)),
+          -1000)
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 11, 59, 59, 1)),
+          -1000)
+      })
     })
   })
 
@@ -596,6 +760,8 @@ describe('MillisConverter', () => {
           [0]) // truncated from .9 to 0
         assert.equal(millisConverter.atomicToUnix(0),
           NaN)
+        assert.equal(millisConverter.atomicToOffset(0),
+          NaN)
       })
 
       it('at the end of the ray', () => {
@@ -608,6 +774,8 @@ describe('MillisConverter', () => {
         assert.deepEqual(millisConverter.unixToAtomic(-1, { array: true }),
           [-1])
         assert.equal(millisConverter.atomicToUnix(-1),
+          NaN)
+        assert.equal(millisConverter.atomicToOffset(-1),
           NaN)
       })
     })
@@ -670,6 +838,18 @@ describe('MillisConverter', () => {
           assert.equal(millisConverter.atomicToUnix(2_999), 1_999)
           assert.equal(millisConverter.atomicToUnix(3_000), 1_000)
           assert.equal(millisConverter.atomicToUnix(3_001), 1_001)
+        })
+
+        it('atomicToOffset', () => {
+          assert.equal(millisConverter.atomicToOffset(0), 0)
+          assert.equal(millisConverter.atomicToOffset(1_000), 0)
+          assert.equal(millisConverter.atomicToOffset(1_001), 0)
+          assert.equal(millisConverter.atomicToOffset(1_999), 0)
+          assert.equal(millisConverter.atomicToOffset(2_000), 1_000)
+          assert.equal(millisConverter.atomicToOffset(2_001), 1_000)
+          assert.equal(millisConverter.atomicToOffset(2_999), 1_000)
+          assert.equal(millisConverter.atomicToOffset(3_000), 2_000)
+          assert.equal(millisConverter.atomicToOffset(3_001), 2_000)
         })
       })
 
@@ -734,6 +914,27 @@ describe('MillisConverter', () => {
           assert.deepEqual(millisConverter.atomicToUnix(3001),
             1001)
         })
+
+        it('atomicToOffset', () => {
+          assert.equal(millisConverter.atomicToOffset(0),
+            0)
+
+          // STALL STARTS
+          assert.equal(millisConverter.atomicToOffset(999),
+            0)
+          assert.equal(millisConverter.atomicToOffset(1000),
+            NaN)
+          assert.equal(millisConverter.atomicToOffset(1001),
+            NaN)
+
+          // STALL ENDS
+          assert.equal(millisConverter.atomicToOffset(2999),
+            NaN)
+          assert.deepEqual(millisConverter.atomicToOffset(3000),
+            2000)
+          assert.deepEqual(millisConverter.atomicToOffset(3001),
+            2000)
+        })
       })
 
       describe('STALL', () => {
@@ -797,6 +998,27 @@ describe('MillisConverter', () => {
           assert.deepEqual(millisConverter.atomicToUnix(3001),
             1001)
         })
+
+        it('atomicToOffset', () => {
+          assert.equal(millisConverter.atomicToOffset(0),
+            0)
+
+          // STALL STARTS
+          assert.equal(millisConverter.atomicToOffset(999),
+            0)
+          assert.equal(millisConverter.atomicToOffset(1000),
+            0)
+          assert.equal(millisConverter.atomicToOffset(1001),
+            1)
+
+          // STALL ENDS
+          assert.deepEqual(millisConverter.atomicToOffset(2999),
+            1999)
+          assert.deepEqual(millisConverter.atomicToOffset(3000),
+            2000)
+          assert.deepEqual(millisConverter.atomicToOffset(3001),
+            2000)
+        })
       })
     })
 
@@ -841,6 +1063,20 @@ describe('MillisConverter', () => {
           assert.equal(millisConverter.atomicToUnix(2_999), 1_999)
           assert.equal(millisConverter.atomicToUnix(3_000), 1_500)
         })
+
+        it('atomicToOffset', () => {
+          assert.equal(millisConverter.atomicToOffset(0), 0)
+          assert.equal(millisConverter.atomicToOffset(999), 0)
+          assert.equal(millisConverter.atomicToOffset(1_000), 0)
+          assert.equal(millisConverter.atomicToOffset(1_001), 0)
+          assert.equal(millisConverter.atomicToOffset(1_999), 0)
+          assert.equal(millisConverter.atomicToOffset(2_000), 1_000)
+          assert.equal(millisConverter.atomicToOffset(2_001), 1_000)
+          assert.equal(millisConverter.atomicToOffset(2_499), 1_000)
+          assert.equal(millisConverter.atomicToOffset(2_500), 1_000)
+          assert.equal(millisConverter.atomicToOffset(2_999), 1_000)
+          assert.equal(millisConverter.atomicToOffset(3_000), 1_500)
+        })
       })
 
       describe('BREAK', () => {
@@ -867,6 +1103,21 @@ describe('MillisConverter', () => {
           assert.equal(millisConverter.atomicToUnix(2_501), NaN)
           assert.equal(millisConverter.atomicToUnix(2_999), NaN)
           assert.equal(millisConverter.atomicToUnix(3_000), 1_500)
+        })
+
+        it('atomicToOffset', () => {
+          assert.equal(millisConverter.atomicToOffset(0), 0)
+          assert.equal(millisConverter.atomicToOffset(999), 0)
+          assert.equal(millisConverter.atomicToOffset(1_000), NaN)
+          assert.equal(millisConverter.atomicToOffset(1_001), NaN)
+          assert.equal(millisConverter.atomicToOffset(1_999), NaN)
+          assert.equal(millisConverter.atomicToOffset(2_000), 1_000)
+          assert.equal(millisConverter.atomicToOffset(2_001), 1_000)
+          assert.equal(millisConverter.atomicToOffset(2_499), 1_000)
+          assert.equal(millisConverter.atomicToOffset(2_500), NaN)
+          assert.equal(millisConverter.atomicToOffset(2_501), NaN)
+          assert.equal(millisConverter.atomicToOffset(2_999), NaN)
+          assert.equal(millisConverter.atomicToOffset(3_000), 1_500)
         })
       })
 
@@ -907,6 +1158,22 @@ describe('MillisConverter', () => {
           assert.equal(millisConverter.atomicToUnix(2_999), 1_500)
           assert.equal(millisConverter.atomicToUnix(3_000), 1_500)
           assert.equal(millisConverter.atomicToUnix(3_001), 1_501)
+        })
+
+        it('atomicToOffset', () => {
+          assert.equal(millisConverter.atomicToOffset(0), 0)
+          assert.equal(millisConverter.atomicToOffset(999), 0)
+          assert.equal(millisConverter.atomicToOffset(1_000), 0)
+          assert.equal(millisConverter.atomicToOffset(1_001), 1)
+          assert.equal(millisConverter.atomicToOffset(1_999), 999)
+          assert.equal(millisConverter.atomicToOffset(2_000), 1_000)
+          assert.equal(millisConverter.atomicToOffset(2_001), 1_000)
+          assert.equal(millisConverter.atomicToOffset(2_499), 1_000)
+          assert.equal(millisConverter.atomicToOffset(2_500), 1_000)
+          assert.equal(millisConverter.atomicToOffset(2_501), 1_001)
+          assert.equal(millisConverter.atomicToOffset(2_999), 1_499)
+          assert.equal(millisConverter.atomicToOffset(3_000), 1_500)
+          assert.equal(millisConverter.atomicToOffset(3_001), 1_500)
         })
       })
     })
@@ -984,6 +1251,23 @@ describe('MillisConverter', () => {
           assert.equal(millisConverter.atomicToUnix(3_001n), 501n)
           assert.equal(millisConverter.atomicToUnix(4_499n), 1_999n)
           assert.equal(millisConverter.atomicToUnix(4_500n), 2_000n)
+        })
+
+        it('atomicToOffset (BigInts)', () => {
+          assert.equal(millisConverter.atomicToOffset(0n), 0n)
+          assert.equal(millisConverter.atomicToOffset(499n), 0n)
+          assert.equal(millisConverter.atomicToOffset(500n), 0n)
+          assert.equal(millisConverter.atomicToOffset(999n), 0n)
+          assert.equal(millisConverter.atomicToOffset(1_000n), 0n)
+          assert.equal(millisConverter.atomicToOffset(1_001n), 0n)
+          assert.equal(millisConverter.atomicToOffset(1_999n), 0n)
+          assert.equal(millisConverter.atomicToOffset(2_000n), 1_000n)
+          assert.equal(millisConverter.atomicToOffset(2_001n), 1_000n)
+          assert.equal(millisConverter.atomicToOffset(2_999n), 1_000n)
+          assert.equal(millisConverter.atomicToOffset(3_000n), 2_500n)
+          assert.equal(millisConverter.atomicToOffset(3_001n), 2_500n)
+          assert.equal(millisConverter.atomicToOffset(4_499n), 2_500n)
+          assert.equal(millisConverter.atomicToOffset(4_500n), 2_500n)
         })
       })
 

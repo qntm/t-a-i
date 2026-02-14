@@ -1,6 +1,36 @@
 import { Second } from './second.js'
 import { Converter } from './converter.js'
 
+const unwrap = millis => {
+  const isInteger = Number.isInteger(millis)
+
+  if (isInteger) {
+    millis = BigInt(millis)
+  }
+
+  if (typeof millis !== 'bigint') {
+    throw Error(`Not an integer: ${millis}`)
+  }
+
+  millis = Second.fromMillis(millis)
+
+  return { isInteger, millis }
+}
+
+const wrap = ({ isInteger, millis }) => {
+  if (Number.isNaN(millis)) {
+    return millis
+  }
+
+  millis = millis.toMillis()
+
+  if (isInteger) {
+    millis = Number(millis)
+  }
+
+  return millis
+}
+
 // Do not subclass `Converter` as we do not expose the same interface
 export class MillisConverter {
   constructor (data, model) {
@@ -8,53 +38,25 @@ export class MillisConverter {
   }
 
   atomicToUnix (atomicMillis) {
-    const isInteger = Number.isInteger(atomicMillis)
+    const { isInteger, millis: atomic } = unwrap(atomicMillis)
+    const unix = this.converter.atomicToUnix(atomic)
+    return wrap({ isInteger, millis: unix })
+  }
 
-    if (isInteger) {
-      atomicMillis = BigInt(atomicMillis)
-    }
-
-    if (typeof atomicMillis !== 'bigint') {
-      throw Error(`Not an integer: ${atomicMillis}`)
-    }
-
-    let unix = this.converter.atomicToUnix(Second.fromMillis(atomicMillis))
-    if (Number.isNaN(unix)) {
-      return unix
-    }
-
-    unix = unix.toMillis()
-
-    if (isInteger) {
-      unix = Number(unix)
-    }
-
-    return unix
+  atomicToOffset (atomicMillis) {
+    const { isInteger, millis: atomic } = unwrap(atomicMillis)
+    const unix = this.converter.atomicToOffset(atomic)
+    return wrap({ isInteger, millis: unix })
   }
 
   unixToAtomic (unixMillis, options = {}) {
-    const isInteger = Number.isInteger(unixMillis)
+    const { isInteger, millis: unix } = unwrap(unixMillis)
 
-    if (isInteger) {
-      unixMillis = BigInt(unixMillis)
-    }
-
-    if (typeof unixMillis !== 'bigint') {
-      throw Error(`Not an integer: ${unixMillis}`)
-    }
-
-    let ranges = this.converter.unixToAtomic(Second.fromMillis(unixMillis))
-    ranges = ranges.map(range => [
-      range.start.toMillis(),
-      range.end.toMillis()
-    ])
-
-    if (isInteger) {
-      ranges = ranges.map(range => [
-        Number(range[0]),
-        Number(range[1])
+    const ranges = this.converter.unixToAtomic(unix)
+      .map(range => [
+        wrap({ isInteger, millis: range.start }),
+        wrap({ isInteger, millis: range.end })
       ])
-    }
 
     if (options.array === true) {
       return options.range === true ? ranges : ranges.map(range => range[1])
