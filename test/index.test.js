@@ -41,13 +41,17 @@ describe('TaiConverter', () => {
 
       it('starts TAI at 1961-01-01 00:00:01.422_818', () => {
         // 00:00:01.422_818 is in range, but rounds down to 00:00:01.422 which technically is not
-        assert.deepEqual(unixToAtomic(Date.UTC(1961, JAN, 1, 0, 0, 0, 0)),
-          [-283_996_798_578])
+        assert.deepEqual(
+          unixToAtomic(Date.UTC(1961, JAN, 1, 0, 0, 0, 0)),
+          [-283_996_798_578]
+        )
       })
 
       it('advances 15 TAI picoseconds per Unix millisecond', () => {
-        assert.deepEqual(unixToAtomic(Date.UTC(1961, JAN, 1, 0, 0, 0, 1)),
-          [Date.UTC(1961, JAN, 1, 0, 0, 1, 423)])
+        assert.deepEqual(
+          unixToAtomic(Date.UTC(1961, JAN, 1, 0, 0, 0, 1)),
+          [Date.UTC(1961, JAN, 1, 0, 0, 1, 423)]
+        )
         assert.deepEqual(unixToAtomic(Date.UTC(1961, JAN, 1, 0, 0, 0, 2)),
           [Date.UTC(1961, JAN, 1, 0, 0, 1, 424)])
         assert.deepEqual(unixToAtomic(Date.UTC(1961, JAN, 1, 0, 0, 0, 3)),

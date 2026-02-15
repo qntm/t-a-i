@@ -19,18 +19,21 @@ describe('NanosConverter', () => {
       const nanosConverter = new NanosConverter(data, MODELS.OVERRUN)
 
       it('manages basic conversions', () => {
-        assert.deepEqual(nanosConverter.unixToAtomic(0, { range: true, array: true }),
-          [[0, 0]])
-        assert.deepEqual(nanosConverter.unixToAtomic(0, { range: true }),
-          [0, 0])
-        assert.deepEqual(nanosConverter.unixToAtomic(0, { array: true }),
-          [0])
-        assert.equal(nanosConverter.unixToAtomic(0),
-          0)
-        assert.equal(nanosConverter.atomicToUnix(0),
-          0)
-        assert.equal(nanosConverter.atomicToOffset(0),
-          0)
+        assert.deepEqual(
+          nanosConverter.unixToAtomic(0, { range: true, array: true }),
+          [[0, 0]]
+        )
+        assert.deepEqual(
+          nanosConverter.unixToAtomic(0, { range: true }),
+          [0, 0]
+        )
+        assert.deepEqual(
+          nanosConverter.unixToAtomic(0, { array: true }),
+          [0]
+        )
+        assert.equal(nanosConverter.unixToAtomic(0), 0)
+        assert.equal(nanosConverter.atomicToUnix(0), 0)
+        assert.equal(nanosConverter.atomicToOffset(0), 0)
       })
     })
 
@@ -38,12 +41,9 @@ describe('NanosConverter', () => {
       const nanosConverter = new NanosConverter(data, MODELS.BREAK)
 
       it('manages basic conversions', () => {
-        assert.equal(nanosConverter.unixToAtomic(0),
-          0)
-        assert.equal(nanosConverter.atomicToUnix(0),
-          0)
-        assert.equal(nanosConverter.atomicToOffset(0),
-          0)
+        assert.equal(nanosConverter.unixToAtomic(0), 0)
+        assert.equal(nanosConverter.atomicToUnix(0), 0)
+        assert.equal(nanosConverter.atomicToOffset(0), 0)
       })
     })
 
@@ -60,21 +60,15 @@ describe('NanosConverter', () => {
       })
 
       it('fails when the atomic count is out of bounds', () => {
-        assert.equal(nanosConverter.atomicToUnix(0),
-          0)
-        assert.equal(nanosConverter.atomicToUnix(-1),
-          NaN)
-        assert.equal(nanosConverter.atomicToOffset(0),
-          0)
-        assert.equal(nanosConverter.atomicToOffset(-1),
-          NaN)
+        assert.equal(nanosConverter.atomicToUnix(0), 0)
+        assert.equal(nanosConverter.atomicToUnix(-1), NaN)
+        assert.equal(nanosConverter.atomicToOffset(0), 0)
+        assert.equal(nanosConverter.atomicToOffset(-1), NaN)
       })
 
       it('fails when the Unix count is out of bounds', () => {
-        assert.equal(nanosConverter.unixToAtomic(0),
-          0)
-        assert.equal(nanosConverter.unixToAtomic(-1),
-          NaN)
+        assert.equal(nanosConverter.unixToAtomic(0), 0)
+        assert.equal(nanosConverter.unixToAtomic(-1), NaN)
       })
 
       it('manages basic conversions', () => {
@@ -91,12 +85,9 @@ describe('NanosConverter', () => {
       const nanosConverter = new NanosConverter(data, MODELS.SMEAR)
 
       it('manages basic conversions', () => {
-        assert.equal(nanosConverter.unixToAtomic(0),
-          0)
-        assert.equal(nanosConverter.atomicToUnix(0),
-          0)
-        assert.equal(nanosConverter.atomicToOffset(0),
-          0)
+        assert.equal(nanosConverter.unixToAtomic(0), 0)
+        assert.equal(nanosConverter.atomicToUnix(0), 0)
+        assert.equal(nanosConverter.atomicToOffset(0), 0)
       })
     })
   })
@@ -111,58 +102,67 @@ describe('NanosConverter', () => {
       const nanosConverter = new NanosConverter(data, MODELS.STALL)
 
       it('unixToAtomic', () => {
-        assert.equal(nanosConverter.unixToAtomic(0n),
-          0n)
+        assert.equal(nanosConverter.unixToAtomic(0n), 0n)
 
         // FORWARD JUMP
-        assert.equal(nanosConverter.unixToAtomic(BigInt(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)) * 1_000_000n),
-          BigInt(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)) * 1_000_000n)
-        assert.equal(nanosConverter.unixToAtomic(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)) * 1_000_000n),
-          BigInt(Date.UTC(1980, JAN, 1, 0, 0, 1, 0)) * 1_000_000n)
-        assert.equal(nanosConverter.unixToAtomic(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 1)) * 1_000_000n),
-          BigInt(Date.UTC(1980, JAN, 1, 0, 0, 1, 1)) * 1_000_000n)
+        assert.equal(
+          nanosConverter.unixToAtomic(BigInt(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)) * 1_000_000n),
+          BigInt(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)) * 1_000_000n
+        )
+        assert.equal(
+          nanosConverter.unixToAtomic(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)) * 1_000_000n),
+          BigInt(Date.UTC(1980, JAN, 1, 0, 0, 1, 0)) * 1_000_000n
+        )
+        assert.equal(
+          nanosConverter.unixToAtomic(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 1)) * 1_000_000n),
+          BigInt(Date.UTC(1980, JAN, 1, 0, 0, 1, 1)) * 1_000_000n
+        )
       })
 
       it('atomicToUnix', () => {
-        assert.equal(nanosConverter.atomicToUnix(0),
-          0)
+        assert.equal(nanosConverter.atomicToUnix(0), 0)
 
         // STALL STARTS
-        assert.equal(nanosConverter.atomicToUnix(BigInt(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)) * 1_000_000n),
-          BigInt(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)) * 1_000_000n)
-        assert.equal(nanosConverter.atomicToUnix(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)) * 1_000_000n),
-          BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)) * 1_000_000n)
-        assert.equal(nanosConverter.atomicToUnix(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 1)) * 1_000_000n),
-          BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)) * 1_000_000n)
+        assert.equal(
+          nanosConverter.atomicToUnix(BigInt(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)) * 1_000_000n),
+          BigInt(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)) * 1_000_000n
+        )
+        assert.equal(
+          nanosConverter.atomicToUnix(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)) * 1_000_000n),
+          BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)) * 1_000_000n
+        )
+        assert.equal(
+          nanosConverter.atomicToUnix(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 1)) * 1_000_000n),
+          BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)) * 1_000_000n
+        )
 
         // STALL ENDS
-        assert.equal(nanosConverter.atomicToUnix(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)) * 1_000_000n),
-          BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)) * 1_000_000n)
-        assert.equal(nanosConverter.atomicToUnix(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 1, 0)) * 1_000_000n),
-          BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)) * 1_000_000n)
-        assert.equal(nanosConverter.atomicToUnix(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 1, 1)) * 1_000_000n),
-          BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 1)) * 1_000_000n)
+        assert.equal(
+          nanosConverter.atomicToUnix(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)) * 1_000_000n),
+          BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)) * 1_000_000n
+        )
+        assert.equal(
+          nanosConverter.atomicToUnix(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 1, 0)) * 1_000_000n),
+          BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)) * 1_000_000n
+        )
+        assert.equal(
+          nanosConverter.atomicToUnix(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 1, 1)) * 1_000_000n),
+          BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 1)) * 1_000_000n
+        )
       })
 
       it('atomicToOffset', () => {
-        assert.equal(nanosConverter.atomicToOffset(0n),
-          0n)
+        assert.equal(nanosConverter.atomicToOffset(0n), 0n)
 
         // STALL STARTS
-        assert.equal(nanosConverter.atomicToOffset(BigInt(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)) * 1_000_000n),
-          0n)
-        assert.equal(nanosConverter.atomicToOffset(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)) * 1_000_000n),
-          0n)
-        assert.equal(nanosConverter.atomicToOffset(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 1)) * 1_000_000n),
-          1_000_000n)
+        assert.equal(nanosConverter.atomicToOffset(BigInt(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)) * 1_000_000n), 0n)
+        assert.equal(nanosConverter.atomicToOffset(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)) * 1_000_000n), 0n)
+        assert.equal(nanosConverter.atomicToOffset(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 1)) * 1_000_000n), 1_000_000n)
 
         // STALL ENDS
-        assert.equal(nanosConverter.atomicToOffset(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)) * 1_000_000n),
-          999_000_000n)
-        assert.equal(nanosConverter.atomicToOffset(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 1, 0)) * 1_000_000n),
-          1_000_000_000n)
-        assert.equal(nanosConverter.atomicToOffset(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 1, 1)) * 1_000_000n),
-          1_000_000_000n)
+        assert.equal(nanosConverter.atomicToOffset(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)) * 1_000_000n), 999_000_000n)
+        assert.equal(nanosConverter.atomicToOffset(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 1, 0)) * 1_000_000n), 1_000_000_000n)
+        assert.equal(nanosConverter.atomicToOffset(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 1, 1)) * 1_000_000n), 1_000_000_000n)
       })
     })
 
@@ -170,78 +170,96 @@ describe('NanosConverter', () => {
       const nanosConverter = new NanosConverter(data, MODELS.SMEAR)
 
       it('unixToAtomic', () => {
-        assert.equal(nanosConverter.unixToAtomic(0n),
-          0n)
+        assert.equal(nanosConverter.unixToAtomic(0n), 0n)
 
         // SMEAR STARTS
-        assert.equal(nanosConverter.unixToAtomic(BigInt(Date.UTC(1979, DEC, 31, 11, 59, 59, 999)) * 1_000_000n),
-          BigInt(Date.UTC(1979, DEC, 31, 11, 59, 59, 999)) * 1_000_000n)
-        assert.equal(nanosConverter.unixToAtomic(BigInt(Date.UTC(1979, DEC, 31, 12, 0, 0, 0)) * 1_000_000n),
-          BigInt(Date.UTC(1979, DEC, 31, 12, 0, 0, 0)) * 1_000_000n)
-        assert.equal(nanosConverter.unixToAtomic(BigInt(Date.UTC(1979, DEC, 31, 12, 0, 0, 1)) * 1_000_000n),
-          BigInt(Date.UTC(1979, DEC, 31, 12, 0, 0, 1)) * 1_000_000n + 11n)
+        assert.equal(
+          nanosConverter.unixToAtomic(BigInt(Date.UTC(1979, DEC, 31, 11, 59, 59, 999)) * 1_000_000n),
+          BigInt(Date.UTC(1979, DEC, 31, 11, 59, 59, 999)) * 1_000_000n
+        )
+        assert.equal(
+          nanosConverter.unixToAtomic(BigInt(Date.UTC(1979, DEC, 31, 12, 0, 0, 0)) * 1_000_000n),
+          BigInt(Date.UTC(1979, DEC, 31, 12, 0, 0, 0)) * 1_000_000n
+        )
+        assert.equal(
+          nanosConverter.unixToAtomic(BigInt(Date.UTC(1979, DEC, 31, 12, 0, 0, 1)) * 1_000_000n),
+          BigInt(Date.UTC(1979, DEC, 31, 12, 0, 0, 1)) * 1_000_000n + 11n
+        )
 
         // SMEAR MIDPOINT
-        assert.equal(nanosConverter.unixToAtomic(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)) * 1_000_000n),
-          BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 500)) * 1_000_000n)
+        assert.equal(
+          nanosConverter.unixToAtomic(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)) * 1_000_000n),
+          BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 500)) * 1_000_000n
+        )
 
         // SMEAR ENDS
-        assert.equal(nanosConverter.unixToAtomic(BigInt(Date.UTC(1980, JAN, 1, 11, 59, 59, 999)) * 1_000_000n),
-          BigInt(Date.UTC(1980, JAN, 1, 12, 0, 0, 998)) * 1_000_000n + 999_988n)
-        assert.equal(nanosConverter.unixToAtomic(BigInt(Date.UTC(1980, JAN, 1, 12, 0, 0, 0)) * 1_000_000n),
-          BigInt(Date.UTC(1980, JAN, 1, 12, 0, 1, 0)) * 1_000_000n)
-        assert.equal(nanosConverter.unixToAtomic(BigInt(Date.UTC(1980, JAN, 1, 12, 0, 0, 1)) * 1_000_000n),
-          BigInt(Date.UTC(1980, JAN, 1, 12, 0, 1, 1)) * 1_000_000n)
+        assert.equal(
+          nanosConverter.unixToAtomic(BigInt(Date.UTC(1980, JAN, 1, 11, 59, 59, 999)) * 1_000_000n),
+          BigInt(Date.UTC(1980, JAN, 1, 12, 0, 0, 998)) * 1_000_000n + 999_988n
+        )
+        assert.equal(
+          nanosConverter.unixToAtomic(BigInt(Date.UTC(1980, JAN, 1, 12, 0, 0, 0)) * 1_000_000n),
+          BigInt(Date.UTC(1980, JAN, 1, 12, 0, 1, 0)) * 1_000_000n
+        )
+        assert.equal(
+          nanosConverter.unixToAtomic(BigInt(Date.UTC(1980, JAN, 1, 12, 0, 0, 1)) * 1_000_000n),
+          BigInt(Date.UTC(1980, JAN, 1, 12, 0, 1, 1)) * 1_000_000n
+        )
       })
 
       it('atomicToUnix', () => {
-        assert.equal(nanosConverter.atomicToUnix(0n),
-          0n)
+        assert.equal(nanosConverter.atomicToUnix(0n), 0n)
 
         // SMEAR STARTS
-        assert.equal(nanosConverter.atomicToUnix(BigInt(Date.UTC(1979, DEC, 31, 11, 59, 59, 999)) * 1_000_000n),
-          BigInt(Date.UTC(1979, DEC, 31, 11, 59, 59, 999)) * 1_000_000n)
-        assert.equal(nanosConverter.atomicToUnix(BigInt(Date.UTC(1979, DEC, 31, 12, 0, 0, 0)) * 1_000_000n),
-          BigInt(Date.UTC(1979, DEC, 31, 12, 0, 0, 0)) * 1_000_000n)
-        assert.equal(nanosConverter.atomicToUnix(BigInt(Date.UTC(1979, DEC, 31, 12, 0, 0, 1)) * 1_000_000n),
-          BigInt(Date.UTC(1979, DEC, 31, 12, 0, 0, 0)) * 1_000_000n + 999_988n)
+        assert.equal(
+          nanosConverter.atomicToUnix(BigInt(Date.UTC(1979, DEC, 31, 11, 59, 59, 999)) * 1_000_000n),
+          BigInt(Date.UTC(1979, DEC, 31, 11, 59, 59, 999)) * 1_000_000n
+        )
+        assert.equal(
+          nanosConverter.atomicToUnix(BigInt(Date.UTC(1979, DEC, 31, 12, 0, 0, 0)) * 1_000_000n),
+          BigInt(Date.UTC(1979, DEC, 31, 12, 0, 0, 0)) * 1_000_000n
+        )
+        assert.equal(
+          nanosConverter.atomicToUnix(BigInt(Date.UTC(1979, DEC, 31, 12, 0, 0, 1)) * 1_000_000n),
+          BigInt(Date.UTC(1979, DEC, 31, 12, 0, 0, 0)) * 1_000_000n + 999_988n
+        )
 
         // SMEAR MIDPOINT
-        assert.equal(nanosConverter.atomicToUnix(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 500)) * 1_000_000n),
-          BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)) * 1_000_000n)
+        assert.equal(
+          nanosConverter.atomicToUnix(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 500)) * 1_000_000n),
+          BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)) * 1_000_000n
+        )
 
         // SMEAR ENDS
-        assert.equal(nanosConverter.atomicToUnix(BigInt(Date.UTC(1980, JAN, 1, 12, 0, 0, 999)) * 1_000_000n),
-          BigInt(Date.UTC(1980, JAN, 1, 11, 59, 59, 999)) * 1_000_000n + 11n)
-        assert.equal(nanosConverter.atomicToUnix(BigInt(Date.UTC(1980, JAN, 1, 12, 0, 1, 0)) * 1_000_000n),
-          BigInt(Date.UTC(1980, JAN, 1, 12, 0, 0, 0)) * 1_000_000n)
-        assert.equal(nanosConverter.atomicToUnix(BigInt(Date.UTC(1980, JAN, 1, 12, 0, 1, 1)) * 1_000_000n),
-          BigInt(Date.UTC(1980, JAN, 1, 12, 0, 0, 1)) * 1_000_000n)
+        assert.equal(
+          nanosConverter.atomicToUnix(BigInt(Date.UTC(1980, JAN, 1, 12, 0, 0, 999)) * 1_000_000n),
+          BigInt(Date.UTC(1980, JAN, 1, 11, 59, 59, 999)) * 1_000_000n + 11n
+        )
+        assert.equal(
+          nanosConverter.atomicToUnix(BigInt(Date.UTC(1980, JAN, 1, 12, 0, 1, 0)) * 1_000_000n),
+          BigInt(Date.UTC(1980, JAN, 1, 12, 0, 0, 0)) * 1_000_000n
+        )
+        assert.equal(
+          nanosConverter.atomicToUnix(BigInt(Date.UTC(1980, JAN, 1, 12, 0, 1, 1)) * 1_000_000n),
+          BigInt(Date.UTC(1980, JAN, 1, 12, 0, 0, 1)) * 1_000_000n
+        )
       })
 
       it('atomicToOffset', () => {
-        assert.equal(nanosConverter.atomicToUnix(0n),
-          0n)
+        assert.equal(nanosConverter.atomicToUnix(0n), 0n)
 
         // SMEAR STARTS
-        assert.equal(nanosConverter.atomicToOffset(BigInt(Date.UTC(1979, DEC, 31, 11, 59, 59, 999)) * 1_000_000n),
-          0n)
-        assert.equal(nanosConverter.atomicToOffset(BigInt(Date.UTC(1979, DEC, 31, 12, 0, 0, 0)) * 1_000_000n),
-          0n)
-        assert.equal(nanosConverter.atomicToOffset(BigInt(Date.UTC(1979, DEC, 31, 12, 0, 0, 1)) * 1_000_000n),
-          11n)
+        assert.equal(nanosConverter.atomicToOffset(BigInt(Date.UTC(1979, DEC, 31, 11, 59, 59, 999)) * 1_000_000n), 0n)
+        assert.equal(nanosConverter.atomicToOffset(BigInt(Date.UTC(1979, DEC, 31, 12, 0, 0, 0)) * 1_000_000n), 0n)
+        assert.equal(nanosConverter.atomicToOffset(BigInt(Date.UTC(1979, DEC, 31, 12, 0, 0, 1)) * 1_000_000n), 11n)
 
         // SMEAR MIDPOINT
-        assert.equal(nanosConverter.atomicToOffset(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 500)) * 1_000_000n),
-          500_000_000n)
+        assert.equal(nanosConverter.atomicToOffset(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 500)) * 1_000_000n), 500_000_000n)
 
         // SMEAR ENDS
-        assert.equal(nanosConverter.atomicToOffset(BigInt(Date.UTC(1980, JAN, 1, 12, 0, 0, 999)) * 1_000_000n),
-          999_999_988n)
-        assert.equal(nanosConverter.atomicToOffset(BigInt(Date.UTC(1980, JAN, 1, 12, 0, 1, 0)) * 1_000_000n),
-          1_000_000_000n)
-        assert.equal(nanosConverter.atomicToOffset(BigInt(Date.UTC(1980, JAN, 1, 12, 0, 1, 1)) * 1_000_000n),
-          1_000_000_000n)
+        assert.equal(nanosConverter.atomicToOffset(BigInt(Date.UTC(1980, JAN, 1, 12, 0, 0, 999)) * 1_000_000n), 999_999_988n)
+        assert.equal(nanosConverter.atomicToOffset(BigInt(Date.UTC(1980, JAN, 1, 12, 0, 1, 0)) * 1_000_000n), 1_000_000_000n)
+        assert.equal(nanosConverter.atomicToOffset(BigInt(Date.UTC(1980, JAN, 1, 12, 0, 1, 1)) * 1_000_000n), 1_000_000_000n)
       })
     })
   })
@@ -254,43 +272,55 @@ describe('NanosConverter', () => {
     const nanosConverter = new NanosConverter(data, MODELS.OVERRUN)
 
     it('before anything clever occurs', () => {
-      assert.deepEqual(nanosConverter.unixToAtomic(Date.UTC(1963, OCT, 31, 23, 59, 59, 999) * 1_000_000, { array: true }),
+      assert.deepEqual(
+        nanosConverter.unixToAtomic(Date.UTC(1963, OCT, 31, 23, 59, 59, 999) * 1_000_000, { array: true }),
         [
           Date.UTC(1963, NOV, 1, 0, 0, 2, 596) * 1_000_000 + 278_800
-        ])
-      // -194_745_597_404_844_400_013n TAI picoseconds
+          // -194_745_597_404_844_400_013n TAI picoseconds
+        ]
+      )
     })
 
     it('exactly at the time', () => {
-      assert.deepEqual(nanosConverter.unixToAtomic(Date.UTC(1963, NOV, 1, 0, 0, 0, 0) * 1_000_000, { array: true }),
+      assert.deepEqual(
+        nanosConverter.unixToAtomic(Date.UTC(1963, NOV, 1, 0, 0, 0, 0) * 1_000_000, { array: true }),
         [
           Date.UTC(1963, NOV, 1, 0, 0, 2, 597) * 1_000_000 + 278_800,
           Date.UTC(1963, NOV, 1, 0, 0, 2, 697) * 1_000_000 + 278_800
-        ])
+        ]
+      )
     })
 
     it('then', () => {
-      assert.deepEqual(nanosConverter.unixToAtomic(Date.UTC(1963, NOV, 1, 0, 0, 0, 1) * 1_000_000, { array: true }),
+      assert.deepEqual(
+        nanosConverter.unixToAtomic(Date.UTC(1963, NOV, 1, 0, 0, 0, 1) * 1_000_000, { array: true }),
         [
           Date.UTC(1963, NOV, 1, 0, 0, 2, 598) * 1_000_000 + 278_800,
           Date.UTC(1963, NOV, 1, 0, 0, 2, 698) * 1_000_000 + 278_800
-        ])
+        ]
+      )
 
-      assert.deepEqual(nanosConverter.unixToAtomic(Date.UTC(1963, NOV, 1, 0, 0, 0, 99) * 1_000_000, { array: true }),
+      assert.deepEqual(
+        nanosConverter.unixToAtomic(Date.UTC(1963, NOV, 1, 0, 0, 0, 99) * 1_000_000, { array: true }),
         [
           Date.UTC(1963, NOV, 1, 0, 0, 2, 696) * 1_000_000 + 278_820,
           Date.UTC(1963, NOV, 1, 0, 0, 2, 796) * 1_000_000 + 278_820 // -194_659_197_203_721_198_713n TAI
-        ])
+        ]
+      )
 
-      assert.deepEqual(nanosConverter.unixToAtomic(Date.UTC(1963, NOV, 1, 0, 0, 0, 100) * 1_000_000, { array: true }),
+      assert.deepEqual(
+        nanosConverter.unixToAtomic(Date.UTC(1963, NOV, 1, 0, 0, 0, 100) * 1_000_000, { array: true }),
         [
           Date.UTC(1963, NOV, 1, 0, 0, 2, 797) * 1_000_000 + 278_820
-        ])
+        ]
+      )
 
-      assert.deepEqual(nanosConverter.unixToAtomic(Date.UTC(1963, NOV, 1, 0, 0, 0, 101) * 1_000_000, { array: true }),
+      assert.deepEqual(
+        nanosConverter.unixToAtomic(Date.UTC(1963, NOV, 1, 0, 0, 0, 101) * 1_000_000, { array: true }),
         [
           Date.UTC(1963, NOV, 1, 0, 0, 2, 798) * 1_000_000 + 278_820
-        ])
+        ]
+      )
     })
   })
 })
