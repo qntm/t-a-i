@@ -41,238 +41,242 @@ describe('TaiConverter', () => {
 
       it('starts TAI at 1961-01-01 00:00:01.422_818', () => {
         // 00:00:01.422_818 is in range, but rounds down to 00:00:01.422 which technically is not
-        assert.deepEqual(unixToAtomic(Date.UTC(1961, JAN, 1, 0, 0, 0, 0)),
-          [-283_996_798_578])
+        assert.deepEqual(
+          unixToAtomic(Date.UTC(1961, JAN, 1, 0, 0, 0, 0)),
+          [-283_996_798_578]
+        )
       })
 
       it('advances 15 TAI picoseconds per Unix millisecond', () => {
-        assert.deepEqual(unixToAtomic(Date.UTC(1961, JAN, 1, 0, 0, 0, 1)),
-          [Date.UTC(1961, JAN, 1, 0, 0, 1, 423)])
-        assert.deepEqual(unixToAtomic(Date.UTC(1961, JAN, 1, 0, 0, 0, 2)),
-          [Date.UTC(1961, JAN, 1, 0, 0, 1, 424)])
-        assert.deepEqual(unixToAtomic(Date.UTC(1961, JAN, 1, 0, 0, 0, 3)),
-          [Date.UTC(1961, JAN, 1, 0, 0, 1, 425)])
+        assert.deepEqual(
+          unixToAtomic(Date.UTC(1961, JAN, 1, 0, 0, 0, 1)),
+          [Date.UTC(1961, JAN, 1, 0, 0, 1, 423)]
+        )
+        assert.deepEqual(
+          unixToAtomic(Date.UTC(1961, JAN, 1, 0, 0, 0, 2)),
+          [Date.UTC(1961, JAN, 1, 0, 0, 1, 424)]
+        )
+        assert.deepEqual(
+          unixToAtomic(Date.UTC(1961, JAN, 1, 0, 0, 0, 3)),
+          [Date.UTC(1961, JAN, 1, 0, 0, 1, 425)]
+        )
       })
 
       it('advances 0.001_296 TAI seconds per Unix day', () => {
-        assert.deepEqual(unixToAtomic(Date.UTC(1961, JAN, 2, 0, 0, 0, 0)),
-          [Date.UTC(1961, JAN, 2, 0, 0, 1, 424)])
+        assert.deepEqual(
+          unixToAtomic(Date.UTC(1961, JAN, 2, 0, 0, 0, 0)),
+          [Date.UTC(1961, JAN, 2, 0, 0, 1, 424)]
+        )
         // It's 1.424_114 but gets rounded down to 1.424_000
       })
 
       it('makes certain TAI millisecond counts inaccessible', () => {
-        assert.deepEqual(unixToAtomic(-283_984_666_668),
-          [-283_984_665_246]) // -283_984_665_245.000_000_020 rounded towards negative infinity
-        assert.deepEqual(unixToAtomic(-283_984_666_667),
-          [-283_984_665_245]) // -283_984_665_244.000_000_005 rounded towards negative infinity
+        assert.deepEqual(
+          unixToAtomic(-283_984_666_668),
+          [-283_984_665_246] // -283_984_665_245.000_000_020 rounded towards negative infinity
+        )
+        assert.deepEqual(
+          unixToAtomic(-283_984_666_667),
+          [-283_984_665_245] // -283_984_665_244.000_000_005 rounded towards negative infinity
+        )
 
         // it's not possible to get a result of [-283_984_665_244.xxx_xxx_xxx]
 
-        assert.deepEqual(unixToAtomic(-283_984_666_666),
-          [-283_984_665_243]) // -283_984_665_242.999_999_990 rounded towards negative infinity
-        assert.deepEqual(unixToAtomic(-283_984_666_665),
-          [-283_984_665_242]) // -283_984_665_241.999_999_975 rounded towards negative infinity
+        assert.deepEqual(
+          unixToAtomic(-283_984_666_666),
+          [-283_984_665_243] // -283_984_665_242.999_999_990 rounded towards negative infinity
+        )
+        assert.deepEqual(
+          unixToAtomic(-283_984_666_665),
+          [-283_984_665_242] // -283_984_665_241.999_999_975 rounded towards negative infinity
+        )
       })
     })
 
     describe('unixToAtomic', () => {
       it('starts TAI at 1961-01-01 00:00:01.422_818', () => {
         // 00:00:01.422_818 is in range, but rounds down to 00:00:01.422 which is not
-        assert.equal(taiConverter.unixToAtomic(Date.UTC(1961, JAN, 1, 0, 0, 0, 0)),
-          -283_996_798_578)
+        assert.equal(
+          taiConverter.unixToAtomic(Date.UTC(1961, JAN, 1, 0, 0, 0, 0)),
+          -283_996_798_578
+        )
       })
 
       it('advances 15 TAI picoseconds per Unix millisecond', () => {
-        assert.equal(taiConverter.unixToAtomic(Date.UTC(1961, JAN, 1, 0, 0, 0, 1)),
-          Date.UTC(1961, JAN, 1, 0, 0, 1, 423))
-        assert.equal(taiConverter.unixToAtomic(Date.UTC(1961, JAN, 1, 0, 0, 0, 2)),
-          Date.UTC(1961, JAN, 1, 0, 0, 1, 424))
-        assert.equal(taiConverter.unixToAtomic(Date.UTC(1961, JAN, 1, 0, 0, 0, 3)),
-          Date.UTC(1961, JAN, 1, 0, 0, 1, 425))
+        assert.equal(taiConverter.unixToAtomic(Date.UTC(1961, JAN, 1, 0, 0, 0, 1)), Date.UTC(1961, JAN, 1, 0, 0, 1, 423))
+        assert.equal(taiConverter.unixToAtomic(Date.UTC(1961, JAN, 1, 0, 0, 0, 2)), Date.UTC(1961, JAN, 1, 0, 0, 1, 424))
+        assert.equal(taiConverter.unixToAtomic(Date.UTC(1961, JAN, 1, 0, 0, 0, 3)), Date.UTC(1961, JAN, 1, 0, 0, 1, 425))
       })
 
       it('advances 0.001_296 TAI seconds per Unix day', () => {
-        assert.equal(taiConverter.unixToAtomic(Date.UTC(1961, JAN, 2, 0, 0, 0, 0)),
-          Date.UTC(1961, JAN, 2, 0, 0, 1, 424))
+        assert.equal(
+          taiConverter.unixToAtomic(Date.UTC(1961, JAN, 2, 0, 0, 0, 0)),
+          Date.UTC(1961, JAN, 2, 0, 0, 1, 424)
+        )
         // It's 1.424_114 but gets rounded down to 1.424_000
       })
 
       it('makes certain TAI millisecond counts inaccessible', () => {
-        assert.equal(taiConverter.unixToAtomic(-283_984_666_668),
-          -283_984_665_246) // -283_984_665_245.000_000_020 rounded towards negative infinity
-        assert.equal(taiConverter.unixToAtomic(-283_984_666_667),
-          -283_984_665_245) // -283_984_665_244.000_000_005 rounded towards negative infinity
+        assert.equal(
+          taiConverter.unixToAtomic(-283_984_666_668),
+          -283_984_665_246 // -283_984_665_245.000_000_020 rounded towards negative infinity
+        )
+        assert.equal(
+          taiConverter.unixToAtomic(-283_984_666_667),
+          -283_984_665_245 // -283_984_665_244.000_000_005 rounded towards negative infinity
+        )
 
         // it's not possible to get a result of -283_984_665_244.xxx_xxx_xxx
 
-        assert.equal(taiConverter.unixToAtomic(-283_984_666_666),
-          -283_984_665_243) // -283_984_665_242.999_999_990 rounded towards negative infinity
-        assert.equal(taiConverter.unixToAtomic(-283_984_666_665),
-          -283_984_665_242) // -283_984_665_241.999_999_975 rounded towards negative infinity
+        assert.equal(
+          taiConverter.unixToAtomic(-283_984_666_666),
+          -283_984_665_243 // -283_984_665_242.999_999_990 rounded towards negative infinity
+        )
+        assert.equal(
+          taiConverter.unixToAtomic(-283_984_666_665),
+          -283_984_665_242 // -283_984_665_241.999_999_975 rounded towards negative infinity
+        )
       })
     })
 
     describe('atomicToUnix', () => {
       it('The NEW earliest instant in TAI', () => {
-        assert.equal(taiConverter.atomicToUnix(Date.UTC(1961, JAN, 1, 0, 0, 1, 422)),
-          NaN)
+        assert.equal(taiConverter.atomicToUnix(Date.UTC(1961, JAN, 1, 0, 0, 1, 422)), NaN)
 
         // Actual start of TAI: 1961-01-01 00:00:01.422_818
-        assert.equal(taiConverter.atomicToUnix(Date.UTC(1961, JAN, 1, 0, 0, 1, 423)),
-          Date.UTC(1961, JAN, 1, 0, 0, 0, 0))
-        assert.equal(taiConverter.atomicToUnix(-283_996_798_577),
-          -283_996_800_000) // same
+        assert.equal(taiConverter.atomicToUnix(Date.UTC(1961, JAN, 1, 0, 0, 1, 423)), Date.UTC(1961, JAN, 1, 0, 0, 0, 0))
+        assert.equal(taiConverter.atomicToUnix(-283_996_798_577), -283_996_800_000) // same
       })
 
       it('start of 1972', () => {
-        assert.equal(taiConverter.atomicToUnix(Date.UTC(1972, JAN, 1, 0, 0, 9, 998)),
-          Date.UTC(1972, JAN, 1, 0, 0, 0, 105))
-        assert.equal(taiConverter.atomicToUnix(Date.UTC(1972, JAN, 1, 0, 0, 9, 998)),
-          63_072_000_105) // same
+        assert.equal(taiConverter.atomicToUnix(Date.UTC(1972, JAN, 1, 0, 0, 9, 998)), Date.UTC(1972, JAN, 1, 0, 0, 0, 105))
+        assert.equal(taiConverter.atomicToUnix(Date.UTC(1972, JAN, 1, 0, 0, 9, 998)), 63_072_000_105) // same
 
-        assert.equal(taiConverter.atomicToUnix(Date.UTC(1972, JAN, 1, 0, 0, 9, 999)),
-          Date.UTC(1972, JAN, 1, 0, 0, 0, 106))
-        assert.equal(taiConverter.atomicToUnix(Date.UTC(1972, JAN, 1, 0, 0, 9, 999)),
-          63_072_000_106) // same
+        assert.equal(taiConverter.atomicToUnix(Date.UTC(1972, JAN, 1, 0, 0, 9, 999)), Date.UTC(1972, JAN, 1, 0, 0, 0, 106))
+        assert.equal(taiConverter.atomicToUnix(Date.UTC(1972, JAN, 1, 0, 0, 9, 999)), 63_072_000_106) // same
 
         // After this point in time, conversions become far simpler and always integer numbers of milliseconds
-        assert.equal(taiConverter.atomicToUnix(Date.UTC(1972, JAN, 1, 0, 0, 10, 0)),
-          Date.UTC(1972, JAN, 1, 0, 0, 0, 0))
-        assert.equal(taiConverter.atomicToUnix(Date.UTC(1972, JAN, 1, 0, 0, 10, 1)),
-          Date.UTC(1972, JAN, 1, 0, 0, 0, 1))
-        assert.equal(taiConverter.atomicToUnix(Date.UTC(1972, JAN, 1, 0, 0, 10, 2)),
-          Date.UTC(1972, JAN, 1, 0, 0, 0, 2))
+        assert.equal(taiConverter.atomicToUnix(Date.UTC(1972, JAN, 1, 0, 0, 10, 0)), Date.UTC(1972, JAN, 1, 0, 0, 0, 0))
+        assert.equal(taiConverter.atomicToUnix(Date.UTC(1972, JAN, 1, 0, 0, 10, 1)), Date.UTC(1972, JAN, 1, 0, 0, 0, 1))
+        assert.equal(taiConverter.atomicToUnix(Date.UTC(1972, JAN, 1, 0, 0, 10, 2)), Date.UTC(1972, JAN, 1, 0, 0, 0, 2))
         // etc.
       })
 
       it('typical', () => {
         // A typical leap second from the past, note repetition
-        assert.equal(taiConverter.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 29, 750)),
-          Date.UTC(1998, DEC, 31, 23, 59, 58, 750))
-        assert.equal(taiConverter.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 30, 0)),
-          Date.UTC(1998, DEC, 31, 23, 59, 59, 0))
-        assert.equal(taiConverter.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 30, 250)),
-          Date.UTC(1998, DEC, 31, 23, 59, 59, 250))
-        assert.equal(taiConverter.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 30, 500)),
-          Date.UTC(1998, DEC, 31, 23, 59, 59, 500))
-        assert.equal(taiConverter.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 30, 750)),
-          Date.UTC(1998, DEC, 31, 23, 59, 59, 750))
-        assert.equal(taiConverter.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 31, 0)),
-          Date.UTC(1999, JAN, 1, 0, 0, 0, 0))
-        assert.equal(taiConverter.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 31, 250)),
-          Date.UTC(1999, JAN, 1, 0, 0, 0, 250))
-        assert.equal(taiConverter.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 31, 500)),
-          Date.UTC(1999, JAN, 1, 0, 0, 0, 500))
-        assert.equal(taiConverter.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 31, 750)),
-          Date.UTC(1999, JAN, 1, 0, 0, 0, 750))
-        assert.equal(taiConverter.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 32, 0)),
-          Date.UTC(1999, JAN, 1, 0, 0, 0, 0)) // repetition
-        assert.equal(taiConverter.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 32, 250)),
-          Date.UTC(1999, JAN, 1, 0, 0, 0, 250)) // repetition
-        assert.equal(taiConverter.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 32, 500)),
-          Date.UTC(1999, JAN, 1, 0, 0, 0, 500)) // repetition
-        assert.equal(taiConverter.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 32, 750)),
-          Date.UTC(1999, JAN, 1, 0, 0, 0, 750)) // repetition
-        assert.equal(taiConverter.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 33, 0)),
-          Date.UTC(1999, JAN, 1, 0, 0, 1, 0))
-        assert.equal(taiConverter.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 33, 250)),
-          Date.UTC(1999, JAN, 1, 0, 0, 1, 250))
+        assert.equal(taiConverter.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 29, 750)), Date.UTC(1998, DEC, 31, 23, 59, 58, 750))
+        assert.equal(taiConverter.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 30, 0)), Date.UTC(1998, DEC, 31, 23, 59, 59, 0))
+        assert.equal(taiConverter.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 30, 250)), Date.UTC(1998, DEC, 31, 23, 59, 59, 250))
+        assert.equal(taiConverter.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 30, 500)), Date.UTC(1998, DEC, 31, 23, 59, 59, 500))
+        assert.equal(taiConverter.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 30, 750)), Date.UTC(1998, DEC, 31, 23, 59, 59, 750))
+        assert.equal(taiConverter.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 31, 0)), Date.UTC(1999, JAN, 1, 0, 0, 0, 0))
+        assert.equal(taiConverter.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 31, 250)), Date.UTC(1999, JAN, 1, 0, 0, 0, 250))
+        assert.equal(taiConverter.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 31, 500)), Date.UTC(1999, JAN, 1, 0, 0, 0, 500))
+        assert.equal(taiConverter.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 31, 750)), Date.UTC(1999, JAN, 1, 0, 0, 0, 750))
+        assert.equal(taiConverter.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 32, 0)), Date.UTC(1999, JAN, 1, 0, 0, 0, 0)) // repetition
+        assert.equal(taiConverter.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 32, 250)), Date.UTC(1999, JAN, 1, 0, 0, 0, 250)) // repetition
+        assert.equal(taiConverter.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 32, 500)), Date.UTC(1999, JAN, 1, 0, 0, 0, 500)) // repetition
+        assert.equal(taiConverter.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 32, 750)), Date.UTC(1999, JAN, 1, 0, 0, 0, 750)) // repetition
+        assert.equal(taiConverter.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 33, 0)), Date.UTC(1999, JAN, 1, 0, 0, 1, 0))
+        assert.equal(taiConverter.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 33, 250)), Date.UTC(1999, JAN, 1, 0, 0, 1, 250))
       })
     })
 
     describe('TAI->Unix conversions', () => {
       it('now-ish', () => {
-        assert.equal(taiConverter.atomicToUnix(Date.UTC(2016, OCT, 27, 20, 5, 50, 678)),
-          Date.UTC(2016, OCT, 27, 20, 5, 14, 678))
+        assert.equal(taiConverter.atomicToUnix(Date.UTC(2016, OCT, 27, 20, 5, 50, 678)), Date.UTC(2016, OCT, 27, 20, 5, 14, 678))
       })
     })
 
     describe('Unix->TAI conversions', () => {
       it('The NEW earliest instant in TAI', () => {
-        assert.deepEqual(taiConverter.unixToAtomic(Date.UTC(1960, DEC, 31, 23, 59, 59, 999), { array: true }),
-          [])
-        assert.equal(taiConverter.unixToAtomic(Date.UTC(1960, DEC, 31, 23, 59, 59, 999)),
-          NaN)
+        assert.deepEqual(
+          taiConverter.unixToAtomic(Date.UTC(1960, DEC, 31, 23, 59, 59, 999), { array: true }),
+          []
+        )
+        assert.equal(taiConverter.unixToAtomic(Date.UTC(1960, DEC, 31, 23, 59, 59, 999)), NaN)
       })
 
       it('icky', () => {
         // Again with the icky floating point comparisons. Fun fact! There is about 105 leap milliseconds here!
-        assert.deepEqual(taiConverter.unixToAtomic(Date.UTC(1972, JAN, 1, 0, 0, 0, 0), { array: true }),
+        assert.deepEqual(
+          taiConverter.unixToAtomic(Date.UTC(1972, JAN, 1, 0, 0, 0, 0), { array: true }),
           [
             Date.UTC(1972, JAN, 1, 0, 0, 9, 892), // should be + 0.242_004 but rounded towards 1970
             Date.UTC(1972, JAN, 1, 0, 0, 10, 0)
-          ])
-        assert.equal(taiConverter.unixToAtomic(Date.UTC(1972, JAN, 1, 0, 0, 0, 0)),
-          Date.UTC(1972, JAN, 1, 0, 0, 10, 0))
-        assert.equal(taiConverter.unixToAtomic(Date.UTC(1972, JAN, 1, 0, 0, 0, 1), { array: true }).length,
-          2)
-        assert.equal(taiConverter.unixToAtomic(Date.UTC(1972, JAN, 1, 0, 0, 0, 1), { array: true })[1],
-          Date.UTC(1972, JAN, 1, 0, 0, 10, 1))
-        assert.equal(taiConverter.unixToAtomic(Date.UTC(1972, JAN, 1, 0, 0, 0, 1)),
-          Date.UTC(1972, JAN, 1, 0, 0, 10, 1))
-        assert.equal(taiConverter.unixToAtomic(Date.UTC(1972, JAN, 1, 0, 0, 0, 2)),
-          Date.UTC(1972, JAN, 1, 0, 0, 10, 2))
+          ]
+        )
+        assert.equal(
+          taiConverter.unixToAtomic(Date.UTC(1972, JAN, 1, 0, 0, 0, 0)),
+          Date.UTC(1972, JAN, 1, 0, 0, 10, 0)
+        )
+        assert.equal(taiConverter.unixToAtomic(Date.UTC(1972, JAN, 1, 0, 0, 0, 1), { array: true }).length, 2)
+        assert.equal(taiConverter.unixToAtomic(Date.UTC(1972, JAN, 1, 0, 0, 0, 1), { array: true })[1], Date.UTC(1972, JAN, 1, 0, 0, 10, 1))
+        assert.equal(taiConverter.unixToAtomic(Date.UTC(1972, JAN, 1, 0, 0, 0, 1)), Date.UTC(1972, JAN, 1, 0, 0, 10, 1))
+        assert.equal(taiConverter.unixToAtomic(Date.UTC(1972, JAN, 1, 0, 0, 0, 2)), Date.UTC(1972, JAN, 1, 0, 0, 10, 2))
         // etc.
       })
 
       it('typical (array mode)', () => {
         // A typical leap second from the past, note repetition
-        assert.deepEqual(taiConverter.unixToAtomic(Date.UTC(1998, DEC, 31, 23, 59, 59, 750), { array: true }),
+        assert.deepEqual(
+          taiConverter.unixToAtomic(Date.UTC(1998, DEC, 31, 23, 59, 59, 750), { array: true }),
           [
             Date.UTC(1999, JAN, 1, 0, 0, 30, 750)
-          ])
-        assert.deepEqual(taiConverter.unixToAtomic(Date.UTC(1999, JAN, 1, 0, 0, 0, 0), { array: true }),
+          ]
+        )
+        assert.deepEqual(
+          taiConverter.unixToAtomic(Date.UTC(1999, JAN, 1, 0, 0, 0, 0), { array: true }),
           [
             Date.UTC(1999, JAN, 1, 0, 0, 31, 0),
             Date.UTC(1999, JAN, 1, 0, 0, 32, 0)
-          ])
-        assert.deepEqual(taiConverter.unixToAtomic(Date.UTC(1999, JAN, 1, 0, 0, 0, 250), { array: true }),
+          ]
+        )
+        assert.deepEqual(
+          taiConverter.unixToAtomic(Date.UTC(1999, JAN, 1, 0, 0, 0, 250), { array: true }),
           [
             Date.UTC(1999, JAN, 1, 0, 0, 31, 250),
             Date.UTC(1999, JAN, 1, 0, 0, 32, 250)
-          ])
-        assert.deepEqual(taiConverter.unixToAtomic(Date.UTC(1999, JAN, 1, 0, 0, 0, 500), { array: true }),
+          ]
+        )
+        assert.deepEqual(
+          taiConverter.unixToAtomic(Date.UTC(1999, JAN, 1, 0, 0, 0, 500), { array: true }),
           [
             Date.UTC(1999, JAN, 1, 0, 0, 31, 500),
             Date.UTC(1999, JAN, 1, 0, 0, 32, 500)
-          ])
-        assert.deepEqual(taiConverter.unixToAtomic(Date.UTC(1999, JAN, 1, 0, 0, 0, 750), { array: true }),
+          ]
+        )
+        assert.deepEqual(
+          taiConverter.unixToAtomic(Date.UTC(1999, JAN, 1, 0, 0, 0, 750), { array: true }),
           [
             Date.UTC(1999, JAN, 1, 0, 0, 31, 750),
             Date.UTC(1999, JAN, 1, 0, 0, 32, 750)
-          ])
-        assert.deepEqual(taiConverter.unixToAtomic(Date.UTC(1999, JAN, 1, 0, 0, 1, 0), { array: true }),
+          ]
+        )
+        assert.deepEqual(
+          taiConverter.unixToAtomic(Date.UTC(1999, JAN, 1, 0, 0, 1, 0), { array: true }),
           [
             Date.UTC(1999, JAN, 1, 0, 0, 33, 0)
-          ])
+          ]
+        )
       })
 
       it('typical', () => {
         // A typical leap second from the past, note repetition
-        assert.equal(taiConverter.unixToAtomic(Date.UTC(1998, DEC, 31, 23, 59, 59, 750)),
-          Date.UTC(1999, JAN, 1, 0, 0, 30, 750))
-        assert.equal(taiConverter.unixToAtomic(Date.UTC(1999, JAN, 1, 0, 0, 0, 0)),
-          Date.UTC(1999, JAN, 1, 0, 0, 32, 0))
-        assert.equal(taiConverter.unixToAtomic(Date.UTC(1999, JAN, 1, 0, 0, 0, 250)),
-          Date.UTC(1999, JAN, 1, 0, 0, 32, 250))
-        assert.equal(taiConverter.unixToAtomic(Date.UTC(1999, JAN, 1, 0, 0, 0, 500)),
-          Date.UTC(1999, JAN, 1, 0, 0, 32, 500))
-        assert.equal(taiConverter.unixToAtomic(Date.UTC(1999, JAN, 1, 0, 0, 0, 750)),
-          Date.UTC(1999, JAN, 1, 0, 0, 32, 750))
-        assert.equal(taiConverter.unixToAtomic(Date.UTC(1999, JAN, 1, 0, 0, 1, 0)),
-          Date.UTC(1999, JAN, 1, 0, 0, 33, 0))
+        assert.equal(taiConverter.unixToAtomic(Date.UTC(1998, DEC, 31, 23, 59, 59, 750)), Date.UTC(1999, JAN, 1, 0, 0, 30, 750))
+        assert.equal(taiConverter.unixToAtomic(Date.UTC(1999, JAN, 1, 0, 0, 0, 0)), Date.UTC(1999, JAN, 1, 0, 0, 32, 0))
+        assert.equal(taiConverter.unixToAtomic(Date.UTC(1999, JAN, 1, 0, 0, 0, 250)), Date.UTC(1999, JAN, 1, 0, 0, 32, 250))
+        assert.equal(taiConverter.unixToAtomic(Date.UTC(1999, JAN, 1, 0, 0, 0, 500)), Date.UTC(1999, JAN, 1, 0, 0, 32, 500))
+        assert.equal(taiConverter.unixToAtomic(Date.UTC(1999, JAN, 1, 0, 0, 0, 750)), Date.UTC(1999, JAN, 1, 0, 0, 32, 750))
+        assert.equal(taiConverter.unixToAtomic(Date.UTC(1999, JAN, 1, 0, 0, 1, 0)), Date.UTC(1999, JAN, 1, 0, 0, 33, 0))
       })
     })
 
     it('Demo', () => {
-      assert.deepEqual(taiConverter.unixToAtomic(915_148_800_000, { array: true }),
-        [915_148_831_000, 915_148_832_000])
-      assert.equal(taiConverter.unixToAtomic(915_148_800_000),
-        915_148_832_000)
-      assert.equal(taiConverter.atomicToUnix(915_148_831_000),
-        915_148_800_000)
-      assert.equal(taiConverter.atomicToUnix(915_148_832_000),
-        915_148_800_000)
+      assert.deepEqual(taiConverter.unixToAtomic(915_148_800_000, { array: true }), [915_148_831_000, 915_148_832_000])
+      assert.equal(taiConverter.unixToAtomic(915_148_800_000), 915_148_832_000)
+      assert.equal(taiConverter.atomicToUnix(915_148_831_000), 915_148_800_000)
+      assert.equal(taiConverter.atomicToUnix(915_148_832_000), 915_148_800_000)
     })
 
     it('Crazy pre-1972 nonsense', () => {
@@ -280,195 +284,127 @@ describe('TaiConverter', () => {
 
       // Prior ray
       // TAI picosecond count rounds to -252_460_798_155 which is not in range
-      assert.deepEqual(taiConverter.unixToAtomic(Date.UTC(1961, DEC, 31, 23, 59, 59, 999), { array: true }),
-        [Date.UTC(1962, JAN, 1, 0, 0, 1, 844)])
-      assert.deepEqual(taiConverter.unixToAtomic(Date.UTC(1962, JAN, 1, 0, 0, 0, 0), { array: true }),
-        [-252_460_798_155])
-      assert.equal(taiConverter.unixToAtomic(Date.UTC(1962, JAN, 1, 0, 0, 0, 0)),
-        -252_460_798_155)
+      assert.deepEqual(taiConverter.unixToAtomic(Date.UTC(1961, DEC, 31, 23, 59, 59, 999), { array: true }), [Date.UTC(1962, JAN, 1, 0, 0, 1, 844)])
+      assert.deepEqual(taiConverter.unixToAtomic(Date.UTC(1962, JAN, 1, 0, 0, 0, 0), { array: true }), [-252_460_798_155])
+      assert.equal(taiConverter.unixToAtomic(Date.UTC(1962, JAN, 1, 0, 0, 0, 0)), -252_460_798_155)
 
       // Next ray
-      assert.deepEqual(taiConverter.unixToAtomic(Date.UTC(1962, JAN, 1, 0, 0, 0, 1), { array: true }),
-        [Date.UTC(1962, JAN, 1, 0, 0, 1, 846)])
-      assert.equal(taiConverter.unixToAtomic(Date.UTC(1962, JAN, 1, 0, 0, 0, 1)),
-        -252_460_798_154)
+      assert.deepEqual(taiConverter.unixToAtomic(Date.UTC(1962, JAN, 1, 0, 0, 0, 1), { array: true }), [Date.UTC(1962, JAN, 1, 0, 0, 1, 846)])
+      assert.equal(taiConverter.unixToAtomic(Date.UTC(1962, JAN, 1, 0, 0, 0, 1)), -252_460_798_154)
     })
 
     it('inserted tenth', () => {
       // Oh look, an inserted leap tenth of a second!
       // The period between 1965-09-01 00:00:00 and 00:00:00.100 UTC happened twice!
-      assert.deepEqual(taiConverter.unixToAtomic(Date.UTC(1965, SEP, 1, 0, 0, 0, 50), { array: true }),
+      assert.deepEqual(
+        taiConverter.unixToAtomic(Date.UTC(1965, SEP, 1, 0, 0, 0, 50), { array: true }),
         [
           Date.UTC(1965, SEP, 1, 0, 0, 4, 105),
           Date.UTC(1965, SEP, 1, 0, 0, 4, 205)
-        ])
-      assert.equal(taiConverter.unixToAtomic(Date.UTC(1965, SEP, 1, 0, 0, 0, 50)),
-        Date.UTC(1965, SEP, 1, 0, 0, 4, 205))
+        ]
+      )
+      assert.equal(taiConverter.unixToAtomic(Date.UTC(1965, SEP, 1, 0, 0, 0, 50)), Date.UTC(1965, SEP, 1, 0, 0, 4, 205))
     })
 
     it('removed twentieth', () => {
       // Hey, what! A removed leap twentieth of a second???
       // Well, technically, that's 1/20th of a TAI second, which is SLIGHTLY LESS than 1/20th of a UTC second
       // Which means that 23:59:59.950 UTC *does* actually exist...
-      assert.equal(taiConverter.unixToAtomic(Date.UTC(1961, JUL, 31, 23, 59, 59, 949), { array: true }).length,
-        1)
-      assert.equal(taiConverter.unixToAtomic(Date.UTC(1961, JUL, 31, 23, 59, 59, 949)),
-        -265_679_998_354)
+      assert.equal(taiConverter.unixToAtomic(Date.UTC(1961, JUL, 31, 23, 59, 59, 949), { array: true }).length, 1)
+      assert.equal(taiConverter.unixToAtomic(Date.UTC(1961, JUL, 31, 23, 59, 59, 949)), -265_679_998_354)
 
-      assert.deepEqual(taiConverter.unixToAtomic(Date.UTC(1961, JUL, 31, 23, 59, 59, 950), { array: true }),
-        [-265_679_998_353])
-      assert.equal(taiConverter.unixToAtomic(Date.UTC(1961, JUL, 31, 23, 59, 59, 950)),
-        -265_679_998_353)
+      assert.deepEqual(taiConverter.unixToAtomic(Date.UTC(1961, JUL, 31, 23, 59, 59, 950), { array: true }), [-265_679_998_353])
+      assert.equal(taiConverter.unixToAtomic(Date.UTC(1961, JUL, 31, 23, 59, 59, 950)), -265_679_998_353)
 
-      assert.equal(taiConverter.unixToAtomic(Date.UTC(1961, JUL, 31, 23, 59, 59, 951), { array: true }).length,
-        0)
-      assert.equal(taiConverter.unixToAtomic(Date.UTC(1961, JUL, 31, 23, 59, 59, 951)),
-        NaN)
+      assert.equal(taiConverter.unixToAtomic(Date.UTC(1961, JUL, 31, 23, 59, 59, 951), { array: true }).length, 0)
+      assert.equal(taiConverter.unixToAtomic(Date.UTC(1961, JUL, 31, 23, 59, 59, 951)), NaN)
 
-      assert.equal(taiConverter.unixToAtomic(Date.UTC(1961, JUL, 31, 23, 59, 59, 999), { array: true }).length,
-        0)
-      assert.equal(taiConverter.unixToAtomic(Date.UTC(1961, JUL, 31, 23, 59, 59, 999)),
-        NaN)
+      assert.equal(taiConverter.unixToAtomic(Date.UTC(1961, JUL, 31, 23, 59, 59, 999), { array: true }).length, 0)
+      assert.equal(taiConverter.unixToAtomic(Date.UTC(1961, JUL, 31, 23, 59, 59, 999)), NaN)
 
-      assert.equal(taiConverter.unixToAtomic(Date.UTC(1961, AUG, 1, 0, 0, 0, 0), { array: true }).length,
-        1)
-      assert.equal(taiConverter.unixToAtomic(Date.UTC(1961, AUG, 1, 0, 0, 0, 0)),
-        -265_679_998_353)
+      assert.equal(taiConverter.unixToAtomic(Date.UTC(1961, AUG, 1, 0, 0, 0, 0), { array: true }).length, 1)
+      assert.equal(taiConverter.unixToAtomic(Date.UTC(1961, AUG, 1, 0, 0, 0, 0)), -265_679_998_353)
 
-      assert.equal(taiConverter.unixToAtomic(Date.UTC(1961, AUG, 1, 0, 0, 0, 1), { array: true }).length,
-        1)
-      assert.equal(taiConverter.unixToAtomic(Date.UTC(1961, AUG, 1, 0, 0, 0, 1)),
-        -265_679_998_352)
+      assert.equal(taiConverter.unixToAtomic(Date.UTC(1961, AUG, 1, 0, 0, 0, 1), { array: true }).length, 1)
+      assert.equal(taiConverter.unixToAtomic(Date.UTC(1961, AUG, 1, 0, 0, 0, 1)), -265_679_998_352)
 
-      assert.equal(taiConverter.unixToAtomic(Date.UTC(1961, AUG, 1, 0, 0, 0, 2), { array: true }).length,
-        1)
-      assert.equal(taiConverter.unixToAtomic(Date.UTC(1961, AUG, 1, 0, 0, 0, 2)),
-        -265_679_998_351)
+      assert.equal(taiConverter.unixToAtomic(Date.UTC(1961, AUG, 1, 0, 0, 0, 2), { array: true }).length, 1)
+      assert.equal(taiConverter.unixToAtomic(Date.UTC(1961, AUG, 1, 0, 0, 0, 2)), -265_679_998_351)
 
-      assert.equal(taiConverter.atomicToUnix(Date.UTC(1961, AUG, 1, 0, 0, 1, 647)),
-        Date.UTC(1961, JUL, 31, 23, 59, 59, 949))
+      assert.equal(taiConverter.atomicToUnix(Date.UTC(1961, AUG, 1, 0, 0, 1, 647)), Date.UTC(1961, JUL, 31, 23, 59, 59, 949))
     })
 
     it('boundaries', () => {
       // Let's check out some boundaries where the relationship between TAI and UTC changed
       // 1 January 1962: Perfect continuity (although the drift rate changed)
-      assert.equal(taiConverter.unixToAtomic(Date.UTC(1961, DEC, 31, 23, 59, 59, 999), { array: true }).length,
-        1)
-      assert.equal(taiConverter.unixToAtomic(Date.UTC(1962, JAN, 1, 0, 0, 0, 0), { array: true }).length,
-        1)
-      assert.equal(taiConverter.unixToAtomic(Date.UTC(1962, JAN, 1, 0, 0, 0, 1), { array: true }).length,
-        1)
+      assert.equal(taiConverter.unixToAtomic(Date.UTC(1961, DEC, 31, 23, 59, 59, 999), { array: true }).length, 1)
+      assert.equal(taiConverter.unixToAtomic(Date.UTC(1962, JAN, 1, 0, 0, 0, 0), { array: true }).length, 1)
+      assert.equal(taiConverter.unixToAtomic(Date.UTC(1962, JAN, 1, 0, 0, 0, 1), { array: true }).length, 1)
 
       // 1 January 1964: Perfect continuity (drift rate changes)
-      assert.equal(taiConverter.unixToAtomic(Date.UTC(1963, DEC, 31, 23, 59, 59, 999), { array: true }).length,
-        1)
-      assert.equal(taiConverter.unixToAtomic(Date.UTC(1964, JAN, 1, 0, 0, 0, 0), { array: true }).length,
-        1)
-      assert.equal(taiConverter.unixToAtomic(Date.UTC(1964, JAN, 1, 0, 0, 0, 1), { array: true }).length,
-        1)
+      assert.equal(taiConverter.unixToAtomic(Date.UTC(1963, DEC, 31, 23, 59, 59, 999), { array: true }).length, 1)
+      assert.equal(taiConverter.unixToAtomic(Date.UTC(1964, JAN, 1, 0, 0, 0, 0), { array: true }).length, 1)
+      assert.equal(taiConverter.unixToAtomic(Date.UTC(1964, JAN, 1, 0, 0, 0, 1), { array: true }).length, 1)
 
       // 1 April 1964: 0.1 TAI seconds inserted
-      assert.equal(taiConverter.unixToAtomic(Date.UTC(1964, MAR, 31, 23, 59, 59, 999), { array: true }).length,
-        1)
-      assert.equal(taiConverter.unixToAtomic(Date.UTC(1964, APR, 1, 0, 0, 0, 0), { array: true }).length,
-        2)
-      assert.equal(taiConverter.unixToAtomic(Date.UTC(1964, APR, 1, 0, 0, 0, 99), { array: true }).length,
-        2)
-      assert.equal(taiConverter.unixToAtomic(Date.UTC(1964, APR, 1, 0, 0, 0, 100), { array: true }).length,
-        1)
+      assert.equal(taiConverter.unixToAtomic(Date.UTC(1964, MAR, 31, 23, 59, 59, 999), { array: true }).length, 1)
+      assert.equal(taiConverter.unixToAtomic(Date.UTC(1964, APR, 1, 0, 0, 0, 0), { array: true }).length, 2)
+      assert.equal(taiConverter.unixToAtomic(Date.UTC(1964, APR, 1, 0, 0, 0, 99), { array: true }).length, 2)
+      assert.equal(taiConverter.unixToAtomic(Date.UTC(1964, APR, 1, 0, 0, 0, 100), { array: true }).length, 1)
 
       // etc. (various occasions when 0.1 TAI seconds were inserted)
-      assert.equal(taiConverter.unixToAtomic(Date.UTC(1964, SEP, 1, 0, 0, 0, 99), { array: true }).length,
-        2)
-      assert.equal(taiConverter.unixToAtomic(Date.UTC(1965, JAN, 1, 0, 0, 0, 99), { array: true }).length,
-        2)
-      assert.equal(taiConverter.unixToAtomic(Date.UTC(1965, MAR, 1, 0, 0, 0, 99), { array: true }).length,
-        2)
-      assert.equal(taiConverter.unixToAtomic(Date.UTC(1965, JUL, 1, 0, 0, 0, 99), { array: true }).length,
-        2)
-      assert.equal(taiConverter.unixToAtomic(Date.UTC(1965, SEP, 1, 0, 0, 0, 99), { array: true }).length,
-        2)
+      assert.equal(taiConverter.unixToAtomic(Date.UTC(1964, SEP, 1, 0, 0, 0, 99), { array: true }).length, 2)
+      assert.equal(taiConverter.unixToAtomic(Date.UTC(1965, JAN, 1, 0, 0, 0, 99), { array: true }).length, 2)
+      assert.equal(taiConverter.unixToAtomic(Date.UTC(1965, MAR, 1, 0, 0, 0, 99), { array: true }).length, 2)
+      assert.equal(taiConverter.unixToAtomic(Date.UTC(1965, JUL, 1, 0, 0, 0, 99), { array: true }).length, 2)
+      assert.equal(taiConverter.unixToAtomic(Date.UTC(1965, SEP, 1, 0, 0, 0, 99), { array: true }).length, 2)
 
       // 1 January 1966: Perfect continuity (drift rate changes)
-      assert.equal(taiConverter.unixToAtomic(Date.UTC(1965, DEC, 31, 23, 59, 59, 999), { array: true }).length,
-        1)
-      assert.equal(taiConverter.unixToAtomic(Date.UTC(1966, JAN, 1, 0, 0, 0, 0), { array: true }).length,
-        1)
-      assert.equal(taiConverter.unixToAtomic(Date.UTC(1966, JAN, 1, 0, 0, 0, 1), { array: true }).length,
-        1)
+      assert.equal(taiConverter.unixToAtomic(Date.UTC(1965, DEC, 31, 23, 59, 59, 999), { array: true }).length, 1)
+      assert.equal(taiConverter.unixToAtomic(Date.UTC(1966, JAN, 1, 0, 0, 0, 0), { array: true }).length, 1)
+      assert.equal(taiConverter.unixToAtomic(Date.UTC(1966, JAN, 1, 0, 0, 0, 1), { array: true }).length, 1)
 
       // 1 February 1968: 0.1 TAI seconds removed
-      assert.equal(taiConverter.unixToAtomic(Date.UTC(1968, JAN, 31, 23, 59, 59, 899), { array: true }).length,
-        1)
-      assert.deepEqual(taiConverter.unixToAtomic(Date.UTC(1968, JAN, 31, 23, 59, 59, 900), { array: true }),
-        [-60_479_993_815])
+      assert.equal(taiConverter.unixToAtomic(Date.UTC(1968, JAN, 31, 23, 59, 59, 899), { array: true }).length, 1)
+      assert.deepEqual(taiConverter.unixToAtomic(Date.UTC(1968, JAN, 31, 23, 59, 59, 900), { array: true }), [-60_479_993_815])
 
-      assert.equal(taiConverter.unixToAtomic(Date.UTC(1968, JAN, 31, 23, 59, 59, 901), { array: true }).length,
-        0)
-      assert.equal(taiConverter.unixToAtomic(Date.UTC(1968, JAN, 31, 23, 59, 59, 999), { array: true }).length,
-        0)
-      assert.equal(taiConverter.unixToAtomic(Date.UTC(1968, FEB, 1, 0, 0, 0, 0), { array: true }).length,
-        1)
+      assert.equal(taiConverter.unixToAtomic(Date.UTC(1968, JAN, 31, 23, 59, 59, 901), { array: true }).length, 0)
+      assert.equal(taiConverter.unixToAtomic(Date.UTC(1968, JAN, 31, 23, 59, 59, 999), { array: true }).length, 0)
+      assert.equal(taiConverter.unixToAtomic(Date.UTC(1968, FEB, 1, 0, 0, 0, 0), { array: true }).length, 1)
 
       // 1 January 1972: 0.107_758 TAI seconds inserted
-      assert.equal(taiConverter.unixToAtomic(Date.UTC(1971, DEC, 31, 23, 59, 59, 999), { array: true }).length,
-        1)
-      assert.equal(taiConverter.unixToAtomic(Date.UTC(1972, JAN, 1, 0, 0, 0, 0), { array: true }).length,
-        2)
-      assert.equal(taiConverter.unixToAtomic(Date.UTC(1972, JAN, 1, 0, 0, 0, 107), { array: true }).length,
-        2)
-      assert.equal(taiConverter.unixToAtomic(Date.UTC(1972, JAN, 1, 0, 0, 0, 108), { array: true }).length,
-        1)
+      assert.equal(taiConverter.unixToAtomic(Date.UTC(1971, DEC, 31, 23, 59, 59, 999), { array: true }).length, 1)
+      assert.equal(taiConverter.unixToAtomic(Date.UTC(1972, JAN, 1, 0, 0, 0, 0), { array: true }).length, 2)
+      assert.equal(taiConverter.unixToAtomic(Date.UTC(1972, JAN, 1, 0, 0, 0, 107), { array: true }).length, 2)
+      assert.equal(taiConverter.unixToAtomic(Date.UTC(1972, JAN, 1, 0, 0, 0, 108), { array: true }).length, 1)
 
       // Removed time
-      assert.equal(taiConverter.unixToAtomic(-265_680_000_051, { array: true }).length,
-        1)
-      assert.equal(taiConverter.unixToAtomic(-265_680_000_050, { array: true }).length,
-        1)
-      assert.equal(taiConverter.unixToAtomic(-265_680_000_049, { array: true }).length,
-        0)
-      assert.equal(taiConverter.unixToAtomic(-265_680_000_048, { array: true }).length,
-        0)
+      assert.equal(taiConverter.unixToAtomic(-265_680_000_051, { array: true }).length, 1)
+      assert.equal(taiConverter.unixToAtomic(-265_680_000_050, { array: true }).length, 1)
+      assert.equal(taiConverter.unixToAtomic(-265_680_000_049, { array: true }).length, 0)
+      assert.equal(taiConverter.unixToAtomic(-265_680_000_048, { array: true }).length, 0)
 
-      assert.equal(taiConverter.unixToAtomic(-252_460_800_000, { array: true }).length,
-        1)
-      assert.equal(taiConverter.unixToAtomic(-194_659_199_900, { array: true }).length,
-        1)
-      assert.equal(taiConverter.unixToAtomic(-189_388_800_000, { array: true }).length,
-        1)
-      assert.equal(taiConverter.unixToAtomic(-181_526_399_900, { array: true }).length,
-        1)
-      assert.equal(taiConverter.unixToAtomic(-168_307_199_900, { array: true }).length,
-        1)
-      assert.equal(taiConverter.unixToAtomic(-157_766_399_900, { array: true }).length,
-        1)
-      assert.equal(taiConverter.unixToAtomic(-152_668_799_900, { array: true }).length,
-        1)
-      assert.equal(taiConverter.unixToAtomic(-142_127_999_900, { array: true }).length,
-        1)
-      assert.equal(taiConverter.unixToAtomic(-136_771_199_900, { array: true }).length,
-        1)
-      assert.equal(taiConverter.unixToAtomic(-126_230_400_000, { array: true }).length,
-        1)
+      assert.equal(taiConverter.unixToAtomic(-252_460_800_000, { array: true }).length, 1)
+      assert.equal(taiConverter.unixToAtomic(-194_659_199_900, { array: true }).length, 1)
+      assert.equal(taiConverter.unixToAtomic(-189_388_800_000, { array: true }).length, 1)
+      assert.equal(taiConverter.unixToAtomic(-181_526_399_900, { array: true }).length, 1)
+      assert.equal(taiConverter.unixToAtomic(-168_307_199_900, { array: true }).length, 1)
+      assert.equal(taiConverter.unixToAtomic(-157_766_399_900, { array: true }).length, 1)
+      assert.equal(taiConverter.unixToAtomic(-152_668_799_900, { array: true }).length, 1)
+      assert.equal(taiConverter.unixToAtomic(-142_127_999_900, { array: true }).length, 1)
+      assert.equal(taiConverter.unixToAtomic(-136_771_199_900, { array: true }).length, 1)
+      assert.equal(taiConverter.unixToAtomic(-126_230_400_000, { array: true }).length, 1)
 
       // Removed time
-      assert.equal(taiConverter.unixToAtomic(-60_480_000_101, { array: true }).length,
-        1)
-      assert.equal(taiConverter.unixToAtomic(-60_480_000_100, { array: true }).length,
-        1)
-      assert.equal(taiConverter.unixToAtomic(-60_480_000_099, { array: true }).length,
-        0)
-      assert.equal(taiConverter.unixToAtomic(-60_480_000_098, { array: true }).length,
-        0)
+      assert.equal(taiConverter.unixToAtomic(-60_480_000_101, { array: true }).length, 1)
+      assert.equal(taiConverter.unixToAtomic(-60_480_000_100, { array: true }).length, 1)
+      assert.equal(taiConverter.unixToAtomic(-60_480_000_099, { array: true }).length, 0)
+      assert.equal(taiConverter.unixToAtomic(-60_480_000_098, { array: true }).length, 0)
 
-      assert.equal(taiConverter.unixToAtomic(63_072_000_106, { array: true }).length,
-        2)
-      assert.equal(taiConverter.unixToAtomic(63_072_000_107, { array: true }).length,
-        2)
-      assert.equal(taiConverter.unixToAtomic(63_072_000_108, { array: true }).length,
-        1)
-      assert.equal(taiConverter.unixToAtomic(63_072_000_109, { array: true }).length,
-        1)
+      assert.equal(taiConverter.unixToAtomic(63_072_000_106, { array: true }).length, 2)
+      assert.equal(taiConverter.unixToAtomic(63_072_000_107, { array: true }).length, 2)
+      assert.equal(taiConverter.unixToAtomic(63_072_000_108, { array: true }).length, 1)
+      assert.equal(taiConverter.unixToAtomic(63_072_000_109, { array: true }).length, 1)
     })
 
     describe('TAI raw data conversion unit tests based on magic numbers', () => {
@@ -577,118 +513,76 @@ describe('TaiConverter', () => {
         assert.equal(taiConverter.atomicToUnix(-283_996_798_578), NaN) // same
 
         // Actual start of TAI: 1961-01-01 00:00:01.422_818
-        assert.equal(taiConverter.atomicToUnix(Date.UTC(1961, JAN, 1, 0, 0, 1, 423)),
-          Date.UTC(1961, JAN, 1, 0, 0, 0, 0))
-        assert.equal(taiConverter.atomicToUnix(-283_996_798_577),
-          -283_996_800_000) // same
+        assert.equal(taiConverter.atomicToUnix(Date.UTC(1961, JAN, 1, 0, 0, 1, 423)), Date.UTC(1961, JAN, 1, 0, 0, 0, 0))
+        assert.equal(taiConverter.atomicToUnix(-283_996_798_577), -283_996_800_000) // same
       })
 
       it('handles the start of 1972', () => {
-        assert.equal(taiConverter.atomicToUnix(Date.UTC(1972, JAN, 1, 0, 0, 10, 0)),
-          Date.UTC(1972, JAN, 1, 0, 0, 0, 0))
+        assert.equal(taiConverter.atomicToUnix(Date.UTC(1972, JAN, 1, 0, 0, 10, 0)), Date.UTC(1972, JAN, 1, 0, 0, 0, 0))
       })
 
       it('0.107_758 seconds added, start of 1972', () => {
-        assert.equal(taiConverter.atomicToUnix(Date.UTC(1972, JAN, 1, 0, 0, 9, 890)),
-          Date.UTC(1971, DEC, 31, 23, 59, 59, 997))
-        assert.equal(taiConverter.atomicToUnix(Date.UTC(1972, JAN, 1, 0, 0, 9, 891)),
-          Date.UTC(1971, DEC, 31, 23, 59, 59, 998))
-        assert.equal(taiConverter.atomicToUnix(Date.UTC(1972, JAN, 1, 0, 0, 9, 892)),
-          Date.UTC(1971, DEC, 31, 23, 59, 59, 999))
+        assert.equal(taiConverter.atomicToUnix(Date.UTC(1972, JAN, 1, 0, 0, 9, 890)), Date.UTC(1971, DEC, 31, 23, 59, 59, 997))
+        assert.equal(taiConverter.atomicToUnix(Date.UTC(1972, JAN, 1, 0, 0, 9, 891)), Date.UTC(1971, DEC, 31, 23, 59, 59, 998))
+        assert.equal(taiConverter.atomicToUnix(Date.UTC(1972, JAN, 1, 0, 0, 9, 892)), Date.UTC(1971, DEC, 31, 23, 59, 59, 999))
         // instants from 1972-01-01 00:00:09.892_242 TAI onwards have multiple preimages
-        assert.equal(taiConverter.atomicToUnix(Date.UTC(1972, JAN, 1, 0, 0, 9, 893)),
-          Date.UTC(1972, JAN, 1, 0, 0, 0, 0)) // stalled
-        assert.equal(taiConverter.atomicToUnix(Date.UTC(1972, JAN, 1, 0, 0, 9, 999)),
-          Date.UTC(1972, JAN, 1, 0, 0, 0, 0)) // stalled
+        assert.equal(taiConverter.atomicToUnix(Date.UTC(1972, JAN, 1, 0, 0, 9, 893)), Date.UTC(1972, JAN, 1, 0, 0, 0, 0)) // stalled
+        assert.equal(taiConverter.atomicToUnix(Date.UTC(1972, JAN, 1, 0, 0, 9, 999)), Date.UTC(1972, JAN, 1, 0, 0, 0, 0)) // stalled
         // Leap time over
-        assert.equal(taiConverter.atomicToUnix(Date.UTC(1972, JAN, 1, 0, 0, 10, 0)),
-          Date.UTC(1972, JAN, 1, 0, 0, 0, 0))
+        assert.equal(taiConverter.atomicToUnix(Date.UTC(1972, JAN, 1, 0, 0, 10, 0)), Date.UTC(1972, JAN, 1, 0, 0, 0, 0))
 
         // After this point in time, conversions become far simpler and always integer numbers of milliseconds
-        assert.equal(taiConverter.atomicToUnix(Date.UTC(1972, JAN, 1, 0, 0, 10, 1)),
-          Date.UTC(1972, JAN, 1, 0, 0, 0, 1))
-        assert.equal(taiConverter.atomicToUnix(Date.UTC(1972, JAN, 1, 0, 0, 10, 2)),
-          Date.UTC(1972, JAN, 1, 0, 0, 0, 2))
+        assert.equal(taiConverter.atomicToUnix(Date.UTC(1972, JAN, 1, 0, 0, 10, 1)), Date.UTC(1972, JAN, 1, 0, 0, 0, 1))
+        assert.equal(taiConverter.atomicToUnix(Date.UTC(1972, JAN, 1, 0, 0, 10, 2)), Date.UTC(1972, JAN, 1, 0, 0, 0, 2))
         // etc.
       })
 
       it('typical', () => {
         // A typical leap second from the past, note non-canonical times
-        assert.equal(taiConverter.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 29, 750)),
-          Date.UTC(1998, DEC, 31, 23, 59, 58, 750))
-        assert.equal(taiConverter.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 30, 0)),
-          Date.UTC(1998, DEC, 31, 23, 59, 59, 0))
-        assert.equal(taiConverter.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 30, 250)),
-          Date.UTC(1998, DEC, 31, 23, 59, 59, 250))
-        assert.equal(taiConverter.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 30, 500)),
-          Date.UTC(1998, DEC, 31, 23, 59, 59, 500))
-        assert.equal(taiConverter.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 30, 750)),
-          Date.UTC(1998, DEC, 31, 23, 59, 59, 750))
-        assert.equal(taiConverter.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 31, 0)),
-          Date.UTC(1999, JAN, 1, 0, 0, 0, 0)) // stalled
-        assert.equal(taiConverter.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 31, 250)),
-          Date.UTC(1999, JAN, 1, 0, 0, 0, 0)) // stalled
-        assert.equal(taiConverter.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 31, 500)),
-          Date.UTC(1999, JAN, 1, 0, 0, 0, 0)) // stalled
-        assert.equal(taiConverter.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 31, 750)),
-          Date.UTC(1999, JAN, 1, 0, 0, 0, 0)) // stalled
-        assert.equal(taiConverter.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 32, 0)),
-          Date.UTC(1999, JAN, 1, 0, 0, 0, 0)) // stalled
-        assert.equal(taiConverter.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 32, 250)),
-          Date.UTC(1999, JAN, 1, 0, 0, 0, 250))
-        assert.equal(taiConverter.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 32, 500)),
-          Date.UTC(1999, JAN, 1, 0, 0, 0, 500))
-        assert.equal(taiConverter.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 32, 750)),
-          Date.UTC(1999, JAN, 1, 0, 0, 0, 750))
-        assert.equal(taiConverter.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 33, 0)),
-          Date.UTC(1999, JAN, 1, 0, 0, 1, 0))
-        assert.equal(taiConverter.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 33, 250)),
-          Date.UTC(1999, JAN, 1, 0, 0, 1, 250))
+        assert.equal(taiConverter.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 29, 750)), Date.UTC(1998, DEC, 31, 23, 59, 58, 750))
+        assert.equal(taiConverter.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 30, 0)), Date.UTC(1998, DEC, 31, 23, 59, 59, 0))
+        assert.equal(taiConverter.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 30, 250)), Date.UTC(1998, DEC, 31, 23, 59, 59, 250))
+        assert.equal(taiConverter.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 30, 500)), Date.UTC(1998, DEC, 31, 23, 59, 59, 500))
+        assert.equal(taiConverter.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 30, 750)), Date.UTC(1998, DEC, 31, 23, 59, 59, 750))
+        assert.equal(taiConverter.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 31, 0)), Date.UTC(1999, JAN, 1, 0, 0, 0, 0)) // stalled
+        assert.equal(taiConverter.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 31, 250)), Date.UTC(1999, JAN, 1, 0, 0, 0, 0)) // stalled
+        assert.equal(taiConverter.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 31, 500)), Date.UTC(1999, JAN, 1, 0, 0, 0, 0)) // stalled
+        assert.equal(taiConverter.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 31, 750)), Date.UTC(1999, JAN, 1, 0, 0, 0, 0)) // stalled
+        assert.equal(taiConverter.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 32, 0)), Date.UTC(1999, JAN, 1, 0, 0, 0, 0)) // stalled
+        assert.equal(taiConverter.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 32, 250)), Date.UTC(1999, JAN, 1, 0, 0, 0, 250))
+        assert.equal(taiConverter.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 32, 500)), Date.UTC(1999, JAN, 1, 0, 0, 0, 500))
+        assert.equal(taiConverter.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 32, 750)), Date.UTC(1999, JAN, 1, 0, 0, 0, 750))
+        assert.equal(taiConverter.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 33, 0)), Date.UTC(1999, JAN, 1, 0, 0, 1, 0))
+        assert.equal(taiConverter.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 33, 250)), Date.UTC(1999, JAN, 1, 0, 0, 1, 250))
       })
     })
 
     describe('Unix->TAI conversions', () => {
       it('typical', () => {
         // A typical leap second from the past, note repetition
-        assert.equal(taiConverter.unixToAtomic(Date.UTC(1998, DEC, 31, 23, 59, 58, 750)),
-          Date.UTC(1999, JAN, 1, 0, 0, 29, 750))
-        assert.equal(taiConverter.unixToAtomic(Date.UTC(1998, DEC, 31, 23, 59, 59, 0)),
-          Date.UTC(1999, JAN, 1, 0, 0, 30, 0))
-        assert.equal(taiConverter.unixToAtomic(Date.UTC(1998, DEC, 31, 23, 59, 59, 250)),
-          Date.UTC(1999, JAN, 1, 0, 0, 30, 250))
-        assert.equal(taiConverter.unixToAtomic(Date.UTC(1998, DEC, 31, 23, 59, 59, 500)),
-          Date.UTC(1999, JAN, 1, 0, 0, 30, 500))
-        assert.equal(taiConverter.unixToAtomic(Date.UTC(1998, DEC, 31, 23, 59, 59, 750)),
-          Date.UTC(1999, JAN, 1, 0, 0, 30, 750))
-        assert.equal(taiConverter.unixToAtomic(Date.UTC(1999, JAN, 1, 0, 0, 0, 0)),
-          Date.UTC(1999, JAN, 1, 0, 0, 32, 0))
-        assert.equal(taiConverter.unixToAtomic(Date.UTC(1999, JAN, 1, 0, 0, 0, 250)),
-          Date.UTC(1999, JAN, 1, 0, 0, 32, 250))
-        assert.equal(taiConverter.unixToAtomic(Date.UTC(1999, JAN, 1, 0, 0, 0, 500)),
-          Date.UTC(1999, JAN, 1, 0, 0, 32, 500))
-        assert.equal(taiConverter.unixToAtomic(Date.UTC(1999, JAN, 1, 0, 0, 0, 750)),
-          Date.UTC(1999, JAN, 1, 0, 0, 32, 750))
-        assert.equal(taiConverter.unixToAtomic(Date.UTC(1999, JAN, 1, 0, 0, 1, 0)),
-          Date.UTC(1999, JAN, 1, 0, 0, 33, 0))
-        assert.equal(taiConverter.unixToAtomic(Date.UTC(1999, JAN, 1, 0, 0, 1, 250)),
-          Date.UTC(1999, JAN, 1, 0, 0, 33, 250))
+        assert.equal(taiConverter.unixToAtomic(Date.UTC(1998, DEC, 31, 23, 59, 58, 750)), Date.UTC(1999, JAN, 1, 0, 0, 29, 750))
+        assert.equal(taiConverter.unixToAtomic(Date.UTC(1998, DEC, 31, 23, 59, 59, 0)), Date.UTC(1999, JAN, 1, 0, 0, 30, 0))
+        assert.equal(taiConverter.unixToAtomic(Date.UTC(1998, DEC, 31, 23, 59, 59, 250)), Date.UTC(1999, JAN, 1, 0, 0, 30, 250))
+        assert.equal(taiConverter.unixToAtomic(Date.UTC(1998, DEC, 31, 23, 59, 59, 500)), Date.UTC(1999, JAN, 1, 0, 0, 30, 500))
+        assert.equal(taiConverter.unixToAtomic(Date.UTC(1998, DEC, 31, 23, 59, 59, 750)), Date.UTC(1999, JAN, 1, 0, 0, 30, 750))
+        assert.equal(taiConverter.unixToAtomic(Date.UTC(1999, JAN, 1, 0, 0, 0, 0)), Date.UTC(1999, JAN, 1, 0, 0, 32, 0))
+        assert.equal(taiConverter.unixToAtomic(Date.UTC(1999, JAN, 1, 0, 0, 0, 250)), Date.UTC(1999, JAN, 1, 0, 0, 32, 250))
+        assert.equal(taiConverter.unixToAtomic(Date.UTC(1999, JAN, 1, 0, 0, 0, 500)), Date.UTC(1999, JAN, 1, 0, 0, 32, 500))
+        assert.equal(taiConverter.unixToAtomic(Date.UTC(1999, JAN, 1, 0, 0, 0, 750)), Date.UTC(1999, JAN, 1, 0, 0, 32, 750))
+        assert.equal(taiConverter.unixToAtomic(Date.UTC(1999, JAN, 1, 0, 0, 1, 0)), Date.UTC(1999, JAN, 1, 0, 0, 33, 0))
+        assert.equal(taiConverter.unixToAtomic(Date.UTC(1999, JAN, 1, 0, 0, 1, 250)), Date.UTC(1999, JAN, 1, 0, 0, 33, 250))
       })
 
       it('Now-ish', () => {
-        assert.equal(taiConverter.unixToAtomic(Date.UTC(2016, OCT, 27, 20, 5, 14, 678)),
-          Date.UTC(2016, OCT, 27, 20, 5, 50, 678))
+        assert.equal(taiConverter.unixToAtomic(Date.UTC(2016, OCT, 27, 20, 5, 14, 678)), Date.UTC(2016, OCT, 27, 20, 5, 50, 678))
       })
     })
 
     it('Demo', () => {
-      assert.equal(taiConverter.unixToAtomic(915_148_799_000),
-        915_148_830_000)
-      assert.equal(taiConverter.unixToAtomic(Date.UTC(1998, DEC, 31, 23, 59, 59)),
-        Date.UTC(1999, JAN, 1, 0, 0, 30))
-      assert.equal(taiConverter.atomicToUnix(915_148_830_000),
-        915_148_799_000)
-      assert.equal(taiConverter.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 30)),
-        Date.UTC(1998, DEC, 31, 23, 59, 59))
+      assert.equal(taiConverter.unixToAtomic(915_148_799_000), 915_148_830_000)
+      assert.equal(taiConverter.unixToAtomic(Date.UTC(1998, DEC, 31, 23, 59, 59)), Date.UTC(1999, JAN, 1, 0, 0, 30))
+      assert.equal(taiConverter.atomicToUnix(915_148_830_000), 915_148_799_000)
+      assert.equal(taiConverter.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 30)), Date.UTC(1998, DEC, 31, 23, 59, 59))
 
       assert.equal(taiConverter.atomicToUnix(915_148_831_000), 915_148_800_000)
       assert.equal(taiConverter.atomicToUnix(915_148_831_001), 915_148_800_000)
@@ -698,13 +592,10 @@ describe('TaiConverter', () => {
 
     it('Crazy pre-1972 nonsense', () => {
       // TAI picosecond count rounds to -252_460_798_155 which is not on the ray
-      assert.equal(taiConverter.unixToAtomic(Date.UTC(1962, JAN, 1, 0, 0, 0, 0)),
-        -252_460_798_155)
+      assert.equal(taiConverter.unixToAtomic(Date.UTC(1962, JAN, 1, 0, 0, 0, 0)), -252_460_798_155)
 
-      assert.equal(taiConverter.unixToAtomic(Date.UTC(1962, JAN, 1, 0, 0, 0, 1)),
-        -252_460_798_154)
-      assert.equal(taiConverter.unixToAtomic(Date.UTC(1962, JAN, 1, 0, 0, 0, 1)),
-        Date.UTC(1962, JAN, 1, 0, 0, 1, 846)) // Same
+      assert.equal(taiConverter.unixToAtomic(Date.UTC(1962, JAN, 1, 0, 0, 0, 1)), -252_460_798_154)
+      assert.equal(taiConverter.unixToAtomic(Date.UTC(1962, JAN, 1, 0, 0, 0, 1)), Date.UTC(1962, JAN, 1, 0, 0, 1, 846)) // Same
     })
 
     describe('TAI raw data conversion unit tests based on magic numbers', () => {
@@ -857,26 +748,19 @@ describe('TaiConverter', () => {
     const taiConverter = TaiConverter(MODELS.SMEAR)
 
     it('smears', () => {
-      assert.equal(taiConverter.unixToAtomic(Date.UTC(2016, DEC, 31, 0, 0, 0, 0)),
-        Date.UTC(2016, DEC, 31, 0, 0, 36, 0))
-      assert.equal(taiConverter.unixToAtomic(Date.UTC(2016, DEC, 31, 12, 0, 0, 0)),
-        Date.UTC(2016, DEC, 31, 12, 0, 36, 0))
-      assert.equal(taiConverter.unixToAtomic(Date.UTC(2016, DEC, 31, 12, 0, 0, 1)),
-        Date.UTC(2016, DEC, 31, 12, 0, 36, 1))
+      assert.equal(taiConverter.unixToAtomic(Date.UTC(2016, DEC, 31, 0, 0, 0, 0)), Date.UTC(2016, DEC, 31, 0, 0, 36, 0))
+      assert.equal(taiConverter.unixToAtomic(Date.UTC(2016, DEC, 31, 12, 0, 0, 0)), Date.UTC(2016, DEC, 31, 12, 0, 36, 0))
+      assert.equal(taiConverter.unixToAtomic(Date.UTC(2016, DEC, 31, 12, 0, 0, 1)), Date.UTC(2016, DEC, 31, 12, 0, 36, 1))
 
       // After 86_400 Unix milliseconds, 86_401 TAI milliseconds have passed
-      assert.equal(taiConverter.unixToAtomic(Date.UTC(2016, DEC, 31, 12, 1, 26, 399)),
-        Date.UTC(2016, DEC, 31, 12, 2, 2, 399))
-      assert.equal(taiConverter.unixToAtomic(Date.UTC(2016, DEC, 31, 12, 1, 26, 400)),
-        Date.UTC(2016, DEC, 31, 12, 2, 2, 401))
+      assert.equal(taiConverter.unixToAtomic(Date.UTC(2016, DEC, 31, 12, 1, 26, 399)), Date.UTC(2016, DEC, 31, 12, 2, 2, 399))
+      assert.equal(taiConverter.unixToAtomic(Date.UTC(2016, DEC, 31, 12, 1, 26, 400)), Date.UTC(2016, DEC, 31, 12, 2, 2, 401))
 
       // After 12 Unix hours, 12 TAI hours and 500 milliseconds
-      assert.equal(taiConverter.unixToAtomic(Date.UTC(2017, JAN, 1, 0, 0, 0, 0)),
-        Date.UTC(2017, JAN, 1, 0, 0, 36, 500))
+      assert.equal(taiConverter.unixToAtomic(Date.UTC(2017, JAN, 1, 0, 0, 0, 0)), Date.UTC(2017, JAN, 1, 0, 0, 36, 500))
 
       // After 24 Unix hours, 24 TAI hours and 1 second
-      assert.equal(taiConverter.unixToAtomic(Date.UTC(2017, JAN, 1, 12, 0, 0, 0)),
-        Date.UTC(2017, JAN, 1, 12, 0, 37))
+      assert.equal(taiConverter.unixToAtomic(Date.UTC(2017, JAN, 1, 12, 0, 0, 0)), Date.UTC(2017, JAN, 1, 12, 0, 37))
     })
   })
 })

@@ -19,22 +19,14 @@ describe('MillisConverter', () => {
       const millisConverter = new MillisConverter(data, MODELS.OVERRUN)
 
       it('manages basic conversions', () => {
-        assert.deepEqual(millisConverter.unixToAtomic(0, { range: true, array: true }),
-          [[0, 0]])
-        assert.deepEqual(millisConverter.unixToAtomic(0, { range: true }),
-          [0, 0])
-        assert.deepEqual(millisConverter.unixToAtomic(0, { array: true }),
-          [0])
-        assert.equal(millisConverter.unixToAtomic(0),
-          0)
-        assert.equal(millisConverter.unixToAtomic(0n),
-          0n)
-        assert.equal(millisConverter.atomicToUnix(0),
-          0)
-        assert.equal(millisConverter.atomicToUnix(0n),
-          0n)
-        assert.equal(millisConverter.atomicToOffset(0n),
-          0n)
+        assert.deepEqual(millisConverter.unixToAtomic(0, { range: true, array: true }), [[0, 0]])
+        assert.deepEqual(millisConverter.unixToAtomic(0, { range: true }), [0, 0])
+        assert.deepEqual(millisConverter.unixToAtomic(0, { array: true }), [0])
+        assert.equal(millisConverter.unixToAtomic(0), 0)
+        assert.equal(millisConverter.unixToAtomic(0n), 0n)
+        assert.equal(millisConverter.atomicToUnix(0), 0)
+        assert.equal(millisConverter.atomicToUnix(0n), 0n)
+        assert.equal(millisConverter.atomicToOffset(0n), 0n)
       })
     })
 
@@ -42,12 +34,9 @@ describe('MillisConverter', () => {
       const millisConverter = new MillisConverter(data, MODELS.BREAK)
 
       it('manages basic conversions', () => {
-        assert.equal(millisConverter.unixToAtomic(0),
-          0)
-        assert.equal(millisConverter.atomicToUnix(0),
-          0)
-        assert.equal(millisConverter.atomicToOffset(0),
-          0)
+        assert.equal(millisConverter.unixToAtomic(0), 0)
+        assert.equal(millisConverter.atomicToUnix(0), 0)
+        assert.equal(millisConverter.atomicToOffset(0), 0)
       })
     })
 
@@ -64,21 +53,15 @@ describe('MillisConverter', () => {
       })
 
       it('fails when the atomic count is out of bounds', () => {
-        assert.equal(millisConverter.atomicToUnix(0),
-          0)
-        assert.equal(millisConverter.atomicToUnix(-1),
-          NaN)
-        assert.equal(millisConverter.atomicToOffset(0),
-          0)
-        assert.equal(millisConverter.atomicToOffset(-1),
-          NaN)
+        assert.equal(millisConverter.atomicToUnix(0), 0)
+        assert.equal(millisConverter.atomicToUnix(-1), NaN)
+        assert.equal(millisConverter.atomicToOffset(0), 0)
+        assert.equal(millisConverter.atomicToOffset(-1), NaN)
       })
 
       it('fails when the Unix count is out of bounds', () => {
-        assert.equal(millisConverter.unixToAtomic(0),
-          0)
-        assert.equal(millisConverter.unixToAtomic(-1),
-          NaN)
+        assert.equal(millisConverter.unixToAtomic(0), 0)
+        assert.equal(millisConverter.unixToAtomic(-1), NaN)
       })
 
       it('manages basic conversions', () => {
@@ -95,12 +78,9 @@ describe('MillisConverter', () => {
       const millisConverter = new MillisConverter(data, MODELS.SMEAR)
 
       it('manages basic conversions', () => {
-        assert.equal(millisConverter.unixToAtomic(0),
-          0)
-        assert.equal(millisConverter.atomicToUnix(0),
-          0)
-        assert.equal(millisConverter.atomicToOffset(0),
-          0)
+        assert.equal(millisConverter.unixToAtomic(0), 0)
+        assert.equal(millisConverter.atomicToUnix(0), 0)
+        assert.equal(millisConverter.atomicToOffset(0), 0)
       })
     })
   })
@@ -115,101 +95,94 @@ describe('MillisConverter', () => {
       const millisConverter = new MillisConverter(data, MODELS.OVERRUN)
 
       it('unixToAtomic (array mode)', () => {
-        assert.deepEqual(millisConverter.unixToAtomic(0, { array: true }),
+        assert.deepEqual(
+          millisConverter.unixToAtomic(0, { array: true }),
           [
             0
-          ])
+          ]
+        )
 
         // BIFURCATION
-        assert.deepEqual(millisConverter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999), { array: true }),
+        assert.deepEqual(
+          millisConverter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999), { array: true }),
           [
             Date.UTC(1979, DEC, 31, 23, 59, 59, 999)
-          ])
-        assert.deepEqual(millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 0), { array: true }),
+          ]
+        )
+        assert.deepEqual(
+          millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 0), { array: true }),
           [
             Date.UTC(1980, JAN, 1, 0, 0, 0, 0),
             Date.UTC(1980, JAN, 1, 0, 0, 1, 0)
-          ])
-        assert.deepEqual(millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 1), { array: true }),
+          ]
+        )
+        assert.deepEqual(
+          millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 1), { array: true }),
           [
             Date.UTC(1980, JAN, 1, 0, 0, 0, 1),
             Date.UTC(1980, JAN, 1, 0, 0, 1, 1)
-          ])
+          ]
+        )
 
         // COLLAPSE
-        assert.deepEqual(millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 999), { array: true }),
+        assert.deepEqual(
+          millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 999), { array: true }),
           [
             Date.UTC(1980, JAN, 1, 0, 0, 0, 999),
             Date.UTC(1980, JAN, 1, 0, 0, 1, 999)
-          ])
-        assert.deepEqual(millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 1, 0), { array: true }),
+          ]
+        )
+        assert.deepEqual(
+          millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 1, 0), { array: true }),
           [
             Date.UTC(1980, JAN, 1, 0, 0, 2, 0)
-          ])
-        assert.deepEqual(millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 1, 1), { array: true }),
+          ]
+        )
+        assert.deepEqual(
+          millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 1, 1), { array: true }),
           [
             Date.UTC(1980, JAN, 1, 0, 0, 2, 1)
-          ])
+          ]
+        )
       })
 
       it('unixToAtomic', () => {
-        assert.equal(millisConverter.unixToAtomic(0),
-          0)
+        assert.equal(millisConverter.unixToAtomic(0), 0)
 
         // FORWARD JUMP
-        assert.equal(millisConverter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)),
-          Date.UTC(1979, DEC, 31, 23, 59, 59, 999))
-        assert.equal(millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)),
-          Date.UTC(1980, JAN, 1, 0, 0, 1, 0))
-        assert.equal(millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 1)),
-          Date.UTC(1980, JAN, 1, 0, 0, 1, 1))
+        assert.equal(millisConverter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)), Date.UTC(1979, DEC, 31, 23, 59, 59, 999))
+        assert.equal(millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)), Date.UTC(1980, JAN, 1, 0, 0, 1, 0))
+        assert.equal(millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 1)), Date.UTC(1980, JAN, 1, 0, 0, 1, 1))
 
-        assert.equal(millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)),
-          Date.UTC(1980, JAN, 1, 0, 0, 1, 999))
-        assert.equal(millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 1, 0)),
-          Date.UTC(1980, JAN, 1, 0, 0, 2, 0))
-        assert.equal(millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 1, 1)),
-          Date.UTC(1980, JAN, 1, 0, 0, 2, 1))
+        assert.equal(millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)), Date.UTC(1980, JAN, 1, 0, 0, 1, 999))
+        assert.equal(millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 1, 0)), Date.UTC(1980, JAN, 1, 0, 0, 2, 0))
+        assert.equal(millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 1, 1)), Date.UTC(1980, JAN, 1, 0, 0, 2, 1))
       })
 
       it('atomicToUnix', () => {
-        assert.equal(millisConverter.atomicToUnix(0),
-          0)
+        assert.equal(millisConverter.atomicToUnix(0), 0)
 
-        assert.equal(millisConverter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)),
-          Date.UTC(1979, DEC, 31, 23, 59, 59, 999))
-        assert.equal(millisConverter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)),
-          Date.UTC(1980, JAN, 1, 0, 0, 0, 0))
-        assert.equal(millisConverter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 0, 1)),
-          Date.UTC(1980, JAN, 1, 0, 0, 0, 1))
+        assert.equal(millisConverter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)), Date.UTC(1979, DEC, 31, 23, 59, 59, 999))
+        assert.equal(millisConverter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)), Date.UTC(1980, JAN, 1, 0, 0, 0, 0))
+        assert.equal(millisConverter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 0, 1)), Date.UTC(1980, JAN, 1, 0, 0, 0, 1))
 
         // BACKTRACK
-        assert.equal(millisConverter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)),
-          Date.UTC(1980, JAN, 1, 0, 0, 0, 999))
-        assert.equal(millisConverter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 1, 0)),
-          Date.UTC(1980, JAN, 1, 0, 0, 0, 0))
-        assert.equal(millisConverter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 1, 1)),
-          Date.UTC(1980, JAN, 1, 0, 0, 0, 1))
+        assert.equal(millisConverter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)), Date.UTC(1980, JAN, 1, 0, 0, 0, 999))
+        assert.equal(millisConverter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 1, 0)), Date.UTC(1980, JAN, 1, 0, 0, 0, 0))
+        assert.equal(millisConverter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 1, 1)), Date.UTC(1980, JAN, 1, 0, 0, 0, 1))
       })
 
       it('atomicToOffset', () => {
-        assert.equal(millisConverter.atomicToOffset(0),
-          0)
+        assert.equal(millisConverter.atomicToOffset(0), 0)
 
-        assert.equal(millisConverter.atomicToOffset(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)),
-          0)
-        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)),
-          0)
-        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 0, 0, 0, 1)),
-          0)
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)), 0)
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)), 0)
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 0, 0, 0, 1)), 0)
 
         // BACKTRACK
-        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)),
-          0)
-        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 0, 0, 1, 0)),
-          1000)
-        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 0, 0, 1, 1)),
-          1000)
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)), 0)
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 0, 0, 1, 0)), 1000)
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 0, 0, 1, 1)), 1000)
       })
     })
 
@@ -217,65 +190,44 @@ describe('MillisConverter', () => {
       const millisConverter = new MillisConverter(data, MODELS.BREAK)
 
       it('unixToAtomic', () => {
-        assert.equal(millisConverter.unixToAtomic(0),
-          0)
+        assert.equal(millisConverter.unixToAtomic(0), 0)
 
         // FORWARD JUMP
-        assert.equal(millisConverter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)),
-          Date.UTC(1979, DEC, 31, 23, 59, 59, 999))
-        assert.equal(millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)),
-          Date.UTC(1980, JAN, 1, 0, 0, 1, 0))
-        assert.equal(millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 1)),
-          Date.UTC(1980, JAN, 1, 0, 0, 1, 1))
+        assert.equal(millisConverter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)), Date.UTC(1979, DEC, 31, 23, 59, 59, 999))
+        assert.equal(millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)), Date.UTC(1980, JAN, 1, 0, 0, 1, 0))
+        assert.equal(millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 1)), Date.UTC(1980, JAN, 1, 0, 0, 1, 1))
 
-        assert.equal(millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)),
-          Date.UTC(1980, JAN, 1, 0, 0, 1, 999))
-        assert.equal(millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 1, 0)),
-          Date.UTC(1980, JAN, 1, 0, 0, 2, 0))
-        assert.equal(millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 1, 1)),
-          Date.UTC(1980, JAN, 1, 0, 0, 2, 1))
+        assert.equal(millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)), Date.UTC(1980, JAN, 1, 0, 0, 1, 999))
+        assert.equal(millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 1, 0)), Date.UTC(1980, JAN, 1, 0, 0, 2, 0))
+        assert.equal(millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 1, 1)), Date.UTC(1980, JAN, 1, 0, 0, 2, 1))
       })
 
       it('atomicToUnix', () => {
-        assert.equal(millisConverter.atomicToUnix(0),
-          0)
+        assert.equal(millisConverter.atomicToUnix(0), 0)
 
         // UNDEFINED UNIX TIME STARTS
-        assert.equal(millisConverter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)),
-          Date.UTC(1979, DEC, 31, 23, 59, 59, 999))
-        assert.equal(millisConverter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)),
-          NaN)
-        assert.equal(millisConverter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 0, 1)),
-          NaN)
+        assert.equal(millisConverter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)), Date.UTC(1979, DEC, 31, 23, 59, 59, 999))
+        assert.equal(millisConverter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)), NaN)
+        assert.equal(millisConverter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 0, 1)), NaN)
 
         // UNDEFINED UNIX TIME ENDS
-        assert.equal(millisConverter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)),
-          NaN)
-        assert.equal(millisConverter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 1, 0)),
-          Date.UTC(1980, JAN, 1, 0, 0, 0, 0))
-        assert.equal(millisConverter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 1, 1)),
-          Date.UTC(1980, JAN, 1, 0, 0, 0, 1))
+        assert.equal(millisConverter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)), NaN)
+        assert.equal(millisConverter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 1, 0)), Date.UTC(1980, JAN, 1, 0, 0, 0, 0))
+        assert.equal(millisConverter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 1, 1)), Date.UTC(1980, JAN, 1, 0, 0, 0, 1))
       })
 
       it('atomicToOffset', () => {
-        assert.equal(millisConverter.atomicToOffset(0),
-          0)
+        assert.equal(millisConverter.atomicToOffset(0), 0)
 
         // UNDEFINED UNIX TIME STARTS
-        assert.equal(millisConverter.atomicToOffset(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)),
-          0)
-        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)),
-          NaN)
-        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 0, 0, 0, 1)),
-          NaN)
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)), 0)
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)), NaN)
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 0, 0, 0, 1)), NaN)
 
         // UNDEFINED UNIX TIME ENDS
-        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)),
-          NaN)
-        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 0, 0, 1, 0)),
-          1000)
-        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 0, 0, 1, 1)),
-          1000)
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)), NaN)
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 0, 0, 1, 0)), 1000)
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 0, 0, 1, 1)), 1000)
       })
     })
 
@@ -283,80 +235,67 @@ describe('MillisConverter', () => {
       const millisConverter = new MillisConverter(data, MODELS.STALL)
 
       it('unixToAtomic (range mode)', () => {
-        assert.deepEqual(millisConverter.unixToAtomic(0, { range: true }),
-          [0, 0])
+        assert.deepEqual(millisConverter.unixToAtomic(0, { range: true }), [0, 0])
 
         // STALL POINT
-        assert.deepEqual(millisConverter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999), { range: true }),
+        assert.deepEqual(
+          millisConverter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999), { range: true }),
           [
             Date.UTC(1979, DEC, 31, 23, 59, 59, 999),
             Date.UTC(1979, DEC, 31, 23, 59, 59, 999)
-          ])
-        assert.deepEqual(millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 0), { range: true }),
+          ]
+        )
+        assert.deepEqual(
+          millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 0), { range: true }),
           [
             Date.UTC(1980, JAN, 1, 0, 0, 0, 0),
             Date.UTC(1980, JAN, 1, 0, 0, 1, 0)
-          ])
-        assert.deepEqual(millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 1), { range: true }),
+          ]
+        )
+        assert.deepEqual(
+          millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 1), { range: true }),
           [
             Date.UTC(1980, JAN, 1, 0, 0, 1, 1),
             Date.UTC(1980, JAN, 1, 0, 0, 1, 1)
-          ])
+          ]
+        )
       })
 
       it('unixToAtomic', () => {
-        assert.equal(millisConverter.unixToAtomic(0),
-          0)
+        assert.equal(millisConverter.unixToAtomic(0), 0)
 
         // FORWARD JUMP
-        assert.equal(millisConverter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)),
-          Date.UTC(1979, DEC, 31, 23, 59, 59, 999))
-        assert.equal(millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)),
-          Date.UTC(1980, JAN, 1, 0, 0, 1, 0))
-        assert.equal(millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 1)),
-          Date.UTC(1980, JAN, 1, 0, 0, 1, 1))
+        assert.equal(millisConverter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)), Date.UTC(1979, DEC, 31, 23, 59, 59, 999))
+        assert.equal(millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)), Date.UTC(1980, JAN, 1, 0, 0, 1, 0))
+        assert.equal(millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 1)), Date.UTC(1980, JAN, 1, 0, 0, 1, 1))
       })
 
       it('atomicToUnix', () => {
-        assert.equal(millisConverter.atomicToUnix(0),
-          0)
+        assert.equal(millisConverter.atomicToUnix(0), 0)
 
         // STALL STARTS
-        assert.equal(millisConverter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)),
-          Date.UTC(1979, DEC, 31, 23, 59, 59, 999))
-        assert.equal(millisConverter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)),
-          Date.UTC(1980, JAN, 1, 0, 0, 0, 0))
-        assert.equal(millisConverter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 0, 1)),
-          Date.UTC(1980, JAN, 1, 0, 0, 0, 0))
+        assert.equal(millisConverter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)), Date.UTC(1979, DEC, 31, 23, 59, 59, 999))
+        assert.equal(millisConverter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)), Date.UTC(1980, JAN, 1, 0, 0, 0, 0))
+        assert.equal(millisConverter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 0, 1)), Date.UTC(1980, JAN, 1, 0, 0, 0, 0))
 
         // STALL ENDS
-        assert.equal(millisConverter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)),
-          Date.UTC(1980, JAN, 1, 0, 0, 0, 0))
-        assert.equal(millisConverter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 1, 0)),
-          Date.UTC(1980, JAN, 1, 0, 0, 0, 0))
-        assert.equal(millisConverter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 1, 1)),
-          Date.UTC(1980, JAN, 1, 0, 0, 0, 1))
+        assert.equal(millisConverter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)), Date.UTC(1980, JAN, 1, 0, 0, 0, 0))
+        assert.equal(millisConverter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 1, 0)), Date.UTC(1980, JAN, 1, 0, 0, 0, 0))
+        assert.equal(millisConverter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 1, 1)), Date.UTC(1980, JAN, 1, 0, 0, 0, 1))
       })
 
       it('atomicToOffset', () => {
-        assert.equal(millisConverter.atomicToOffset(0),
-          0)
+        assert.equal(millisConverter.atomicToOffset(0), 0)
 
         // STALL STARTS
-        assert.equal(millisConverter.atomicToOffset(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)),
-          0)
-        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)),
-          0)
-        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 0, 0, 0, 1)),
-          1)
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)), 0)
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)), 0)
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 0, 0, 0, 1)), 1)
 
         // STALL ENDS
-        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)),
-          999)
-        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 0, 0, 1, 0)),
-          1000)
-        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 0, 0, 1, 1)),
-          1000)
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)), 999)
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 0, 0, 1, 0)), 1000)
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 0, 0, 1, 1)), 1000)
       })
     })
 
@@ -364,78 +303,54 @@ describe('MillisConverter', () => {
       const millisConverter = new MillisConverter(data, MODELS.SMEAR)
 
       it('unixToAtomic', () => {
-        assert.equal(millisConverter.unixToAtomic(0),
-          0)
+        assert.equal(millisConverter.unixToAtomic(0), 0)
 
         // SMEAR STARTS
-        assert.equal(millisConverter.unixToAtomic(Date.UTC(1979, DEC, 31, 11, 59, 59, 999)),
-          Date.UTC(1979, DEC, 31, 11, 59, 59, 999))
-        assert.equal(millisConverter.unixToAtomic(Date.UTC(1979, DEC, 31, 12, 0, 0, 0)),
-          Date.UTC(1979, DEC, 31, 12, 0, 0, 0))
-        assert.equal(millisConverter.unixToAtomic(Date.UTC(1979, DEC, 31, 12, 0, 0, 1)),
-          Date.UTC(1979, DEC, 31, 12, 0, 0, 1))
+        assert.equal(millisConverter.unixToAtomic(Date.UTC(1979, DEC, 31, 11, 59, 59, 999)), Date.UTC(1979, DEC, 31, 11, 59, 59, 999))
+        assert.equal(millisConverter.unixToAtomic(Date.UTC(1979, DEC, 31, 12, 0, 0, 0)), Date.UTC(1979, DEC, 31, 12, 0, 0, 0))
+        assert.equal(millisConverter.unixToAtomic(Date.UTC(1979, DEC, 31, 12, 0, 0, 1)), Date.UTC(1979, DEC, 31, 12, 0, 0, 1))
 
         // SMEAR MIDPOINT
-        assert.equal(millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)),
-          Date.UTC(1980, JAN, 1, 0, 0, 0, 500))
+        assert.equal(millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)), Date.UTC(1980, JAN, 1, 0, 0, 0, 500))
 
         // SMEAR ENDS
-        assert.equal(millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 11, 59, 59, 999)),
-          Date.UTC(1980, JAN, 1, 12, 0, 0, 998)) // truncated down
-        assert.equal(millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 12, 0, 0, 0)),
-          Date.UTC(1980, JAN, 1, 12, 0, 1, 0))
-        assert.equal(millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 12, 0, 0, 1)),
-          Date.UTC(1980, JAN, 1, 12, 0, 1, 1))
+        assert.equal(millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 11, 59, 59, 999)), Date.UTC(1980, JAN, 1, 12, 0, 0, 998)) // truncated down
+        assert.equal(millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 12, 0, 0, 0)), Date.UTC(1980, JAN, 1, 12, 0, 1, 0))
+        assert.equal(millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 12, 0, 0, 1)), Date.UTC(1980, JAN, 1, 12, 0, 1, 1))
       })
 
       it('atomicToUnix', () => {
-        assert.equal(millisConverter.atomicToUnix(0),
-          0)
+        assert.equal(millisConverter.atomicToUnix(0), 0)
 
         // SMEAR STARTS
-        assert.equal(millisConverter.atomicToUnix(Date.UTC(1979, DEC, 31, 11, 59, 59, 999)),
-          Date.UTC(1979, DEC, 31, 11, 59, 59, 999))
-        assert.equal(millisConverter.atomicToUnix(Date.UTC(1979, DEC, 31, 12, 0, 0, 0)),
-          Date.UTC(1979, DEC, 31, 12, 0, 0, 0))
-        assert.equal(millisConverter.atomicToUnix(Date.UTC(1979, DEC, 31, 12, 0, 0, 1)),
-          Date.UTC(1979, DEC, 31, 12, 0, 0, 0)) // truncated down
+        assert.equal(millisConverter.atomicToUnix(Date.UTC(1979, DEC, 31, 11, 59, 59, 999)), Date.UTC(1979, DEC, 31, 11, 59, 59, 999))
+        assert.equal(millisConverter.atomicToUnix(Date.UTC(1979, DEC, 31, 12, 0, 0, 0)), Date.UTC(1979, DEC, 31, 12, 0, 0, 0))
+        assert.equal(millisConverter.atomicToUnix(Date.UTC(1979, DEC, 31, 12, 0, 0, 1)), Date.UTC(1979, DEC, 31, 12, 0, 0, 0)) // truncated down
 
         // SMEAR MIDPOINT
-        assert.equal(millisConverter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 0, 500)),
-          Date.UTC(1980, JAN, 1, 0, 0, 0, 0))
+        assert.equal(millisConverter.atomicToUnix(Date.UTC(1980, JAN, 1, 0, 0, 0, 500)), Date.UTC(1980, JAN, 1, 0, 0, 0, 0))
 
         // SMEAR ENDS
-        assert.equal(millisConverter.atomicToUnix(Date.UTC(1980, JAN, 1, 12, 0, 0, 999)),
-          Date.UTC(1980, JAN, 1, 11, 59, 59, 999))
-        assert.equal(millisConverter.atomicToUnix(Date.UTC(1980, JAN, 1, 12, 0, 1, 0)),
-          Date.UTC(1980, JAN, 1, 12, 0, 0, 0))
-        assert.equal(millisConverter.atomicToUnix(Date.UTC(1980, JAN, 1, 12, 0, 1, 1)),
-          Date.UTC(1980, JAN, 1, 12, 0, 0, 1))
+        assert.equal(millisConverter.atomicToUnix(Date.UTC(1980, JAN, 1, 12, 0, 0, 999)), Date.UTC(1980, JAN, 1, 11, 59, 59, 999))
+        assert.equal(millisConverter.atomicToUnix(Date.UTC(1980, JAN, 1, 12, 0, 1, 0)), Date.UTC(1980, JAN, 1, 12, 0, 0, 0))
+        assert.equal(millisConverter.atomicToUnix(Date.UTC(1980, JAN, 1, 12, 0, 1, 1)), Date.UTC(1980, JAN, 1, 12, 0, 0, 1))
       })
 
       it('atomicToOffset', () => {
-        assert.equal(millisConverter.atomicToUnix(0),
-          0)
+        assert.equal(millisConverter.atomicToUnix(0), 0)
 
         // SMEAR STARTS
-        assert.equal(millisConverter.atomicToOffset(Date.UTC(1979, DEC, 31, 11, 59, 59, 999)),
-          0)
-        assert.equal(millisConverter.atomicToOffset(Date.UTC(1979, DEC, 31, 12, 0, 0, 0)),
-          0)
-        assert.equal(millisConverter.atomicToOffset(Date.UTC(1979, DEC, 31, 12, 0, 0, 1)),
-          0) // truncated down
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1979, DEC, 31, 11, 59, 59, 999)), 0)
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1979, DEC, 31, 12, 0, 0, 0)), 0)
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1979, DEC, 31, 12, 0, 0, 1)), 0) // truncated down
 
         // SMEAR MIDPOINT
-        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 0, 0, 0, 500)),
-          500)
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 0, 0, 0, 500)), 500)
 
         // SMEAR ENDS
-        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 12, 0, 0, 999)),
-          999) // truncated down
-        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 12, 0, 1, 0)),
-          1000)
-        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 12, 0, 1, 1)),
-          1000)
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 12, 0, 0, 999)), 999) // truncated down
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 12, 0, 1, 0)), 1000)
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 12, 0, 1, 1)), 1000)
       })
     })
   })
@@ -450,77 +365,73 @@ describe('MillisConverter', () => {
       const millisConverter = new MillisConverter(data, MODELS.OVERRUN)
 
       it('unixToAtomic (array mode)', () => {
-        assert.deepEqual(millisConverter.unixToAtomic(0, { array: true }),
-          [0])
+        assert.deepEqual(millisConverter.unixToAtomic(0, { array: true }), [0])
 
         // START OF MISSING TIME
-        assert.deepEqual(millisConverter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 58, 999), { array: true }),
+        assert.deepEqual(
+          millisConverter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 58, 999), { array: true }),
           [
             Date.UTC(1979, DEC, 31, 23, 59, 58, 999)
-          ])
-        assert.deepEqual(millisConverter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 0), { array: true }),
-          [])
-        assert.deepEqual(millisConverter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 1), { array: true }),
-          [])
+          ]
+        )
+        assert.deepEqual(
+          millisConverter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 0), { array: true }),
+          []
+        )
+        assert.deepEqual(
+          millisConverter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 1), { array: true }),
+          []
+        )
 
         // END OF MISSING TIME
-        assert.deepEqual(millisConverter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999), { array: true }),
-          [])
-        assert.deepEqual(millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 0), { array: true }),
+        assert.deepEqual(
+          millisConverter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999), { array: true }),
+          []
+        )
+        assert.deepEqual(
+          millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 0), { array: true }),
           [
             Date.UTC(1979, DEC, 31, 23, 59, 59, 0)
-          ])
-        assert.deepEqual(millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 1), { array: true }),
+          ]
+        )
+        assert.deepEqual(
+          millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 1), { array: true }),
           [
             Date.UTC(1979, DEC, 31, 23, 59, 59, 1)
-          ])
+          ]
+        )
       })
 
       it('unixToAtomic', () => {
-        assert.equal(millisConverter.unixToAtomic(0),
-          0)
+        assert.equal(millisConverter.unixToAtomic(0), 0)
 
         // START OF MISSING TIME
-        assert.equal(millisConverter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)),
-          Date.UTC(1979, DEC, 31, 23, 59, 58, 999))
-        assert.equal(millisConverter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)),
-          NaN)
-        assert.equal(millisConverter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 1)),
-          NaN)
+        assert.equal(millisConverter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)), Date.UTC(1979, DEC, 31, 23, 59, 58, 999))
+        assert.equal(millisConverter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)), NaN)
+        assert.equal(millisConverter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 1)), NaN)
 
         // END OF MISSING TIME
-        assert.equal(millisConverter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)),
-          NaN)
-        assert.equal(millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)),
-          Date.UTC(1979, DEC, 31, 23, 59, 59, 0))
-        assert.equal(millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 1)),
-          Date.UTC(1979, DEC, 31, 23, 59, 59, 1))
+        assert.equal(millisConverter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)), NaN)
+        assert.equal(millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)), Date.UTC(1979, DEC, 31, 23, 59, 59, 0))
+        assert.equal(millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 1)), Date.UTC(1979, DEC, 31, 23, 59, 59, 1))
       })
 
       it('atomicToUnix', () => {
-        assert.equal(millisConverter.atomicToUnix(0),
-          0)
+        assert.equal(millisConverter.atomicToUnix(0), 0)
 
         // JUMP AHEAD
-        assert.equal(millisConverter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)),
-          Date.UTC(1979, DEC, 31, 23, 59, 58, 999))
-        assert.equal(millisConverter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)),
-          Date.UTC(1980, JAN, 1, 0, 0, 0, 0))
-        assert.equal(millisConverter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 59, 1)),
-          Date.UTC(1980, JAN, 1, 0, 0, 0, 1))
+        assert.equal(millisConverter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)), Date.UTC(1979, DEC, 31, 23, 59, 58, 999))
+        assert.equal(millisConverter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)), Date.UTC(1980, JAN, 1, 0, 0, 0, 0))
+        assert.equal(millisConverter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 59, 1)), Date.UTC(1980, JAN, 1, 0, 0, 0, 1))
       })
 
       it('atomicToOffset', () => {
-        assert.equal(millisConverter.atomicToOffset(0),
-          0)
+        assert.equal(millisConverter.atomicToOffset(0), 0)
 
         // JUMP AHEAD
-        assert.equal(millisConverter.atomicToOffset(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)),
-          0)
-        assert.equal(millisConverter.atomicToOffset(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)),
-          -1000)
-        assert.equal(millisConverter.atomicToOffset(Date.UTC(1979, DEC, 31, 23, 59, 59, 1)),
-          -1000)
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)), 0)
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)), -1000)
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1979, DEC, 31, 23, 59, 59, 1)), -1000)
       })
     })
 
@@ -528,50 +439,35 @@ describe('MillisConverter', () => {
       const millisConverter = new MillisConverter(data, MODELS.BREAK)
 
       it('unixToAtomic', () => {
-        assert.equal(millisConverter.unixToAtomic(0),
-          0)
+        assert.equal(millisConverter.unixToAtomic(0), 0)
 
         // START OF MISSING TIME
-        assert.equal(millisConverter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)),
-          Date.UTC(1979, DEC, 31, 23, 59, 58, 999))
-        assert.equal(millisConverter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)),
-          NaN)
-        assert.equal(millisConverter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 1)),
-          NaN)
+        assert.equal(millisConverter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)), Date.UTC(1979, DEC, 31, 23, 59, 58, 999))
+        assert.equal(millisConverter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)), NaN)
+        assert.equal(millisConverter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 1)), NaN)
 
         // END OF MISSING TIME
-        assert.equal(millisConverter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)),
-          NaN)
-        assert.equal(millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)),
-          Date.UTC(1979, DEC, 31, 23, 59, 59, 0))
-        assert.equal(millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 1)),
-          Date.UTC(1979, DEC, 31, 23, 59, 59, 1))
+        assert.equal(millisConverter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)), NaN)
+        assert.equal(millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)), Date.UTC(1979, DEC, 31, 23, 59, 59, 0))
+        assert.equal(millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 1)), Date.UTC(1979, DEC, 31, 23, 59, 59, 1))
       })
 
       it('atomicToUnix', () => {
-        assert.equal(millisConverter.atomicToUnix(0),
-          0)
+        assert.equal(millisConverter.atomicToUnix(0), 0)
 
         // JUMP AHEAD
-        assert.equal(millisConverter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)),
-          Date.UTC(1979, DEC, 31, 23, 59, 58, 999))
-        assert.equal(millisConverter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)),
-          Date.UTC(1980, JAN, 1, 0, 0, 0, 0))
-        assert.equal(millisConverter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 59, 1)),
-          Date.UTC(1980, JAN, 1, 0, 0, 0, 1))
+        assert.equal(millisConverter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)), Date.UTC(1979, DEC, 31, 23, 59, 58, 999))
+        assert.equal(millisConverter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)), Date.UTC(1980, JAN, 1, 0, 0, 0, 0))
+        assert.equal(millisConverter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 59, 1)), Date.UTC(1980, JAN, 1, 0, 0, 0, 1))
       })
 
       it('atomicToOffset', () => {
-        assert.equal(millisConverter.atomicToOffset(0),
-          0)
+        assert.equal(millisConverter.atomicToOffset(0), 0)
 
         // JUMP AHEAD
-        assert.equal(millisConverter.atomicToOffset(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)),
-          0)
-        assert.equal(millisConverter.atomicToOffset(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)),
-          -1000)
-        assert.equal(millisConverter.atomicToOffset(Date.UTC(1979, DEC, 31, 23, 59, 59, 1)),
-          -1000)
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)), 0)
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)), -1000)
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1979, DEC, 31, 23, 59, 59, 1)), -1000)
       })
     })
 
@@ -579,92 +475,91 @@ describe('MillisConverter', () => {
       const millisConverter = new MillisConverter(data, MODELS.STALL)
 
       it('unixToAtomic (range mode)', () => {
-        assert.deepEqual(millisConverter.unixToAtomic(0, { range: true }),
+        assert.deepEqual(
+          millisConverter.unixToAtomic(0, { range: true }),
           [
             0,
             0
-          ])
+          ]
+        )
 
         // START OF MISSING TIME
-        assert.deepEqual(millisConverter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 58, 999), { range: true }),
+        assert.deepEqual(
+          millisConverter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 58, 999), { range: true }),
           [
             Date.UTC(1979, DEC, 31, 23, 59, 58, 999),
             Date.UTC(1979, DEC, 31, 23, 59, 58, 999)
-          ])
-        assert.deepEqual(millisConverter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 0), { range: true }),
+          ]
+        )
+        assert.deepEqual(
+          millisConverter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 0), { range: true }),
           [
             NaN,
             NaN
-          ])
-        assert.deepEqual(millisConverter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 1), { range: true }),
+          ]
+        )
+        assert.deepEqual(
+          millisConverter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 1), { range: true }),
           [
             NaN,
             NaN
-          ])
+          ]
+        )
 
         // END OF MISSING TIME
-        assert.deepEqual(millisConverter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999), { range: true }),
+        assert.deepEqual(
+          millisConverter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999), { range: true }),
           [
             NaN,
             NaN
-          ])
-        assert.deepEqual(millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 0), { range: true }),
+          ]
+        )
+        assert.deepEqual(
+          millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 0), { range: true }),
           [
             Date.UTC(1979, DEC, 31, 23, 59, 59, 0),
             Date.UTC(1979, DEC, 31, 23, 59, 59, 0)
-          ])
-        assert.deepEqual(millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 1), { range: true }),
+          ]
+        )
+        assert.deepEqual(
+          millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 1), { range: true }),
           [
             Date.UTC(1979, DEC, 31, 23, 59, 59, 1),
             Date.UTC(1979, DEC, 31, 23, 59, 59, 1)
-          ])
+          ]
+        )
       })
 
       it('unixToAtomic', () => {
-        assert.equal(millisConverter.unixToAtomic(0),
-          0)
+        assert.equal(millisConverter.unixToAtomic(0), 0)
 
         // START OF MISSING TIME
-        assert.equal(millisConverter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)),
-          Date.UTC(1979, DEC, 31, 23, 59, 58, 999))
-        assert.equal(millisConverter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)),
-          NaN)
-        assert.equal(millisConverter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 1)),
-          NaN)
+        assert.equal(millisConverter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)), Date.UTC(1979, DEC, 31, 23, 59, 58, 999))
+        assert.equal(millisConverter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)), NaN)
+        assert.equal(millisConverter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 1)), NaN)
 
         // END OF MISSING TIME
-        assert.equal(millisConverter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)),
-          NaN)
-        assert.equal(millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)),
-          Date.UTC(1979, DEC, 31, 23, 59, 59, 0))
-        assert.equal(millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 1)),
-          Date.UTC(1979, DEC, 31, 23, 59, 59, 1))
+        assert.equal(millisConverter.unixToAtomic(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)), NaN)
+        assert.equal(millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)), Date.UTC(1979, DEC, 31, 23, 59, 59, 0))
+        assert.equal(millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 1)), Date.UTC(1979, DEC, 31, 23, 59, 59, 1))
       })
 
       it('atomicToUnix', () => {
-        assert.equal(millisConverter.atomicToUnix(0),
-          0)
+        assert.equal(millisConverter.atomicToUnix(0), 0)
 
         // JUMP AHEAD
-        assert.equal(millisConverter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)),
-          Date.UTC(1979, DEC, 31, 23, 59, 58, 999))
-        assert.equal(millisConverter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)),
-          Date.UTC(1980, JAN, 1, 0, 0, 0, 0))
-        assert.equal(millisConverter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 59, 1)),
-          Date.UTC(1980, JAN, 1, 0, 0, 0, 1))
+        assert.equal(millisConverter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)), Date.UTC(1979, DEC, 31, 23, 59, 58, 999))
+        assert.equal(millisConverter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)), Date.UTC(1980, JAN, 1, 0, 0, 0, 0))
+        assert.equal(millisConverter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 59, 1)), Date.UTC(1980, JAN, 1, 0, 0, 0, 1))
       })
 
       it('atomicToOffset', () => {
-        assert.equal(millisConverter.atomicToOffset(0),
-          0)
+        assert.equal(millisConverter.atomicToOffset(0), 0)
 
         // JUMP AHEAD
-        assert.equal(millisConverter.atomicToOffset(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)),
-          0)
-        assert.equal(millisConverter.atomicToOffset(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)),
-          -1000)
-        assert.equal(millisConverter.atomicToOffset(Date.UTC(1979, DEC, 31, 23, 59, 59, 1)),
-          -1000)
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)), 0)
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)), -1000)
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1979, DEC, 31, 23, 59, 59, 1)), -1000)
       })
     })
 
@@ -672,78 +567,54 @@ describe('MillisConverter', () => {
       const millisConverter = new MillisConverter(data, MODELS.SMEAR)
 
       it('unixToAtomic', () => {
-        assert.equal(millisConverter.unixToAtomic(0),
-          0)
+        assert.equal(millisConverter.unixToAtomic(0), 0)
 
         // START OF SMEAR
-        assert.equal(millisConverter.unixToAtomic(Date.UTC(1979, DEC, 31, 11, 59, 59, 999)),
-          Date.UTC(1979, DEC, 31, 11, 59, 59, 999))
-        assert.equal(millisConverter.unixToAtomic(Date.UTC(1979, DEC, 31, 12, 0, 0, 0)),
-          Date.UTC(1979, DEC, 31, 12, 0, 0, 0))
-        assert.equal(millisConverter.unixToAtomic(Date.UTC(1979, DEC, 31, 12, 0, 0, 1)),
-          Date.UTC(1979, DEC, 31, 12, 0, 0, 0)) // truncated
+        assert.equal(millisConverter.unixToAtomic(Date.UTC(1979, DEC, 31, 11, 59, 59, 999)), Date.UTC(1979, DEC, 31, 11, 59, 59, 999))
+        assert.equal(millisConverter.unixToAtomic(Date.UTC(1979, DEC, 31, 12, 0, 0, 0)), Date.UTC(1979, DEC, 31, 12, 0, 0, 0))
+        assert.equal(millisConverter.unixToAtomic(Date.UTC(1979, DEC, 31, 12, 0, 0, 1)), Date.UTC(1979, DEC, 31, 12, 0, 0, 0)) // truncated
 
         // MIDPOINT OF SMEAR
-        assert.equal(millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)),
-          Date.UTC(1979, DEC, 31, 23, 59, 59, 500))
+        assert.equal(millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)), Date.UTC(1979, DEC, 31, 23, 59, 59, 500))
 
         // END OF SMEAR
-        assert.equal(millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 11, 59, 59, 999)),
-          Date.UTC(1980, JAN, 1, 11, 59, 58, 999))
-        assert.equal(millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 12, 0, 0, 0)),
-          Date.UTC(1980, JAN, 1, 11, 59, 59, 0))
-        assert.equal(millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 12, 0, 0, 1)),
-          Date.UTC(1980, JAN, 1, 11, 59, 59, 1))
+        assert.equal(millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 11, 59, 59, 999)), Date.UTC(1980, JAN, 1, 11, 59, 58, 999))
+        assert.equal(millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 12, 0, 0, 0)), Date.UTC(1980, JAN, 1, 11, 59, 59, 0))
+        assert.equal(millisConverter.unixToAtomic(Date.UTC(1980, JAN, 1, 12, 0, 0, 1)), Date.UTC(1980, JAN, 1, 11, 59, 59, 1))
       })
 
       it('atomicToUnix', () => {
-        assert.equal(millisConverter.atomicToUnix(0),
-          0)
+        assert.equal(millisConverter.atomicToUnix(0), 0)
 
         // START OF SMEAR
-        assert.equal(millisConverter.atomicToUnix(Date.UTC(1979, DEC, 31, 11, 59, 59, 999)),
-          Date.UTC(1979, DEC, 31, 11, 59, 59, 999))
-        assert.equal(millisConverter.atomicToUnix(Date.UTC(1979, DEC, 31, 12, 0, 0, 0)),
-          Date.UTC(1979, DEC, 31, 12, 0, 0, 0))
-        assert.equal(millisConverter.atomicToUnix(Date.UTC(1979, DEC, 31, 12, 0, 0, 1)),
-          Date.UTC(1979, DEC, 31, 12, 0, 0, 1))
+        assert.equal(millisConverter.atomicToUnix(Date.UTC(1979, DEC, 31, 11, 59, 59, 999)), Date.UTC(1979, DEC, 31, 11, 59, 59, 999))
+        assert.equal(millisConverter.atomicToUnix(Date.UTC(1979, DEC, 31, 12, 0, 0, 0)), Date.UTC(1979, DEC, 31, 12, 0, 0, 0))
+        assert.equal(millisConverter.atomicToUnix(Date.UTC(1979, DEC, 31, 12, 0, 0, 1)), Date.UTC(1979, DEC, 31, 12, 0, 0, 1))
 
         // MIDPOINT OF SMEAR
-        assert.equal(millisConverter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 59, 500)),
-          Date.UTC(1980, JAN, 1, 0, 0, 0, 0))
+        assert.equal(millisConverter.atomicToUnix(Date.UTC(1979, DEC, 31, 23, 59, 59, 500)), Date.UTC(1980, JAN, 1, 0, 0, 0, 0))
 
         // END OF SMEAR
-        assert.equal(millisConverter.atomicToUnix(Date.UTC(1980, JAN, 1, 11, 59, 59, 999)),
-          Date.UTC(1980, JAN, 1, 12, 0, 0, 999))
-        assert.equal(millisConverter.atomicToUnix(Date.UTC(1980, JAN, 1, 11, 59, 59, 0)),
-          Date.UTC(1980, JAN, 1, 12, 0, 0, 0))
-        assert.equal(millisConverter.atomicToUnix(Date.UTC(1980, JAN, 1, 11, 59, 59, 1)),
-          Date.UTC(1980, JAN, 1, 12, 0, 0, 1))
+        assert.equal(millisConverter.atomicToUnix(Date.UTC(1980, JAN, 1, 11, 59, 59, 999)), Date.UTC(1980, JAN, 1, 12, 0, 0, 999))
+        assert.equal(millisConverter.atomicToUnix(Date.UTC(1980, JAN, 1, 11, 59, 59, 0)), Date.UTC(1980, JAN, 1, 12, 0, 0, 0))
+        assert.equal(millisConverter.atomicToUnix(Date.UTC(1980, JAN, 1, 11, 59, 59, 1)), Date.UTC(1980, JAN, 1, 12, 0, 0, 1))
       })
 
       it('atomicToOffset', () => {
-        assert.equal(millisConverter.atomicToOffset(0),
-          0)
+        assert.equal(millisConverter.atomicToOffset(0), 0)
 
         // START OF SMEAR
-        assert.equal(millisConverter.atomicToOffset(Date.UTC(1979, DEC, 31, 11, 59, 59, 999)),
-          0)
-        assert.equal(millisConverter.atomicToOffset(Date.UTC(1979, DEC, 31, 12, 0, 0, 0)),
-          0)
-        assert.equal(millisConverter.atomicToOffset(Date.UTC(1979, DEC, 31, 12, 0, 0, 1)),
-          -1) // truncated down from -0.000...1
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1979, DEC, 31, 11, 59, 59, 999)), 0)
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1979, DEC, 31, 12, 0, 0, 0)), 0)
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1979, DEC, 31, 12, 0, 0, 1)), -1) // truncated down from -0.000...1
 
         // MIDPOINT OF SMEAR
-        assert.equal(millisConverter.atomicToOffset(Date.UTC(1979, DEC, 31, 23, 59, 59, 500)),
-          -500)
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1979, DEC, 31, 23, 59, 59, 500)), -500)
 
         // END OF SMEAR
-        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 11, 59, 59, 999)),
-          -1000) // truncated down from -999.999...9
-        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 11, 59, 59, 0)),
-          -1000)
-        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 11, 59, 59, 1)),
-          -1000)
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 11, 59, 59, 999)), -1000) // truncated down from -999.999...9
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 11, 59, 59, 0)), -1000)
+        assert.equal(millisConverter.atomicToOffset(Date.UTC(1980, JAN, 1, 11, 59, 59, 1)), -1000)
       })
     })
   })
@@ -756,12 +627,9 @@ describe('MillisConverter', () => {
         ]
         const millisConverter = new MillisConverter(data, MODELS.OVERRUN)
 
-        assert.deepEqual(millisConverter.unixToAtomic(1, { array: true }),
-          [0]) // truncated from .9 to 0
-        assert.equal(millisConverter.atomicToUnix(0),
-          NaN)
-        assert.equal(millisConverter.atomicToOffset(0),
-          NaN)
+        assert.deepEqual(millisConverter.unixToAtomic(1, { array: true }), [0]) // truncated from .9 to 0
+        assert.equal(millisConverter.atomicToUnix(0), NaN)
+        assert.equal(millisConverter.atomicToOffset(0), NaN)
       })
 
       it('at the end of the ray', () => {
@@ -771,12 +639,9 @@ describe('MillisConverter', () => {
         ]
         const millisConverter = new MillisConverter(data, MODELS.OVERRUN)
 
-        assert.deepEqual(millisConverter.unixToAtomic(-1, { array: true }),
-          [-1])
-        assert.equal(millisConverter.atomicToUnix(-1),
-          NaN)
-        assert.equal(millisConverter.atomicToOffset(-1),
-          NaN)
+        assert.deepEqual(millisConverter.unixToAtomic(-1, { array: true }), [-1])
+        assert.equal(millisConverter.atomicToUnix(-1), NaN)
+        assert.equal(millisConverter.atomicToOffset(-1), NaN)
       })
     })
   })
@@ -793,39 +658,48 @@ describe('MillisConverter', () => {
         const millisConverter = new MillisConverter(data, MODELS.OVERRUN)
 
         it('unixToAtomic (array mode)', () => {
-          assert.deepEqual(millisConverter.unixToAtomic(0, { array: true }), [0])
-          assert.deepEqual(millisConverter.unixToAtomic(999, { array: true }),
+          assert.deepEqual(
+            millisConverter.unixToAtomic(0, { array: true }),
+            [
+              0
+            ]
+          )
+          assert.deepEqual(
+            millisConverter.unixToAtomic(999, { array: true }),
             [
               999
-            ])
-          assert.deepEqual(millisConverter.unixToAtomic(1_000, { array: true }),
+            ]
+          )
+          assert.deepEqual(
+            millisConverter.unixToAtomic(1_000, { array: true }),
             [
               1_000,
               2_000,
               3_000
-            ])
-          assert.deepEqual(millisConverter.unixToAtomic(1_999, { array: true }),
+            ]
+          )
+          assert.deepEqual(
+            millisConverter.unixToAtomic(1_999, { array: true }),
             [
               1_999,
               2_999,
               3_999
-            ])
-          assert.deepEqual(millisConverter.unixToAtomic(2_000, { array: true }),
+            ]
+          )
+          assert.deepEqual(
+            millisConverter.unixToAtomic(2_000, { array: true }),
             [
               4_000
-            ])
+            ]
+          )
         })
 
         it('unixToAtomic', () => {
           assert.equal(millisConverter.unixToAtomic(0), 0)
-          assert.equal(millisConverter.unixToAtomic(999),
-            999)
-          assert.equal(millisConverter.unixToAtomic(1_000),
-            3_000)
-          assert.equal(millisConverter.unixToAtomic(1_999),
-            3_999)
-          assert.equal(millisConverter.unixToAtomic(2_000),
-            4_000)
+          assert.equal(millisConverter.unixToAtomic(999), 999)
+          assert.equal(millisConverter.unixToAtomic(1_000), 3_000)
+          assert.equal(millisConverter.unixToAtomic(1_999), 3_999)
+          assert.equal(millisConverter.unixToAtomic(2_000), 4_000)
         })
 
         it('atomicToUnix', () => {
@@ -857,83 +731,73 @@ describe('MillisConverter', () => {
         const millisConverter = new MillisConverter(data, MODELS.BREAK)
 
         it('unixToAtomic (range mode)', () => {
-          assert.deepEqual(millisConverter.unixToAtomic(0, { range: true }),
+          assert.deepEqual(
+            millisConverter.unixToAtomic(0, { range: true }),
             [
               0,
               0
-            ])
+            ]
+          )
 
           // STALL POINT
-          assert.deepEqual(millisConverter.unixToAtomic(999, { range: true }),
+          assert.deepEqual(
+            millisConverter.unixToAtomic(999, { range: true }),
             [
               999,
               999
-            ])
-          assert.deepEqual(millisConverter.unixToAtomic(1000, { range: true }),
+            ]
+          )
+          assert.deepEqual(
+            millisConverter.unixToAtomic(1000, { range: true }),
             [
               3000,
               3000
-            ])
-          assert.deepEqual(millisConverter.unixToAtomic(1001, { range: true }),
+            ]
+          )
+          assert.deepEqual(
+            millisConverter.unixToAtomic(1001, { range: true }),
             [
               3001,
               3001
-            ])
+            ]
+          )
         })
 
         it('unixToAtomic', () => {
-          assert.equal(millisConverter.unixToAtomic(0),
-            0)
+          assert.equal(millisConverter.unixToAtomic(0), 0)
 
           // STALL POINT
-          assert.equal(millisConverter.unixToAtomic(999),
-            999)
-          assert.equal(millisConverter.unixToAtomic(1000),
-            3000)
-          assert.equal(millisConverter.unixToAtomic(1001),
-            3001)
+          assert.equal(millisConverter.unixToAtomic(999), 999)
+          assert.equal(millisConverter.unixToAtomic(1000), 3000)
+          assert.equal(millisConverter.unixToAtomic(1001), 3001)
         })
 
         it('atomicToUnix', () => {
-          assert.equal(millisConverter.atomicToUnix(0),
-            0)
+          assert.equal(millisConverter.atomicToUnix(0), 0)
 
           // STALL STARTS
-          assert.equal(millisConverter.atomicToUnix(999),
-            999)
-          assert.equal(millisConverter.atomicToUnix(1000),
-            NaN)
-          assert.equal(millisConverter.atomicToUnix(1001),
-            NaN)
+          assert.equal(millisConverter.atomicToUnix(999), 999)
+          assert.equal(millisConverter.atomicToUnix(1000), NaN)
+          assert.equal(millisConverter.atomicToUnix(1001), NaN)
 
           // STALL ENDS
-          assert.equal(millisConverter.atomicToUnix(2999),
-            NaN)
-          assert.deepEqual(millisConverter.atomicToUnix(3000),
-            1000)
-          assert.deepEqual(millisConverter.atomicToUnix(3001),
-            1001)
+          assert.equal(millisConverter.atomicToUnix(2999), NaN)
+          assert.deepEqual(millisConverter.atomicToUnix(3000), 1000)
+          assert.deepEqual(millisConverter.atomicToUnix(3001), 1001)
         })
 
         it('atomicToOffset', () => {
-          assert.equal(millisConverter.atomicToOffset(0),
-            0)
+          assert.equal(millisConverter.atomicToOffset(0), 0)
 
           // STALL STARTS
-          assert.equal(millisConverter.atomicToOffset(999),
-            0)
-          assert.equal(millisConverter.atomicToOffset(1000),
-            NaN)
-          assert.equal(millisConverter.atomicToOffset(1001),
-            NaN)
+          assert.equal(millisConverter.atomicToOffset(999), 0)
+          assert.equal(millisConverter.atomicToOffset(1000), NaN)
+          assert.equal(millisConverter.atomicToOffset(1001), NaN)
 
           // STALL ENDS
-          assert.equal(millisConverter.atomicToOffset(2999),
-            NaN)
-          assert.deepEqual(millisConverter.atomicToOffset(3000),
-            2000)
-          assert.deepEqual(millisConverter.atomicToOffset(3001),
-            2000)
+          assert.equal(millisConverter.atomicToOffset(2999), NaN)
+          assert.deepEqual(millisConverter.atomicToOffset(3000), 2000)
+          assert.deepEqual(millisConverter.atomicToOffset(3001), 2000)
         })
       })
 
@@ -941,83 +805,73 @@ describe('MillisConverter', () => {
         const millisConverter = new MillisConverter(data, MODELS.STALL)
 
         it('unixToAtomic (range mode)', () => {
-          assert.deepEqual(millisConverter.unixToAtomic(0, { range: true }),
+          assert.deepEqual(
+            millisConverter.unixToAtomic(0, { range: true }),
             [
               0,
               0
-            ])
+            ]
+          )
 
           // STALL POINT
-          assert.deepEqual(millisConverter.unixToAtomic(999, { range: true }),
+          assert.deepEqual(
+            millisConverter.unixToAtomic(999, { range: true }),
             [
               999,
               999
-            ])
-          assert.deepEqual(millisConverter.unixToAtomic(1000, { range: true }),
+            ]
+          )
+          assert.deepEqual(
+            millisConverter.unixToAtomic(1000, { range: true }),
             [
               1000,
               3000
-            ])
-          assert.deepEqual(millisConverter.unixToAtomic(1001, { range: true }),
+            ]
+          )
+          assert.deepEqual(
+            millisConverter.unixToAtomic(1001, { range: true }),
             [
               3001,
               3001
-            ])
+            ]
+          )
         })
 
         it('unixToAtomic', () => {
-          assert.equal(millisConverter.unixToAtomic(0),
-            0)
+          assert.equal(millisConverter.unixToAtomic(0), 0)
 
           // STALL POINT
-          assert.equal(millisConverter.unixToAtomic(999),
-            999)
-          assert.equal(millisConverter.unixToAtomic(1000),
-            3000)
-          assert.equal(millisConverter.unixToAtomic(1001),
-            3001)
+          assert.equal(millisConverter.unixToAtomic(999), 999)
+          assert.equal(millisConverter.unixToAtomic(1000), 3000)
+          assert.equal(millisConverter.unixToAtomic(1001), 3001)
         })
 
         it('atomicToUnix', () => {
-          assert.equal(millisConverter.atomicToUnix(0),
-            0)
+          assert.equal(millisConverter.atomicToUnix(0), 0)
 
           // STALL STARTS
-          assert.equal(millisConverter.atomicToUnix(999),
-            999)
-          assert.equal(millisConverter.atomicToUnix(1000),
-            1000)
-          assert.equal(millisConverter.atomicToUnix(1001),
-            1000)
+          assert.equal(millisConverter.atomicToUnix(999), 999)
+          assert.equal(millisConverter.atomicToUnix(1000), 1000)
+          assert.equal(millisConverter.atomicToUnix(1001), 1000)
 
           // STALL ENDS
-          assert.deepEqual(millisConverter.atomicToUnix(2999),
-            1000)
-          assert.deepEqual(millisConverter.atomicToUnix(3000),
-            1000)
-          assert.deepEqual(millisConverter.atomicToUnix(3001),
-            1001)
+          assert.deepEqual(millisConverter.atomicToUnix(2999), 1000)
+          assert.deepEqual(millisConverter.atomicToUnix(3000), 1000)
+          assert.deepEqual(millisConverter.atomicToUnix(3001), 1001)
         })
 
         it('atomicToOffset', () => {
-          assert.equal(millisConverter.atomicToOffset(0),
-            0)
+          assert.equal(millisConverter.atomicToOffset(0), 0)
 
           // STALL STARTS
-          assert.equal(millisConverter.atomicToOffset(999),
-            0)
-          assert.equal(millisConverter.atomicToOffset(1000),
-            0)
-          assert.equal(millisConverter.atomicToOffset(1001),
-            1)
+          assert.equal(millisConverter.atomicToOffset(999), 0)
+          assert.equal(millisConverter.atomicToOffset(1000), 0)
+          assert.equal(millisConverter.atomicToOffset(1001), 1)
 
           // STALL ENDS
-          assert.deepEqual(millisConverter.atomicToOffset(2999),
-            1999)
-          assert.deepEqual(millisConverter.atomicToOffset(3000),
-            2000)
-          assert.deepEqual(millisConverter.atomicToOffset(3001),
-            2000)
+          assert.deepEqual(millisConverter.atomicToOffset(2999), 1999)
+          assert.deepEqual(millisConverter.atomicToOffset(3000), 2000)
+          assert.deepEqual(millisConverter.atomicToOffset(3001), 2000)
         })
       })
     })
@@ -1273,15 +1127,19 @@ describe('MillisConverter', () => {
 
       describe('BREAK', () => {
         it('says no', () => {
-          assert.throws(() => new MillisConverter(data, MODELS.BREAK),
-            /segment length must be positive/)
+          assert.throws(
+            () => new MillisConverter(data, MODELS.BREAK),
+            /segment length must be positive/
+          )
         })
       })
 
       describe('STALL', () => {
         it('says no', () => {
-          assert.throws(() => new MillisConverter(data, MODELS.STALL),
-            /segment length must be positive/)
+          assert.throws(
+            () => new MillisConverter(data, MODELS.STALL),
+            /segment length must be positive/
+          )
         })
       })
     })
@@ -1295,44 +1153,55 @@ describe('MillisConverter', () => {
     const millisConverter = new MillisConverter(data, MODELS.OVERRUN)
 
     it('before anything clever occurs', () => {
-      assert.deepEqual(millisConverter.unixToAtomic(Date.UTC(1963, OCT, 31, 23, 59, 59, 999), { array: true }),
+      assert.deepEqual(
+        millisConverter.unixToAtomic(Date.UTC(1963, OCT, 31, 23, 59, 59, 999), { array: true }),
         [
           Date.UTC(1963, NOV, 1, 0, 0, 2, 596)
-        ])
+        ]
+      )
       // -194_745_597_404_844_400_013n TAI picoseconds
     })
 
     it('exactly at the time', () => {
-      assert.deepEqual(millisConverter.unixToAtomic(Date.UTC(1963, NOV, 1, 0, 0, 0, 0), { array: true }),
+      assert.deepEqual(
+        millisConverter.unixToAtomic(Date.UTC(1963, NOV, 1, 0, 0, 0, 0), { array: true }),
         [
           Date.UTC(1963, NOV, 1, 0, 0, 2, 597),
           Date.UTC(1963, NOV, 1, 0, 0, 2, 697)
-        ])
-      // assert.deepEqual(millisConverter.unixToAtomicPicos(Date.UTC(1963, NOV, 1, 0, 0, 0, 0)))
+        ]
+      )
     })
 
     it('then', () => {
-      assert.deepEqual(millisConverter.unixToAtomic(Date.UTC(1963, NOV, 1, 0, 0, 0, 1), { array: true }),
+      assert.deepEqual(
+        millisConverter.unixToAtomic(Date.UTC(1963, NOV, 1, 0, 0, 0, 1), { array: true }),
         [
           Date.UTC(1963, NOV, 1, 0, 0, 2, 598),
           Date.UTC(1963, NOV, 1, 0, 0, 2, 698)
-        ])
+        ]
+      )
 
-      assert.deepEqual(millisConverter.unixToAtomic(Date.UTC(1963, NOV, 1, 0, 0, 0, 99), { array: true }),
+      assert.deepEqual(
+        millisConverter.unixToAtomic(Date.UTC(1963, NOV, 1, 0, 0, 0, 99), { array: true }),
         [
           Date.UTC(1963, NOV, 1, 0, 0, 2, 696),
           Date.UTC(1963, NOV, 1, 0, 0, 2, 796) // -194_659_197_203_721_198_713n TAI
-        ])
+        ]
+      )
 
-      assert.deepEqual(millisConverter.unixToAtomic(Date.UTC(1963, NOV, 1, 0, 0, 0, 100), { array: true }),
+      assert.deepEqual(
+        millisConverter.unixToAtomic(Date.UTC(1963, NOV, 1, 0, 0, 0, 100), { array: true }),
         [
           Date.UTC(1963, NOV, 1, 0, 0, 2, 797)
-        ])
+        ]
+      )
 
-      assert.deepEqual(millisConverter.unixToAtomic(Date.UTC(1963, NOV, 1, 0, 0, 0, 101), { array: true }),
+      assert.deepEqual(
+        millisConverter.unixToAtomic(Date.UTC(1963, NOV, 1, 0, 0, 0, 101), { array: true }),
         [
           Date.UTC(1963, NOV, 1, 0, 0, 2, 798)
-        ])
+        ]
+      )
     })
   })
 })
