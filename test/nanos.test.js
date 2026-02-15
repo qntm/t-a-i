@@ -102,10 +102,48 @@ describe('TaiConverter', () => {
       })
     })
 
+    describe('atomicToOffset', () => {
+      it('typical', () => {
+        // A typical leap second from the past, note repetition
+        assert.equal(taiConverter.atomicToOffset(BigInt(Date.UTC(1999, JAN, 1, 0, 0, 29, 750)) * 1_000_000n),
+          31_000_000_000n)
+        assert.equal(taiConverter.atomicToOffset(BigInt(Date.UTC(1999, JAN, 1, 0, 0, 30, 0)) * 1_000_000n),
+          31_000_000_000n)
+        assert.equal(taiConverter.atomicToOffset(BigInt(Date.UTC(1999, JAN, 1, 0, 0, 30, 250)) * 1_000_000n),
+          31_000_000_000n)
+        assert.equal(taiConverter.atomicToOffset(BigInt(Date.UTC(1999, JAN, 1, 0, 0, 30, 500)) * 1_000_000n),
+          31_000_000_000n)
+        assert.equal(taiConverter.atomicToOffset(BigInt(Date.UTC(1999, JAN, 1, 0, 0, 30, 750)) * 1_000_000n),
+          31_000_000_000n)
+        assert.equal(taiConverter.atomicToOffset(BigInt(Date.UTC(1999, JAN, 1, 0, 0, 31, 0)) * 1_000_000n),
+          31_000_000_000n)
+        assert.equal(taiConverter.atomicToOffset(BigInt(Date.UTC(1999, JAN, 1, 0, 0, 31, 250)) * 1_000_000n),
+          31_000_000_000n)
+        assert.equal(taiConverter.atomicToOffset(BigInt(Date.UTC(1999, JAN, 1, 0, 0, 31, 500)) * 1_000_000n),
+          31_000_000_000n)
+        assert.equal(taiConverter.atomicToOffset(BigInt(Date.UTC(1999, JAN, 1, 0, 0, 31, 750)) * 1_000_000n),
+          31_000_000_000n)
+        assert.equal(taiConverter.atomicToOffset(BigInt(Date.UTC(1999, JAN, 1, 0, 0, 32, 0)) * 1_000_000n),
+          32_000_000_000n)
+        assert.equal(taiConverter.atomicToOffset(BigInt(Date.UTC(1999, JAN, 1, 0, 0, 32, 250)) * 1_000_000n),
+          32_000_000_000n)
+        assert.equal(taiConverter.atomicToOffset(BigInt(Date.UTC(1999, JAN, 1, 0, 0, 32, 500)) * 1_000_000n),
+          32_000_000_000n)
+        assert.equal(taiConverter.atomicToOffset(BigInt(Date.UTC(1999, JAN, 1, 0, 0, 32, 750)) * 1_000_000n),
+          32_000_000_000n)
+        assert.equal(taiConverter.atomicToOffset(BigInt(Date.UTC(1999, JAN, 1, 0, 0, 33, 0)) * 1_000_000n),
+          32_000_000_000n)
+        assert.equal(taiConverter.atomicToOffset(BigInt(Date.UTC(1999, JAN, 1, 0, 0, 33, 250)) * 1_000_000n),
+          32_000_000_000n)
+      })
+    })
+
     describe('TAI->Unix conversions', () => {
       it('now-ish', () => {
-        assert.equal(taiConverter.atomicToUnix(Date.UTC(2016, OCT, 27, 20, 5, 50, 678) * 1_000_000),
-          Date.UTC(2016, OCT, 27, 20, 5, 14, 678) * 1_000_000)
+        assert.equal(taiConverter.atomicToUnix(BigInt(Date.UTC(2016, OCT, 27, 20, 5, 50, 678)) * 1_000_000n),
+          BigInt(Date.UTC(2016, OCT, 27, 20, 5, 14, 678)) * 1_000_000n)
+        assert.equal(taiConverter.atomicToOffset(BigInt(Date.UTC(2016, OCT, 27, 20, 5, 50, 678)) * 1_000_000n),
+          36_000_000_000n)
       })
     })
 
@@ -172,6 +210,67 @@ describe('TaiConverter', () => {
 
       assert.equal(unixNanos, 1_483_271_999_999_000_000n)
       assert.equal(taiNanos, 1_483_272_036_998_999_988n)
+    })
+  })
+
+  describe('atomicToOffset', () => {
+    it('may or may not reflect a simple subtraction', () => {
+      const taiConverter = TaiConverter(MODELS.STALL)
+
+      assert.equal(taiConverter.unixToAtomic(0n), 8_000_082_000n) // exact
+      assert.equal(taiConverter.unixToAtomic(1n), 8_000_082_000n + 1n) // truncated
+      assert.equal(taiConverter.unixToAtomic(33_333_333n), 8_000_082_000n + 33_333_333n) // truncated
+      // 33,333,333.3...ns would be exactly 1ns of drift
+      assert.equal(taiConverter.unixToAtomic(33_333_334n), 8_000_082_000n + 33_333_335n) // truncated
+
+      assert.equal(taiConverter.unixToAtomic(100_000_000n), 8_100_082_003n) // 3 ns drift, exact
+      assert.equal(taiConverter.unixToAtomic(1_000_000_000n), 9_000_082_030n) // 30 ns drift, exact
+      assert.equal(taiConverter.unixToAtomic(2_000_000_000n), 10_000_082_060n) // 60 ns drift
+      assert.equal(taiConverter.unixToAtomic(86_400_000_000_000n), 86_408_002_674_000n) // 2,592,000 ns drift
+
+      // Reverse
+      assert.equal(taiConverter.atomicToUnix(8_000_082_000n), 0n)
+      assert.equal(taiConverter.atomicToUnix(8_000_082_001n), 0n) // truncated
+      assert.equal(taiConverter.atomicToUnix(8_000_082_002n), 1n) // truncated
+      assert.equal(taiConverter.atomicToUnix(8_000_082_010n), 9n) // truncated
+      assert.equal(taiConverter.atomicToUnix(8_000_082_011n), 10n) // truncated
+      assert.equal(taiConverter.atomicToUnix(8_000_082_100n), 99n) // truncated
+      assert.equal(taiConverter.atomicToUnix(8_000_082_101n), 100n) // truncated
+      assert.equal(taiConverter.atomicToUnix(8_000_083_000n), 999n) // truncated
+      assert.equal(taiConverter.atomicToUnix(8_000_083_001n), 1_000n) // truncated
+      assert.equal(taiConverter.atomicToUnix(8_000_092_000n), 9_999n) // truncated
+      assert.equal(taiConverter.atomicToUnix(8_000_092_001n), 10_000n) // truncated
+      assert.equal(taiConverter.atomicToUnix(8_000_182_000n), 99_999n) // truncated
+      assert.equal(taiConverter.atomicToUnix(8_000_182_001n), 100_000n) // truncated
+      assert.equal(taiConverter.atomicToUnix(8_001_082_000n), 999_999n) // truncated
+      assert.equal(taiConverter.atomicToUnix(8_001_082_001n), 1_000_000n) // truncated
+      assert.equal(taiConverter.atomicToUnix(8_010_082_000n), 9_999_999n) // truncated
+      assert.equal(taiConverter.atomicToUnix(8_010_082_001n), 10_000_000n) // truncated
+      assert.equal(taiConverter.atomicToUnix(8_000_082_000n + 33_333_333n), 33_333_332n)
+      assert.equal(taiConverter.atomicToUnix(8_000_082_000n + 33_333_334n), 33_333_333n)
+      assert.equal(taiConverter.atomicToUnix(8_000_082_000n + 33_333_335n), 33_333_333n)
+      assert.equal(taiConverter.atomicToUnix(8_100_082_003n), 100_000_000n)
+      assert.equal(taiConverter.atomicToUnix(8_500_082_015n), 500_000_000n)
+      assert.equal(taiConverter.atomicToUnix(9_000_082_030n), 1_000_000_000n)
+      assert.equal(taiConverter.atomicToUnix(10_000_082_060n), 2_000_000_000n)
+      assert.equal(taiConverter.atomicToUnix(86_408_002_674_000n), 86_400_000_000_000n)
+
+      assert.equal(taiConverter.atomicToOffset(8_000_082_000n), 8_000_082_000n)
+      assert.equal(taiConverter.atomicToOffset(8_000_082_001n), 8_000_082_000n)
+      assert.equal(taiConverter.atomicToOffset(8_000_082_002n), 8_000_082_000n)
+      assert.equal(taiConverter.atomicToOffset(8_000_082_000n + 33_333_333n), 8_000_082_000n)
+      assert.equal(taiConverter.atomicToOffset(8_000_082_000n + 33_333_334n), 8_000_082_000n)
+      assert.equal(taiConverter.atomicToOffset(8_000_082_000n + 33_333_335n), 8_000_082_001n)
+      assert.equal(taiConverter.atomicToOffset(8_100_082_003n), 8_000_082_000n + 3n)
+      assert.equal(taiConverter.atomicToOffset(8_500_082_015n), 8_000_082_000n + 15n)
+      assert.equal(taiConverter.atomicToOffset(9_000_082_030n), 8_000_082_000n + 30n)
+      assert.equal(taiConverter.atomicToOffset(10_000_082_060n), 8_000_082_000n + 60n)
+      assert.equal(taiConverter.atomicToOffset(86_408_002_674_000n), 8_000_082_000n + 2_592_000n)
+
+      // Here is a succinct demonstration of why `atomicToOffset` exists
+      const atomic = 8_000_082_001n
+      assert.equal(atomic - taiConverter.atomicToUnix(atomic), 8_000_082_001n) // wrong
+      assert.equal(taiConverter.atomicToOffset(atomic), 8_000_082_000n) // right
     })
   })
 })
