@@ -12,17 +12,17 @@ const unwrap = millis => {
     throw Error(`Not an integer: ${millis}`)
   }
 
-  millis = Second.fromMillis(millis)
+  const second = Second.fromMillis(millis)
 
-  return { isInteger, millis }
+  return { isInteger, second }
 }
 
-const wrap = ({ isInteger, millis }) => {
-  if (Number.isNaN(millis)) {
-    return millis
+const wrap = ({ isInteger, second }) => {
+  if (Number.isNaN(second)) {
+    return second
   }
 
-  millis = millis.toMillis()
+  let millis = second.toMillis()
 
   if (isInteger) {
     millis = Number(millis)
@@ -38,24 +38,24 @@ export class MillisConverter {
   }
 
   atomicToUnix (atomicMillis) {
-    const { isInteger, millis: atomic } = unwrap(atomicMillis)
+    const { isInteger, second: atomic } = unwrap(atomicMillis)
     const unix = this.converter.atomicToUnix(atomic)
-    return wrap({ isInteger, millis: unix })
+    return wrap({ isInteger, second: unix })
   }
 
   atomicToOffset (atomicMillis) {
-    const { isInteger, millis: atomic } = unwrap(atomicMillis)
+    const { isInteger, second: atomic } = unwrap(atomicMillis)
     const unix = this.converter.atomicToOffset(atomic)
-    return wrap({ isInteger, millis: unix })
+    return wrap({ isInteger, second: unix })
   }
 
   unixToAtomic (unixMillis, options = {}) {
-    const { isInteger, millis: unix } = unwrap(unixMillis)
+    const { isInteger, second: unix } = unwrap(unixMillis)
 
     const ranges = this.converter.unixToAtomic(unix)
       .map(range => [
-        wrap({ isInteger, millis: range.start }),
-        wrap({ isInteger, millis: range.end })
+        wrap({ isInteger, second: range.start }),
+        wrap({ isInteger, second: range.end })
       ])
 
     if (options.array === true) {

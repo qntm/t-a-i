@@ -12,17 +12,17 @@ const unwrap = nanos => {
     throw Error(`Not an integer: ${nanos}`)
   }
 
-  nanos = Second.fromNanos(nanos)
+  const second = Second.fromNanos(nanos)
 
-  return { isInteger, nanos }
+  return { isInteger, second }
 }
 
-const wrap = ({ isInteger, nanos }) => {
-  if (Number.isNaN(nanos)) {
-    return nanos
+const wrap = ({ isInteger, second }) => {
+  if (Number.isNaN(second)) {
+    return second
   }
 
-  nanos = nanos.toNanos()
+  let nanos = second.toNanos()
 
   if (isInteger) {
     nanos = Number(nanos)
@@ -38,23 +38,23 @@ export class NanosConverter {
   }
 
   atomicToUnix (atomicNanos) {
-    const { isInteger, nanos: atomic } = unwrap(atomicNanos)
+    const { isInteger, second: atomic } = unwrap(atomicNanos)
     const unix = this.converter.atomicToUnix(atomic)
-    return wrap({ isInteger, nanos: unix })
+    return wrap({ isInteger, second: unix })
   }
 
   atomicToOffset (atomicNanos) {
-    const { isInteger, nanos: atomic } = unwrap(atomicNanos)
+    const { isInteger, second: atomic } = unwrap(atomicNanos)
     const unix = this.converter.atomicToOffset(atomic)
-    return wrap({ isInteger, nanos: unix })
+    return wrap({ isInteger, second: unix })
   }
 
   unixToAtomic (unixNanos, options = {}) {
-    const { isInteger, nanos: unix } = unwrap(unixNanos)
+    const { isInteger, second: unix } = unwrap(unixNanos)
     const ranges = this.converter.unixToAtomic(unix)
       .map(range => [
-        wrap({ isInteger, nanos: range.start }),
-        wrap({ isInteger, nanos: range.end })
+        wrap({ isInteger, second: range.start }),
+        wrap({ isInteger, second: range.end })
       ])
 
     if (options.array === true) {

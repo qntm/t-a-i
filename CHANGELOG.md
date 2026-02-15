@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 5.1.0
+
+Added `atomicToOffset()`.
+
 ## 5.0.0
 
 Support for Node.js 22 and lower is dropped.

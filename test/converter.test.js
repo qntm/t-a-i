@@ -6,6 +6,7 @@ import { MODELS } from '../src/munge.js'
 import { Range } from '../src/range.js'
 import { Rat } from '../src/rat.js'
 import { Second } from '../src/second.js'
+import { taiData } from '../src/tai-data.js'
 
 const JAN = 0
 const DEC = 11
@@ -896,6 +897,35 @@ describe('Converter', () => {
             /segment length must be positive/)
         })
       })
+    })
+  })
+
+  describe('real data', () => {
+    const converter = new Converter(taiData, MODELS.SMEAR)
+
+    it('exactly at the Unix epoch', () => {
+      const atomic = new Second(new Rat(8_000_082_000n, 1_000_000_000n))
+      const unix = converter.atomicToUnix(atomic)
+      const offset = converter.atomicToOffset(atomic)
+
+      assert.deepEqual(unix, new Second(new Rat(0n)))
+      assert.deepEqual(offset, new Second(new Rat(8_000_082_000n, 1_000_000_000n)))
+      assert.deepEqual(atomic.minusS(unix), offset)
+    })
+
+    it('one nanosecond after the Unix epoch', () => {
+      const atomic = new Second(new Rat(8_000_082_001n, 1_000_000_000n))
+      const unix = converter.atomicToUnix(atomic)
+      const offset = converter.atomicToOffset(atomic)
+
+      assert.deepEqual(unix, new Second(new Rat(1n, 1_000_000_030n))) // 0.99999997000000089999997300000081ns
+      assert.deepEqual(offset, new Second(new Rat(8_000_082_240_002_460_030n, 1_000_000_030_000_000_000n))) // 8000082000.0000000299999991ns
+      assert.deepEqual(atomic.minusS(unix), offset)
+
+      // However, truncations to nanoseconds lose precision
+      assert.equal(atomic.toNanos(), 8_000_082_001n) // exact
+      assert.equal(unix.toNanos(), 0n) // falls just short of 1n and so truncates to 0n
+      assert.equal(offset.toNanos(), 8_000_082_000n) // just over 8_000_082_000 and so truncates to 8_000_082_000
     })
   })
 })

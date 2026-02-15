@@ -176,7 +176,7 @@ Returns a TAI/Unix converter object whose conversions obey the specified model. 
 
 ### taiConverter.atomicToUnix(atomic)
 
-Throws unless `atomic` is an integer. Converts the input TAI millisecond count to a Unix millisecond count. Under normal circumstances this conversion returns a single integer. If the input is a BigInt, a BigInt is returned. If the precise value to be returned is fractional, it is rounded towards negative infinity. If the input is prior to the beginning of TAI, `NaN` is returned.
+Converts the input TAI millisecond count to a Unix millisecond count. Throws if `atomic` is not an integer. Returns an integer. If the precise value to be returned is fractional, it is rounded towards negative infinity. If `atomic` is a BigInt, returns a BigInt. If `atomic` is prior to the beginning of TAI, `NaN` is returned (even if `atomic` is a BigInt).
 
 When Unix time is inserted,
 
@@ -187,12 +187,30 @@ When Unix time is inserted,
 
 When Unix time is removed,
 
-* with the `OVERRUN`, `BREAK` and `STALL` models, the returned Unix millisecond count jumps up discontinuously between input one TAI millisecond count and the next.
+* with the `OVERRUN`, `BREAK` and `STALL` models, the returned Unix millisecond count jumps up discontinuously between one input TAI millisecond count and the next.
 * with the `SMEAR` model, the discontinuity is smeared out from midday to midday across the discontinuity.
+
+### taiConverter.atomicToOffset(atomic)
+
+Converts the input TAI millisecond count to the current difference in milliseconds between TAI and Unix time. Throws if `atomic` is not an integer. Returns an integer. If the precise value to be returned is fractional, it is rounded towards negative infinity. If `atomic` is a BigInt, returns a BigInt. If `atomic` is prior to the beginning of TAI, `NaN` is returned (even if `atomic` is a BigInt). It is recommend to use this instead of `atomic - taiConverter.atomicToOffset(atomic)` because it returns more accurate results.
+
+The returned value is always positive, as TAI has been ahead of Unix time for as long as both have been well-defined. Prior to 1 January 1972, Unix seconds were slightly shorter than TAI seconds (the precise ratio varied), so the offset increased smoothly over the course of months and years. After 1 January 1972, Unix seconds and TAI seconds are precisely the same length, so the offset is fixed.
+
+When Unix time is inserted,
+
+* with the `OVERRUN` model, the offset jumps up discontinuously between one input TAI millisecond count and the next.
+* with the `BREAK` model,  Unix time is indeterminate; `NaN` is returned.
+* with the `STALL` model, the offset increases smoothly over the course of the inserted time.
+* with the `SMEAR` model, the offset increases smoothly from midday to midday across the discontinuity.
+
+When Unix time is removed,
+
+* with the `OVERRUN`, `BREAK` and `STALL` models, the offset jumps down discontinuously between input one TAI millisecond count and the next.
+* with the `SMEAR` model, the offset decreases smoothly from midday to midday across the discontinuity.
 
 ### taiConverter.unixToAtomic(unix[, options])
 
-Throws unless `unix` is an integer. Converts the input Unix millisecond count to a TAI millisecond count. Under normal circumstances this conversion returns a single integer. If the input is a BigInt, a BigInt is returned. If the precise value to be returned is fractional, it is rounded towards negative infinity. If the input is prior to the beginning of TAI, `NaN` is returned.
+Converts the input Unix millisecond count to a TAI millisecond count. Throws if `unix` is not an integer. Under normal circumstances, returns a single integer. If the precise value to be returned is fractional, it is rounded towards negative infinity. If `unix` is a BigInt, a BigInt is returned. If `unix` is prior to the beginning of TAI (_i.e._ less than `UNIX_START`), `NaN` is returned (even if `unix` is a BigInt).
 
 When Unix time is inserted,
 
