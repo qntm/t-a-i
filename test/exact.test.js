@@ -583,7 +583,7 @@ describe('TaiConverter', () => {
         [
           new Range(new Second(new Rat(-252_460_798_153_141_999_987n, 1_000_000_000_000n)))
         ]
-          )
+      )
     })
 
     describe('TAI raw data conversion unit tests based on magic numbers', () => {
