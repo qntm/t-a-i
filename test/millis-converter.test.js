@@ -3,7 +3,6 @@ import { describe, it } from 'node:test'
 
 import { MODELS } from '../src/munge.js'
 import { MillisConverter } from '../src/millis-converter.js'
-import { taiData } from '../src/tai-data.js'
 
 const JAN = 0
 const OCT = 9

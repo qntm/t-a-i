@@ -52,7 +52,7 @@ export class MillisConverter {
 
   atomicToDriftRate (atomicMillis) {
     const { isInteger, second: atomic } = unwrap(atomicMillis)
-    let atomicPerUnix = this.converter.atomicToDriftRate(atomic)
+    const atomicPerUnix = this.converter.atomicToDriftRate(atomic)
 
     if (Number.isNaN(atomicPerUnix) || atomicPerUnix === Infinity) {
       return atomicPerUnix

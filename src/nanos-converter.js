@@ -52,7 +52,7 @@ export class NanosConverter {
 
   atomicToDriftRate (atomicNanos) {
     const { isInteger, second: atomic } = unwrap(atomicNanos)
-    let atomicPerUnix = this.converter.atomicToDriftRate(atomic)
+    const atomicPerUnix = this.converter.atomicToDriftRate(atomic)
 
     if (Number.isNaN(atomicPerUnix) || atomicPerUnix === Infinity) {
       return atomicPerUnix
