@@ -340,7 +340,7 @@ describe('TaiConverter', () => {
       )
     })
 
-    it('during smear of 1 Jan 2017: 1 seconds inserted', () => {
+    it('during smear of 1 Jan 2017: 1 second inserted', () => {
       const taiConverter = TaiConverter(MODELS.SMEAR)
 
       // Start of smear
