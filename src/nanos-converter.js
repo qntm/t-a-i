@@ -1,3 +1,4 @@
+import { Rat } from './rat.js'
 import { Second } from './second.js'
 import { Converter } from './converter.js'
 
@@ -47,6 +48,23 @@ export class NanosConverter {
     const { isInteger, second: atomic } = unwrap(atomicNanos)
     const unix = this.converter.atomicToOffset(atomic)
     return wrap({ isInteger, second: unix })
+  }
+
+  atomicToDriftRate (atomicNanos) {
+    const { isInteger, second: atomic } = unwrap(atomicNanos)
+    let atomicPerUnix = this.converter.atomicToDriftRate(atomic)
+
+    if (Number.isNaN(atomicPerUnix) || atomicPerUnix === Infinity) {
+      return atomicPerUnix
+    }
+
+    let atomicNanosPerUnixDay = atomicPerUnix.times(new Rat(86_400_000_000_000n)).trunc()
+
+    if (isInteger) {
+      atomicNanosPerUnixDay = Number(atomicNanosPerUnixDay)
+    }
+
+    return atomicNanosPerUnixDay
   }
 
   unixToAtomic (unixNanos, options = {}) {

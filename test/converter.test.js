@@ -24,6 +24,7 @@ describe('Converter', () => {
         assert.deepEqual(converter.unixToAtomic(Second.fromMillis(0n)), [new Range(Second.fromMillis(0n))])
         assert.deepEqual(converter.atomicToUnix(Second.fromMillis(0n)), Second.fromMillis(0n))
         assert.deepEqual(converter.atomicToOffset(Second.fromMillis(0n)), Second.fromMillis(0n))
+        assert.deepEqual(converter.atomicToDriftRate(Second.fromMillis(0n)), new Rat(0n))
       })
     })
 
@@ -34,6 +35,7 @@ describe('Converter', () => {
         assert.deepEqual(converter.unixToAtomic(Second.fromMillis(0n)), [new Range(Second.fromMillis(0n))])
         assert.deepEqual(converter.atomicToUnix(Second.fromMillis(0n)), Second.fromMillis(0n))
         assert.deepEqual(converter.atomicToOffset(Second.fromMillis(0n)), Second.fromMillis(0n))
+        assert.deepEqual(converter.atomicToDriftRate(Second.fromMillis(0n)), new Rat(0n))
       })
     })
 
@@ -44,6 +46,7 @@ describe('Converter', () => {
         assert.deepEqual(converter.atomicToUnix(Second.fromMillis(0n)), Second.fromMillis(0n))
         assert.equal(converter.atomicToUnix(Second.fromMillis(-1n)), NaN)
         assert.equal(converter.atomicToOffset(Second.fromMillis(-1n)), NaN)
+        assert.deepEqual(converter.atomicToDriftRate(Second.fromMillis(-1n)), NaN)
       })
 
       it('fails when the Unix count is out of bounds', () => {
@@ -55,6 +58,7 @@ describe('Converter', () => {
         assert.deepEqual(converter.unixToAtomic(Second.fromMillis(0n)), [new Range(Second.fromMillis(0n))])
         assert.deepEqual(converter.atomicToUnix(Second.fromMillis(0n)), Second.fromMillis(0n))
         assert.deepEqual(converter.atomicToOffset(Second.fromMillis(0n)), Second.fromMillis(0n))
+        assert.deepEqual(converter.atomicToDriftRate(Second.fromMillis(0n)), new Rat(0n))
       })
     })
 
@@ -65,6 +69,7 @@ describe('Converter', () => {
         assert.deepEqual(converter.unixToAtomic(Second.fromMillis(0n)), [new Range(Second.fromMillis(0n))])
         assert.deepEqual(converter.atomicToUnix(Second.fromMillis(0n)), Second.fromMillis(0n))
         assert.deepEqual(converter.atomicToOffset(Second.fromMillis(0n)), Second.fromMillis(0n))
+        assert.deepEqual(converter.atomicToDriftRate(Second.fromMillis(0n)), new Rat(0n))
       })
     })
   })
@@ -186,6 +191,37 @@ describe('Converter', () => {
           Second.fromMillis(1_000n)
         )
       })
+
+      it('atomicToDriftRate', () => {
+        assert.deepEqual(converter.atomicToDriftRate(Second.fromMillis(0n)), new Rat(0n))
+
+        assert.deepEqual(
+          converter.atomicToDriftRate(Second.fromMillis(BigInt(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))),
+          new Rat(0n)
+        )
+        assert.deepEqual(
+          converter.atomicToDriftRate(Second.fromMillis(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)))),
+          new Rat(0n)
+        )
+        assert.deepEqual(
+          converter.atomicToDriftRate(Second.fromMillis(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 1)))),
+          new Rat(0n)
+        )
+
+        // BACKTRACK
+        assert.deepEqual(
+          converter.atomicToDriftRate(Second.fromMillis(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)))),
+          new Rat(0n)
+        )
+        assert.deepEqual(
+          converter.atomicToDriftRate(Second.fromMillis(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 1, 0)))),
+          new Rat(0n)
+        )
+        assert.deepEqual(
+          converter.atomicToDriftRate(Second.fromMillis(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 1, 1)))),
+          new Rat(0n)
+        )
+      })
     })
 
     describe('BREAK', () => {
@@ -302,6 +338,38 @@ describe('Converter', () => {
           Second.fromMillis(1_000n)
         )
       })
+
+      it('atomicToDriftRate', () => {
+        assert.deepEqual(converter.atomicToDriftRate(Second.fromMillis(0n)), new Rat(0n))
+
+        // UNDEFINED UNIX TIME STARTS
+        assert.deepEqual(
+          converter.atomicToDriftRate(Second.fromMillis(BigInt(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))),
+          new Rat(0n)
+        )
+        assert.equal(
+          converter.atomicToDriftRate(Second.fromMillis(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)))),
+          NaN
+        )
+        assert.equal(
+          converter.atomicToDriftRate(Second.fromMillis(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 1)))),
+          NaN
+        )
+
+        // UNDEFINED UNIX TIME ENDS
+        assert.equal(
+          converter.atomicToDriftRate(Second.fromMillis(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)))),
+          NaN
+        )
+        assert.deepEqual(
+          converter.atomicToDriftRate(Second.fromMillis(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 1, 0)))),
+          new Rat(0n)
+        )
+        assert.deepEqual(
+          converter.atomicToDriftRate(Second.fromMillis(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 1, 1)))),
+          new Rat(0n)
+        )
+      })
     })
 
     describe('STALL', () => {
@@ -400,6 +468,38 @@ describe('Converter', () => {
         assert.deepEqual(
           converter.atomicToOffset(Second.fromMillis(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 1, 1)))),
           Second.fromMillis(1_000n)
+        )
+      })
+
+      it('atomicToDriftRate', () => {
+        assert.deepEqual(converter.atomicToDriftRate(Second.fromMillis(0n)), new Rat(0n))
+
+        // STALL STARTS
+        assert.deepEqual(
+          converter.atomicToDriftRate(Second.fromMillis(BigInt(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)))),
+          new Rat(0n)
+        )
+        assert.equal(
+          converter.atomicToDriftRate(Second.fromMillis(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)))),
+          Infinity
+        )
+        assert.equal(
+          converter.atomicToDriftRate(Second.fromMillis(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 1)))),
+          Infinity
+        )
+
+        // STALL ENDS
+        assert.equal(
+          converter.atomicToDriftRate(Second.fromMillis(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)))),
+          Infinity
+        )
+        assert.deepEqual(
+          converter.atomicToDriftRate(Second.fromMillis(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 1, 0)))),
+          new Rat(0n)
+        )
+        assert.deepEqual(
+          converter.atomicToDriftRate(Second.fromMillis(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 1, 1)))),
+          new Rat(0n)
         )
       })
     })
@@ -539,6 +639,44 @@ describe('Converter', () => {
           Second.fromMillis(1000n)
         )
       })
+
+      it('atomicToDriftRate', () => {
+        assert.deepEqual(converter.atomicToDriftRate(Second.fromMillis(0n)), new Rat(0n))
+
+        // SMEAR STARTS, UNIX TIME RUNS A LITTLE SLOWER THAN ATOMIC
+        assert.deepEqual(
+          converter.atomicToDriftRate(Second.fromMillis(BigInt(Date.UTC(1979, DEC, 31, 11, 59, 59, 999)))),
+          new Rat(0n)
+        )
+        assert.deepEqual(
+          converter.atomicToDriftRate(Second.fromMillis(BigInt(Date.UTC(1979, DEC, 31, 12, 0, 0, 0)))),
+          new Rat(1_000n, 86_400_000n) // TAI will gain 1 second over the course of the next 24 Unix hours
+        )
+        assert.deepEqual(
+          converter.atomicToDriftRate(Second.fromMillis(BigInt(Date.UTC(1979, DEC, 31, 12, 0, 0, 1)))),
+          new Rat(1_000n, 86_400_000n)
+        )
+
+        // SMEAR MIDPOINT
+        assert.deepEqual(
+          converter.atomicToDriftRate(Second.fromMillis(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 500)))),
+          new Rat(1_000n, 86_400_000n)
+        )
+
+        // SMEAR ENDS, UNIX HAS DROPPED A FULL SECOND BEHIND
+        assert.deepEqual(
+          converter.atomicToDriftRate(Second.fromMillis(BigInt(Date.UTC(1980, JAN, 1, 12, 0, 0, 999)))),
+          new Rat(1_000n, 86_400_000n)
+        )
+        assert.deepEqual(
+          converter.atomicToDriftRate(Second.fromMillis(BigInt(Date.UTC(1980, JAN, 1, 12, 0, 1, 0)))),
+          new Rat(0n)
+        )
+        assert.deepEqual(
+          converter.atomicToDriftRate(Second.fromMillis(BigInt(Date.UTC(1980, JAN, 1, 12, 0, 1, 1)))),
+          new Rat(0n)
+        )
+      })
     })
   })
 
@@ -629,6 +767,24 @@ describe('Converter', () => {
           Second.fromMillis(-1_000n)
         )
       })
+
+      it('atomicToDriftRate', () => {
+        assert.deepEqual(converter.atomicToDriftRate(Second.fromMillis(0n)), new Rat(0n))
+
+        // JUMP AHEAD
+        assert.deepEqual(
+          converter.atomicToDriftRate(Second.fromMillis(BigInt(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)))),
+          new Rat(0n)
+        )
+        assert.deepEqual(
+          converter.atomicToDriftRate(Second.fromMillis(BigInt(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)))),
+          new Rat(0n)
+        )
+        assert.deepEqual(
+          converter.atomicToDriftRate(Second.fromMillis(BigInt(Date.UTC(1979, DEC, 31, 23, 59, 59, 1)))),
+          new Rat(0n)
+        )
+      })
     })
 
     describe('BREAK', () => {
@@ -712,6 +868,24 @@ describe('Converter', () => {
           Second.fromMillis(-1_000n)
         )
       })
+
+      it('atomicToDriftRate', () => {
+        assert.deepEqual(converter.atomicToDriftRate(Second.fromMillis(0n)), new Rat(0n))
+
+        // JUMP AHEAD
+        assert.deepEqual(
+          converter.atomicToDriftRate(Second.fromMillis(BigInt(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)))),
+          new Rat(0n)
+        )
+        assert.deepEqual(
+          converter.atomicToDriftRate(Second.fromMillis(BigInt(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)))),
+          new Rat(0n)
+        )
+        assert.deepEqual(
+          converter.atomicToDriftRate(Second.fromMillis(BigInt(Date.UTC(1979, DEC, 31, 23, 59, 59, 1)))),
+          new Rat(0n)
+        )
+      })
     })
 
     describe('STALL', () => {
@@ -793,6 +967,24 @@ describe('Converter', () => {
         assert.deepEqual(
           converter.atomicToOffset(Second.fromMillis(BigInt(Date.UTC(1979, DEC, 31, 23, 59, 59, 1)))),
           Second.fromMillis(-1_000n)
+        )
+      })
+
+      it('atomicToDriftRate', () => {
+        assert.deepEqual(converter.atomicToDriftRate(Second.fromMillis(0n)), new Rat(0n))
+
+        // JUMP AHEAD
+        assert.deepEqual(
+          converter.atomicToDriftRate(Second.fromMillis(BigInt(Date.UTC(1979, DEC, 31, 23, 59, 58, 999)))),
+          new Rat(0n)
+        )
+        assert.deepEqual(
+          converter.atomicToDriftRate(Second.fromMillis(BigInt(Date.UTC(1979, DEC, 31, 23, 59, 59, 0)))),
+          new Rat(0n)
+        )
+        assert.deepEqual(
+          converter.atomicToDriftRate(Second.fromMillis(BigInt(Date.UTC(1979, DEC, 31, 23, 59, 59, 1)))),
+          new Rat(0n)
         )
       })
     })
@@ -932,6 +1124,44 @@ describe('Converter', () => {
           Second.fromMillis(-1_000n)
         )
       })
+
+      it('atomicToDriftRate', () => {
+        assert.deepEqual(converter.atomicToDriftRate(Second.fromMillis(0n)), new Rat(0n))
+
+        // SMEAR STARTS, UNIX TIME RUNS A LITTLE FASTER THAN ATOMIC
+        assert.deepEqual(
+          converter.atomicToDriftRate(Second.fromMillis(BigInt(Date.UTC(1979, DEC, 31, 11, 59, 59, 999)))),
+          new Rat(0n)
+        )
+        assert.deepEqual(
+          converter.atomicToDriftRate(Second.fromMillis(BigInt(Date.UTC(1979, DEC, 31, 12, 0, 0, 0)))),
+          new Rat(-1_000n, 86_400_000n) // TAI will lose 1s over the next 24 Unix hours
+        )
+        assert.deepEqual(
+          converter.atomicToDriftRate(Second.fromMillis(BigInt(Date.UTC(1979, DEC, 31, 12, 0, 0, 1)))),
+          new Rat(-1_000n, 86_400_000n)
+        )
+
+        // SMEAR MIDPOINT
+        assert.deepEqual(
+          converter.atomicToDriftRate(Second.fromMillis(BigInt(Date.UTC(1979, DEC, 31, 23, 59, 59, 500)))),
+          new Rat(-1_000n, 86_400_000n)
+        )
+
+        // SMEAR ENDS, UNIX HAS RUN A FULL SECOND FASTER THAN ATOMIC
+        assert.deepEqual(
+          converter.atomicToDriftRate(Second.fromMillis(BigInt(Date.UTC(1980, JAN, 1, 11, 59, 58, 999)))),
+          new Rat(-1_000n, 86_400_000n)
+        )
+        assert.deepEqual(
+          converter.atomicToDriftRate(Second.fromMillis(BigInt(Date.UTC(1980, JAN, 1, 11, 59, 59, 0)))),
+          new Rat(0n)
+        )
+        assert.deepEqual(
+          converter.atomicToDriftRate(Second.fromMillis(BigInt(Date.UTC(1980, JAN, 1, 11, 59, 59, 1)))),
+          new Rat(0n)
+        )
+      })
     })
   })
 
@@ -957,6 +1187,10 @@ describe('Converter', () => {
           converter.atomicToOffset(new Second(new Rat(900n, 1_000_000n))),
           new Second(new Rat(-1n, 10_000n))
         )
+        assert.deepEqual(
+          converter.atomicToDriftRate(new Second(new Rat(900n, 1_000_000n))),
+          new Rat(0n)
+        )
       })
 
       it('at the end of the ray', () => {
@@ -979,6 +1213,10 @@ describe('Converter', () => {
         assert.deepEqual(
           converter.atomicToOffset(new Second(new Rat(-900n, 1_000_000n))),
           new Second(new Rat(1n, 10_000n))
+        )
+        assert.deepEqual(
+          converter.atomicToDriftRate(new Second(new Rat(900n, 1_000_000n))),
+          new Rat(0n)
         )
       })
     })
@@ -1090,6 +1328,41 @@ describe('Converter', () => {
             Second.fromMillis(2000n)
           )
         })
+
+        it('atomicToDriftRate', () => {
+          assert.deepEqual(
+            converter.atomicToDriftRate(Second.fromMillis(0n)),
+            new Rat(0n)
+          )
+
+          // STALL STARTS
+          assert.deepEqual(
+            converter.atomicToDriftRate(Second.fromMillis(999n)),
+            new Rat(0n)
+          )
+          assert.equal(
+            converter.atomicToDriftRate(Second.fromMillis(1000n)),
+            NaN
+          )
+          assert.equal(
+            converter.atomicToDriftRate(Second.fromMillis(1001n)),
+            NaN
+          )
+
+          // STALL ENDS
+          assert.equal(
+            converter.atomicToDriftRate(Second.fromMillis(2999n)),
+            NaN
+          )
+          assert.deepEqual(
+            converter.atomicToDriftRate(Second.fromMillis(3000n)),
+            new Rat(0n)
+          )
+          assert.deepEqual(
+            converter.atomicToDriftRate(Second.fromMillis(3001n)),
+            new Rat(0n)
+          )
+        })
       })
 
       describe('STALL', () => {
@@ -1193,6 +1466,41 @@ describe('Converter', () => {
             Second.fromMillis(2000n)
           )
         })
+
+        it('atomicToDriftRate', () => {
+          assert.deepEqual(
+            converter.atomicToDriftRate(Second.fromMillis(0n)),
+            new Rat(0n)
+          )
+
+          // STALL STARTS
+          assert.deepEqual(
+            converter.atomicToDriftRate(Second.fromMillis(999n)),
+            new Rat(0n)
+          )
+          assert.equal(
+            converter.atomicToDriftRate(Second.fromMillis(1000n)),
+            Infinity
+          )
+          assert.equal(
+            converter.atomicToDriftRate(Second.fromMillis(1001n)),
+            Infinity
+          )
+
+          // STALL ENDS
+          assert.equal(
+            converter.atomicToDriftRate(Second.fromMillis(2999n)),
+            Infinity
+          )
+          assert.deepEqual(
+            converter.atomicToDriftRate(Second.fromMillis(3000n)),
+            new Rat(0n)
+          )
+          assert.deepEqual(
+            converter.atomicToDriftRate(Second.fromMillis(3001n)),
+            new Rat(0n)
+          )
+        })
       })
     })
 
@@ -1231,20 +1539,24 @@ describe('Converter', () => {
       const atomic = new Second(new Rat(8_000_082_000n, 1_000_000_000n))
       const unix = converter.atomicToUnix(atomic)
       const offset = converter.atomicToOffset(atomic)
+      const driftRate = converter.atomicToDriftRate(atomic)
 
       assert.deepEqual(unix, new Second(new Rat(0n)))
       assert.deepEqual(offset, new Second(new Rat(8_000_082_000n, 1_000_000_000n)))
       assert.deepEqual(atomic.minusS(unix), offset)
+      assert.deepEqual(driftRate, new Rat(30n, 1_000_000_000n)) // TAI gaining 30ns per Unix second
     })
 
     it('one nanosecond after the Unix epoch', () => {
       const atomic = new Second(new Rat(8_000_082_001n, 1_000_000_000n))
       const unix = converter.atomicToUnix(atomic)
       const offset = converter.atomicToOffset(atomic)
+      const driftRate = converter.atomicToDriftRate(atomic)
 
       assert.deepEqual(unix, new Second(new Rat(1n, 1_000_000_030n))) // 0.99999997000000089999997300000081ns
       assert.deepEqual(offset, new Second(new Rat(8_000_082_240_002_460_030n, 1_000_000_030_000_000_000n))) // 8000082000.0000000299999991ns
       assert.deepEqual(atomic.minusS(unix), offset)
+      assert.deepEqual(driftRate, new Rat(30n, 1_000_000_000n)) // TAI gaining 30ns per Unix second
 
       // However, truncations to nanoseconds lose precision
       assert.equal(atomic.toNanos(), 8_000_082_001n) // exact

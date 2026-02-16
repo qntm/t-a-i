@@ -2,7 +2,8 @@
 
 ## 5.1.0
 
-Added `atomicToOffset()`.
+* Added `atomicToOffset()`.
+* Added `atomicToDriftRate()`.
 
 ## 5.0.0
 

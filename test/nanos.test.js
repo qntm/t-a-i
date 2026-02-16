@@ -5,8 +5,12 @@ import { TaiConverter, MODELS, UNIX_START, UNIX_END } from '../src/nanos.js'
 
 const JAN = 0
 const JUN = 5
+const JUL = 6
+const AUG = 7
 const OCT = 9
 const DEC = 11
+
+const TAI_START = -283_996_798_577_182_000n
 
 describe('UNIX_START', () => {
   it('is correct', () => {
@@ -42,7 +46,7 @@ describe('TaiConverter', () => {
         )
         assert.deepEqual(
           unixToAtomic(BigInt(Date.UTC(1961, JAN, 1, 0, 0, 0, 0)) * 1_000_000n),
-          [-283_996_798_577_182_000n]
+          [TAI_START]
         )
         assert.deepEqual(
           unixToAtomic(BigInt(Date.UTC(1961, JAN, 1, 0, 0, 0, 0)) * 1_000_000n),
@@ -81,6 +85,10 @@ describe('TaiConverter', () => {
     })
 
     describe('atomicToUnix', () => {
+      it('start of history', () => {
+        assert.equal(taiConverter.atomicToUnix(TAI_START), -283_996_800_000_000_000n)
+      })
+
       it('typical', () => {
         // A typical leap second from the past, note repetition
         assert.equal(taiConverter.atomicToUnix(Date.UTC(1999, JAN, 1, 0, 0, 29, 750) * 1_000_000), Date.UTC(1998, DEC, 31, 23, 59, 58, 750) * 1_000_000)
@@ -212,6 +220,11 @@ describe('TaiConverter', () => {
   })
 
   describe('atomicToOffset', () => {
+    it('start of history', () => {
+      const taiConverter = TaiConverter(MODELS.STALL)
+      assert.equal(taiConverter.atomicToOffset(TAI_START), 1_422_818_000n)
+    })
+
     it('may or may not reflect a simple subtraction', () => {
       const taiConverter = TaiConverter(MODELS.STALL)
 
@@ -269,6 +282,100 @@ describe('TaiConverter', () => {
       const atomic = 8_000_082_001n
       assert.equal(atomic - taiConverter.atomicToUnix(atomic), 8_000_082_001n) // wrong
       assert.equal(taiConverter.atomicToOffset(atomic), 8_000_082_000n) // right
+    })
+  })
+
+  describe('atomicToDriftRate', () => {
+    it('start of history', () => {
+      const taiConverter = TaiConverter(MODELS.STALL)
+      assert.equal(taiConverter.atomicToDriftRate(TAI_START), 1_296_000n) // 1.296 TAI ms / Unix day = 15 TAI ns / Unix second
+    })
+
+    it('historic conversions', () => {
+      const taiConverter = TaiConverter(MODELS.STALL)
+
+      // Normal drift
+      assert.equal(taiConverter.atomicToDriftRate(BigInt(Date.UTC(1961, JAN, 2)) * 1_000_000n), 1_296_000n) // 15 TAI ns / Unix day
+      assert.equal(taiConverter.atomicToDriftRate(BigInt(Date.UTC(1962, JAN, 2)) * 1_000_000n), 1_123_200n) // 13 TAI ns / Unix day
+      assert.equal(taiConverter.atomicToDriftRate(BigInt(Date.UTC(1964, JAN, 2)) * 1_000_000n), 1_296_000n) // 15 TAI ns / Unix day
+      assert.equal(taiConverter.atomicToDriftRate(BigInt(Date.UTC(1966, JAN, 2)) * 1_000_000n), 2_592_000n) // 30 TAI ns / Unix day
+      assert.equal(taiConverter.atomicToDriftRate(BigInt(Date.UTC(1972, JAN, 2)) * 1_000_000n), 0n) // 0 TAI ns / Unix day
+    })
+
+    it('during smear of 1 Aug 1961: 0.05 seconds removed', () => {
+      const taiConverter = TaiConverter(MODELS.SMEAR)
+
+      // Start of smear
+      assert.equal(
+        taiConverter.atomicToDriftRate(taiConverter.unixToAtomic(BigInt(Date.UTC(1961, JUL, 31, 11, 59, 59, 59)) * 1_000_000n)),
+        1_296_000n
+      )
+      assert.equal(
+        taiConverter.atomicToDriftRate(taiConverter.unixToAtomic(BigInt(Date.UTC(1961, JUL, 31, 12, 0, 0, 0)) * 1_000_000n)),
+        1_296_000n - 50_000_000n
+      )
+      assert.equal(
+        taiConverter.atomicToDriftRate(taiConverter.unixToAtomic(BigInt(Date.UTC(1961, JUL, 31, 12, 0, 0, 1)) * 1_000_000n)),
+        1_296_000n - 50_000_000n
+      )
+
+      // Midpoint of smear
+      assert.equal(
+        taiConverter.atomicToDriftRate(taiConverter.unixToAtomic(BigInt(Date.UTC(1961, AUG, 1, 0, 0, 0, 0)) * 1_000_000n)),
+        1_296_000n - 50_000_000n
+      )
+
+      // End of smear
+      assert.equal(
+        taiConverter.atomicToDriftRate(taiConverter.unixToAtomic(BigInt(Date.UTC(1961, AUG, 1, 11, 59, 59, 59)) * 1_000_000n)),
+        1_296_000n - 50_000_000n
+      )
+      assert.equal(
+        taiConverter.atomicToDriftRate(taiConverter.unixToAtomic(BigInt(Date.UTC(1961, AUG, 1, 12, 0, 0, 0)) * 1_000_000n)),
+        1_296_000n
+      )
+      assert.equal(
+        taiConverter.atomicToDriftRate(taiConverter.unixToAtomic(BigInt(Date.UTC(1961, AUG, 1, 12, 0, 0, 1)) * 1_000_000n)),
+        1_296_000n
+      )
+    })
+
+    it('during smear of 1 Jan 2017: 1 seconds inserted', () => {
+      const taiConverter = TaiConverter(MODELS.SMEAR)
+
+      // Start of smear
+      assert.equal(
+        taiConverter.atomicToDriftRate(taiConverter.unixToAtomic(BigInt(Date.UTC(2016, DEC, 31, 11, 59, 59, 59)) * 1_000_000n)),
+        0n
+      )
+      assert.equal(
+        taiConverter.atomicToDriftRate(taiConverter.unixToAtomic(BigInt(Date.UTC(2016, DEC, 31, 12, 0, 0, 0)) * 1_000_000n)),
+        1_000_000_000n
+      )
+      assert.equal(
+        taiConverter.atomicToDriftRate(taiConverter.unixToAtomic(BigInt(Date.UTC(2016, DEC, 31, 12, 0, 0, 1)) * 1_000_000n)),
+        1_000_000_000n
+      )
+
+      // Midpoint of smear
+      assert.equal(
+        taiConverter.atomicToDriftRate(taiConverter.unixToAtomic(BigInt(Date.UTC(2017, JAN, 1, 0, 0, 0, 0)) * 1_000_000n)),
+        1_000_000_000n
+      )
+
+      // End of smear
+      assert.equal(
+        taiConverter.atomicToDriftRate(taiConverter.unixToAtomic(BigInt(Date.UTC(2017, JAN, 1, 11, 59, 59, 59)) * 1_000_000n)),
+        1_000_000_000n
+      )
+      assert.equal(
+        taiConverter.atomicToDriftRate(taiConverter.unixToAtomic(BigInt(Date.UTC(2017, JAN, 1, 12, 0, 0, 0)) * 1_000_000n)),
+        0n
+      )
+      assert.equal(
+        taiConverter.atomicToDriftRate(taiConverter.unixToAtomic(BigInt(Date.UTC(2017, JAN, 1, 12, 0, 0, 1)) * 1_000_000n)),
+        0n
+      )
     })
   })
 })

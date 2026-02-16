@@ -34,6 +34,7 @@ describe('NanosConverter', () => {
         assert.equal(nanosConverter.unixToAtomic(0), 0)
         assert.equal(nanosConverter.atomicToUnix(0), 0)
         assert.equal(nanosConverter.atomicToOffset(0), 0)
+        assert.equal(nanosConverter.atomicToDriftRate(0n), 0n)
       })
     })
 
@@ -44,6 +45,7 @@ describe('NanosConverter', () => {
         assert.equal(nanosConverter.unixToAtomic(0), 0)
         assert.equal(nanosConverter.atomicToUnix(0), 0)
         assert.equal(nanosConverter.atomicToOffset(0), 0)
+        assert.equal(nanosConverter.atomicToDriftRate(0n), 0n)
       })
     })
 
@@ -55,8 +57,10 @@ describe('NanosConverter', () => {
         assert.throws(() => nanosConverter.unixToAtomic('boop'), /Not an integer: boop/)
         assert.throws(() => nanosConverter.atomicToUnix(Infinity), /Not an integer: Infinity/)
         assert.throws(() => nanosConverter.atomicToUnix('boops'), /Not an integer: boops/)
-        assert.throws(() => nanosConverter.atomicToUnix(NaN), /Not an integer: NaN/)
-        assert.throws(() => nanosConverter.atomicToUnix('booops'), /Not an integer: booops/)
+        assert.throws(() => nanosConverter.atomicToOffset(NaN), /Not an integer: NaN/)
+        assert.throws(() => nanosConverter.atomicToOffset('booops'), /Not an integer: booops/)
+        assert.throws(() => nanosConverter.atomicToDriftRate(-Infinity), /Not an integer: -Infinity/)
+        assert.throws(() => nanosConverter.atomicToDriftRate('boooops'), /Not an integer: boooops/)
       })
 
       it('fails when the atomic count is out of bounds', () => {
@@ -64,6 +68,8 @@ describe('NanosConverter', () => {
         assert.equal(nanosConverter.atomicToUnix(-1), NaN)
         assert.equal(nanosConverter.atomicToOffset(0), 0)
         assert.equal(nanosConverter.atomicToOffset(-1), NaN)
+        assert.equal(nanosConverter.atomicToDriftRate(0), 0)
+        assert.equal(nanosConverter.atomicToDriftRate(-1), NaN)
       })
 
       it('fails when the Unix count is out of bounds', () => {
@@ -78,6 +84,7 @@ describe('NanosConverter', () => {
         assert.equal(nanosConverter.unixToAtomic(0), 0)
         assert.equal(nanosConverter.atomicToUnix(0), 0)
         assert.equal(nanosConverter.atomicToOffset(0), 0)
+        assert.equal(nanosConverter.atomicToDriftRate(0n), 0n)
       })
     })
 
@@ -88,6 +95,7 @@ describe('NanosConverter', () => {
         assert.equal(nanosConverter.unixToAtomic(0), 0)
         assert.equal(nanosConverter.atomicToUnix(0), 0)
         assert.equal(nanosConverter.atomicToOffset(0), 0)
+        assert.equal(nanosConverter.atomicToDriftRate(0n), 0n)
       })
     })
   })
@@ -163,6 +171,20 @@ describe('NanosConverter', () => {
         assert.equal(nanosConverter.atomicToOffset(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)) * 1_000_000n), 999_000_000n)
         assert.equal(nanosConverter.atomicToOffset(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 1, 0)) * 1_000_000n), 1_000_000_000n)
         assert.equal(nanosConverter.atomicToOffset(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 1, 1)) * 1_000_000n), 1_000_000_000n)
+      })
+
+      it('atomicToDriftRate', () => {
+        assert.equal(nanosConverter.atomicToDriftRate(0n), 0n)
+
+        // STALL STARTS
+        assert.equal(nanosConverter.atomicToDriftRate(BigInt(Date.UTC(1979, DEC, 31, 23, 59, 59, 999)) * 1_000_000n), 0n)
+        assert.equal(nanosConverter.atomicToDriftRate(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 0)) * 1_000_000n), Infinity)
+        assert.equal(nanosConverter.atomicToDriftRate(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 1)) * 1_000_000n), Infinity)
+
+        // STALL ENDS
+        assert.equal(nanosConverter.atomicToDriftRate(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 999)) * 1_000_000n), Infinity)
+        assert.equal(nanosConverter.atomicToDriftRate(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 1, 0)) * 1_000_000n), 0n)
+        assert.equal(nanosConverter.atomicToDriftRate(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 1, 1)) * 1_000_000n), 0n)
       })
     })
 
@@ -246,7 +268,7 @@ describe('NanosConverter', () => {
       })
 
       it('atomicToOffset', () => {
-        assert.equal(nanosConverter.atomicToUnix(0n), 0n)
+        assert.equal(nanosConverter.atomicToOffset(0n), 0n)
 
         // SMEAR STARTS
         assert.equal(nanosConverter.atomicToOffset(BigInt(Date.UTC(1979, DEC, 31, 11, 59, 59, 999)) * 1_000_000n), 0n)
@@ -260,6 +282,23 @@ describe('NanosConverter', () => {
         assert.equal(nanosConverter.atomicToOffset(BigInt(Date.UTC(1980, JAN, 1, 12, 0, 0, 999)) * 1_000_000n), 999_999_988n)
         assert.equal(nanosConverter.atomicToOffset(BigInt(Date.UTC(1980, JAN, 1, 12, 0, 1, 0)) * 1_000_000n), 1_000_000_000n)
         assert.equal(nanosConverter.atomicToOffset(BigInt(Date.UTC(1980, JAN, 1, 12, 0, 1, 1)) * 1_000_000n), 1_000_000_000n)
+      })
+
+      it('atomicToDriftRate', () => {
+        assert.equal(nanosConverter.atomicToDriftRate(0n), 0n)
+
+        // SMEAR STARTS
+        assert.equal(nanosConverter.atomicToDriftRate(BigInt(Date.UTC(1979, DEC, 31, 11, 59, 59, 999)) * 1_000_000n), 0n)
+        assert.equal(nanosConverter.atomicToDriftRate(BigInt(Date.UTC(1979, DEC, 31, 12, 0, 0, 0)) * 1_000_000n), 1_000_000_000n)
+        assert.equal(nanosConverter.atomicToDriftRate(BigInt(Date.UTC(1979, DEC, 31, 12, 0, 0, 1)) * 1_000_000n), 1_000_000_000n)
+
+        // SMEAR MIDPOINT
+        assert.equal(nanosConverter.atomicToDriftRate(BigInt(Date.UTC(1980, JAN, 1, 0, 0, 0, 500)) * 1_000_000n), 1_000_000_000n)
+
+        // SMEAR ENDS
+        assert.equal(nanosConverter.atomicToDriftRate(BigInt(Date.UTC(1980, JAN, 1, 12, 0, 0, 999)) * 1_000_000n), 1_000_000_000n)
+        assert.equal(nanosConverter.atomicToDriftRate(BigInt(Date.UTC(1980, JAN, 1, 12, 0, 1, 0)) * 1_000_000n), 0n)
+        assert.equal(nanosConverter.atomicToDriftRate(BigInt(Date.UTC(1980, JAN, 1, 12, 0, 1, 1)) * 1_000_000n), 0n)
       })
     })
   })

@@ -1,4 +1,5 @@
 import { Second } from './second.js'
+import { Rat } from './rat.js'
 import { Converter } from './converter.js'
 
 const unwrap = millis => {
@@ -47,6 +48,23 @@ export class MillisConverter {
     const { isInteger, second: atomic } = unwrap(atomicMillis)
     const unix = this.converter.atomicToOffset(atomic)
     return wrap({ isInteger, second: unix })
+  }
+
+  atomicToDriftRate (atomicMillis) {
+    const { isInteger, second: atomic } = unwrap(atomicMillis)
+    let atomicPerUnix = this.converter.atomicToDriftRate(atomic)
+
+    if (Number.isNaN(atomicPerUnix) || atomicPerUnix === Infinity) {
+      return atomicPerUnix
+    }
+
+    let atomicMillisPerUnixDay = atomicPerUnix.times(new Rat(86_400_000n)).trunc()
+
+    if (isInteger) {
+      atomicMillisPerUnixDay = Number(atomicMillisPerUnixDay)
+    }
+
+    return atomicMillisPerUnixDay
   }
 
   unixToAtomic (unixMillis, options = {}) {
