@@ -763,4 +763,15 @@ describe('TaiConverter', () => {
       assert.equal(taiConverter.unixToAtomic(Date.UTC(2017, JAN, 1, 12, 0, 0, 0)), Date.UTC(2017, JAN, 1, 12, 0, 37))
     })
   })
+
+  describe('historic data', () => {
+    it('atomicToDriftRate (is not very useful)', () => {
+      const taiConverter = TaiConverter(MODELS.STALL)
+      assert.equal(taiConverter.atomicToDriftRate(BigInt(Date.UTC(1961, JAN, 2))), 1n) // 15 TAI ns / Unix day, TRUNCATED
+      assert.equal(taiConverter.atomicToDriftRate(BigInt(Date.UTC(1962, JAN, 2))), 1n) // 13 TAI ns / Unix day, TRUNCATED
+      assert.equal(taiConverter.atomicToDriftRate(BigInt(Date.UTC(1964, JAN, 2))), 1n) // 15 TAI ns / Unix day, TRUNCATED
+      assert.equal(taiConverter.atomicToDriftRate(BigInt(Date.UTC(1966, JAN, 2))), 2n) // 30 TAI ns / Unix day, TRUNCATED
+      assert.equal(taiConverter.atomicToDriftRate(BigInt(Date.UTC(1972, JAN, 2))), 0n) // 0 TAI ns / Unix day, EXACT
+    })
+  })
 })

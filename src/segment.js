@@ -74,6 +74,8 @@ export class Segment {
     return atomic.minusS(unix)
   }
 
+  // Drift rate is measured in TAI seconds per Unix second
+  // Usually this is 0 or in the billionths (up to 30 nanoseconds per second)
   driftRate () {
     if (this.slope.unixPerAtomic.eq(new Rat(0n))) {
       return Infinity

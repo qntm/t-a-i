@@ -35,11 +35,19 @@ export class Converter {
   atomicToOffset (atomic) {
     const segment = this.atomicToSegment(atomic)
     if (segment === undefined) {
-      // Pre-1961, or BREAK model and we hit a break
       return NaN
     }
 
     return segment.atomicToOffset(atomic)
+  }
+
+  atomicToDriftRate (atomic) {
+    const segment = this.atomicToSegment(atomic)
+    if (segment === undefined) {
+      return NaN
+    }
+
+    return segment.driftRate()
   }
 
   unixToAtomic (unix) {
