@@ -303,8 +303,8 @@ console.log(taiStart)
 console.log(taiConverter.atomicToOffset(taiStart))
 // 1_422_818_000n TAI nanoseconds
 
-console.log(taiConverter.atomicToOffset(taiStart))
-// 1_422_818_000n TAI nanoseconds
+console.log(taiConverter.atomicToDriftRate(taiStart))
+// 1_296_000n TAI nanoseconds per Unix day
 ```
 
 #### A note on precision when using the nanoseconds API
