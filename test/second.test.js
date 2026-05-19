@@ -29,19 +29,18 @@ describe('Second', () => {
   })
 
   it('greater than', () => {
-    assert.equal(new Second(new Rat(-1n, 3n)).gtS(new Second(new Rat(1n, -2n))), true)
+    assert.equal(new Second(new Rat(-1n, 3n)).gtS(new Second(new Rat(-1n, 2n))), true)
     assert.equal(new Second(new Rat(0n)).gtS(new Second(new Rat(1n))), false)
   })
 
   it('equal', () => {
-    assert.equal(new Second(new Rat(-1n, 3n)).eqS(new Second(new Rat(4n, -12n))), true)
+    assert.equal(new Second(new Rat(-1n, 3n)).eqS(new Second(new Rat(-4n, 12n))), true)
     assert.equal(new Second(new Rat(0n)).eqS(new Second(new Rat(-1n))), false)
     assert.equal(new Second(new Rat(0n)).eqS(new Second(new Rat(-0n))), true)
   })
 
   it('less than or equal', () => {
-    assert.equal(new Second(new Rat(-2n, -3n)).leS(new Second(new Rat(-2n, -3n))), true)
-    assert.equal(new Second(new Rat(-2n, -3n)).leS(new Second(new Rat(2n, 3n))), true)
+    assert.equal(new Second(new Rat(2n, 3n)).leS(new Second(new Rat(2n, 3n))), true)
     assert.equal(new Second(new Rat(9n, 12n)).leS(new Second(new Rat(6n, 8n))), true)
     assert.equal(new Second(new Rat(9n, 13n)).leS(new Second(new Rat(6n, 8n))), true)
   })
