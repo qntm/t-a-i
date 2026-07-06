@@ -192,7 +192,7 @@ When Unix time is removed,
 
 ### taiConverter.atomicToOffset(atomic)
 
-Converts the input TAI millisecond count to the current difference in milliseconds between TAI and Unix time. Throws if `atomic` is not an integer. Returns an integer. If the precise value to be returned is fractional, it is rounded towards negative infinity. If `atomic` is a BigInt, returns a BigInt. If `atomic` is prior to the beginning of TAI, `NaN` is returned (even if `atomic` is a BigInt). It is recommend to use this instead of `atomic - taiConverter.atomicToOffset(atomic)` because it returns more accurate results.
+Converts the input TAI millisecond count to the current difference in milliseconds between TAI and Unix time. Throws if `atomic` is not an integer. Returns an integer. If the precise value to be returned is fractional, it is rounded towards negative infinity. If `atomic` is a BigInt, returns a BigInt. If `atomic` is prior to the beginning of TAI, `NaN` is returned (even if `atomic` is a BigInt). It is recommend to use this instead of `atomic - taiConverter.atomicToUnix(atomic)` because it returns more accurate results.
 
 The returned value is always positive, as TAI has been ahead of Unix time for as long as both have been well-defined. Prior to 1 January 1972, Unix seconds were slightly shorter than TAI seconds (the precise ratio varied), so the offset increased smoothly over the course of months and years. After 1 January 1972, Unix seconds and TAI seconds are precisely the same length, so the offset is fixed.
 
