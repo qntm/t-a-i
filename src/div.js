@@ -1,7 +1,8 @@
 // Divide two BigInts and round the result towards negative infinity
 
-// Why doesn't JavaScript have this?
+// Why doesn't JavaScript have these?
 export const sign = a => a > 0n ? 1n : a === 0n ? 0n : -1n
+export const abs = a => a > 0n ? a : -a
 
 export const div = (a, b) => {
   const q = a / b
